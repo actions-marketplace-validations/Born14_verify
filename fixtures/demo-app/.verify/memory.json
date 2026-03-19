@@ -1,0 +1,40 @@
+{
+  "constraints": [],
+  "outcomes": [
+    {
+      "timestamp": 1773876224976,
+      "sessionId": "s_1773876224899_lf4p",
+      "success": false,
+      "changeType": "logic",
+      "filesTouched": [
+        "server.js"
+      ],
+      "gatesFailed": [
+        "F9"
+      ],
+      "signature": "edit_not_applicable",
+      "failureKind": "app_failure"
+    },
+    {
+      "timestamp": 1773876230822,
+      "sessionId": "s_1773876230244_t0sv",
+      "success": true,
+      "changeType": "logic",
+      "filesTouched": [
+        "server.js"
+      ],
+      "gatesFailed": []
+    }
+  ],
+  "patterns": [
+    {
+      "signature": "edit_not_applicable",
+      "occurrences": 1,
+      "lastSeen": 1773876224976,
+      "winningFixes": [],
+      "affectedFiles": [
+        "server.js"
+      ]
+    }
+  ]
+}

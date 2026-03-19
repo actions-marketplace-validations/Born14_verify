@@ -1,0 +1,9 @@
+# Self-test runtime artifacts
+data/self-test-*.jsonl
+data/self-test-summary-*.json
+data/improve-baseline-*.jsonl
+data/improvement-ledger.jsonl
+data/subprocess-ledger.jsonl
+
+# Keep the data directory itself
+!data/.gitkeep

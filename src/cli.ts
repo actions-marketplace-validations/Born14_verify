@@ -19,6 +19,8 @@ import { isDockerAvailable, hasDockerCompose } from './runners/docker-runner.js'
 import { parseDiff } from './parsers/git-diff.js';
 import type { Edit, Predicate, VerifyConfig } from './types.js';
 import type { ScenarioFamily } from '../scripts/harness/types.js';
+import { FaultLedger } from './store/fault-ledger.js';
+import type { FaultClassification } from './store/fault-ledger.js';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -35,6 +37,8 @@ async function main() {
       return runDoctor();
     case 'self-test':
       return runSelfTestCommand();
+    case 'faults':
+      return runFaults();
     case '--version':
     case '-v':
       return printVersion();
@@ -348,6 +352,185 @@ async function runSelfTestCommand() {
   process.exit(result.exitCode);
 }
 
+function runFaults() {
+  const cwd = process.cwd();
+  const ledgerPath = join(cwd, '.verify', 'faults.jsonl');
+  const ledger = new FaultLedger(ledgerPath);
+
+  const subcommand = args[1];
+
+  switch (subcommand) {
+    case 'list':
+    case undefined: {
+      const filter = args.find(a => a.startsWith('--filter='))?.split('=')[1];
+      const appFilter = args.find(a => a.startsWith('--app='))?.split('=')[1];
+
+      let entries = ledger.all();
+      if (filter) entries = entries.filter(e => e.classification === filter);
+      if (appFilter) entries = entries.filter(e => e.app === appFilter);
+
+      if (entries.length === 0) {
+        console.log('No fault entries found.');
+        console.log('Faults are recorded automatically when verify() runs with cross-check probes,');
+        console.log('or manually with: npx @sovereign-labs/verify faults log');
+        return;
+      }
+
+      console.log(`\nFault Ledger (${entries.length} entries)\n`);
+      for (const e of entries) {
+        const encoded = e.scenarioId ? `→ ${e.scenarioId}` : '○ unencoded';
+        const conf = e.confidence === 'high' ? '' : ` [${e.confidence}]`;
+        const icon = e.classification === 'false_positive' ? '✗'
+          : e.classification === 'false_negative' ? '✗'
+          : e.classification === 'bad_hint' ? '~'
+          : e.classification === 'correct' ? '✓'
+          : e.classification === 'agent_fault' ? '·'
+          : '?';
+        console.log(`  ${icon} ${e.id}  ${e.classification}${conf}  ${encoded}`);
+        console.log(`    ${e.app}: ${e.goal.slice(0, 60)}${e.goal.length > 60 ? '...' : ''}`);
+        console.log(`    ${e.reason}`);
+        console.log('');
+      }
+      break;
+    }
+
+    case 'inbox': {
+      const unencoded = ledger.getUnencoded();
+      if (unencoded.length === 0) {
+        console.log('No unencoded faults. All discovered faults have scenarios.');
+        return;
+      }
+
+      console.log(`\nUnencoded Faults (${unencoded.length} waiting for scenarios)\n`);
+      for (const e of unencoded) {
+        const conf = e.confidence === 'high' ? '' : ` [${e.confidence}]`;
+        console.log(`  ${e.id}  ${e.classification}${conf}`);
+        console.log(`    ${e.app}: ${e.goal.slice(0, 60)}${e.goal.length > 60 ? '...' : ''}`);
+        console.log(`    Gate: ${e.failedGate ?? 'none (verify passed)'}  Signature: ${e.signature ?? 'none'}`);
+        if (e.narrowingHint) console.log(`    Hint: ${e.narrowingHint.slice(0, 80)}`);
+        console.log('');
+      }
+      break;
+    }
+
+    case 'review': {
+      const needsReview = ledger.getNeedsReview();
+      if (needsReview.length === 0) {
+        console.log('No faults need review. All entries are classified with confidence.');
+        return;
+      }
+
+      console.log(`\nFaults Needing Review (${needsReview.length})\n`);
+      for (const e of needsReview) {
+        console.log(`  ? ${e.id}  ${e.classification} [${e.confidence}]`);
+        console.log(`    ${e.app}: ${e.goal.slice(0, 60)}${e.goal.length > 60 ? '...' : ''}`);
+        console.log(`    Verify: ${e.verifyPassed ? 'PASS' : 'FAIL'}  Gate: ${e.failedGate ?? 'none'}`);
+        console.log(`    Reason: ${e.reason}`);
+        console.log('');
+      }
+      break;
+    }
+
+    case 'summary': {
+      const summary = ledger.summarize();
+      console.log(`\nFault Ledger Summary\n`);
+      console.log(`  Total entries:     ${summary.total}`);
+      console.log(`  Verify bugs:       ${summary.byClassification.false_positive + summary.byClassification.false_negative + summary.byClassification.bad_hint}`);
+      console.log(`    False positives:  ${summary.byClassification.false_positive}`);
+      console.log(`    False negatives:  ${summary.byClassification.false_negative}`);
+      console.log(`    Bad hints:        ${summary.byClassification.bad_hint}`);
+      console.log(`  Agent faults:      ${summary.byClassification.agent_fault}`);
+      console.log(`  Correct:           ${summary.byClassification.correct}`);
+      console.log(`  Ambiguous:         ${summary.byClassification.ambiguous}`);
+      console.log(`  Unencoded:         ${summary.unencoded}`);
+      console.log(`  Encoded:           ${summary.encoded}`);
+      console.log(`  Needs review:      ${summary.needsReview}`);
+      break;
+    }
+
+    case 'log': {
+      // Manual entry: npx verify faults log --app=X --goal="Y" --class=false_positive --reason="Z"
+      const app = args.find(a => a.startsWith('--app='))?.split('=')[1];
+      const goal = args.find(a => a.startsWith('--goal='))?.split('=')[1];
+      const cls = args.find(a => a.startsWith('--class='))?.split('=')[1];
+      const reason = args.find(a => a.startsWith('--reason='))?.split('=')[1];
+      const gate = args.find(a => a.startsWith('--gate='))?.split('=')[1];
+      const notes = args.find(a => a.startsWith('--notes='))?.split('=')[1];
+
+      if (!app || !goal || !cls || !reason) {
+        console.error('Usage: npx @sovereign-labs/verify faults log --app=X --goal="Y" --class=false_positive --reason="Z"');
+        console.error('');
+        console.error('Required: --app, --goal, --class, --reason');
+        console.error('Optional: --gate, --notes');
+        console.error('');
+        console.error('Classes: false_positive, false_negative, bad_hint, agent_fault');
+        process.exit(1);
+      }
+
+      const entry = ledger.recordManual({
+        app,
+        goal,
+        verifyPassed: cls === 'false_positive',
+        failedGate: gate,
+        classification: cls as FaultClassification,
+        reason,
+        notes,
+      });
+
+      console.log(`Logged: ${entry.id}`);
+      console.log(`  ${entry.classification}: ${entry.goal}`);
+      break;
+    }
+
+    case 'classify': {
+      // Reclassify: npx verify faults classify <id> --class=false_positive --reason="Z"
+      const id = args[2];
+      const cls = args.find(a => a.startsWith('--class='))?.split('=')[1];
+      const reason = args.find(a => a.startsWith('--reason='))?.split('=')[1];
+
+      if (!id || !cls || !reason) {
+        console.error('Usage: npx @sovereign-labs/verify faults classify <id> --class=false_positive --reason="Z"');
+        process.exit(1);
+      }
+
+      const updated = ledger.reclassify(id, cls as FaultClassification, reason);
+      if (!updated) {
+        console.error(`Fault ${id} not found.`);
+        process.exit(1);
+      }
+
+      console.log(`Reclassified: ${updated.id} → ${updated.classification}`);
+      break;
+    }
+
+    case 'link': {
+      // Link to scenario: npx verify faults link <id> --scenario=A11
+      const id = args[2];
+      const scenarioId = args.find(a => a.startsWith('--scenario='))?.split('=')[1];
+
+      if (!id || !scenarioId) {
+        console.error('Usage: npx @sovereign-labs/verify faults link <id> --scenario=A11');
+        process.exit(1);
+      }
+
+      const updated = ledger.linkScenario(id, scenarioId);
+      if (!updated) {
+        console.error(`Fault ${id} not found.`);
+        process.exit(1);
+      }
+
+      console.log(`Linked: ${updated.id} → scenario ${scenarioId}`);
+      console.log('The improve loop will now guard this scenario.');
+      break;
+    }
+
+    default:
+      console.error(`Unknown faults subcommand: ${subcommand}`);
+      console.error('Available: list, inbox, review, summary, log, classify, link');
+      process.exit(1);
+  }
+}
+
 function printVersion() {
   try {
     const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
@@ -367,6 +550,7 @@ Commands:
   ground [dir]      Print grounding context (CSS, HTML, routes)
   doctor            Check Docker + Playwright availability
   self-test         Run the verification harness (56 scenarios, 7 families)
+  faults            Manage the gate fault ledger (discovered verify bugs)
 
 Options:
   --json            Output full result as JSON
@@ -378,6 +562,15 @@ Self-test options:
   --docker          Enable Docker scenarios (Family F)
   --fail-on-bug     Exit 1 on bug-severity violations
 
+Fault ledger subcommands:
+  faults list       All faults (--filter=false_positive, --app=myapp)
+  faults inbox      Unencoded faults waiting for scenarios
+  faults review     Faults needing human classification
+  faults summary    Statistics overview
+  faults log        Record a fault manually (--app, --goal, --class, --reason)
+  faults classify   Reclassify a fault (faults classify <id> --class=X --reason=Y)
+  faults link       Link fault to scenario (faults link <id> --scenario=A11)
+
 Examples:
   npx @sovereign-labs/verify init
   npx @sovereign-labs/verify check
@@ -387,6 +580,8 @@ Examples:
   npx @sovereign-labs/verify doctor
   npx @sovereign-labs/verify self-test
   npx @sovereign-labs/verify self-test --families=A,B --fail-on-bug
+  npx @sovereign-labs/verify faults inbox
+  npx @sovereign-labs/verify faults log --app=myapp --goal="change color" --class=false_positive --reason="health 500"
 `);
 }
 

@@ -62,5 +62,15 @@ export { runVisionGate } from './gates/vision.js';
 export { runHttpGate } from './gates/http.js';
 export { runInvariantsGate } from './gates/invariants.js';
 
+// Fault ledger — track real-world gate faults for improvement
+export { FaultLedger } from './store/fault-ledger.js';
+export type {
+  FaultEntry,
+  FaultClassification,
+  FaultSummary,
+  CrossCheckEvidence,
+  RecordContext,
+} from './store/fault-ledger.js';
+
 // Parsers — convert external formats into Edit[]
 export { parseDiff } from './parsers/git-diff.js';

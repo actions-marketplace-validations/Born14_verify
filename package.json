@@ -1,6 +1,6 @@
 {
   "name": "@sovereign-labs/verify",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Verification gate for AI-generated code. Deterministic predicates, browser-level visual checks, constraint learning from failures. Every edit gets a fair trial before it touches your users.",
   "type": "module",
   "main": "./src/index.ts",

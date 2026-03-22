@@ -170,32 +170,32 @@ Filesystem predicates assert file existence, structure, and state. The most dete
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| FS-01 | File should exist but doesn't | no coverage | Missing after failed edit |
-| FS-02 | File should not exist but does | no coverage | Leftover artifact |
-| FS-03 | Directory vs file mismatch | no coverage | Expected file, found directory (or vice versa) |
-| FS-04 | Wrong path resolution (relative vs absolute) | no coverage | `./src/file.js` vs `/app/src/file.js` |
-| FS-05 | Symlink resolution | no coverage | File exists but is symlink to elsewhere |
+| FS-01 | File should exist but doesn't | **generator (H)** | Missing after failed edit — 1 scenario |
+| FS-02 | File should not exist but does | **generator (H)** | Leftover artifact — 1 scenario |
+| FS-03 | Directory vs file mismatch | **generator (H)** | Expected file, found directory (or vice versa) — 2 scenarios |
+| FS-04 | Wrong path resolution (relative vs absolute) | **generator (H)** | `../` traversal blocked by staging isolation — 2 scenarios |
+| FS-05 | Symlink resolution | **generator (H)** | Symlink target matches real file — 2 scenarios (Unix-only) |
 | FS-06 | Symlink cycle or traversal edge case | no coverage | Infinite loop or `../../../` escape |
 
 ### Content Integrity
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| FS-07 | Content mismatch (exact) | no coverage | File content differs from expected byte-for-byte |
-| FS-08 | Encoding mismatch (UTF-8 vs other) | no coverage | BOM prefix, Latin-1, etc. |
-| FS-09 | Line ending differences (CRLF/LF) | no coverage | Pattern uses `\n`, file has `\r\n` |
-| FS-10 | Binary vs text misinterpretation | no coverage | Content predicate against `.png` or `.wasm` |
-| FS-11 | NUL bytes in text-like files | no coverage | Corrupted or binary-mixed content |
-| FS-12 | Partial write / truncated file | no coverage | Observed during verification mid-write |
+| FS-07 | Content mismatch (exact) | **generator (H)** | Hash comparison via filesystem_unchanged — 1 scenario |
+| FS-08 | Encoding mismatch (UTF-8 vs other) | **generator (H)** | BOM prefix affects hash — 2 scenarios |
+| FS-09 | Line ending differences (CRLF/LF) | **generator (H)** | `\r\n` vs `\n` hash difference — 2 scenarios |
+| FS-10 | Binary vs text misinterpretation | **generator (H)** | PNG file hashed as binary — 2 scenarios |
+| FS-11 | NUL bytes in text-like files | **generator (H)** | Corrupted file with NUL bytes — 2 scenarios |
+| FS-12 | Partial write / truncated file | **generator (H)** | Malformed predicates (missing fields, bad type) — 3 scenarios |
 | FS-13 | Compressed or encoded content | no coverage | `.gz`, `.br` treated as plain text |
-| FS-14 | Empty file (0 bytes) | no coverage | File exists but has no content |
-| FS-15 | Minified files | no coverage | Pattern exists but no whitespace landmarks |
+| FS-14 | Empty file (0 bytes) | **generator (H)** | Empty file exists/hash/count — 3 scenarios |
+| FS-15 | Minified files | **generator (H)** | Dotfiles included in filesystem_count — 2 scenarios |
 
 ### Structural / Count
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| FS-16 | Wrong number of files | no coverage | Expected N files in directory, found M |
+| FS-16 | Wrong number of files | **generator (H)** | filesystem_count pass/fail — 2 scenarios (H7/H8) |
 | FS-17 | Unexpected extra files | no coverage | Build artifacts, temp files mixed in |
 | FS-18 | Missing expected files in set | no coverage | 3 of 5 migration files present |
 | FS-19 | Generated/build artifact matched instead of source | no coverage | `dist/bundle.js` vs `src/index.js` |
@@ -235,7 +235,7 @@ Filesystem predicates assert file existence, structure, and state. The most dete
 | FS-33 | Same logical file, different path reference | no coverage | Alias, mount, symlink — same bytes |
 | FS-34 | Duplicate files causing ambiguity | no coverage | Same filename in different directories |
 
-**Filesystem total: 34 shapes. Generator coverage: 0. Scenario-only coverage: 0. No coverage: 34.**
+**Filesystem total: 34 shapes. Generator coverage: 14 (FS-01 through FS-05, FS-07 through FS-12, FS-14 through FS-16). Scenario-only coverage: 0. No coverage: 20.**
 
 ---
 
@@ -811,7 +811,7 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 |---|---|---|---|---|---|
 | CSS | 62 | 1 | 7 | 54 | 13% |
 | HTML | 41 | 0 | 3 | 38 | 7% |
-| Filesystem | 34 | 0 | 0 | 34 | 0% |
+| Filesystem | 34 | 14 | 0 | 20 | 41% |
 | Content | 13 | 0 | 2 | 11 | 15% |
 | HTTP | 45 | 1 | 1 | 43 | 4% |
 | DB | 46 | 0 | 0 | 46 | 0% |
@@ -826,22 +826,22 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | Attribution | 10 | 0 | 0 | 10 | 0% |
 | Drift | 10 | 0 | 0 | 10 | 0% |
 | Cross-cutting | 81 | 35 | 2 | 44 | 46% |
-| **Total** | **438** | **37** | **15** | **386** | **12%** |
+| **Total** | **438** | **51** | **15** | **372** | **15%** |
 
 ### The numbers
 
 - **438 known failure shapes** across 17 domains
-- **37 have generators** (all in cross-cutting gate tests)
+- **51 have generators** (35 cross-cutting gate tests + 14 filesystem + 2 other)
 - **15 have individual scenarios** (no generator)
-- **386 have zero coverage** (88% of the known taxonomy)
-- **Current scenario count: 97** (80 built-in + 17 universal)
+- **372 have zero coverage** (85% of the known taxonomy)
+- **Current scenario count: 115** (80 built-in + 17 universal + 18 filesystem Family H)
 
 ### What full coverage looks like
 
 If every shape gets a generator producing ~25 scenarios average:
-- 386 uncovered shapes × 25 = **~9,650 new scenarios**
-- Plus existing 97 = **~9,750 total**
-- Self-test runtime at 2ms/scenario: **~19.5 seconds**
+- 372 uncovered shapes × 25 = **~9,300 new scenarios**
+- Plus existing 115 = **~9,415 total**
+- Self-test runtime at 2ms/scenario: **~19 seconds**
 
 That's the ceiling with today's known taxonomy. Chaos will discover shapes not on this list, so the real number is higher.
 
@@ -866,7 +866,7 @@ The 17 domains organize into three layers:
 - HTML text/content matching (H-08 through H-14, H-24 through H-29) — ~13 shapes, ~300 scenarios
 - F9 syntax validation (X-37 through X-41, X-66 through X-71) — ~11 shapes, ~250 scenarios
 - Content pattern matching (N-04 through N-08) — ~5 shapes, ~100 scenarios
-- Filesystem basics (FS-01 through FS-15) — ~15 shapes, ~300 scenarios
+- ~~Filesystem basics (FS-01 through FS-15)~~ — **14/15 done**, 25 scenarios. Remaining: FS-06 (symlink cycles), FS-13 (compressed content)
 - Fingerprinting edge cases (X-51 through X-56) — ~6 shapes, ~150 scenarios
 - Attribution errors (AT-01 through AT-10) — ~10 shapes, ~200 scenarios
 
@@ -935,12 +935,12 @@ Priority-ordered by ROI (shapes closed per engineering hour). Each phase builds 
 **Wave 1 — Pure computation, no demo-app changes needed (Tier 1):**
 1. CSS value normalization generators (C-01 through C-16, C-44 through C-52) — 25 shapes, ~600 scenarios
 2. CSS shorthand generators (C-17 through C-30) — 14 shapes, ~300 scenarios
-3. `fs` predicate type + filesystem generators (FS-01 through FS-15) — 15 shapes, ~300 scenarios
+3. ~~`fs` predicate type + filesystem generators (FS-01 through FS-15)~~ — **14/15 done** (FS-06, FS-13 remaining), 25 scenarios shipped
 4. Content pattern generators (N-04 through N-08) — 5 shapes, ~100 scenarios
 5. Fingerprinting edge case generators (X-51 through X-56) — 6 shapes, ~150 scenarios
 6. Attribution error generators (AT-01 through AT-10) — 10 shapes, ~200 scenarios
 
-*Wave 1 total: ~75 shapes, ~1,650 scenarios. Coverage: 12% → 29%*
+*Wave 1 total: ~75 shapes, ~1,650 scenarios. Coverage: 15% → 29%. Filesystem: 14/15 done.*
 
 **Wave 2 — Minor demo-app expansion (Tier 2):**
 7. HTML text/content generators (H-08 through H-14, H-24 through H-29) — 13 shapes, ~300 scenarios

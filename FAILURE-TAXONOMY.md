@@ -889,3 +889,135 @@ The 17 domains organize into three layers:
 - Observer effects (OE-01 through OE-09) — needs stateful production-like setup
 - Drift/regression (DR-01 through DR-10) — needs multi-deploy history
 - Dynamic content (H-23, H-41) — needs JS runtime / hydration
+
+---
+
+## Roadmap: Closing Coverage
+
+This section captures the concrete plan for going from 12% to full coverage. It serves as the authoritative reference so context isn't lost across sessions.
+
+### Phase 1: New Predicate Types
+
+Domains define reality. Predicate types define how you query it. The relationship is 1:N — one domain can have multiple predicate types.
+
+**Current predicate types (6):**
+
+| Domain | Predicate Type | Status |
+|--------|---------------|--------|
+| CSS | `css` | Shipped |
+| HTML | `html` | Shipped |
+| Content | `content` | Shipped |
+| HTTP | `http` | Shipped |
+| HTTP | `http_sequence` | Shipped |
+| DB | `db` | Shipped |
+
+**New predicate types to add (6):**
+
+| Domain | Predicate Type | Priority | What it tests |
+|--------|---------------|----------|---------------|
+| Filesystem | `fs` | **Next** | File exists, permissions, size, content hash, symlinks, encoding |
+| Browser | `interaction` | After fs | Click targets, form inputs, event handlers, focus/blur |
+| Browser | `navigation` | After fs | Route transitions, history state, redirects, anchor links |
+| Browser | `visibility` | After fs | Display state, viewport intersection, z-index stacking, opacity |
+| Browser | `storage` | After fs | localStorage, sessionStorage, cookies, indexedDB |
+| Browser | `lifecycle` | Tier 3 | Hydration, SSR/CSR transitions, web component upgrades, lazy loading |
+
+**Why browser needs multiple types, not one monolithic `browser`:**
+- Each type has a distinct verification mechanism (DOM query vs navigation API vs IntersectionObserver vs Storage API)
+- Failure modes are orthogonal — an interaction bug shares nothing with a storage bug
+- Generators are cleaner when scoped to one verification surface
+- Matches the existing pattern: HTTP has `http` + `http_sequence`, not one type
+
+### Phase 2: Generator Build Order
+
+Priority-ordered by ROI (shapes closed per engineering hour). Each phase builds on demo-app capabilities from the previous one.
+
+**Wave 1 — Pure computation, no demo-app changes needed (Tier 1):**
+1. CSS value normalization generators (C-01 through C-16, C-44 through C-52) — 25 shapes, ~600 scenarios
+2. CSS shorthand generators (C-17 through C-30) — 14 shapes, ~300 scenarios
+3. `fs` predicate type + filesystem generators (FS-01 through FS-15) — 15 shapes, ~300 scenarios
+4. Content pattern generators (N-04 through N-08) — 5 shapes, ~100 scenarios
+5. Fingerprinting edge case generators (X-51 through X-56) — 6 shapes, ~150 scenarios
+6. Attribution error generators (AT-01 through AT-10) — 10 shapes, ~200 scenarios
+
+*Wave 1 total: ~75 shapes, ~1,650 scenarios. Coverage: 12% → 29%*
+
+**Wave 2 — Minor demo-app expansion (Tier 2):**
+7. HTML text/content generators (H-08 through H-14, H-24 through H-29) — 13 shapes, ~300 scenarios
+8. HTML structure generators (H-15 through H-41) — needs richer HTML in demo-app
+9. HTTP body/request generators (P-01 through P-38) — needs richer API routes
+10. CSS selector edge cases (C-34 through C-62) — needs 2+ routes, pseudo-elements
+11. `interaction` + `navigation` + `visibility` + `storage` predicate types
+12. Browser interaction generators (BR-01 through BR-13) — needs JS event handlers in demo-app
+13. Cross-predicate interaction generators (I-01 through I-12) — needs multi-surface demo
+14. Invariant generators (INV-01 through INV-09) — needs invariant-aware demo-app
+15. Scope boundary generators (SC-01 through SC-10) — needs multi-component demo
+16. Identity/reference generators (ID-01 through ID-10) — needs cross-surface verification
+
+*Wave 2 total: ~150 shapes, ~3,500 scenarios. Coverage: 29% → 63%*
+
+**Wave 3 — Infrastructure expansion (Tier 3):**
+17. DB generators (D-01 through D-46) — needs demo-app with DB fixture
+18. Filesystem advanced generators (FS-16 through FS-34) — needs symlinks, permissions
+19. `lifecycle` predicate type + browser lifecycle generators (BR-19 through BR-27)
+20. Temporal generators (TO-01 through TO-10) — needs async/dynamic runtime
+21. HTTP network generators (P-39 through P-45) — needs real server/proxy
+22. Concurrency generators (CO-01 through CO-09) — needs multi-process environment
+23. Observer effects generators (OE-01 through OE-09) — needs stateful setup
+24. Drift/regression generators (DR-01 through DR-10) — needs multi-deploy history
+
+*Wave 3 total: ~161 shapes, ~4,000 scenarios. Coverage: 63% → 100%*
+
+### Phase 3: `fs` Predicate Spec (Immediate Next)
+
+The filesystem is the most deterministic reality surface — no browser, no network, no timing. Design the `fs` predicate type first because:
+- **Strongest K5 learning signal** — binary pass/fail, no normalization ambiguity
+- **Zero infrastructure** — works on any OS, no Docker, no browser
+- **Perfect grounding** — file system is the ground truth, not a proxy for it
+- **Fast verification** — `stat()`, `readFile()`, `readdir()` are sub-millisecond
+- **Broadest applicability** — every app has files; not every app has a browser or DB
+
+Spec design happens in the next session. Target: `packages/verify/src/predicates/fs.ts` with types in `src/types.ts`.
+
+### Phase 4: Browser Predicate Types (After fs)
+
+Browser predicates split into 4 initial types (5th deferred to Tier 3):
+
+**`interaction`** — User-facing interactive behavior:
+- Click targets respond (button, link, form submit)
+- Form inputs accept values (fill, clear, select)
+- Event handlers fire (focus, blur, hover state changes)
+- Keyboard navigation works (tab order, enter-to-submit)
+- Assertions: element is clickable, input accepts value, event fires
+
+**`navigation`** — Route and history behavior:
+- Client-side route transitions complete
+- History state updates correctly (pushState, replaceState)
+- Redirects resolve to expected destination
+- Anchor links scroll to target
+- Back/forward navigation works
+- Assertions: URL matches, history length, scroll position
+
+**`visibility`** — Visual presence and layout:
+- Elements are visible in viewport (not just `display: block`)
+- Z-index stacking is correct (element on top)
+- Opacity is non-zero and element not clipped
+- Intersection observer semantics (above fold, visible %)
+- Responsive breakpoint behavior
+- Assertions: isVisible, isInViewport, isOnTop, visiblePercentage
+
+**`storage`** — Client-side persistence:
+- localStorage keys exist with expected values
+- sessionStorage lifecycle correct
+- Cookies set with correct attributes (path, expiry, secure)
+- IndexedDB stores and object stores exist
+- Assertions: keyExists, valueEquals, cookieHas, storeExists
+
+**`lifecycle`** (Tier 3, deferred) — Framework-level behavior:
+- SSR→CSR hydration completes without mismatch
+- Web components upgrade from undefined
+- Lazy-loaded modules resolve
+- Service worker registration succeeds
+- Assertions: hydrated, upgraded, loaded, registered
+
+Each type gets its own generator family, its own failure shapes, and its own verification mechanism. They share a Playwright transport but nothing else.

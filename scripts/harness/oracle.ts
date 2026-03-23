@@ -1402,6 +1402,126 @@ export function narrowingNoHint(): InvariantCheck {
   };
 }
 
+// =============================================================================
+// GATE PRESENCE / ABSENCE INVARIANTS — Wave 2B
+// =============================================================================
+
+/**
+ * Assert a gate is present in results (ran, regardless of outcome).
+ */
+export function gatePresent(gateName: string): InvariantCheck {
+  return {
+    name: `gate_present_${gateName}`,
+    category: 'gate_sequence',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const gate = result.gates.find(g => g.gate === gateName);
+      if (!gate) {
+        return { passed: false, violation: `Gate '${gateName}' not found in results`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert a gate passed.
+ */
+export function gatePassed(gateName: string): InvariantCheck {
+  return {
+    name: `gate_passed_${gateName}`,
+    category: 'gate_sequence',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const gate = result.gates.find(g => g.gate === gateName);
+      if (!gate) return { passed: false, violation: `Gate '${gateName}' not found`, severity: 'bug' };
+      if (!gate.passed) {
+        return { passed: false, violation: `Gate '${gateName}' failed: ${gate.detail}`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert a gate failed.
+ */
+export function gateFailed(gateName: string, description?: string): InvariantCheck {
+  return {
+    name: `gate_failed_${gateName}${description ? '_' + description.substring(0, 20) : ''}`,
+    category: 'gate_sequence',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const gate = result.gates.find(g => g.gate === gateName);
+      if (!gate) return { passed: false, violation: `Gate '${gateName}' not found`, severity: 'bug' };
+      if (gate.passed) {
+        return { passed: false, violation: `Gate '${gateName}' should have failed but passed`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert attestation contains a specific substring.
+ */
+export function attestationContains(expected: string): InvariantCheck {
+  return {
+    name: `attestation_contains_${expected.substring(0, 20)}`,
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      if (!result.attestation.includes(expected)) {
+        return { passed: false, violation: `Attestation missing "${expected}": "${result.attestation.substring(0, 100)}"`, severity: 'unexpected' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert effective predicate count matches expected.
+ */
+export function effectivePredicateCount(expected: number): InvariantCheck {
+  return {
+    name: `effective_predicate_count_${expected}`,
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const count = result.effectivePredicates?.length ?? 0;
+      if (count !== expected) {
+        return { passed: false, violation: `Expected ${expected} effective predicates, got ${count}`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert gate detail contains specific text.
+ */
+export function gateDetailContains(gateName: string, expected: string): InvariantCheck {
+  return {
+    name: `gate_detail_${gateName}_contains_${expected.substring(0, 20)}`,
+    category: 'gate_sequence',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const gate = result.gates.find(g => g.gate === gateName);
+      if (!gate) return { passed: true, severity: 'info' }; // gate absent, not this check's concern
+      if (!gate.detail.includes(expected)) {
+        return { passed: false, violation: `Gate '${gateName}' detail "${gate.detail.substring(0, 80)}" missing "${expected}"`, severity: 'unexpected' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
 export const UNIVERSAL_INVARIANTS: InvariantCheck[] = [
   ...PRODUCT_INVARIANTS,
   ...HARNESS_INVARIANTS,

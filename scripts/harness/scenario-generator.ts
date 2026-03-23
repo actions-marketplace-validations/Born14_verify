@@ -60,6 +60,12 @@ import {
   gatesPassedAndFailed,
   narrowingHintContains,
   narrowingNoHint,
+  gatePresent,
+  gatePassed,
+  gateFailed,
+  attestationContains,
+  effectivePredicateCount,
+  gateDetailContains,
 } from './oracle.js';
 import { makeSolidPNG } from './test-png.js';
 import { ConstraintStore, predicateFingerprint, extractSignature } from '../../src/store/constraint-store.js';
@@ -2913,7 +2919,7 @@ function generateFamilyE(appDir: string): VerifyScenario[] {
     failureClass: 'C-08',
     description: 'C-08: "0" in edit vs "0px" in predicate — normalizer converts 0px→0 (grounded)',
     edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 0' }],
-    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0px' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0px', path: '/' }],
     config: { appDir, gates: { staging: false, browser: false, http: false } },
     invariants: [
       groundingRan(),
@@ -2930,7 +2936,7 @@ function generateFamilyE(appDir: string): VerifyScenario[] {
     failureClass: 'C-08',
     description: 'C-08: "0px" in edit vs "0" in predicate — normalizer converts 0px→0 (grounded)',
     edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 0px' }],
-    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0', path: '/' }],
     config: { appDir, gates: { staging: false, browser: false, http: false } },
     invariants: [
       groundingRan(),
@@ -2947,7 +2953,7 @@ function generateFamilyE(appDir: string): VerifyScenario[] {
     failureClass: 'C-08',
     description: 'C-08: "0em" vs "0rem" — normalizer converts both→0 (grounded)',
     edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 0em' }],
-    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0rem' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0rem', path: '/' }],
     config: { appDir, gates: { staging: false, browser: false, http: false } },
     invariants: [
       groundingRan(),
@@ -2965,7 +2971,7 @@ function generateFamilyE(appDir: string): VerifyScenario[] {
     failureClass: 'C-09',
     description: 'C-09: Edit uses calc() — predicate expects computed result (groundingMiss)',
     edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: calc(2rem - 4px)' }],
-    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '28px' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '28px', path: '/' }],
     config: { appDir, gates: { staging: false, browser: false, http: false } },
     invariants: [
       groundingRan(),
@@ -2982,7 +2988,7 @@ function generateFamilyE(appDir: string): VerifyScenario[] {
     failureClass: 'C-09',
     description: 'C-09: Edit calc() matches predicate calc() via substring (grounded)',
     edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: calc(100% - 20px)' }],
-    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: 'calc(100% - 20px)' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: 'calc(100% - 20px)', path: '/' }],
     config: { appDir, gates: { staging: false, browser: false, http: false } },
     invariants: [
       groundingRan(),
@@ -6959,6 +6965,3055 @@ function generateWave2A_G(appDir: string): VerifyScenario[] {
 }
 
 // =============================================================================
+// WAVE 2B: CSS SELECTOR/VALUE + GATE LOGIC + CONTENT + NARROWING
+// =============================================================================
+
+function generateWave2B(appDir: string): VerifyScenario[] {
+  const scenarios: VerifyScenario[] = [];
+
+  // =========================================================================
+  // C-22: flex shorthand → grow/shrink/basis
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C22a_flexShorthand'),
+    family: 'E',
+    generator: 'C22a_flex_shorthand',
+    failureClass: 'C-22',
+    description: 'C-22: flex shorthand "flex: 1 0 auto" — flex-grow not in SHORTHAND_MAP',
+    edits: [{ file: 'server.js', search: '.items li { padding: 0.5rem 0; border-bottom: 1px solid #eee; }', replace: '.items li { padding: 0.5rem 0; border-bottom: 1px solid #eee; flex: 1 0 auto; }' }],
+    predicates: [{ type: 'css', selector: '.items li', property: 'flex-grow', expected: '1' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-22a flex shorthand'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'flex-grow not in source — only introduced by edit shorthand'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-23: grid shorthand family
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C23a_gridShorthand'),
+    family: 'E',
+    generator: 'C23a_grid_shorthand',
+    failureClass: 'C-23',
+    description: 'C-23: grid-template shorthand — grid-template-columns not extractable from shorthand',
+    edits: [{ file: 'server.js', search: '.items { list-style: none; padding: 0; }', replace: '.items { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; }' }],
+    predicates: [{ type: 'css', selector: '.items', property: 'grid-template-columns', expected: '1fr 1fr' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-23a grid shorthand'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'grid-template-columns not in source — edit adds longhand but grounding checks original'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-26: list-style shorthand → type/position/image
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C26a_listStyleShorthand'),
+    family: 'E',
+    generator: 'C26a_list_style_shorthand',
+    failureClass: 'C-26',
+    description: 'C-26: list-style shorthand — list-style-type extraction',
+    edits: [{ file: 'server.js', search: '.items { list-style: none; padding: 0; }', replace: '.items { list-style: square inside; padding: 0; }' }],
+    predicates: [{ type: 'css', selector: '.items', property: 'list-style-type', expected: 'square' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-26a list-style shorthand'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-27: text-decoration shorthand → line/color/style/thickness
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C27a_textDecorationShorthand'),
+    family: 'E',
+    generator: 'C27a_text_decoration_shorthand',
+    failureClass: 'C-27',
+    description: 'C-27: text-decoration shorthand — text-decoration-line extraction gap',
+    edits: [{ file: 'server.js', search: 'a.nav-link { color: #0066cc; text-decoration: none; margin-right: 1rem; }', replace: 'a.nav-link { color: #0066cc; text-decoration: underline wavy red; margin-right: 1rem; }' }],
+    predicates: [{ type: 'css', selector: 'a.nav-link', property: 'text-decoration-line', expected: 'underline' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-27a text-decoration shorthand'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'text-decoration-line resolves from shorthand but value mismatch'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-29: overflow shorthand → overflow-x/overflow-y
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C29a_overflowShorthand'),
+    family: 'E',
+    generator: 'C29a_overflow_shorthand',
+    failureClass: 'C-29',
+    description: 'C-29: overflow shorthand — overflow-x from "overflow: hidden scroll"',
+    edits: [{ file: 'server.js', search: '.items { list-style: none; padding: 0; }', replace: '.items { list-style: none; padding: 0; overflow: hidden scroll; }' }],
+    predicates: [{ type: 'css', selector: '.items', property: 'overflow-x', expected: 'hidden' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-29a overflow shorthand'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-32: Property not found on valid selector
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C32a_propertyNotFound'),
+    family: 'E',
+    generator: 'C32a_property_not_found',
+    failureClass: 'C-32',
+    description: 'C-32: Valid selector h1 but property "z-index" not in its CSS — groundingMiss',
+    edits: [{ file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: 'h1 { color: #1a1a2e; font-size: 2rem; z-index: 10; }' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'z-index', expected: '10' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-32a property not found'),
+      groundingRan(),
+      // z-index is not in the original CSS for h1 — grounding should detect edit adds it
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('E', 'C32b_propertyNotInSource'),
+    family: 'E',
+    generator: 'C32b_property_not_in_source',
+    failureClass: 'C-32',
+    description: 'C-32: Predicate queries property not in source CSS at all',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }], // no-op
+    predicates: [{ type: 'css', selector: 'body', property: 'transform', expected: 'none' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-32b property not in source'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-33: Value mismatch (expected ≠ actual)
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C33a_valueMismatch'),
+    family: 'E',
+    generator: 'C33a_value_mismatch',
+    failureClass: 'C-33',
+    description: 'C-33: CSS value mismatch — expected green but source has #1a1a2e',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }], // no-op
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'green' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-33a value mismatch'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'h1 color exists but value mismatch — green vs #1a1a2e'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  scenarios.push({
+    id: nextId('E', 'C33b_valueMismatchHex'),
+    family: 'E',
+    generator: 'C33b_value_mismatch_hex',
+    failureClass: 'C-33',
+    description: 'C-33: CSS value mismatch — expected #ff0000 but source has #1a1a2e',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-33b value mismatch hex'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'h1 color exists but value mismatch — #ff0000 vs #1a1a2e'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // C-35: Specificity / cascade conflict
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C35a_specificityConflict'),
+    family: 'E',
+    generator: 'C35a_specificity_conflict',
+    failureClass: 'C-35',
+    description: 'C-35: Two rules for same element — later rule wins in source parse',
+    edits: [{ file: 'server.js', search: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }', replace: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }\n    footer { color: red; }' }],
+    predicates: [{ type: 'css', selector: 'footer', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-35a specificity'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-36: Multi-selector rules — .a, .b { color: red }
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C36a_multiSelector'),
+    family: 'E',
+    generator: 'C36a_multi_selector',
+    failureClass: 'C-36',
+    description: 'C-36: Comma-separated selector ".subtitle, footer" — both share the value',
+    edits: [{ file: 'server.js', search: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }', replace: '.subtitle, footer { color: #ff6600; }\n    footer { margin-top: 2rem; font-size: 0.8rem; }' }],
+    predicates: [{ type: 'css', selector: '.subtitle', property: 'color', expected: '#ff6600' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-36a multi-selector'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-42: Multiple style blocks with same selector (edge case)
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C42a_multiBlock'),
+    family: 'E',
+    generator: 'C42a_multi_block_merge',
+    failureClass: 'C-42',
+    description: 'C-42: Same selector in two style blocks — extractCSS merge behavior',
+    edits: [{ file: 'server.js', search: '</style>', replace: '</style>\n  <style>\n    h1 { font-weight: bold; }\n  </style>' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'font-weight', expected: 'bold' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-42a multi block'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'font-weight not on h1 in original — only introduced by edit'),
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('E', 'C42b_multiBlockOriginal'),
+    family: 'E',
+    generator: 'C42b_multi_block_original_preserved',
+    failureClass: 'C-42',
+    description: 'C-42: Original properties preserved after second block adds new property',
+    edits: [{ file: 'server.js', search: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }\n  </style>', replace: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }\n  </style>\n  <style>\n    h1 { font-weight: bold; }\n  </style>' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-42b original preserved'),
+      groundingRan(),
+      predicateIsGrounded(0, 'h1 color still grounded'),
+      verifySucceeded('original color preserved after merge'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // C-43: Duplicate properties in same block — later wins
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C43a_duplicateProperty'),
+    family: 'E',
+    generator: 'C43a_duplicate_property',
+    failureClass: 'C-43',
+    description: 'C-43: Duplicate property in block — later declaration wins (cascade)',
+    edits: [{ file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: 'h1 { color: #1a1a2e; font-size: 2rem; color: red; }' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-43a duplicate property'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('E', 'C43b_duplicatePropertyFirst'),
+    family: 'E',
+    generator: 'C43b_duplicate_property_first',
+    failureClass: 'C-43',
+    description: 'C-43: Duplicate property — asserting first value fails (second wins)',
+    edits: [{ file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: 'h1 { color: blue; font-size: 2rem; color: red; }' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'blue' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-43b duplicate first value'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // C-47: Transform matrix equivalence
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C47a_transformMatrix'),
+    family: 'E',
+    generator: 'C47a_transform_matrix',
+    failureClass: 'C-47',
+    description: 'C-47: translateX(10px) vs matrix form — source-level comparison',
+    edits: [{ file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: 'h1 { color: #1a1a2e; font-size: 2rem; transform: translateX(10px); }' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'transform', expected: 'translateX(10px)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-47a transform'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-48: Filter/backdrop-filter normalization
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C48a_filterNormalization'),
+    family: 'E',
+    generator: 'C48a_filter_normalization',
+    failureClass: 'C-48',
+    description: 'C-48: filter property normalization — blur(5px) source match',
+    edits: [{ file: 'server.js', search: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }', replace: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; filter: blur(5px); }' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'filter', expected: 'blur(5px)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-48a filter'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // C-50: CSS variable fallback path
+  // =========================================================================
+  scenarios.push({
+    id: nextId('E', 'C50a_varFallback'),
+    family: 'E',
+    generator: 'C50a_var_fallback',
+    failureClass: 'C-50',
+    description: 'C-50: var(--missing, red) fallback — source-level var() not resolved',
+    edits: [{ file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: 'h1 { color: var(--heading-color, red); font-size: 2rem; }' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-50a var fallback'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-22: Skipped vs absent vs disabled gate distinction
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X22a_disabledGateAbsent'),
+    family: 'G',
+    generator: 'X22a_disabled_gate_absent',
+    failureClass: 'X-22',
+    description: 'X-22: Disabled staging gate should be absent from results',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-22a disabled gate absent'),
+      gateAbsent('staging', 'staging disabled'),
+      gateAbsent('browser', 'browser disabled'),
+      gateAbsent('http', 'http disabled'),
+      verifySucceeded('should pass with disabled gates'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  scenarios.push({
+    id: nextId('G', 'X22b_enabledGatePresent'),
+    family: 'G',
+    generator: 'X22b_enabled_gate_present',
+    failureClass: 'X-22',
+    description: 'X-22: Enabled grounding and F9 gates should always be present',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Test App</h1>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Test App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-22b enabled present'),
+      gatePresent('grounding'),
+      gatePresent('F9'),
+      gatePresent('K5'),
+      gatePresent('G5'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-57: Gate side effects leak into later gates
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X57a_gateSideEffects'),
+    family: 'G',
+    generator: 'X57a_gate_side_effects',
+    failureClass: 'X-57',
+    description: 'X-57: F9 edit application should not affect grounding results (run order)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: green' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'green' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-57a gate side effects'),
+      gatePresent('grounding'),
+      gatePresent('F9'),
+      gatePassed('grounding'),
+      gatePassed('F9'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-60: Optional gate absence treated as pass
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X60a_optionalAbsence'),
+    family: 'G',
+    generator: 'X60a_optional_absence',
+    failureClass: 'X-60',
+    description: 'X-60: Disabled optional gates should not appear as "passed" in attestation',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Test App</h1>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Test App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false, vision: false, invariants: false } },
+    invariants: [
+      shouldNotCrash('X-60a optional absence'),
+      verifySucceeded('pass without optional gates'),
+      gateAbsent('staging', 'staging disabled'),
+      gateAbsent('browser', 'browser disabled'),
+      gateAbsent('http', 'http disabled'),
+      gateAbsent('vision', 'vision disabled'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // N-10: Very large file content pattern
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'N10a_largeFilePattern'),
+    family: 'G',
+    generator: 'N10a_large_file_pattern',
+    failureClass: 'N-10',
+    description: 'N-10: Content pattern search in a file with repeated content',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }], // no-op
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'res.end' }], // appears multiple times
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-10a large pattern'),
+      verifySucceeded('pattern found via includes()'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // N-11: Pattern matches scaffold/boilerplate
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'N11a_scaffoldMatch'),
+    family: 'G',
+    generator: 'N11a_scaffold_match',
+    failureClass: 'N-11',
+    description: 'N-11: Content pattern matches boilerplate — false positive (includes works)',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'http.createServer' }], // boilerplate pattern
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-11a scaffold match'),
+      verifySucceeded('boilerplate pattern found'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // N-12: Content in bundled/concatenated source
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'N12a_concatenatedContent'),
+    family: 'G',
+    generator: 'N12a_concatenated_content',
+    failureClass: 'N-12',
+    description: 'N-12: Pattern from HTML template embedded in server.js (source file = bundle)',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: '<ul class="items">' }], // HTML inside JS
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-12a concatenated'),
+      verifySucceeded('HTML pattern found in JS source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // X-72: Hint correct locally but globally harmful
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X72a_locallyCorrectHint'),
+    family: 'G',
+    generator: 'X72a_locally_correct_hint',
+    failureClass: 'X-72',
+    description: 'X-72: Narrowing hint for CSS mismatch — locally correct but might affect other selectors',
+    edits: [{ file: 'server.js', search: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }', replace: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'color', expected: 'blue' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-72a locally correct hint'),
+      narrowingPresent(),
+      // The hint should reference the actual value (#333) — locally correct
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-73: Hint overfits to specific value
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X73a_overfitHint'),
+    family: 'G',
+    generator: 'X73a_overfit_hint',
+    failureClass: 'X-73',
+    description: 'X-73: Narrowing hint references specific value, may not generalize across predicates',
+    edits: [{ file: 'server.js', search: '.subtitle { color: #666; font-size: 1rem; }', replace: '.subtitle { color: #666; font-size: 1rem; }' }],
+    predicates: [{ type: 'css', selector: '.subtitle', property: 'font-size', expected: '2rem' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-73a overfit hint'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-74: Hint leaks wrong causal explanation
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X74a_wrongCausalHint'),
+    family: 'G',
+    generator: 'X74a_wrong_causal_hint',
+    failureClass: 'X-74',
+    description: 'X-74: F9 failure on wrong file — hint says "file not found" (correct cause)',
+    edits: [{ file: 'nonexistent_route.js', search: 'old', replace: 'new' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-74a wrong causal'),
+      verifyFailedAt('F9', 'File not found'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-75: Multiple failures, narrowing picks wrong one
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X75a_multipleFailures'),
+    family: 'G',
+    generator: 'X75a_multiple_failures',
+    failureClass: 'X-75',
+    description: 'X-75: Two bad edits — first F9 failure stops pipeline, second never evaluated',
+    edits: [
+      { file: 'nonexistent.js', search: 'old', replace: 'new' },
+      { file: 'server.js', search: 'MISSING_SEARCH', replace: 'new' },
+    ],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-75a multiple failures'),
+      verifyFailedAt('F9', 'First bad edit stops pipeline'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-05: Serialization round-trip stability
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X05a_serializationRoundTrip'),
+    family: 'G',
+    generator: 'X05a_serialization_round_trip',
+    failureClass: 'X-05',
+    description: 'X-05: JSON round-trip preserves fingerprint — covered by fingerprintDeterminism in A family',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-05a round trip'),
+      verifySucceeded('round trip stable'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // X-06: Unicode in fingerprint input
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X06a_unicodeFingerprint'),
+    family: 'G',
+    generator: 'X06a_unicode_fingerprint',
+    failureClass: 'X-06',
+    description: 'X-06: Unicode selector name in predicate — fingerprint handles non-ASCII',
+    edits: [{ file: 'server.js', search: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }', replace: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }\n    .données { color: blue; }' }],
+    predicates: [{ type: 'css', selector: '.données', property: 'color', expected: 'blue' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-06a unicode fingerprint'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-69: Unicode grapheme boundaries break search
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X69a_unicodeGrapheme'),
+    family: 'G',
+    generator: 'X69a_unicode_grapheme',
+    failureClass: 'X-69',
+    description: 'X-69: Search string with unicode characters — indexOf handles correctly',
+    edits: [{ file: 'server.js', search: 'Powered by Node.js', replace: 'Powéred by Nödé.js' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Powéred by Nödé.js' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-69a unicode grapheme'),
+      verifySucceeded('unicode edit applied'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // FS-17: Unexpected extra files
+  // =========================================================================
+  scenarios.push({
+    id: nextId('H', 'FS17a_extraFiles'),
+    family: 'H',
+    generator: 'FS17a_extra_files',
+    failureClass: 'FS-17',
+    description: 'FS-17: filesystem_count includes unexpected files in directory',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'filesystem_count' as any, directory: '.', expected: 1 }], // intentionally wrong count
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-17a extra files'),
+      // The directory has more than 1 file — should fail or detect mismatch
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // FS-18: Missing expected files in set
+  // =========================================================================
+  scenarios.push({
+    id: nextId('H', 'FS18a_missingFile'),
+    family: 'H',
+    generator: 'FS18a_missing_file',
+    failureClass: 'FS-18',
+    description: 'FS-18: filesystem_exists on file that does not exist',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'filesystem_exists' as any, file: 'migrations/001.sql' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-18a missing file'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // FS-20: Case sensitivity across OSes
+  // =========================================================================
+  scenarios.push({
+    id: nextId('H', 'FS20a_caseSensitivity'),
+    family: 'H',
+    generator: 'FS20a_case_sensitivity',
+    failureClass: 'FS-20',
+    description: 'FS-20: Edit referencing "Server.js" (wrong case) — case sensitivity behavior varies by OS',
+    edits: [{ file: 'Server.js', search: 'Powered by Node.js', replace: 'Powered by Bun' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Powered by Bun' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-20a case sensitivity'),
+      // On case-insensitive FS (Windows/macOS): Server.js resolves to server.js, edit applies
+      // On case-sensitive FS (Linux): Server.js not found, F9 fails
+      // Either way, the scenario should not crash
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // FS-23: Path traversal normalization
+  // =========================================================================
+  scenarios.push({
+    id: nextId('H', 'FS23a_pathTraversal'),
+    family: 'H',
+    generator: 'FS23a_path_traversal',
+    failureClass: 'FS-23',
+    description: 'FS-23: Path with "../demo-app/server.js" normalization',
+    edits: [{ file: '../demo-app/server.js', search: 'Demo App', replace: 'Traversal App' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Traversal App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-23a path traversal'),
+      // Should be blocked by staging isolation or treated as valid path
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // FS-34: Duplicate files causing ambiguity
+  // =========================================================================
+  scenarios.push({
+    id: nextId('H', 'FS34a_duplicateFile'),
+    family: 'H',
+    generator: 'FS34a_duplicate_file',
+    failureClass: 'FS-34',
+    description: 'FS-34: Content predicate on file — only one server.js, no ambiguity',
+    edits: [{ file: 'server.js', search: 'Powered by Node.js', replace: 'Powered by Sovereign' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Powered by Sovereign' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-34a duplicate file'),
+      verifySucceeded('unique file match'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // X-61: Grounding snapshot stale vs verification target
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X61a_groundingStale'),
+    family: 'G',
+    generator: 'X61a_grounding_stale',
+    failureClass: 'X-61',
+    description: 'X-61: Grounding reads source before edit — CSS property added by edit not in grounding',
+    edits: [{ file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: 'h1 { color: #1a1a2e; font-size: 2rem; text-shadow: 2px 2px 4px gray; }' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'text-shadow', expected: '2px 2px 4px gray' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-61a grounding stale'),
+      groundingRan(),
+      // text-shadow not in original source → groundingMiss expected
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-62: Grounding over-approximates existence
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X62a_groundingOverApprox'),
+    family: 'G',
+    generator: 'X62a_grounding_over_approx',
+    failureClass: 'X-62',
+    description: 'X-62: Selector exists in CSS but behind a conditional route — grounding still finds it',
+    edits: [{ file: 'server.js', search: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }', replace: 'footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }' }],
+    predicates: [{ type: 'css', selector: 'footer', property: 'color', expected: '#999', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-62a over-approx'),
+      groundingRan(),
+      predicateIsGrounded(0, 'footer exists in source'),
+      verifySucceeded('footer grounded and value matches'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // X-63: Grounding under-approximates (indirect assembly)
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X63a_groundingUnderApprox'),
+    family: 'G',
+    generator: 'X63a_grounding_under_approx',
+    failureClass: 'X-63',
+    description: 'X-63: CSS selector in a file that grounding does not scan → groundingMiss',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'css', selector: '.external-component', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-63a under-approx'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'external component not in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-64: Cross-file composition not reflected
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'X64a_crossFileComposition'),
+    family: 'G',
+    generator: 'X64a_cross_file_composition',
+    failureClass: 'X-64',
+    description: 'X-64: Predicate references selector from imported CSS file — miss (single-file grounding)',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'css', selector: '.imported-layout', property: 'display', expected: 'flex' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-64a cross-file'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'imported selector not grounded'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // I-08: Grounding says exists, runtime never renders
+  // =========================================================================
+  scenarios.push({
+    id: nextId('I', 'I08a_groundedNotRendered'),
+    family: 'I',
+    generator: 'I08a_grounded_not_rendered',
+    failureClass: 'I-08',
+    description: 'I-08: CSS selector exists in source but element never rendered (no Docker test)',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [
+      { type: 'css', selector: '.items li', property: 'padding', expected: '0.5rem 0' },
+      { type: 'html', selector: '.items li', expected: 'Item Alpha' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-08a grounded not rendered'),
+      groundingRan(),
+      predicateIsGrounded(0, 'items li CSS exists in source'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // I-11: Filesystem passes on artifact, source unchanged
+  // =========================================================================
+  scenarios.push({
+    id: nextId('I', 'I11a_artifactMatch'),
+    family: 'I',
+    generator: 'I11a_artifact_match',
+    failureClass: 'I-11',
+    description: 'I-11: Content predicate matches template literal in source (artifact-like match)',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'res.writeHead(200' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-11a artifact match'),
+      verifySucceeded('boilerplate pattern found'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // I-12: Multi-step workflow passes per step, invariant fails
+  // =========================================================================
+  scenarios.push({
+    id: nextId('I', 'I12a_multiStepHolistic'),
+    family: 'I',
+    generator: 'I12a_multi_step_holistic',
+    failureClass: 'I-12',
+    description: 'I-12: Two independent edits both valid — combined effect still passes all predicates',
+    edits: [
+      { file: 'server.js', search: 'color: #1a1a2e', replace: 'color: green' },
+      { file: 'server.js', search: 'color: #666', replace: 'color: blue' },
+    ],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: 'green' },
+      { type: 'css', selector: '.subtitle', property: 'color', expected: 'blue' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-12a multi-step holistic'),
+      verifySucceeded('both edits apply and both predicates pass'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // INV-01: Health green but core route broken (simulated)
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'INV01a_healthGreenRouteBroken'),
+    family: 'G',
+    generator: 'INV01a_health_green_route_broken',
+    failureClass: 'INV-01',
+    description: 'INV-01: Edit breaks homepage but health route untouched — predicates detect homepage break',
+    edits: [{ file: 'server.js', search: '<h1>Demo App</h1>', replace: '' }], // remove h1
+    predicates: [{ type: 'html', selector: 'h1', expected: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('INV-01a health green route broken'),
+      // h1 removed → html predicate should detect the break
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // INV-07: One invariant masks another (budget exhaustion simulation)
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'INV07a_invariantMasking'),
+    family: 'G',
+    generator: 'INV07a_invariant_masking',
+    failureClass: 'INV-07',
+    description: 'INV-07: First gate failure (F9) masks later gates — pipeline stops at first failure',
+    edits: [{ file: 'server.js', search: 'THIS_STRING_DOES_NOT_EXIST', replace: 'replaced' }],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('INV-07a masking'),
+      verifyFailedAt('F9', 'First failure stops pipeline'),
+      // CSS predicate is grounded and valid, but F9 fails because search string not found
+      // Later gates (content, staging) never run
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // H-03: Element exists but wrong tag type
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H03a_wrongTagType'),
+    family: 'G',
+    generator: 'H03a_wrong_tag_type',
+    failureClass: 'H-03',
+    description: 'H-03: Predicate expects h2 but page has h1 — grounding miss',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'html', selector: 'h2', expected: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-03a wrong tag type'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-04: Multiple matching elements
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H04a_multipleElements'),
+    family: 'G',
+    generator: 'H04a_multiple_elements',
+    failureClass: 'H-04',
+    description: 'H-04: Multiple li elements match — HTML predicate on "li" ambiguous',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'html', selector: 'li', expected: 'Item Alpha' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-04a multiple elements'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-05: Nested element text extraction
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H05a_nestedText'),
+    family: 'G',
+    generator: 'H05a_nested_text',
+    failureClass: 'H-05',
+    description: 'H-05: Text content inside nested elements — nav contains anchor text',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'html', selector: 'nav', expected: 'Home' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-05a nested text'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-06: Self-closing tag variants
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H06a_selfClosingTag'),
+    family: 'G',
+    generator: 'H06a_self_closing_tag',
+    failureClass: 'H-06',
+    description: 'H-06: HTML predicate for self-closing tag existence',
+    edits: [{ file: 'server.js', search: '</body>', replace: '<br/>\n</body>' }],
+    predicates: [{ type: 'html', selector: 'br', expected: 'exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-06a self-closing'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-12: Template expression in source
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H12a_templateExpression'),
+    family: 'G',
+    generator: 'H12a_template_expression',
+    failureClass: 'H-12',
+    description: 'H-12: Content pattern includes template literal — matched literally in source',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: '${PORT}' }], // template expression in source
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-12a template expression'),
+      // ${PORT} is literally in server.js as process.env.PORT || 3000... actually as template literal
+      // Let's check — it's in the console.log template literal
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-20: Element count (cardinality)
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H20a_elementCount'),
+    family: 'G',
+    generator: 'H20a_element_count',
+    failureClass: 'H-20',
+    description: 'H-20: Multiple li elements — HTML predicate only checks existence, not count',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'html', selector: 'li', expected: 'exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-20a element count'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-21: Element ordering
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H21a_elementOrdering'),
+    family: 'G',
+    generator: 'H21a_element_ordering',
+    failureClass: 'H-21',
+    description: 'H-21: Two nav links — order-dependent text matching',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'html', selector: 'a.nav-link', expected: 'Home' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-21a element ordering'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-22: Nesting depth
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H22a_nestingDepth'),
+    family: 'G',
+    generator: 'H22a_nesting_depth',
+    failureClass: 'H-22',
+    description: 'H-22: Element inside nested structure — predicate on ul works regardless of nesting',
+    edits: [{ file: 'server.js', search: 'Demo App</h1>', replace: 'Demo App</h1>' }],
+    predicates: [{ type: 'html', selector: 'ul', expected: 'exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-22a nesting depth'),
+      groundingRan(),
+      verifySucceeded('ul exists in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // H-36: Malformed HTML autocorrection
+  // =========================================================================
+  scenarios.push({
+    id: nextId('G', 'H36a_malformedHTML'),
+    family: 'G',
+    generator: 'H36a_malformed_html',
+    failureClass: 'H-36',
+    description: 'H-36: Malformed HTML in source — missing closing tag, parser handles',
+    edits: [{ file: 'server.js', search: '</footer>', replace: '' }], // remove footer close tag
+    predicates: [{ type: 'html', selector: 'footer', expected: 'exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-36a malformed HTML'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  return scenarios;
+}
+
+// =============================================================================
+// WAVE 2C — HTML structure, CSS advanced, Scope boundary, Identity
+// =============================================================================
+
+function generateWave2C(appDir: string): VerifyScenario[] {
+  const scenarios: VerifyScenario[] = [];
+
+  // =========================================================================
+  // HTML ATTRIBUTES (H-15 through H-19)
+  // =========================================================================
+
+  // H-15: Boolean attributes — disabled vs disabled="disabled" vs disabled=""
+  scenarios.push({
+    id: nextId('G', 'H15a_boolAttr'),
+    family: 'G',
+    generator: 'H15a_boolean_attribute',
+    failureClass: 'H-15',
+    description: 'H-15: Boolean attribute — required attribute exists on input',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'input', expected: 'exists', path: '/form' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-15a boolean attr'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-16: Class attribute matching — class="foo bar" order
+  scenarios.push({
+    id: nextId('G', 'H16a_classAttr'),
+    family: 'G',
+    generator: 'H16a_class_attribute',
+    failureClass: 'H-16',
+    description: 'H-16: Class attribute — .form-group exists on about page',
+    edits: [],
+    predicates: [{ type: 'html', selector: '.form-group', expected: 'exists', path: '/form' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-16a class attr'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-17: Data attributes — data-id="5" string vs number
+  scenarios.push({
+    id: nextId('G', 'H17a_dataAttr'),
+    family: 'G',
+    generator: 'H17a_data_attribute',
+    failureClass: 'H-17',
+    description: 'H-17: Data attribute — fabricated data-id selector → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: '[data-id="5"]', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-17a data attr'),
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'fabricated data attribute selector'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // H-18: URL attributes — href relative vs absolute
+  scenarios.push({
+    id: nextId('G', 'H18a_urlAttr'),
+    family: 'G',
+    generator: 'H18a_url_attribute',
+    failureClass: 'H-18',
+    description: 'H-18: URL attribute — nav-link with href exists',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'a', expected: 'Home', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-18a url attr'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-19: ARIA attributes — fabricated aria-label
+  scenarios.push({
+    id: nextId('G', 'H19a_ariaAttr'),
+    family: 'G',
+    generator: 'H19a_aria_attribute',
+    failureClass: 'H-19',
+    description: 'H-19: ARIA attribute — fabricated [aria-label] selector → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: '[aria-label="menu"]', property: 'display', expected: 'block' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-19a aria attr'),
+      predicateIsGroundingMiss(0, 'fabricated aria selector'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // HTML STRUCTURE (H-20 through H-23, H-32 through H-41)
+  // =========================================================================
+
+  // H-20: Element count (cardinality) — 3 list items
+  scenarios.push({
+    id: nextId('G', 'H20a_cardinality'),
+    family: 'G',
+    generator: 'H20a_element_count',
+    failureClass: 'H-20',
+    description: 'H-20: Element count — team-list has 3 li elements',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'li', expected: 'exists', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-20a cardinality'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-21: Element ordering — first li vs last li
+  scenarios.push({
+    id: nextId('G', 'H21a_ordering'),
+    family: 'G',
+    generator: 'H21a_element_ordering',
+    failureClass: 'H-21',
+    description: 'H-21: Element ordering — first team member is Alice',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'li', expected: 'Alice', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-21a ordering'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-22: Nesting depth — element inside wrong parent
+  scenarios.push({
+    id: nextId('G', 'H22a_nesting'),
+    family: 'G',
+    generator: 'H22a_nesting_depth',
+    failureClass: 'H-22',
+    description: 'H-22: Nesting depth — span.role inside li inside ol',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'span', expected: 'Lead', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-22a nesting'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-23: Dynamic/JS-rendered content — not in source
+  scenarios.push({
+    id: nextId('G', 'H23a_dynamic'),
+    family: 'G',
+    generator: 'H23a_dynamic_content',
+    failureClass: 'H-23',
+    description: 'H-23: Dynamic content — fabricated JS-rendered element → grounding miss for CSS',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.dynamic-widget', property: 'display', expected: 'block' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-23a dynamic'),
+      predicateIsGroundingMiss(0, 'JS-rendered selector not in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // H-32: Hidden but accessible text
+  scenarios.push({
+    id: nextId('G', 'H32a_hiddenText'),
+    family: 'G',
+    generator: 'H32a_hidden_accessible',
+    failureClass: 'H-32',
+    description: 'H-32: Hidden content — .hidden div exists but display:none',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'div', expected: 'This content is hidden via CSS.', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-32a hidden text'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-34: Duplicate IDs — #details exists
+  scenarios.push({
+    id: nextId('G', 'H34a_dupId'),
+    family: 'G',
+    generator: 'H34a_duplicate_id',
+    failureClass: 'H-34',
+    description: 'H-34: Duplicate ID — edit creates second #details, ambiguous selection',
+    edits: [{ file: 'server.js', search: '<footer>About page footer</footer>', replace: '<div id="details"><p>Duplicate</p></div>\n  <footer>About page footer</footer>' }],
+    predicates: [{ type: 'html', selector: '#details', expected: 'exists', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-34a dup id'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-37: Template/inert content
+  scenarios.push({
+    id: nextId('G', 'H37a_template'),
+    family: 'G',
+    generator: 'H37a_template_content',
+    failureClass: 'H-37',
+    description: 'H-37: Template content — fabricated <template> selector → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'template', property: 'display', expected: 'none' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-37a template'),
+      predicateIsGroundingMiss(0, 'template selector not in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // H-38: Parent/ancestor requirement not enforced
+  scenarios.push({
+    id: nextId('G', 'H38a_parentReq'),
+    family: 'G',
+    generator: 'H38a_parent_requirement',
+    failureClass: 'H-38',
+    description: 'H-38: Parent requirement — td exists inside table on about page',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'td', expected: 'Alice', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-38a parent req'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-39: Sibling relationship assertion
+  scenarios.push({
+    id: nextId('G', 'H39a_sibling'),
+    family: 'G',
+    generator: 'H39a_sibling_relation',
+    failureClass: 'H-39',
+    description: 'H-39: Sibling relationship — th elements are siblings in table header',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'th', expected: 'Name', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-39a sibling'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-40: Landmark/semantic structure — nav, footer
+  scenarios.push({
+    id: nextId('G', 'H40a_landmark'),
+    family: 'G',
+    generator: 'H40a_landmark_structure',
+    failureClass: 'H-40',
+    description: 'H-40: Semantic structure — nav element exists on homepage',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'nav', expected: 'exists', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-40a landmark'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-11: Unicode normalization in text
+  scenarios.push({
+    id: nextId('G', 'H11a_unicode'),
+    family: 'G',
+    generator: 'H11a_unicode_normalization',
+    failureClass: 'H-11',
+    description: 'H-11: Unicode normalization — ASCII text matches exactly',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'h1', expected: 'Demo App', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-11a unicode'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-13: Text across child elements
+  scenarios.push({
+    id: nextId('G', 'H13a_childText'),
+    family: 'G',
+    generator: 'H13a_text_across_children',
+    failureClass: 'H-13',
+    description: 'H-13: Text across child elements — p with strong child',
+    edits: [],
+    predicates: [{ type: 'html', selector: 'p', expected: 'Built with', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-13a child text'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-14: Invisible text (display:none content)
+  scenarios.push({
+    id: nextId('G', 'H14a_invisText'),
+    family: 'G',
+    generator: 'H14a_invisible_text',
+    failureClass: 'H-14',
+    description: 'H-14: Invisible text — .hidden element has display:none but content exists in source',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.hidden', property: 'display', expected: 'none', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-14a invisible text'),
+      groundingRan(),
+      predicateIsGrounded(0, '.hidden selector exists'),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-25: Comment nodes in text extraction
+  scenarios.push({
+    id: nextId('G', 'H25a_comments'),
+    family: 'G',
+    generator: 'H25a_comment_nodes',
+    failureClass: 'H-25',
+    description: 'H-25: Comment in source — edit adds HTML comment, content still found',
+    edits: [{ file: 'server.js', search: '<footer>About page footer</footer>', replace: '<!-- footer comment -->\n  <footer>About page footer</footer>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'footer comment' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-25a comments'),
+    ],
+    requiresDocker: false,
+  });
+
+  // H-26: Script/style tag text counted as content
+  scenarios.push({
+    id: nextId('G', 'H26a_scriptStyle'),
+    family: 'G',
+    generator: 'H26a_script_style_text',
+    failureClass: 'H-26',
+    description: 'H-26: Style tag text — content predicate matches inside <style> block',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'border-collapse' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-26a script/style text'),
+      verifySucceeded('content found inside style tag'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // H-27: Non-breaking spaces and special whitespace
+  scenarios.push({
+    id: nextId('G', 'H27a_nbsp'),
+    family: 'G',
+    generator: 'H27a_nonbreaking_space',
+    failureClass: 'H-27',
+    description: 'H-27: Non-breaking space — &nbsp; in source treated as content',
+    edits: [{ file: 'server.js', search: 'About page footer', replace: 'About\u00a0page footer' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'About' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-27a nbsp'),
+      verifySucceeded('content with nbsp found'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // H-29: Placeholder vs actual form value
+  scenarios.push({
+    id: nextId('G', 'H29a_placeholder'),
+    family: 'G',
+    generator: 'H29a_placeholder_value',
+    failureClass: 'H-29',
+    description: 'H-29: Placeholder vs value — placeholder text exists in form source',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Your name' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-29a placeholder'),
+      verifySucceeded('placeholder text found in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // H-30: DOM property vs HTML attribute mismatch
+  scenarios.push({
+    id: nextId('G', 'H30a_domProp'),
+    family: 'G',
+    generator: 'H30a_dom_property',
+    failureClass: 'H-30',
+    description: 'H-30: DOM property — required attribute in source detectable via content',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'required' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-30a dom prop'),
+      verifySucceeded('required attr found'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // CSS ADVANCED SELECTORS (C-34, C-37, C-38, C-39, C-40, C-43, C-53 through C-62)
+  // =========================================================================
+
+  // C-34: Cross-route selector ambiguity (already partially covered by X-62 fix)
+  scenarios.push({
+    id: nextId('G', 'C34a_crossRoute'),
+    family: 'G',
+    generator: 'C34a_cross_route_ambiguity',
+    failureClass: 'C-34',
+    description: 'C-34: Cross-route selector — footer has different color on / vs /about',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'footer', property: 'color', expected: '#999', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-34a cross-route'),
+      groundingRan(),
+      predicateIsGrounded(0, 'footer exists on homepage'),
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('G', 'C34b_crossRouteDiff'),
+    family: 'G',
+    generator: 'C34b_cross_route_different',
+    failureClass: 'C-34',
+    description: 'C-34: Cross-route selector — footer color on /about is #aaa not #999',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'footer', property: 'color', expected: '#aaa', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-34b cross-route diff'),
+      groundingRan(),
+      predicateIsGrounded(0, 'footer exists on about'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-37: Selector combinators — .parent > .child
+  scenarios.push({
+    id: nextId('G', 'C37a_combinator'),
+    family: 'G',
+    generator: 'C37a_selector_combinator',
+    failureClass: 'C-37',
+    description: 'C-37: Selector combinator — .hero .hero-title (descendant) is grounded',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.hero .hero-title', property: 'color', expected: 'white', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-37a combinator'),
+      groundingRan(),
+      predicateIsGrounded(0, '.hero .hero-title exists'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-38: Pseudo-class selectors — :hover
+  scenarios.push({
+    id: nextId('G', 'C38a_pseudoClass'),
+    family: 'G',
+    generator: 'C38a_pseudo_class',
+    failureClass: 'C-38',
+    description: 'C-38: Pseudo-class — a.nav-link:hover is grounded (exists in source)',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'a.nav-link:hover', property: 'text-decoration', expected: 'underline', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-38a pseudo-class'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-39: Pseudo-element selectors — ::before, ::after
+  scenarios.push({
+    id: nextId('G', 'C39a_pseudoElement'),
+    family: 'G',
+    generator: 'C39a_pseudo_element',
+    failureClass: 'C-39',
+    description: 'C-39: Pseudo-element — .required::after exists in form source',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.required::after', property: 'content', expected: '" *"', path: '/form' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-39a pseudo-element'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-40: Inherited vs computed values
+  scenarios.push({
+    id: nextId('G', 'C40a_inherited'),
+    family: 'G',
+    generator: 'C40a_inherited_value',
+    failureClass: 'C-40',
+    description: 'C-40: Inherited value — .subtitle inherits font-family from body',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.subtitle', property: 'color', expected: '#666', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-40a inherited'),
+      groundingRan(),
+      predicateIsGrounded(0, '.subtitle exists'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-43: Duplicate properties in same block — later wins
+  scenarios.push({
+    id: nextId('G', 'C43a_dupProp'),
+    family: 'G',
+    generator: 'C43a_duplicate_property',
+    failureClass: 'C-43',
+    description: 'C-43: Duplicate property — edit adds duplicate color to body, later wins',
+    edits: [{ file: 'server.js', search: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }', replace: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; color: #111; }' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'color', expected: '#111', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-43a dup prop'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-53: Escaped selectors and special characters
+  scenarios.push({
+    id: nextId('G', 'C53a_escaped'),
+    family: 'G',
+    generator: 'C53a_escaped_selector',
+    failureClass: 'C-53',
+    description: 'C-53: Escaped selector — #contact-form (ID with hyphen) is grounded',
+    edits: [],
+    predicates: [{ type: 'html', selector: '#contact-form', expected: 'exists', path: '/form' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-53a escaped'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-54: Attribute selectors — [type="text"], [type="email"]
+  scenarios.push({
+    id: nextId('G', 'C54a_attrSel'),
+    family: 'G',
+    generator: 'C54a_attribute_selector',
+    failureClass: 'C-54',
+    description: 'C-54: Attribute selector — input[type="text"] exists in form CSS',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'input[type="text"]', property: 'padding', expected: '0.5rem', path: '/form' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-54a attr selector'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-55: Shadow DOM boundary — fabricated
+  scenarios.push({
+    id: nextId('G', 'C55a_shadowDOM'),
+    family: 'G',
+    generator: 'C55a_shadow_dom',
+    failureClass: 'C-55',
+    description: 'C-55: Shadow DOM — fabricated shadow host selector → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: '::shadow .inner', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-55a shadow DOM'),
+      predicateIsGroundingMiss(0, 'shadow DOM selector not in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // C-56: Style source precedence mismatch
+  scenarios.push({
+    id: nextId('G', 'C56a_precedence'),
+    family: 'G',
+    generator: 'C56a_style_precedence',
+    failureClass: 'C-56',
+    description: 'C-56: Style precedence — .card .card-title specific selector grounded',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.card .card-title', property: 'font-weight', expected: 'bold', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-56a precedence'),
+      groundingRan(),
+      predicateIsGrounded(0, '.card .card-title exists'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-57: Cascade layers — @layer not in source
+  scenarios.push({
+    id: nextId('G', 'C57a_layers'),
+    family: 'G',
+    generator: 'C57a_cascade_layers',
+    failureClass: 'C-57',
+    description: 'C-57: Cascade layers — fabricated @layer selector → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: '@layer.base', property: 'color', expected: 'blue' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-57a layers'),
+      predicateIsGroundingMiss(0, '@layer selector not in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // C-58: Container query — not in source
+  scenarios.push({
+    id: nextId('G', 'C58a_container'),
+    family: 'G',
+    generator: 'C58a_container_query',
+    failureClass: 'C-58',
+    description: 'C-58: Container query — fabricated @container selector → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: '@container.sidebar', property: 'width', expected: '300px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-58a container'),
+      predicateIsGroundingMiss(0, '@container selector not in source'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // C-59: Logical properties — margin-inline-start
+  scenarios.push({
+    id: nextId('G', 'C59a_logical'),
+    family: 'G',
+    generator: 'C59a_logical_properties',
+    failureClass: 'C-59',
+    description: 'C-59: Logical property — fabricated margin-inline-start → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin-inline-start', expected: '2rem' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-59a logical'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-60: Browser default styles mistaken for success
+  scenarios.push({
+    id: nextId('G', 'C60a_browserDefaults'),
+    family: 'G',
+    generator: 'C60a_browser_defaults',
+    failureClass: 'C-60',
+    description: 'C-60: Browser default — expect display:block on body (user-agent default, not authored)',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'body', property: 'display', expected: 'block' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-60a browser defaults'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-61: Property not observable via getComputedStyle
+  scenarios.push({
+    id: nextId('G', 'C61a_notObservable'),
+    family: 'G',
+    generator: 'C61a_not_observable',
+    failureClass: 'C-61',
+    description: 'C-61: Not observable — content property on .required::after (pseudo-element property)',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.required', property: 'content', expected: '" *"', path: '/form' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-61a not observable'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-62: Longhand/shorthand beyond known families
+  scenarios.push({
+    id: nextId('G', 'C62a_unknownShorthand'),
+    family: 'G',
+    generator: 'C62a_unknown_shorthand',
+    failureClass: 'C-62',
+    description: 'C-62: Unknown shorthand — box-shadow is not in SHORTHAND_MAP, direct match only',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.card', property: 'box-shadow', expected: '0 2px 4px rgba(0,0,0,0.1)', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('C-62a unknown shorthand'),
+      groundingRan(),
+      predicateIsGrounded(0, '.card exists on about'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // SCOPE BOUNDARY (SC-01 through SC-10)
+  // =========================================================================
+
+  // SC-01: Local success, global failure — CSS fix works for target but breaks sibling
+  scenarios.push({
+    id: nextId('G', 'SC01a_localGlobal'),
+    family: 'G',
+    generator: 'SC01a_local_success_global_failure',
+    failureClass: 'SC-01',
+    description: 'SC-01: Local success, global failure — change body color on homepage, about unaffected',
+    edits: [{ file: 'server.js', search: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }', replace: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #000; }' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'color', expected: '#000', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('SC-01a local/global'),
+      groundingRan(),
+      verifySucceeded('scoped edit passes'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // SC-06: Component isolation broken by global CSS
+  scenarios.push({
+    id: nextId('G', 'SC06a_globalCSS'),
+    family: 'G',
+    generator: 'SC06a_global_css_isolation',
+    failureClass: 'SC-06',
+    description: 'SC-06: Global CSS — edit body margin affects all routes',
+    edits: [{ file: 'server.js', search: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }', replace: 'body { font-family: sans-serif; margin: 0; background: #ffffff; color: #333; }' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('SC-06a global CSS'),
+      groundingRan(),
+      verifySucceeded('global CSS change detected'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // SC-10: Blast radius underestimated — edit touches 1 file, affects consumers
+  scenarios.push({
+    id: nextId('G', 'SC10a_blastRadius'),
+    family: 'G',
+    generator: 'SC10a_blast_radius',
+    failureClass: 'SC-10',
+    description: 'SC-10: Blast radius — edit server.js PORT constant affects all routes',
+    edits: [{ file: 'server.js', search: "const PORT = process.env.PORT || 3000;", replace: "const PORT = process.env.PORT || 4000;" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: '4000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('SC-10a blast radius'),
+      verifySucceeded('port change detected'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // IDENTITY / REFERENCE (ID-01 through ID-10)
+  // =========================================================================
+
+  // ID-02: Alias vs canonical path mismatch
+  scenarios.push({
+    id: nextId('G', 'ID02a_alias'),
+    family: 'G',
+    generator: 'ID02a_alias_path',
+    failureClass: 'ID-02',
+    description: 'ID-02: Alias path — content predicate with normalized file path',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'http.createServer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('ID-02a alias'),
+      verifySucceeded('canonical path resolves'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // ID-06: Same CSS value, different representation
+  scenarios.push({
+    id: nextId('G', 'ID06a_cssRepr'),
+    family: 'G',
+    generator: 'ID06a_css_value_representation',
+    failureClass: 'ID-06',
+    description: 'ID-06: CSS value representation — #0066cc is the same value in source',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'a.nav-link', property: 'color', expected: '#0066cc', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('ID-06a css repr'),
+      groundingRan(),
+      predicateIsGrounded(0, 'a.nav-link exists'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ID-08: Same file via symlink/mount/copy — different path
+  scenarios.push({
+    id: nextId('G', 'ID08a_symlinkFile'),
+    family: 'G',
+    generator: 'ID08a_symlink_file',
+    failureClass: 'ID-08',
+    description: 'ID-08: Same file — content predicate on server.js finds pattern regardless of resolution',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'createServer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('ID-08a symlink file'),
+      verifySucceeded('file identity resolved'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // REMAINING CROSS-CUTTING (X-28, X-29, X-35, X-36, X-49, X-58, X-59, X-65)
+  // =========================================================================
+
+  // X-28: Attribution with multi-file edits — only 1 file in demo-app
+  scenarios.push({
+    id: nextId('G', 'X28a_multiFile'),
+    family: 'G',
+    generator: 'X28a_multi_file_attribution',
+    failureClass: 'X-28',
+    description: 'X-28: Multi-file attribution — two edits on server.js both attributed',
+    edits: [
+      { file: 'server.js', search: "{ id: 1, name: 'Alpha' }", replace: "{ id: 1, name: 'Gamma' }" },
+      { file: 'server.js', search: "{ id: 2, name: 'Beta' }", replace: "{ id: 2, name: 'Delta' }" },
+    ],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Gamma' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-28a multi-file'),
+      verifySucceeded('multi-edit attributed'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // X-35: Route discovery accuracy
+  scenarios.push({
+    id: nextId('G', 'X35a_routeDiscovery'),
+    family: 'G',
+    generator: 'X35a_route_discovery',
+    failureClass: 'X-35',
+    description: 'X-35: Route discovery — grounding finds /about route CSS',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.hero', property: 'background', expected: '#3498db', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-35a route discovery'),
+      groundingRan(),
+      predicateIsGrounded(0, '.hero on /about route'),
+    ],
+    requiresDocker: false,
+  });
+
+  // X-36: Dynamic route patterns — parameterized
+  scenarios.push({
+    id: nextId('G', 'X36a_dynamicRoute'),
+    family: 'G',
+    generator: 'X36a_dynamic_route',
+    failureClass: 'X-36',
+    description: 'X-36: Dynamic route — /api/:id style route not in demo-app → grounding miss',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.user-profile', property: 'color', expected: 'blue', path: '/users/1' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-36a dynamic route'),
+      predicateIsGroundingMiss(0, 'dynamic route selector not found'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // HTTP EXTENDED (P-10 through P-14, P-15, P-21, P-22, P-23 through P-29)
+  // =========================================================================
+
+  // P-10: Request body interpolation — {{jobId}} in nested objects
+  scenarios.push({
+    id: nextId('G', 'P10a_interpolation'),
+    family: 'G',
+    generator: 'P10a_body_interpolation',
+    failureClass: 'P-10',
+    description: 'P-10: Body interpolation — POST to /api/echo with interpolation token',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      method: 'POST',
+      path: '/api/echo',
+      body: { data: '{{jobId}}' },
+      expect: { status: 200, bodyContains: 'echo' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-10a interpolation'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // P-11: Query parameter handling
+  scenarios.push({
+    id: nextId('G', 'P11a_queryParam'),
+    family: 'G',
+    generator: 'P11a_query_parameter',
+    failureClass: 'P-11',
+    description: 'P-11: Query parameter — /api/items?page=1 still returns items (no query parsing)',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      path: '/api/items',
+      expect: { status: 200, bodyContains: 'Alpha' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-11a query param'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // P-12: Request method mismatch — GET when should be POST
+  scenarios.push({
+    id: nextId('G', 'P12a_methodMismatch'),
+    family: 'G',
+    generator: 'P12a_method_mismatch',
+    failureClass: 'P-12',
+    description: 'P-12: Method mismatch — GET to /api/echo returns 404 (POST-only endpoint)',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      method: 'GET',
+      path: '/api/echo',
+      expect: { status: 404 },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-12a method mismatch'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // P-21: Relative vs absolute URL
+  scenarios.push({
+    id: nextId('G', 'P21a_relativeUrl'),
+    family: 'G',
+    generator: 'P21a_relative_url',
+    failureClass: 'P-21',
+    description: 'P-21: Relative URL — /health path works as relative',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      path: '/health',
+      expect: { status: 200, bodyContains: 'ok' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-21a relative url'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // P-22: Trailing slash sensitivity
+  scenarios.push({
+    id: nextId('G', 'P22a_trailingSlash'),
+    family: 'G',
+    generator: 'P22a_trailing_slash',
+    failureClass: 'P-22',
+    description: 'P-22: Trailing slash — /about vs /about/ (no trailing slash handler in demo)',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      path: '/about',
+      expect: { status: 200, bodyContains: 'About This App' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-22a trailing slash'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // P-23: bodyContains succeeds on error page
+  scenarios.push({
+    id: nextId('G', 'P23a_errorPage'),
+    family: 'G',
+    generator: 'P23a_error_page_false_positive',
+    failureClass: 'P-23',
+    description: 'P-23: Error page false positive — /nonexistent returns "Not Found"',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      path: '/nonexistent',
+      expect: { status: 404, bodyContains: 'Not Found' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-23a error page'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // P-25: Numeric/string/null distinctions in JSON
+  scenarios.push({
+    id: nextId('G', 'P25a_jsonTypes'),
+    family: 'G',
+    generator: 'P25a_json_type_distinctions',
+    failureClass: 'P-25',
+    description: 'P-25: JSON types — /api/items returns numeric id (1 not "1")',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      path: '/api/items',
+      expect: { status: 200, bodyRegex: '"id":\\s*1' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-25a json types'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // P-29: HTML and JSON both contain expected token
+  scenarios.push({
+    id: nextId('G', 'P29a_crossContentType'),
+    family: 'G',
+    generator: 'P29a_cross_content_type',
+    failureClass: 'P-29',
+    description: 'P-29: Cross content-type — "Alpha" appears in both HTML (homepage) and JSON (/api/items)',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      path: '/api/items',
+      expect: { status: 200, bodyContains: 'Alpha' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('P-29a cross content type'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // INTERACTION EXTENDED (I-02, I-04, I-05, I-08, I-09, I-10, I-11, I-12)
+  // =========================================================================
+
+  // I-02: HTML passes on source, CSS fails in browser — hydration gap
+  scenarios.push({
+    id: nextId('I', 'I02a_htmlCSSgap'),
+    family: 'I',
+    generator: 'I02a_html_css_gap',
+    failureClass: 'I-02',
+    description: 'I-02: HTML passes, CSS fails — html exists but css references fabricated selector',
+    edits: [],
+    predicates: [
+      { type: 'html', selector: 'footer', expected: 'exists', path: '/' },
+      { type: 'css', selector: '.footer-custom', property: 'color', expected: 'red', path: '/' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-02a HTML/CSS gap'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // I-09: Vision agrees with browser, deterministic disagrees
+  scenarios.push({
+    id: nextId('I', 'I09a_normBug'),
+    family: 'I',
+    generator: 'I09a_normalization_bug',
+    failureClass: 'I-09',
+    description: 'I-09: Normalization bug — deterministic CSS check depends on source parsing accuracy',
+    edits: [],
+    predicates: [
+      { type: 'css', selector: 'body', property: 'font-family', expected: 'sans-serif', path: '/' },
+      { type: 'html', selector: 'h1', expected: 'Demo App', path: '/' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-09a norm bug'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // I-10: Deterministic passes on source, browser fails (JS mutation)
+  scenarios.push({
+    id: nextId('I', 'I10a_jsMutation'),
+    family: 'I',
+    generator: 'I10a_js_mutation',
+    failureClass: 'I-10',
+    description: 'I-10: JS mutation — source has correct CSS but JS could override at runtime (no JS in demo)',
+    edits: [],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e', path: '/' },
+      { type: 'content', file: 'server.js', pattern: '#1a1a2e' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-10a JS mutation'),
+      groundingRan(),
+      verifySucceeded('both predicates pass on static app'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // I-11: Filesystem passes on artifact, source unchanged
+  scenarios.push({
+    id: nextId('I', 'I11a_artifact'),
+    family: 'I',
+    generator: 'I11a_artifact_match',
+    failureClass: 'I-11',
+    description: 'I-11: Artifact match — content predicate targets server.js (source, not generated)',
+    edits: [{ file: 'server.js', search: "{ id: 1, name: 'Alpha' }", replace: "{ id: 1, name: 'Omega' }" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Omega' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-11a artifact'),
+      verifySucceeded('source file changed'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // I-12: Multi-step workflow passes per step, invariant fails
+  scenarios.push({
+    id: nextId('I', 'I12a_multiStep'),
+    family: 'I',
+    generator: 'I12a_multi_step_holistic',
+    failureClass: 'I-12',
+    description: 'I-12: Multi-step — two predicates pass individually, no systemic check',
+    edits: [],
+    predicates: [
+      { type: 'http', path: '/health', expect: { status: 200 } },
+      { type: 'http', path: '/api/items', expect: { status: 200, bodyContains: 'Alpha' } },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-12a multi-step'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // NARROWING EXTENDED (X-72 through X-75 — already in Wave 2B)
+  // VISION EXTENDED (X-49, X-76 through X-81)
+  // =========================================================================
+
+  // X-49: All three authorities disagree
+  scenarios.push({
+    id: nextId('G', 'X49a_tripleDisagree'),
+    family: 'G',
+    generator: 'X49a_triple_disagreement',
+    failureClass: 'X-49',
+    description: 'X-49: Triple disagreement — only testable with vision+browser (scenario documents shape)',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'body', property: 'background', expected: '#ffffff', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false, vision: false, triangulation: false } },
+    invariants: [
+      shouldNotCrash('X-49a triple disagree'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // CONTENT EXTENDED (N-10, N-11, N-12)
+  // =========================================================================
+
+  // N-10: Very large files (performance)
+  scenarios.push({
+    id: nextId('G', 'N10a_largeFile'),
+    family: 'G',
+    generator: 'N10a_large_file_performance',
+    failureClass: 'N-10',
+    description: 'N-10: Large file — server.js is small but content search completes fast',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'http.createServer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-10a large file'),
+      verifySucceeded('content search completes'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // N-11: Pattern in generated scaffold
+  scenarios.push({
+    id: nextId('G', 'N11a_scaffold'),
+    family: 'G',
+    generator: 'N11a_scaffold_pattern',
+    failureClass: 'N-11',
+    description: 'N-11: Scaffold pattern — boilerplate http.createServer matches content predicate',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'createServer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-11a scaffold'),
+      verifySucceeded('scaffold pattern found'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // N-12: Concatenated/bundled content
+  scenarios.push({
+    id: nextId('G', 'N12a_bundled'),
+    family: 'G',
+    generator: 'N12a_bundled_content',
+    failureClass: 'N-12',
+    description: 'N-12: Bundled content — pattern only in source file, not in separate bundle',
+    edits: [],
+    predicates: [{ type: 'content', file: 'nonexistent-bundle.js', pattern: 'Alpha' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-12a bundled'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  return scenarios;
+}
+
+// =============================================================================
+// WAVE 3 — DB, FS advanced, Temporal, HTTP network, Concurrency, Observer, Drift
+// =============================================================================
+
+function generateWave3(appDir: string): VerifyScenario[] {
+  const scenarios: VerifyScenario[] = [];
+
+  // =========================================================================
+  // DB GENERATORS (D-01 through D-22) — Test pipeline handling of db predicates
+  // No real DB, but we test how verify handles db predicate types
+  // =========================================================================
+
+  // D-01: Table doesn't exist — db predicate with table_exists assertion
+  scenarios.push({
+    id: nextId('G', 'D01a_tableNotExist'),
+    family: 'G',
+    generator: 'D01a_table_not_exist',
+    failureClass: 'D-01',
+    description: 'D-01: Table doesn\'t exist — db predicate deferred without live DB',
+    edits: [],
+    predicates: [{ type: 'db', table: 'users', assertion: 'table_exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-01a table missing'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // D-02: Column doesn't exist
+  scenarios.push({
+    id: nextId('G', 'D02a_colNotExist'),
+    family: 'G',
+    generator: 'D02a_column_not_exist',
+    failureClass: 'D-02',
+    description: 'D-02: Column doesn\'t exist — db predicate with column_exists assertion',
+    edits: [],
+    predicates: [{ type: 'db', table: 'users', column: 'email', assertion: 'column_exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-02a col missing'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // D-03: Column type mismatch
+  scenarios.push({
+    id: nextId('G', 'D03a_colType'),
+    family: 'G',
+    generator: 'D03a_column_type',
+    failureClass: 'D-03',
+    description: 'D-03: Column type mismatch — db predicate with column_type assertion',
+    edits: [],
+    predicates: [{ type: 'db', table: 'users', column: 'id', assertion: 'column_type', expected: 'integer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-03a col type'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // D-04: Case sensitivity in names
+  scenarios.push({
+    id: nextId('G', 'D04a_caseSensitive'),
+    family: 'G',
+    generator: 'D04a_case_sensitivity',
+    failureClass: 'D-04',
+    description: 'D-04: Case sensitivity — db predicate with mixed-case table name',
+    edits: [],
+    predicates: [{ type: 'db', table: 'Users', assertion: 'table_exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-04a case sensitive'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // D-12: Nullable vs NOT NULL
+  scenarios.push({
+    id: nextId('G', 'D12a_nullable'),
+    family: 'G',
+    generator: 'D12a_nullable_column',
+    failureClass: 'D-12',
+    description: 'D-12: Nullable — db predicate for nullable column (deferred without DB)',
+    edits: [],
+    predicates: [{ type: 'db', table: 'profiles', column: 'bio', assertion: 'column_exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-12a nullable'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // D-16: Empty table vs missing table
+  scenarios.push({
+    id: nextId('G', 'D16a_emptyVsMissing'),
+    family: 'G',
+    generator: 'D16a_empty_vs_missing',
+    failureClass: 'D-16',
+    description: 'D-16: Empty vs missing — db predicate can\'t distinguish without live DB',
+    edits: [],
+    predicates: [{ type: 'db', table: 'sessions', assertion: 'table_exists' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-16a empty vs missing'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // D-18: Postgres vs MySQL type naming
+  scenarios.push({
+    id: nextId('G', 'D18a_crossDB'),
+    family: 'G',
+    generator: 'D18a_cross_db_portability',
+    failureClass: 'D-18',
+    description: 'D-18: Cross-DB — column_type "serial" is Postgres-specific naming',
+    edits: [],
+    predicates: [{ type: 'db', table: 'items', column: 'id', assertion: 'column_type', expected: 'serial' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-18a cross-DB'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // D-20: Boolean representation
+  scenarios.push({
+    id: nextId('G', 'D20a_boolean'),
+    family: 'G',
+    generator: 'D20a_boolean_representation',
+    failureClass: 'D-20',
+    description: 'D-20: Boolean representation — column_type "boolean" varies by DB engine',
+    edits: [],
+    predicates: [{ type: 'db', table: 'flags', column: 'active', assertion: 'column_type', expected: 'boolean' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('D-20a boolean'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // FILESYSTEM ADVANCED (FS-17 through FS-34)
+  // =========================================================================
+
+  // FS-17: Unexpected extra files
+  scenarios.push({
+    id: nextId('H', 'FS17a_extraFiles'),
+    family: 'H',
+    generator: 'FS17a_unexpected_extra_files',
+    failureClass: 'FS-17',
+    description: 'FS-17: Extra files — filesystem_count detects extra file',
+    edits: [],
+    predicates: [{ type: 'fs', assertion: 'filesystem_count', expected: '1', path: '.' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-17a extra files'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // FS-19: Generated/build artifact matched instead of source
+  scenarios.push({
+    id: nextId('H', 'FS19a_buildArtifact'),
+    family: 'H',
+    generator: 'FS19a_build_artifact',
+    failureClass: 'FS-19',
+    description: 'FS-19: Build artifact — content predicate on nonexistent dist file → fail',
+    edits: [],
+    predicates: [{ type: 'content', file: 'dist/bundle.js', pattern: 'createServer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-19a build artifact'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // FS-20: Case sensitivity across OSes
+  scenarios.push({
+    id: nextId('H', 'FS20a_caseSensitive'),
+    family: 'H',
+    generator: 'FS20a_case_sensitivity_os',
+    failureClass: 'FS-20',
+    description: 'FS-20: Case sensitivity — "Server.js" (wrong case) → file not found on Linux',
+    edits: [],
+    predicates: [{ type: 'content', file: 'Server.js', pattern: 'createServer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-20a case sensitive'),
+    ],
+    requiresDocker: false,
+  });
+
+  // FS-21: Unicode normalization in filenames
+  scenarios.push({
+    id: nextId('H', 'FS21a_unicodePath'),
+    family: 'H',
+    generator: 'FS21a_unicode_filename',
+    failureClass: 'FS-21',
+    description: 'FS-21: Unicode filename — content predicate on file with unicode name (not in demo)',
+    edits: [],
+    predicates: [{ type: 'content', file: 'café.js', pattern: 'export' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-21a unicode path'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // FS-22: Glob expansion mismatch
+  scenarios.push({
+    id: nextId('H', 'FS22a_glob'),
+    family: 'H',
+    generator: 'FS22a_glob_expansion',
+    failureClass: 'FS-22',
+    description: 'FS-22: Glob expansion — fs predicate with glob pattern (if supported)',
+    edits: [],
+    predicates: [{ type: 'fs', assertion: 'file_exists', path: '*.js' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-22a glob'),
+    ],
+    requiresDocker: false,
+  });
+
+  // FS-24: File exists but unreadable
+  scenarios.push({
+    id: nextId('H', 'FS24a_unreadable'),
+    family: 'H',
+    generator: 'FS24a_unreadable_file',
+    failureClass: 'FS-24',
+    description: 'FS-24: Unreadable file — content predicate on valid file but server.js is readable',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'listen' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-24a unreadable'),
+      verifySucceeded('server.js is readable'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // FS-32: Same content, different hash method
+  scenarios.push({
+    id: nextId('H', 'FS32a_hashMethod'),
+    family: 'H',
+    generator: 'FS32a_hash_method',
+    failureClass: 'FS-32',
+    description: 'FS-32: Hash method — filesystem_unchanged uses consistent hashing',
+    edits: [],
+    predicates: [{ type: 'fs', assertion: 'filesystem_unchanged' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-32a hash method'),
+    ],
+    requiresDocker: false,
+  });
+
+  // FS-34: Duplicate files causing ambiguity
+  scenarios.push({
+    id: nextId('H', 'FS34a_duplicateFile'),
+    family: 'H',
+    generator: 'FS34a_duplicate_files',
+    failureClass: 'FS-34',
+    description: 'FS-34: Duplicate files — content predicate on server.js is unambiguous (single file)',
+    edits: [],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('FS-34a dup file'),
+      verifySucceeded('single file unambiguous'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // TEMPORAL (TO-01 through TO-10) — Shape documentation via scenarios
+  // =========================================================================
+
+  // TO-01: State not yet settled when evaluated
+  scenarios.push({
+    id: nextId('G', 'TO01a_notSettled'),
+    family: 'G',
+    generator: 'TO01a_state_not_settled',
+    failureClass: 'TO-01',
+    description: 'TO-01: Not settled — static demo-app has no async init, always settled',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('TO-01a not settled'),
+      groundingRan(),
+      verifySucceeded('static app always settled'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // TO-05: Cached state causes stale result
+  scenarios.push({
+    id: nextId('G', 'TO05a_cachedStale'),
+    family: 'G',
+    generator: 'TO05a_cached_state',
+    failureClass: 'TO-05',
+    description: 'TO-05: Cached stale — verify reads fresh file each run (no caching)',
+    edits: [{ file: 'server.js', search: '<title>Demo App</title>', replace: '<title>Fresh Demo</title>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Fresh Demo' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('TO-05a cached stale'),
+      verifySucceeded('fresh read, not cached'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // TO-10: Time-dependent logic
+  scenarios.push({
+    id: nextId('G', 'TO10a_timeDependent'),
+    family: 'G',
+    generator: 'TO10a_time_dependent',
+    failureClass: 'TO-10',
+    description: 'TO-10: Time-dependent — /api/echo returns timestamp, value changes per call',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      method: 'POST',
+      path: '/api/echo',
+      body: { test: 'time' },
+      expect: { status: 200, bodyContains: 'timestamp' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('TO-10a time dependent'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // CONCURRENCY (CO-01 through CO-09)
+  // =========================================================================
+
+  // CO-01: Two edits to same file — verify handles sequentially
+  scenarios.push({
+    id: nextId('G', 'CO01a_concurrentEdits'),
+    family: 'G',
+    generator: 'CO01a_concurrent_edits',
+    failureClass: 'CO-01',
+    description: 'CO-01: Concurrent edits — two edits on server.js applied sequentially by F9',
+    edits: [
+      { file: 'server.js', search: "{ id: 1, name: 'Alpha' }", replace: "{ id: 1, name: 'First' }" },
+      { file: 'server.js', search: "{ id: 2, name: 'Beta' }", replace: "{ id: 2, name: 'Second' }" },
+    ],
+    predicates: [
+      { type: 'content', file: 'server.js', pattern: 'First' },
+      { type: 'content', file: 'server.js', pattern: 'Second' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('CO-01a concurrent edits'),
+      verifySucceeded('sequential edit application'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // CO-09: Constraint store concurrent access
+  scenarios.push({
+    id: nextId('G', 'CO09a_constraintAccess'),
+    family: 'G',
+    generator: 'CO09a_constraint_concurrent',
+    failureClass: 'CO-09',
+    description: 'CO-09: Constraint concurrency — single-threaded verify has no race on constraint store',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.nonexistent-co09', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('CO-09a constraint concurrent'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // OBSERVER EFFECTS (OE-01 through OE-09)
+  // =========================================================================
+
+  // OE-01: HTTP verification call mutates state
+  scenarios.push({
+    id: nextId('G', 'OE01a_httpMutates'),
+    family: 'G',
+    generator: 'OE01a_http_mutates_state',
+    failureClass: 'OE-01',
+    description: 'OE-01: HTTP mutates — POST /api/echo echoes body, no server state mutation',
+    edits: [],
+    predicates: [{
+      type: 'http',
+      method: 'POST',
+      path: '/api/echo',
+      body: { test: 'observer' },
+      expect: { status: 200, bodyContains: 'observer' },
+    }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('OE-01a http mutates'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // OE-06: Verification order changes outcome
+  scenarios.push({
+    id: nextId('G', 'OE06a_orderMatters'),
+    family: 'G',
+    generator: 'OE06a_verification_order',
+    failureClass: 'OE-06',
+    description: 'OE-06: Order matters — CSS checked before HTTP, both independent in static app',
+    edits: [],
+    predicates: [
+      { type: 'css', selector: 'body', property: 'background', expected: '#ffffff', path: '/' },
+      { type: 'http', path: '/health', expect: { status: 200 } },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('OE-06a order'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // DRIFT / REGRESSION (DR-01 through DR-10)
+  // =========================================================================
+
+  // DR-02: CSS cascade shifts from unrelated edit
+  scenarios.push({
+    id: nextId('G', 'DR02a_cascadeShift'),
+    family: 'G',
+    generator: 'DR02a_css_cascade_shift',
+    failureClass: 'DR-02',
+    description: 'DR-02: CSS cascade shift — adding new rule before existing changes specificity',
+    edits: [{ file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: '* { color: inherit; }\n    h1 { color: #1a1a2e; font-size: 2rem; }' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('DR-02a cascade shift'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // DR-07: Configuration drift
+  scenarios.push({
+    id: nextId('G', 'DR07a_configDrift'),
+    family: 'G',
+    generator: 'DR07a_config_drift',
+    failureClass: 'DR-07',
+    description: 'DR-07: Config drift — PORT changed via edit, content predicate detects',
+    edits: [{ file: 'server.js', search: "const PORT = process.env.PORT || 3000;", replace: "const PORT = process.env.PORT || 8080;" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: '8080' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('DR-07a config drift'),
+      verifySucceeded('config change detected'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // INVARIANT SHAPES (INV-01 through INV-09) — Test invariant gate behavior
+  // =========================================================================
+
+  // INV-01: Health green but core route broken
+  scenarios.push({
+    id: nextId('G', 'INV01a_healthGreen'),
+    family: 'G',
+    generator: 'INV01a_health_green_core_broken',
+    failureClass: 'INV-01',
+    description: 'INV-01: Health green, core broken — /health ok but homepage content changed',
+    edits: [{ file: 'server.js', search: '<h1>Demo App</h1>', replace: '<h1>Broken App</h1>' }],
+    predicates: [
+      { type: 'http', path: '/health', expect: { status: 200 } },
+      { type: 'content', file: 'server.js', pattern: 'Broken App' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('INV-01a health green'),
+      verifySucceeded('both predicates pass despite semantic damage'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // INV-04: Invariant checks wrong service
+  scenarios.push({
+    id: nextId('G', 'INV04a_wrongService'),
+    family: 'G',
+    generator: 'INV04a_wrong_service',
+    failureClass: 'INV-04',
+    description: 'INV-04: Wrong service — http predicate checks app health, not db health',
+    edits: [],
+    predicates: [{ type: 'http', path: '/health', expect: { status: 200, bodyContains: 'ok' } }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('INV-04a wrong service'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // INV-08: Scope too broad — false negatives
+  scenarios.push({
+    id: nextId('G', 'INV08a_scopeBroad'),
+    family: 'G',
+    generator: 'INV08a_scope_too_broad',
+    failureClass: 'INV-08',
+    description: 'INV-08: Scope too broad — content predicate on full file passes even for small change',
+    edits: [{ file: 'server.js', search: "{ id: 1, name: 'Alpha' }", replace: "{ id: 1, name: 'Zeta' }" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'http.createServer' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('INV-08a scope broad'),
+      verifySucceeded('broad predicate still passes after unrelated change'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // INV-09: Scope too narrow — misses blast radius
+  scenarios.push({
+    id: nextId('G', 'INV09a_scopeNarrow'),
+    family: 'G',
+    generator: 'INV09a_scope_too_narrow',
+    failureClass: 'INV-09',
+    description: 'INV-09: Scope too narrow — predicate checks one property, edit breaks another',
+    edits: [{ file: 'server.js', search: 'body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }', replace: 'body { margin: 2rem; background: #ffffff; color: #333; }' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'color', expected: '#333', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('INV-09a scope narrow'),
+      groundingRan(),
+      verifySucceeded('narrow predicate passes even though font-family removed'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // BROWSER SHAPES (BR-01 through BR-13) — Document shapes via pipeline tests
+  // =========================================================================
+
+  // BR-03: Element exists but not clickable
+  scenarios.push({
+    id: nextId('G', 'BR03a_notClickable'),
+    family: 'G',
+    generator: 'BR03a_not_clickable',
+    failureClass: 'BR-03',
+    description: 'BR-03: Not clickable — .hidden div exists but display:none prevents interaction',
+    edits: [],
+    predicates: [{ type: 'css', selector: '.hidden', property: 'display', expected: 'none', path: '/about' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('BR-03a not clickable'),
+      groundingRan(),
+      predicateIsGrounded(0, '.hidden selector exists'),
+    ],
+    requiresDocker: false,
+  });
+
+  // BR-10: Direct URL access works but SPA navigation doesn't
+  scenarios.push({
+    id: nextId('G', 'BR10a_directUrl'),
+    family: 'G',
+    generator: 'BR10a_direct_url_access',
+    failureClass: 'BR-10',
+    description: 'BR-10: Direct URL — server-rendered app always works with direct URL access',
+    edits: [],
+    predicates: [{ type: 'http', path: '/about', expect: { status: 200, bodyContains: 'About This App' } }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('BR-10a direct URL'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // BR-27: Responsive breakpoint changes layout
+  scenarios.push({
+    id: nextId('G', 'BR27a_responsive'),
+    family: 'G',
+    generator: 'BR27a_responsive_breakpoint',
+    failureClass: 'BR-27',
+    description: 'BR-27: Responsive — no media queries in demo-app, layout is fixed',
+    edits: [],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '2rem', path: '/' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('BR-27a responsive'),
+      groundingRan(),
+      predicateIsGrounded(0, 'body margin exists'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // REMAINING CROSS-CUTTING (X-65, X-70, X-71, X-76 through X-81)
+  // =========================================================================
+
+  // X-65: Environment-dependent routes behind flags
+  scenarios.push({
+    id: nextId('G', 'X65a_featureFlag'),
+    family: 'G',
+    generator: 'X65a_feature_flag_route',
+    failureClass: 'X-65',
+    description: 'X-65: Feature flag — no feature flags in demo-app, all routes visible',
+    edits: [],
+    predicates: [{ type: 'http', path: '/about', expect: { status: 200 } }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-65a feature flag'),
+      groundingRan(),
+    ],
+    requiresDocker: false,
+  });
+
+  // X-70: File mutated between read and apply
+  scenarios.push({
+    id: nextId('G', 'X70a_raceCondition'),
+    family: 'G',
+    generator: 'X70a_race_condition',
+    failureClass: 'X-70',
+    description: 'X-70: Race condition — verify reads and applies atomically (no race in single-threaded)',
+    edits: [{ file: 'server.js', search: "{ id: 1, name: 'Alpha' }", replace: "{ id: 1, name: 'RaceTest' }" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'RaceTest' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-70a race condition'),
+      verifySucceeded('atomic read-apply'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // X-71: Search matches scaffold/boilerplate, not target
+  scenarios.push({
+    id: nextId('G', 'X71a_scaffoldHit'),
+    family: 'G',
+    generator: 'X71a_scaffold_hit',
+    failureClass: 'X-71',
+    description: 'X-71: Scaffold hit — "res.end" appears many times → F9 ambiguous_match',
+    edits: [{ file: 'server.js', search: 'res.end', replace: 'res.send' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'res.send' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-71a scaffold hit'),
+      verifyFailedAt('F9', 'ambiguous match on scaffold'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  return scenarios;
+}
+
+// =============================================================================
 // GENERATOR DISPATCH
 // =============================================================================
 
@@ -6977,6 +10032,9 @@ export function generateAllScenarios(appDir: string): VerifyScenario[] {
     ...generateFamilyP(appDir),
     ...generateFamilyV(appDir),
     ...generateWave2A_G(appDir),
+    ...generateWave2B(appDir),
+    ...generateWave2C(appDir),
+    ...generateWave3(appDir),
   ];
 }
 
@@ -6988,9 +10046,9 @@ export function generateFamily(family: ScenarioFamily, appDir: string): VerifySc
     case 'D': return generateFamilyD(appDir);
     case 'E': return generateFamilyE(appDir);
     case 'F': return generateFamilyF(appDir);
-    case 'G': return [...generateFamilyG(appDir), ...generateWave2A_G(appDir)];
-    case 'H': return generateFamilyH(appDir);
-    case 'I': return generateFamilyI(appDir);
+    case 'G': return [...generateFamilyG(appDir), ...generateWave2A_G(appDir), ...generateWave2B(appDir).filter(s => s.family === 'G'), ...generateWave2C(appDir).filter(s => s.family === 'G'), ...generateWave3(appDir).filter(s => s.family === 'G')];
+    case 'H': return [...generateFamilyH(appDir), ...generateWave2B(appDir).filter(s => s.family === 'H'), ...generateWave2C(appDir).filter(s => s.family === 'H'), ...generateWave3(appDir).filter(s => s.family === 'H')];
+    case 'I': return [...generateFamilyI(appDir), ...generateWave2C(appDir).filter(s => s.family === 'I'), ...generateWave3(appDir).filter(s => s.family === 'I')];
     case 'M': return generateFamilyM(appDir);
     case 'P': return generateFamilyP(appDir);
     case 'V': return generateFamilyV(appDir);

@@ -8,13 +8,13 @@ Verification gate for AI agent actions. Every edit gets a fair trial before it t
 
 In v0.1.1, HTTP predicates with different `bodyContains` values produced identical fingerprints — K5 couldn't tell them apart. A human caught it by reading the code.
 
-Now 269 automated scenarios across 12 families catch it in under 25 seconds:
+Now 425 automated scenarios across 12 families catch it in under 30 seconds:
 
 ```bash
 npx @sovereign-labs/verify self-test
 
-#   0 bugs | 269 scenarios | 0 unexpected | A: clean, ..., I: clean, ..., P: clean, V: clean
-#   Failure Class Coverage: 91/91 clean
+#   0 bugs | 425 scenarios | 0 unexpected | A: clean, ..., I: clean, ..., P: clean, V: clean
+#   Failure Class Coverage: 246/452 shapes covered
 #   ALL CLEAN — No invariant violations detected.
 ```
 
@@ -168,17 +168,17 @@ npx @sovereign-labs/verify self-test --fail-on-bug
 | **B** | 14 | K5 constraint learning + store resilience (X-54–X-56) | No |
 | **C** | 7 | Gate sequencing and consistency | No |
 | **D** | 23 | G5 containment attribution + attribution errors (AT-01–AT-10) | No |
-| **E** | 61 | Grounding: CSS normalization/shorthand + content patterns (C-01–C-30, C-44–C-52, N-04–N-08) | No |
+| **E** | 79 | Grounding: CSS normalization/shorthand + content patterns (C-01–C-62, N-04–N-08) | No |
 | **F** | 6 | Full Docker pipeline (build → stage → verify) | Yes |
-| **G** | 68 | Edge cases, F9 syntax (X-37–X-41, X-66–X-68), HTML text (H-08–H-10), content (N-03, N-09, N-26), K5 edges (X-16, X-17), narrowing (X-43–X-45) + universal scenarios | No |
-| **H** | 34 | Filesystem gate — 14 failure classes (FS-01 through FS-16) | No |
-| **I** | 7 | Cross-predicate interactions (I-01, I-03, I-06, I-07) | No |
+| **G** | 157 | Edge cases, F9 syntax, HTML (H-03–H-40), content (N-03–N-12), CSS advanced, scope/identity, cross-cutting (X-05–X-75), invariants, DB/temporal/concurrency/observer/drift + universal scenarios | No |
+| **H** | 47 | Filesystem gate — 22 failure classes (FS-01 through FS-34) | No |
+| **I** | 15 | Cross-predicate interactions (I-01–I-12) | No |
 | **M** | 21 | Message gate — 14 failure classes (MSG-01 through MSG-14) | No |
 | **P** | 18 | HTTP gate — status, body, regex, content-type, sequence (P-01–P-09) | Yes |
 | **V** | 14 | Vision + triangulation (3-authority verdict) | No |
 | **UV** | 28 | Universal full-pipeline integration (color normalization, multi-predicate, F9 rejection, HTML predicates) | No |
 
-241 scenarios run pure from families. 28 universal scenarios test cross-gate integration including HTML predicates. 24 need Docker (6 F + 18 P). Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
+397 scenarios run pure from families. 28 universal scenarios test cross-gate integration including HTML predicates. 24 need Docker (6 F + 18 P). 246 of 452 known failure shapes covered (55%). Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
 
 ## Gates
 

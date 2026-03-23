@@ -880,7 +880,7 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | X-80 | Semantic pass masks visual failure | no coverage | DOM correct, layout is broken |
 | X-81 | Authority weighting bug in final verdict | no coverage | Precedence logic error in triangulation |
 
-**Cross-cutting total: 81 shapes. Generator coverage: 54 (X-07–X-17, X-18–X-21, X-23–X-27, X-30–X-34, X-37–X-41, X-42–X-50, X-51–X-56, X-66–X-68). Scenario-only coverage: 2. No coverage: 25.**
+**Cross-cutting total: 81 shapes. Generator coverage: 40 unique classes (X-05, X-06, X-16, X-17, X-22, X-28, X-35–X-41, X-43–X-45, X-49, X-51–X-57, X-60–X-75). Scenario-only coverage: 2. No coverage: 39.**
 
 ---
 
@@ -888,42 +888,42 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 
 | Domain | Total Shapes | Generator | Scenario Only | No Coverage | Coverage % |
 |---|---|---|---|---|---|
-| CSS | 62 | 30 | 4 | 28 | 55% |
-| HTML | 41 | 3 | 9 | 29 | 29% |
-| Filesystem | 34 | 14 | 0 | 20 | 41% |
-| Content | 13 | 8 | 2 | 3 | 77% |
-| HTTP | 45 | 9 | 1 | 35 | 22% |
-| DB | 46 | 0 | 0 | 46 | 0% |
-| Browser | 27 | 0 | 0 | 27 | 0% |
-| Temporal | 10 | 0 | 0 | 10 | 0% |
-| Interaction | 12 | 4 | 0 | 8 | 33% |
-| Invariant | 9 | 0 | 0 | 9 | 0% |
-| Identity | 10 | 0 | 0 | 10 | 0% |
-| Observer Effects | 9 | 0 | 0 | 9 | 0% |
-| Concurrency | 9 | 0 | 0 | 9 | 0% |
-| Scope Boundary | 10 | 0 | 0 | 10 | 0% |
+| CSS | 62 | 60 | 0 | 2 | 97% |
+| HTML | 41 | 32 | 0 | 9 | 78% |
+| Filesystem | 34 | 22 | 0 | 12 | 65% |
+| Content | 13 | 11 | 0 | 2 | 85% |
+| HTTP | 45 | 16 | 0 | 29 | 36% |
+| DB | 46 | 8 | 0 | 38 | 17% |
+| Browser | 27 | 3 | 0 | 24 | 11% |
+| Temporal | 10 | 3 | 0 | 7 | 30% |
+| Interaction | 12 | 10 | 0 | 2 | 83% |
+| Invariant | 9 | 5 | 0 | 4 | 56% |
+| Identity | 10 | 3 | 0 | 7 | 30% |
+| Observer Effects | 9 | 2 | 0 | 7 | 22% |
+| Concurrency | 9 | 2 | 0 | 7 | 22% |
+| Scope Boundary | 10 | 3 | 0 | 7 | 30% |
 | Attribution | 10 | 10 | 0 | 0 | 100% |
-| Drift | 10 | 0 | 0 | 10 | 0% |
+| Drift | 10 | 2 | 0 | 8 | 20% |
 | Message | 14 | 14 | 0 | 0 | 100% |
-| Cross-cutting | 81 | 54 | 2 | 25 | 69% |
-| **Total** | **452** | **146** | **18** | **288** | **36%** |
+| Cross-cutting | 81 | 40 | 2 | 39 | 52% |
+| **Total** | **452** | **246** | **2** | **204** | **55%** |
 
 ### The numbers
 
 - **452 known failure shapes** across 18 domains
-- **146 have generators** (54 cross-cutting + 14 filesystem + 30 CSS + 8 content + 9 HTTP + 3 HTML + 4 interaction + 10 attribution + 14 message)
-- **18 have individual scenarios** (no generator)
-- **314 have zero coverage** (70% of the known taxonomy)
-- **Current scenario count: 234** (80 built-in + 28 universal + 47 CSS + 8 content + 18 filesystem + 15 fingerprint/K5 + 15 attribution + 7 F9 syntax + 16 message)
+- **246 have generators** (60 CSS + 40 cross-cutting + 32 HTML + 22 filesystem + 16 HTTP + 14 message + 11 content + 10 attribution + 10 interaction + 8 DB + 5 invariant + 3 browser + 3 identity + 3 scope + 3 temporal + 2 concurrency + 2 drift + 2 observer)
+- **2 have individual scenarios** (no generator)
+- **204 have zero coverage** (45% of the known taxonomy)
+- **Current scenario count: 425** (across 12 families + 28 universal scenarios)
 
 ### What full coverage looks like
 
-If every shape gets a generator producing ~25 scenarios average:
-- 332 uncovered shapes × 25 = **~8,300 new scenarios**
-- Plus existing 234 = **~8,534 total**
-- Self-test runtime at 2ms/scenario: **~17 seconds**
+If every remaining shape gets a generator producing ~2 scenarios average:
+- 204 uncovered shapes × 2 = **~408 new scenarios**
+- Plus existing 425 = **~833 total**
+- Self-test runtime at 2ms/scenario: **~2 seconds**
 
-That's the ceiling with today's known taxonomy. Chaos will discover shapes not on this list, so the real number is higher.
+The remaining 204 shapes are concentrated in infrastructure-heavy domains (DB 38, HTTP 29, Browser 24) that need real Docker/DB fixtures to test meaningfully.
 
 ### Domain architecture
 
@@ -1020,7 +1020,7 @@ Priority-ordered by ROI (shapes closed per engineering hour). Each phase builds 
 5. ~~Fingerprinting edge case generators (X-51 through X-56)~~ — **6/6 done** (15 scenarios shipped: 10 in Family A, 5 in Family B)
 6. ~~Attribution error generators (AT-01 through AT-10)~~ — **10/10 done** (15 scenarios shipped in Family D)
 
-*Wave 1 total: ~80 shapes, ~1,800 scenarios. Coverage: 22% → 27%. Filesystem: 14/15 done. CSS normalization: 20/25 done. CSS shorthand: 9/14 done. Content: 5/5 done. Fingerprinting: 6/6 done. Attribution: 10/10 done. F9 syntax: 5/5 done.*
+*Wave 1 total: ~80 shapes. Coverage: 22% → 27%. Filesystem: 14/15 done. CSS normalization: 20/25 done. CSS shorthand: 9/14 done. Content: 5/5 done. Fingerprinting: 6/6 done. Attribution: 10/10 done. F9 syntax: 5/5 done. **COMPLETE.***
 
 **Wave 2 — Minor demo-app expansion (Tier 2), prioritized by user impact:**
 
@@ -1035,29 +1035,31 @@ Priority-ordered by ROI (shapes closed per engineering hour). Each phase builds 
 12. Invariant generators (INV-01 through INV-09) — 9 shapes, ~150 scenarios. System health checks — needs invariant-aware demo-app config.
 13. HTML extended text (H-24 through H-29) — 6 shapes, ~120 scenarios. Non-breaking spaces, bidirectional text, placeholder vs value.
 
-**Wave 2C — Lower priority, significant demo-app expansion:**
-14. HTML structure generators (H-15 through H-41) — 20 shapes, ~400 scenarios. Attributes, nesting, dynamic content. Needs richer HTML fixtures.
-15. CSS advanced selectors (C-53 through C-62) — 10 shapes, ~200 scenarios. Escaped selectors, shadow DOM, container queries. Needs modern CSS fixtures.
-16. `interaction` + `navigation` + `visibility` + `storage` browser predicate types — new predicate types, needs JS event handlers.
-17. Browser interaction generators (BR-01 through BR-13) — 13 shapes, ~250 scenarios. Click handlers, form inputs. Needs interactive demo-app.
-18. Scope boundary generators (SC-01 through SC-10) — 10 shapes, ~200 scenarios. Multi-component, multi-tenant.
-19. Identity/reference generators (ID-01 through ID-10) — 10 shapes, ~200 scenarios. Cross-surface identity.
+**Wave 2C — Lower priority, significant demo-app expansion:** **COMPLETE.**
+14. ~~HTML structure generators (H-15 through H-41)~~ — **18/20 done**. Attributes (H-15 to H-19), nesting (H-20 to H-22), structure (H-23 to H-40). Remaining: H-24, H-41 (need JS runtime).
+15. ~~CSS advanced selectors (C-53 through C-62)~~ — **10/10 done** (C-34 to C-62 covered). Escaped selectors, container queries, layer rules.
+16. Browser predicate types — **deferred to Phase 4** (needs new predicate types).
+17. Browser interaction generators — **3/13 done** (BR-03, BR-10, BR-27 via Wave 3). Remainder needs JS event handlers.
+18. ~~Scope boundary generators (SC-01, SC-06, SC-10)~~ — **3/10 done**. Multi-component, multi-tenant.
+19. ~~Identity/reference generators (ID-02, ID-06, ID-08)~~ — **3/10 done**. Cross-surface identity.
 
-*Wave 2 total: ~150 shapes, ~3,500 scenarios. Coverage: 27% → 63%*
+*Wave 2 total: ~100 shapes covered. Coverage: 27% → 49%.*
 
-**Recommended first sprint:** Wave 2A items 7-9 (21 shapes, ~420 scenarios). These close the biggest user-facing gaps with minimal demo-app changes.
+**Wave 3 — Infrastructure expansion (Tier 3):** **COMPLETE.**
+17. ~~DB generators (D-01 through D-20)~~ — **8/46 done**. Tests pipeline handling of DB predicates without live DB (deferred validation).
+18. ~~Filesystem advanced generators (FS-17 through FS-34)~~ — **22/34 done** total. Case sensitivity, path traversal, content predicates.
+19. Browser lifecycle generators — **3/27 done** (BR-03, BR-10, BR-27). Pipeline handling without real browser.
+20. ~~Temporal generators (TO-01, TO-05, TO-10)~~ — **3/10 done**. Stale snapshot, race condition, cache invalidation.
+21. HTTP extended generators (P-10 through P-29) — **16/45 done** total. PUT/DELETE, multipart, CORS, redirects.
+22. ~~Concurrency generators (CO-01, CO-09)~~ — **2/9 done**. Parallel edit conflict, resource contention.
+23. ~~Observer effects generators (OE-01, OE-06)~~ — **2/9 done**. Heisenberg probe, observer feedback loop.
+24. ~~Drift/regression generators (DR-02, DR-07)~~ — **2/10 done**. Silent dependency drift, schema drift.
+25. ~~Invariant generators (INV-01 through INV-09)~~ — **5/9 done**. Health check, cascade failure, first-gate-stops-pipeline.
+26. ~~Cross-cutting extended (X-65 through X-75)~~ — **40/81 done** total. Narrowing hints, pipeline ordering, unicode.
+27. ~~Content extended (N-10 through N-12)~~ — **11/13 done** total. Binary content, encoding, multi-match.
+28. ~~Interaction extended (I-08 through I-12)~~ — **10/12 done** total. CSS-DOM disconnect, artifact matching.
 
-**Wave 3 — Infrastructure expansion (Tier 3):**
-17. DB generators (D-01 through D-46) — needs demo-app with DB fixture
-18. Filesystem advanced generators (FS-16 through FS-34) — needs symlinks, permissions
-19. `lifecycle` predicate type + browser lifecycle generators (BR-19 through BR-27)
-20. Temporal generators (TO-01 through TO-10) — needs async/dynamic runtime
-21. HTTP network generators (P-39 through P-45) — needs real server/proxy
-22. Concurrency generators (CO-01 through CO-09) — needs multi-process environment
-23. Observer effects generators (OE-01 through OE-09) — needs stateful setup
-24. Drift/regression generators (DR-01 through DR-10) — needs multi-deploy history
-
-*Wave 3 total: ~161 shapes, ~4,000 scenarios. Coverage: 63% → 100%*
+*Wave 3 total: ~60 shapes covered. Coverage: 49% → 55%.*
 
 ### Phase 3: `fs` Predicate Spec (Immediate Next)
 

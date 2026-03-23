@@ -1,7 +1,1 @@
-{"_op":"outcome","_ts":1774119241217,"data":{"timestamp":1774119241216,"sessionId":"s_1774119241161_315y","goal":"Fingerprint test","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774119243005,"data":{"timestamp":1774119243004,"sessionId":"s_1774119241738_f7ng","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774119244054,"data":{"timestamp":1774119244054,"sessionId":"s_1774119243020_macl","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774119244105,"data":{"timestamp":1774119244105,"sessionId":"s_1774119244066_vmeb","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774215172728,"data":{"timestamp":1774215172727,"sessionId":"s_1774215172673_397c","success":false,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":["F9"],"signature":"edit_not_applicable","failureKind":"app_failure"}}
-{"_op":"pattern","_ts":1774215172730,"data":{"signature":"edit_not_applicable","occurrences":1,"lastSeen":1774215172727,"winningFixes":[],"affectedFiles":["server.js"]}}
-{"_op":"outcome","_ts":1774215246850,"data":{"timestamp":1774215246849,"sessionId":"s_1774215246801_geri","success":false,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":["F9"],"failureKind":"app_failure"}}
+{"_op":"outcome","_ts":1774240235385,"data":{"timestamp":1774240235385,"sessionId":"s_1774240235358_jnoy","goal":"Fingerprint test","success":false,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":["F9"],"failureKind":"app_failure"}}

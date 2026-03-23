@@ -38,6 +38,12 @@ export function runSyntaxGate(ctx: GateContext): SyntaxGateResult {
       continue;
     }
 
+    // Empty search string is always ambiguous (matches every position)
+    if (!edit.search) {
+      failures.push({ file: edit.file, search: '(empty)', reason: 'ambiguous_match', matchCount: -1 });
+      continue;
+    }
+
     const content = readFileSync(filePath, 'utf-8');
 
     // Count occurrences
@@ -47,7 +53,7 @@ export function runSyntaxGate(ctx: GateContext): SyntaxGateResult {
       idx = content.indexOf(edit.search, idx);
       if (idx === -1) break;
       count++;
-      idx += 1;
+      idx += edit.search.length;
     }
 
     if (count === 0) {

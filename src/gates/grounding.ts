@@ -622,8 +622,53 @@ function extractHTMLElements(content: string): Array<{ tag: string; text?: strin
 }
 
 const _NC: Record<string,string> = {black:'#000000',white:'#ffffff',red:'#ff0000',green:'#008000',blue:'#0000ff',navy:'#000080',orange:'#ffa500',yellow:'#ffff00',purple:'#800080',gray:'#808080',grey:'#808080',silver:'#c0c0c0',maroon:'#800000',teal:'#008080',cyan:'#00ffff',coral:'#ff7f50',tomato:'#ff6347',gold:'#ffd700',indigo:'#4b0082',crimson:'#dc143c',salmon:'#fa8072',lime:'#00ff00',aqua:'#00ffff',pink:'#ffc0cb',olive:'#808000',fuchsia:'#ff00ff',violet:'#ee82ee'};
-function _nC(v: string): string { const l = v.trim().toLowerCase(); return _NC[l] ?? l; }
-const _SH: Record<string,string[]> = {border:['border-width','border-style','border-color'],margin:['margin-top','margin-right','margin-bottom','margin-left'],padding:['padding-top','padding-right','padding-bottom','padding-left'],background:['background-color'],font:['font-style','font-variant','font-weight','font-size','line-height','font-family'],outline:['outline-width','outline-style','outline-color']};
+
+function _nC(v: string): string {
+  const l = v.trim().toLowerCase();
+  // Named color → hex
+  if (_NC[l]) return _NC[l];
+  // Zero unit equivalence: 0px, 0em, 0rem, 0%, 0pt, 0vh, 0vw → "0"
+  if (/^0(?:px|em|rem|%|pt|vh|vw|vmin|vmax|ch|ex|cm|mm|in|pc)$/.test(l)) return '0';
+  // Normalize internal whitespace in functional notation: rgb( 255, 0, 0 ) → rgb(255,0,0)
+  if (/^(?:rgb|hsl)a?\s*\(/.test(l)) {
+    const norm = l.replace(/\s+/g, '').replace(/,\s*/g, ',');
+    // rgba(r,g,b,1) → rgb(r,g,b) (alpha=1 is fully opaque)
+    const rgbaM = norm.match(/^rgba\((\d+),(\d+),(\d+),(1(?:\.0*)?)\)$/);
+    if (rgbaM) return _rgbToHex(+rgbaM[1], +rgbaM[2], +rgbaM[3]);
+    // hsla(h,s%,l%,1) → hsl → hex
+    const hslaM = norm.match(/^hsla\(([\d.]+),([\d.]+)%,([\d.]+)%,(1(?:\.0*)?)\)$/);
+    if (hslaM) return _hslToHex(+hslaM[1], +hslaM[2], +hslaM[3]);
+    // rgb(r,g,b) → hex
+    const rgbM = norm.match(/^rgb\((\d+),(\d+),(\d+)\)$/);
+    if (rgbM) return _rgbToHex(+rgbM[1], +rgbM[2], +rgbM[3]);
+    // hsl(h,s%,l%) → hex
+    const hslM = norm.match(/^hsl\(([\d.]+),([\d.]+)%,([\d.]+)%\)$/);
+    if (hslM) return _hslToHex(+hslM[1], +hslM[2], +hslM[3]);
+    return norm;
+  }
+  return l;
+}
+
+function _rgbToHex(r: number, g: number, b: number): string {
+  const clamp = (n: number) => Math.max(0, Math.min(255, Math.round(n)));
+  return '#' + [clamp(r), clamp(g), clamp(b)].map(c => c.toString(16).padStart(2, '0')).join('');
+}
+
+function _hslToHex(h: number, s: number, l: number): string {
+  const s1 = s / 100, l1 = l / 100;
+  const c = (1 - Math.abs(2 * l1 - 1)) * s1;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l1 - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else { r = c; b = x; }
+  return _rgbToHex((r + m) * 255, (g + m) * 255, (b + m) * 255);
+}
+const _SH: Record<string,string[]> = {border:['border-width','border-style','border-color'],'border-top':['border-top-width','border-top-style','border-top-color'],'border-right':['border-right-width','border-right-style','border-right-color'],'border-bottom':['border-bottom-width','border-bottom-style','border-bottom-color'],'border-left':['border-left-width','border-left-style','border-left-color'],margin:['margin-top','margin-right','margin-bottom','margin-left'],padding:['padding-top','padding-right','padding-bottom','padding-left'],background:['background-color'],font:['font-style','font-variant','font-weight','font-size','line-height','font-family'],outline:['outline-width','outline-style','outline-color']};
 function _rS(sp: string, sv: string, lp: string): string|undefined { const ls=_SH[sp]; if(!ls) return; const i=ls.indexOf(lp); if(i===-1) return; const t=sv.trim().split(/\s+/); return t[i]; }
 
 function extractClassTokens(content: string, route: string): Set<string> {

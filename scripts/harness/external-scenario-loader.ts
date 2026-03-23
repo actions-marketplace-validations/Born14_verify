@@ -13,6 +13,8 @@
  * - regression_guard: verify should match expectedSuccess
  */
 
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 import type { VerifyScenario, InvariantCheck, InvariantVerdict } from './types.js';
 import type { VerifyResult } from '../../src/types.js';
 import { ExternalScenarioStore } from '../../src/store/external-scenarios.js';
@@ -35,9 +37,6 @@ export function loadExternalScenarios(registryPath: string, appDir: string): Ver
  * applies to ANY app — not app-specific selectors or routes.
  */
 export function loadUniversalScenarios(fixtureDir: string): VerifyScenario[] {
-  const { join } = require('path');
-  const { existsSync, readFileSync } = require('fs');
-
   const universalPath = join(fixtureDir, '..', 'scenarios', 'universal.json');
   if (!existsSync(universalPath)) return [];
 

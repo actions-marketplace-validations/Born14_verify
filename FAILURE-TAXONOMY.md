@@ -16,50 +16,50 @@ CSS predicates assert computed style properties on DOM elements. The gap between
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| C-01 | Named color ↔ hex equivalence | scenarios only (uv-011, uv-013) | `red` vs `#ff0000`, 148 named colors |
-| C-02 | RGB ↔ hex equivalence | no coverage | `rgb(255,0,0)` vs `#ff0000` |
-| C-03 | HSL ↔ hex/rgb equivalence | no coverage | `hsl(0,100%,50%)` vs `#ff0000` |
-| C-04 | RGBA with alpha=1 ↔ RGB | no coverage | `rgba(255,0,0,1)` vs `rgb(255,0,0)` |
-| C-05 | HSLA with alpha=1 ↔ HSL | no coverage | Same pattern |
-| C-06 | Whitespace in values | no coverage | `rgb( 255, 0, 0 )` vs `rgb(255,0,0)` |
-| C-07 | Casing in values | no coverage | `Red` vs `red`, `#FF0000` vs `#ff0000` |
-| C-08 | Zero equivalences | no coverage | `0` vs `0px` vs `0em` vs `0%` vs `0rem` |
-| C-09 | `calc()` expressions | no coverage | `calc(100% - 20px)` — can't compare statically |
-| C-10 | CSS custom properties (`var()`) | no coverage | `var(--primary)` resolves to a value at runtime |
-| C-11 | `auto`, `inherit`, `initial`, `unset` keywords | no coverage | Keyword vs computed value |
-| C-12 | `!important` override | no coverage | Same property, different specificity |
-| C-13 | Unit equivalence (relative) | no coverage | `1em` vs `16px` (depends on context) |
-| C-14 | Percentage values | no coverage | `50%` vs `500px` on 1000px container |
-| C-15 | Multiple values on one property | no coverage | `transition: color 0.3s, opacity 0.5s` |
-| C-16 | Browser-specific prefixes | no coverage | `-webkit-transform` vs `transform` |
-| C-44 | Fractional rounding differences | no coverage | `33.3333%` vs `33.33px` — rounding at computed boundary |
-| C-45 | `normal` keyword resolution | no coverage | `line-height: normal`, `font-weight: normal`, `letter-spacing: normal` |
-| C-46 | Font family normalization | no coverage | Quoted vs unquoted, fallback stack, platform substitution |
+| C-01 | Named color ↔ hex equivalence | generator (E) | 4 scenarios: red→#ff0000 ✓, navy ✓, rebeccapurple gap, hex→named gap |
+| C-02 | RGB ↔ hex equivalence | generator (E) | 2 scenarios: rgb(255,0,0)→#ff0000 ✓, rgb(128,0,128)→#800080 ✓ |
+| C-03 | HSL ↔ hex/rgb equivalence | generator (E) | 1 scenario: hsl(120,100%,50%)→#00ff00 ✓ |
+| C-04 | RGBA with alpha=1 ↔ RGB | generator (E) | 1 scenario: rgba(255,0,0,1)→#ff0000 ✓ |
+| C-05 | HSLA with alpha=1 ↔ HSL | generator (E) | 1 scenario: hsla(120,100%,50%,1)→#00ff00 ✓ |
+| C-06 | Whitespace in values | generator (E) | 2 scenarios: internal whitespace gap, outer whitespace handled |
+| C-07 | Casing in values | generator (E) | 3 scenarios: hex case ✓, named case ✓, upper named→hex ✓ |
+| C-08 | Zero equivalences | generator (E) | 3 scenarios: 0px→0 ✓, 0em→0 ✓, 0rem→0 ✓ (all zero-units normalize to "0") |
+| C-09 | `calc()` expressions | generator (E) | 2 scenarios: calc→computed gap, calc literal match ✓ |
+| C-10 | CSS custom properties (`var()`) | generator (E) | 1 scenario: var()→value false confidence (source matches) |
+| C-11 | `auto`, `inherit`, `initial`, `unset` keywords | generator (E) | 2 scenarios: auto→computed gap, inherit→parent gap |
+| C-12 | `!important` override | generator (E) | 1 scenario: !important value substring match ✓ |
+| C-13 | Unit equivalence (relative) | generator (E) | 1 scenario: em→px context-dependent gap |
+| C-14 | Percentage values | generator (E) | 1 scenario: %→px context-dependent gap |
+| C-15 | Multiple values on one property | generator (E) | 1 scenario: new property not in source → groundingMiss |
+| C-16 | Browser-specific prefixes | generator (E) | 1 scenario: -webkit-transform→transform not mapped |
+| C-44 | Fractional rounding differences | generator (E) | 1 scenario: 33.3333%→33.33% rounding gap |
+| C-45 | `normal` keyword resolution | generator (E) | 1 scenario: normal→400 not mapped |
+| C-46 | Font family normalization | generator (E) | 1 scenario: quoted vs unquoted gap |
 | C-47 | Transform matrix equivalence | no coverage | `translateX(10px)` vs `matrix(1, 0, 0, 1, 10, 0)` |
 | C-48 | Filter/backdrop-filter normalization | no coverage | Order and computed serialization differences |
-| C-49 | Color space differences (modern syntax) | no coverage | `rgb(255 0 0 / 1)` vs `rgb(255, 0, 0)` |
+| C-49 | Color space differences (modern syntax) | generator (E) | 1 scenario: modern rgb() vs legacy rgb() gap |
 | C-50 | CSS variable fallback path | no coverage | `var(--x, red)` where `--x` missing or invalid |
-| C-51 | Invalid value silently dropped | no coverage | Property reverts to inherited/initial — no error |
-| C-52 | Unit conversion with root-relative context | no coverage | `rem` depends on root `font-size`, not local context |
+| C-51 | Invalid value silently dropped | generator (E) | 1 scenario: invalid value→inherited gap |
+| C-52 | Unit conversion with root-relative context | generator (E) | 1 scenario: rem→px root-dependent gap |
 
 ### Shorthand Resolution
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| C-17 | `border` → `border-width/style/color` | scenarios only (uv-012, uv-015) | Directional: border-top, border-right, etc. |
-| C-18 | `margin` → directional components | no coverage | `margin: 10px 20px` → top/right/bottom/left |
-| C-19 | `padding` → directional components | no coverage | Same pattern as margin |
-| C-20 | `background` → longhand components | no coverage | `background: url() center/cover no-repeat #fff` |
-| C-21 | `font` → size/weight/family/style | no coverage | `font: bold 16px/1.5 Arial` |
+| C-17 | `border` → `border-width/style/color` | generator (E) + scenarios (uv-012, uv-015) | 2 scenarios: border-bottom not in _SH, direct property match ✓ |
+| C-18 | `margin` → directional components | generator (E) | 4 scenarios: top ✓, right ✓, bottom 4-value ✓, bottom 2-value false confidence |
+| C-19 | `padding` → directional components | generator (E) | 1 scenario: padding-top from shorthand ✓ |
+| C-20 | `background` → longhand components | generator (E) | 2 scenarios: simple ✓, complex positional mismatch |
+| C-21 | `font` → size/weight/family/style | generator (E) | 1 scenario: font shorthand not in source → miss |
 | C-22 | `flex` → grow/shrink/basis | no coverage | `flex: 1 0 auto` |
 | C-23 | `grid` shorthand family | no coverage | `grid-template`, `grid-area`, etc. |
-| C-24 | `animation` → name/duration/timing/etc. | no coverage | 8 longhand properties |
-| C-25 | `transition` → property/duration/timing/delay | no coverage | 4 longhand properties |
+| C-24 | `animation` → name/duration/timing/etc. | generator (E) | 1 scenario: animation-name not in _SH |
+| C-25 | `transition` → property/duration/timing/delay | generator (E) | 1 scenario: transition-duration not in _SH |
 | C-26 | `list-style` → type/position/image | no coverage | 3 longhand properties |
 | C-27 | `text-decoration` → line/color/style/thickness | no coverage | 4 longhand properties |
-| C-28 | `outline` → width/style/color | no coverage | 3 longhand properties |
+| C-28 | `outline` → width/style/color | generator (E) | 1 scenario: outline not in source → miss |
 | C-29 | `overflow` → overflow-x/overflow-y | no coverage | 2 longhand properties |
-| C-30 | Shorthand component ordering ambiguity | no coverage | `border: 1px solid red` — which token is which? |
+| C-30 | Shorthand component ordering ambiguity | generator (E) | 1 scenario: positional token mismatch documented |
 
 ### Selector Matching
 
@@ -89,7 +89,7 @@ CSS predicates assert computed style properties on DOM elements. The gap between
 | C-61 | Property not observable via getComputedStyle | no coverage | Exists in source, not returned by browser API |
 | C-62 | Longhand/shorthand beyond known families | no coverage | Computed returns only longhand for properties not in SHORTHAND_MAP |
 
-**CSS total: 62 shapes. Generator coverage: 1. Scenario-only coverage: 7. No coverage: 54.**
+**CSS total: 62 shapes. Generator coverage: 30 (C-01–C-21, C-24–C-25, C-28, C-30–C-31, C-44–C-46, C-49, C-51–C-52). Scenario-only coverage: 4. No coverage: 28.**
 
 ---
 
@@ -158,7 +158,32 @@ HTML predicates assert element existence, text content, and structure. The gap b
 | H-40 | Landmark/semantic structure mismatch | no coverage | `<main>`, `<nav>`, heading hierarchy (h1→h2→h3) |
 | H-41 | Hydration mismatch (source vs runtime DOM) | no coverage | Server-rendered HTML differs from client-hydrated DOM |
 
-**HTML total: 41 shapes. Generator coverage: 0. Scenario-only coverage: 3. No coverage: 38.**
+**HTML total: 41 shapes. Generator coverage: 0. Scenario-only coverage: 9 (uv-003, uv-006, uv-010, uv-023, uv-024, uv-025, uv-026, uv-027, uv-028). No coverage: 32.**
+
+### HTML Domain Surface Design (Wave 2 Target)
+
+HTML predicates use the existing `html` type with `selector` (tag name), `expected` (text content or `"exists"`), and `path` (route). Verification happens at two layers:
+
+**Layer 1 — Grounding (pre-edit, no Docker):**
+- Element tag existence: `selector` matched against parsed HTML tags per route
+- Text content validation: `expected` compared against element's text content
+- Creation goal detection: if element doesn't exist but edit creates it, grounding allows it through
+- Text change detection: if element exists but text doesn't match expected, `groundingMiss` (by design — grounding validates source truth, not intended truth)
+
+**Layer 2 — Browser gate (post-edit, requires Docker):**
+- `document.querySelector(selector)` against rendered DOM
+- `element.textContent` for text assertions
+- Handles dynamic content, template rendering, JavaScript-created elements
+
+**Initial scenarios shipped (6 in UV family):**
+| Scenario | Shape | What it tests |
+|---|---|---|
+| uv-023 | H-01/H-02 happy path | Element exists with correct text |
+| uv-024 | H-01 exists check | Element existence without text assertion |
+| uv-025 | Creation goal | Edit creates new element — grounding allows |
+| uv-026 | Cross-surface (I-01) | CSS + HTML multi-predicate on same element |
+| uv-027 | H-03 wrong tag | Wrong element tag rejected by grounding |
+| uv-028 | H-02 text change | Text change on existing element triggers grounding miss |
 
 ---
 
@@ -250,11 +275,11 @@ Content predicates assert that patterns exist inside files. Distinct from filesy
 | N-01 | Pattern not found in file | scenario (uv-007) | Single scenario |
 | N-02 | File doesn't exist | scenario (uv-008) | Single scenario |
 | N-03 | Pattern found in wrong file | no coverage | User specifies wrong `file` field |
-| N-04 | Regex vs literal matching | no coverage | `.` matches any char in regex, literal dot in string |
-| N-05 | Multi-line pattern matching | no coverage | Pattern spans line boundary |
-| N-06 | Pattern in comment vs code | no coverage | `// TODO: add login` matches "add login" but it's a comment |
-| N-07 | Case sensitivity | no coverage | `require('Express')` vs `require('express')` |
-| N-08 | Partial match vs full match | no coverage | Pattern "color" matches "background-color" |
+| N-04 | Regex vs literal matching | generator (E) | 2 scenarios: dot is literal ✓, regex-special chars literal ✓ |
+| N-05 | Multi-line pattern matching | generator (E) | 1 scenario: cross-line includes() works ✓ |
+| N-06 | Pattern in comment vs code | generator (E) | 1 scenario: comment text matches (false positive) |
+| N-07 | Case sensitivity | generator (E) | 2 scenarios: correct case ✓, wrong case → miss |
+| N-08 | Partial match vs full match | generator (E) | 2 scenarios: substring false positive, pattern not found |
 | N-26 | Duplicate pattern count ambiguity | no coverage | Pattern exists multiple times — predicate assumes one meaningful occurrence |
 
 ### Semantic Edge Cases
@@ -266,7 +291,7 @@ Content predicates assert that patterns exist inside files. Distinct from filesy
 | N-11 | Pattern in generated scaffold | no coverage | Matches boilerplate, not user-authored code |
 | N-12 | Concatenated/bundled content | no coverage | Pattern exists in bundle but not in source module |
 
-**Content total: 13 shapes. Generator coverage: 0. Scenario-only coverage: 2. No coverage: 11.**
+**Content total: 13 shapes. Generator coverage: 5 (N-04 through N-08). Scenario-only coverage: 2. No coverage: 6.**
 
 ---
 
@@ -640,18 +665,18 @@ Failures where the system identifies the wrong cause of a failure. The verificat
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| AT-01 | Correct failure, wrong cause identified | no coverage | CSS fails → blamed on selector, actually cascade |
-| AT-02 | Multiple causes, single attribution | no coverage | Two bugs, narrowing picks one |
-| AT-03 | Downstream effect mistaken for root cause | no coverage | Deploy failure blamed on code, actually infra |
-| AT-04 | Masking failure — real cause hidden | no coverage | First error swallowed, second error reported |
-| AT-05 | Accidental correctness | no coverage | Predicate passes by coincidence, not causation |
-| AT-06 | Proxy success — right outcome, wrong reason | no coverage | CSS matches but inherited, not authored |
-| AT-07 | Structural validity masks semantic incorrectness | no coverage | HTML valid but accessibility broken |
-| AT-08 | Semantic correctness masks structural breakage | no coverage | Logic right but layout destroyed |
-| AT-09 | Constraint seeded from wrong failure class | no coverage | K5 learns wrong lesson from misattributed failure |
-| AT-10 | Narrowing hint leads to correct fix for wrong reason | no coverage | Agent fixes symptom, not disease |
+| AT-01 | Correct failure, wrong cause identified | generator (D) | 2 scenarios: G5 "unexplained" when edit changes wrong property (AT-01a), G5 false "direct" when edit.replace contains p.expected by coincidence (AT-01b) |
+| AT-02 | Multiple causes, single attribution | generator (D) | 1 scenario: two edits both contain "orange" → both "direct", can't isolate root cause (AT-02a) |
+| AT-03 | Downstream effect mistaken for root cause | generator (D) | 2 scenarios: extractSignature regex list priority — SyntaxError (pos 6) beats health_check (pos 9) (AT-03a), DNS error (pos 3) masks SyntaxError (AT-03b) |
+| AT-04 | Masking failure — real cause hidden | generator (D) | 1 scenario: F9 failure stops pipeline, G5 never runs (AT-04a) |
+| AT-05 | Accidental correctness | generator (D) | 2 scenarios: content predicate already true, unrelated edit → G5 "direct" (AT-05a); edit changes color property, predicate expects different color value → G5 "direct" on property name match (AT-05b) |
+| AT-06 | Proxy success — right outcome, wrong reason | generator (D) | 1 scenario: edit on body font-family, predicate targets .subtitle font-family → "direct" because expected value in edit.replace (AT-06a) |
+| AT-07 | Structural validity masks semantic incorrectness | generator (D) | 1 scenario: title → "Test" is structurally valid, G5 direct, semantic wrongness undetectable (AT-07a) |
+| AT-08 | Semantic correctness masks structural breakage | generator (D) | 1 scenario: API item addition — content match correct, potential layout damage invisible (AT-08a) |
+| AT-09 | Constraint seeded from wrong failure class | generator (D) | 2 scenarios: "timeout during build, exit code 1" → migration_timeout not build_failure (AT-09a); ECONNREFUSED from staging=harness_fault, from evidence=unknown (AT-09b) |
+| AT-10 | Narrowing hint leads to correct fix for wrong reason | generator (D) | 2 scenarios: F9 "search string does not exist" — correct but generic (AT-10a); K5 "try a different strategy" — generic hint (AT-10b) |
 
-**Attribution total: 10 shapes. Generator coverage: 0. Scenario-only coverage: 0. No coverage: 10.**
+**Attribution total: 10 shapes. Generator coverage: 10 (AT-01 through AT-10). Scenario-only coverage: 0. No coverage: 0.**
 
 ---
 
@@ -676,6 +701,60 @@ Failures where the system was correct, becomes incorrect without any direct chan
 
 ---
 
+## Message Predicate Failures
+
+Communication predicates assert properties of outbound agent messages — destination, content, claims with evidence, and negation detection. The `governMessage()` gate pipeline runs: destination → forbidden content → required content → claims → denied patterns → review hook.
+
+### Destination & Content
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| MSG-01 | Destination denied (explicit deny or not in allow list) | generator (M) | 2 scenarios: explicit deny list ✓, not in allow list ✓ |
+| MSG-02 | Forbidden content detected (string or regex) | generator (M) | 2 scenarios: literal string match ✓, regex match ✓ |
+| MSG-05 | Required content missing | generator (M) | 1 scenario: policy requires string not present in body ✓ |
+
+### Claim-Evidence Binding
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| MSG-03 | Claim with valid evidence — approved | generator (M) | 1 scenario: deploy claim + evidence provider returns true ✓ |
+| MSG-04 | Claim without evidence — blocked | generator (M) | 1 scenario: deploy claim trigger present but no evidence provider ✓ |
+| MSG-11 | Stale evidence (evidence exists but too old — provider self-report) | generator (M) | 1 scenario: evidence freshness older than policy maxAge → blocked ✓ |
+| MSG-13 | Epoch-based evidence staleness (gate-computed, overrides provider) | generator (M) | 2 scenarios: epoch comparison ✓, timestamp + maxEvidenceAgeMs ✓ |
+
+### Narrowing (Topic Trust & Evidence Staleness)
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| MSG-12 | Topic override narrowing (agent mislabels topic, gate overrides from content) | generator (M) | 2 scenarios: override → narrowed ✓, agreement → approved ✓ |
+| MSG-13 | Epoch staleness narrowing (evidence exists but epoch stale → narrowed) | generator (M) | See Claim-Evidence Binding above — epoch-based staleness produces narrowed verdict |
+| MSG-14 | Combined narrowing (topic override + epoch staleness) | generator (M) | 1 scenario: both narrowings apply → combined narrowing type ✓ |
+
+### Negation Detection
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| MSG-06 | Obvious negation suppresses trigger | generator (M) | 1 scenario: "has not deployed" suppresses "deployed" trigger → approved ✓ |
+| MSG-06b | Ambiguous negation → clarify | generator (M) | 1 scenario: "may not have deployed" → clarify verdict ✓ |
+
+### Review Hook & Unknown Assertions
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| MSG-07 | Review hook blocks message | generator (M) | 1 scenario: async hook returns block verdict ✓ |
+| MSG-08 | Review hook requests clarification | generator (M) | 1 scenario: async hook returns clarify verdict ✓ |
+| MSG-09 | Unknown assertion detected (no matching trigger) | generator (M) | 2 scenarios: default policy → clarify ✓, allow policy → approved ✓ |
+
+### Pattern Memory
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| MSG-10 | Previously denied pattern blocked on retry | generator (M) | 1 scenario: K5-style denied pattern matching ✓ |
+
+**Message total: 14 failure shapes. Generator coverage: 14/14 (100%). 21 scenarios across Family M.**
+
+---
+
 ## Cross-Cutting Failures (Gate-Level)
 
 These are not predicate-type failures but failures in verify's own gate logic. They affect all predicate types.
@@ -690,12 +769,12 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | X-04 | Numeric vs string (`200` vs `"200"`) | generator (A8) | Covered |
 | X-05 | Serialization round-trip stability | no coverage | JSON.parse(JSON.stringify(p)) → same fingerprint? |
 | X-06 | Unicode in fingerprint input | no coverage | Non-ASCII selector names |
-| X-51 | Object key ordering affects fingerprint | no coverage | Semantically identical, different key order |
-| X-52 | Array ordering matters for some predicates not others | no coverage | False dedupe or false split |
-| X-53 | Fingerprint collision across predicate classes | no coverage | Same field names, different types → same fingerprint |
-| X-54 | Constraint store corruption / partial write | no coverage | Half-written memory file |
-| X-55 | Concurrent readers observe half-written state | no coverage | Race between read and write |
-| X-56 | Expired constraint retained inconsistently | no coverage | Filtered in one code path, retained in another |
+| X-51 | Object key ordering affects fingerprint | generator (A) | 3 scenarios: CSS, HTTP, DB key order invariance verified |
+| X-52 | Array ordering matters for some predicates not others | generator (A) | 3 scenarios: bodyContains array order-sensitive (documented), steps order-sensitive ✓, string vs singleton collision (documented) |
+| X-53 | Fingerprint collision across predicate classes | generator (A) | 4 scenarios: css↔content, http↔content, css↔html, db↔filesystem — all distinct ✓ |
+| X-54 | Constraint store corruption / partial write | generator (B) | 2 scenarios: truncated JSONL survives ✓, empty file loads ✓ |
+| X-55 | Concurrent readers observe half-written state | generator (B) | 1 scenario: second store instance sees first instance's constraint ✓ |
+| X-56 | Expired constraint retained inconsistently | generator (B) | 2 scenarios: lazy expiry at check time ✓, cleanupSession removes expired ✓ |
 
 ### Constraint Learning (Gate: K5)
 
@@ -760,11 +839,11 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| X-37 | Search string not found | no coverage | Edit can't be applied |
-| X-38 | Search string found multiple times | no coverage | Ambiguous edit |
-| X-39 | Search string with special regex chars | no coverage | `.` `*` `[` in search |
-| X-40 | Empty search or replace | no coverage | Edge case |
-| X-41 | Line ending mismatch in edit | no coverage | Edit has `\n`, file has `\r\n` |
+| X-37 | Search string not found | **generator (G)** | 1 scenario: F9 returns not_found, pipeline stops |
+| X-38 | Search string found multiple times | **generator (G)** | 1 scenario: F9 returns ambiguous_match with count |
+| X-39 | Search string with special regex chars | **generator (G)** | 1 scenario: indexOf is literal, not regex — `.` `*` `[` work ✓ |
+| X-40 | Empty search or replace | **generator (G)** | 2 scenarios: empty search → ambiguous (not crash), empty replace → F9 not_found |
+| X-41 | Line ending mismatch in edit | **generator (G)** | 2 scenarios: `\r\n` in file with `\n` search → miss, `\r\n` in search with `\r\n` in file → match ✓ |
 | X-66 | Overlapping edits interfere | no coverage | Two edits affect same region |
 | X-67 | Edit order changes final result | no coverage | Non-commutative edit sequence |
 | X-68 | Search/replace hits previous replacement | no coverage | Substring of prior replacement matches |
@@ -801,7 +880,7 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | X-80 | Semantic pass masks visual failure | no coverage | DOM correct, layout is broken |
 | X-81 | Authority weighting bug in final verdict | no coverage | Precedence logic error in triangulation |
 
-**Cross-cutting total: 81 shapes. Generator coverage: 35. Scenario-only coverage: 2. No coverage: 44.**
+**Cross-cutting total: 81 shapes. Generator coverage: 46 (X-07–X-15, X-18–X-21, X-31–X-36, X-37–X-41, X-42–X-50, X-51–X-56, X-57–X-65). Scenario-only coverage: 2. No coverage: 33.**
 
 ---
 
@@ -809,10 +888,10 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 
 | Domain | Total Shapes | Generator | Scenario Only | No Coverage | Coverage % |
 |---|---|---|---|---|---|
-| CSS | 62 | 1 | 7 | 54 | 13% |
-| HTML | 41 | 0 | 3 | 38 | 7% |
+| CSS | 62 | 30 | 4 | 28 | 55% |
+| HTML | 41 | 0 | 9 | 32 | 22% |
 | Filesystem | 34 | 14 | 0 | 20 | 41% |
-| Content | 13 | 0 | 2 | 11 | 15% |
+| Content | 13 | 5 | 2 | 6 | 54% |
 | HTTP | 45 | 1 | 1 | 43 | 4% |
 | DB | 46 | 0 | 0 | 46 | 0% |
 | Browser | 27 | 0 | 0 | 27 | 0% |
@@ -823,34 +902,35 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | Observer Effects | 9 | 0 | 0 | 9 | 0% |
 | Concurrency | 9 | 0 | 0 | 9 | 0% |
 | Scope Boundary | 10 | 0 | 0 | 10 | 0% |
-| Attribution | 10 | 0 | 0 | 10 | 0% |
+| Attribution | 10 | 10 | 0 | 0 | 100% |
 | Drift | 10 | 0 | 0 | 10 | 0% |
-| Cross-cutting | 81 | 35 | 2 | 44 | 46% |
-| **Total** | **438** | **51** | **15** | **372** | **15%** |
+| Message | 14 | 14 | 0 | 0 | 100% |
+| Cross-cutting | 81 | 46 | 2 | 33 | 59% |
+| **Total** | **452** | **120** | **18** | **314** | **30%** |
 
 ### The numbers
 
-- **438 known failure shapes** across 17 domains
-- **51 have generators** (35 cross-cutting gate tests + 14 filesystem + 2 other)
-- **15 have individual scenarios** (no generator)
-- **372 have zero coverage** (85% of the known taxonomy)
-- **Current scenario count: 115** (80 built-in + 17 universal + 18 filesystem Family H)
+- **449 known failure shapes** across 18 domains
+- **117 have generators** (46 cross-cutting + 14 filesystem + 30 CSS + 5 content + 10 attribution + 11 message + 1 other)
+- **18 have individual scenarios** (no generator)
+- **314 have zero coverage** (70% of the known taxonomy)
+- **Current scenario count: 234** (80 built-in + 28 universal + 47 CSS + 8 content + 18 filesystem + 15 fingerprint/K5 + 15 attribution + 7 F9 syntax + 16 message)
 
 ### What full coverage looks like
 
 If every shape gets a generator producing ~25 scenarios average:
-- 372 uncovered shapes × 25 = **~9,300 new scenarios**
-- Plus existing 115 = **~9,415 total**
-- Self-test runtime at 2ms/scenario: **~19 seconds**
+- 332 uncovered shapes × 25 = **~8,300 new scenarios**
+- Plus existing 234 = **~8,534 total**
+- Self-test runtime at 2ms/scenario: **~17 seconds**
 
 That's the ceiling with today's known taxonomy. Chaos will discover shapes not on this list, so the real number is higher.
 
 ### Domain architecture
 
-The 17 domains organize into three layers:
+The 18 domains organize into three layers:
 
-**Reality surfaces (7)** — domains where predicates observe truth:
-- CSS, HTML, Filesystem, Content, HTTP, DB, Browser
+**Reality surfaces (8)** — domains where predicates observe truth:
+- CSS, HTML, Filesystem, Content, HTTP, DB, Browser, Message
 
 **Meta-failure classes (7)** — failure modes that cut across all surfaces:
 - Temporal, Interaction, Identity, Observer Effects, Concurrency, Scope Boundary, Drift
@@ -864,7 +944,7 @@ The 17 domains organize into three layers:
 - CSS value normalization (C-01 through C-16, C-44 through C-52) — ~25 shapes, ~600 scenarios
 - CSS shorthand family (C-17 through C-30) — ~14 shapes, ~300 scenarios
 - HTML text/content matching (H-08 through H-14, H-24 through H-29) — ~13 shapes, ~300 scenarios
-- F9 syntax validation (X-37 through X-41, X-66 through X-71) — ~11 shapes, ~250 scenarios
+- ~~F9 syntax validation (X-37 through X-41)~~ — **5/5 done** (7 scenarios shipped in Family G). Remaining: X-66 through X-71 (overlapping edits, edit ordering)
 - Content pattern matching (N-04 through N-08) — ~5 shapes, ~100 scenarios
 - ~~Filesystem basics (FS-01 through FS-15)~~ — **14/15 done**, 25 scenarios. Remaining: FS-06 (symlink cycles), FS-13 (compressed content)
 - Fingerprinting edge cases (X-51 through X-56) — ~6 shapes, ~150 scenarios
@@ -933,28 +1013,39 @@ Domains define reality. Predicate types define how you query it. The relationshi
 Priority-ordered by ROI (shapes closed per engineering hour). Each phase builds on demo-app capabilities from the previous one.
 
 **Wave 1 — Pure computation, no demo-app changes needed (Tier 1):**
-1. CSS value normalization generators (C-01 through C-16, C-44 through C-52) — 25 shapes, ~600 scenarios
-2. CSS shorthand generators (C-17 through C-30) — 14 shapes, ~300 scenarios
+1. ~~CSS value normalization generators (C-01 through C-16, C-44 through C-52)~~ — **20/25 done** (33 scenarios shipped). Remaining: C-47, C-48, C-50 (need richer CSS fixture)
+2. CSS shorthand generators (C-17 through C-30) — 14 shapes, ~300 scenarios — **9/14 done** (14 scenarios shipped). Remaining: C-22, C-23, C-26, C-27, C-29 (need richer CSS fixture)
 3. ~~`fs` predicate type + filesystem generators (FS-01 through FS-15)~~ — **14/15 done** (FS-06, FS-13 remaining), 25 scenarios shipped
-4. Content pattern generators (N-04 through N-08) — 5 shapes, ~100 scenarios
-5. Fingerprinting edge case generators (X-51 through X-56) — 6 shapes, ~150 scenarios
-6. Attribution error generators (AT-01 through AT-10) — 10 shapes, ~200 scenarios
+4. ~~Content pattern generators (N-04 through N-08)~~ — **5/5 done** (8 scenarios shipped)
+5. ~~Fingerprinting edge case generators (X-51 through X-56)~~ — **6/6 done** (15 scenarios shipped: 10 in Family A, 5 in Family B)
+6. ~~Attribution error generators (AT-01 through AT-10)~~ — **10/10 done** (15 scenarios shipped in Family D)
 
-*Wave 1 total: ~75 shapes, ~1,650 scenarios. Coverage: 15% → 29%. Filesystem: 14/15 done.*
+*Wave 1 total: ~80 shapes, ~1,800 scenarios. Coverage: 22% → 27%. Filesystem: 14/15 done. CSS normalization: 20/25 done. CSS shorthand: 9/14 done. Content: 5/5 done. Fingerprinting: 6/6 done. Attribution: 10/10 done. F9 syntax: 5/5 done.*
 
-**Wave 2 — Minor demo-app expansion (Tier 2):**
-7. HTML text/content generators (H-08 through H-14, H-24 through H-29) — 13 shapes, ~300 scenarios
-8. HTML structure generators (H-15 through H-41) — needs richer HTML in demo-app
-9. HTTP body/request generators (P-01 through P-38) — needs richer API routes
-10. CSS selector edge cases (C-34 through C-62) — needs 2+ routes, pseudo-elements
-11. `interaction` + `navigation` + `visibility` + `storage` predicate types
-12. Browser interaction generators (BR-01 through BR-13) — needs JS event handlers in demo-app
-13. Cross-predicate interaction generators (I-01 through I-12) — needs multi-surface demo
-14. Invariant generators (INV-01 through INV-09) — needs invariant-aware demo-app
-15. Scope boundary generators (SC-01 through SC-10) — needs multi-component demo
-16. Identity/reference generators (ID-01 through ID-10) — needs cross-surface verification
+**Wave 2 — Minor demo-app expansion (Tier 2), prioritized by user impact:**
 
-*Wave 2 total: ~150 shapes, ~3,500 scenarios. Coverage: 29% → 63%*
+**Wave 2A — Highest impact, minimal demo-app changes:**
+7. HTML text/content generators (H-08 through H-14) — 7 shapes, ~150 scenarios. **Why first:** whitespace normalization (H-08), entity decoding (H-09), case sensitivity (H-10), and template expressions (H-12) are the most common HTML false negatives. Pure computation — needs only text-rich elements in demo-app.
+8. HTTP status & body generators (P-01 through P-08) — 8 shapes, ~150 scenarios. **Why second:** status code, bodyContains, bodyRegex, and empty body are the primary behavioral verification surface. Demo-app needs 2-3 API routes returning JSON.
+9. Cross-predicate interaction generators (I-01 through I-05, I-07) — 6 shapes, ~120 scenarios. **Why third:** catches real bugs where CSS passes but HTML fails (I-01), or content passes but HTTP fails (I-03). Multi-surface scenarios with existing predicate types.
+
+**Wave 2B — Medium impact, some demo-app expansion:**
+10. HTTP sequence & request generators (P-09 through P-14) — 6 shapes, ~100 scenarios. Needs POST endpoints, cookie handling.
+11. CSS selector edge cases (C-34 through C-43) — 10 shapes, ~200 scenarios. Cross-route selectors, specificity, multiple style blocks, cascade. Needs 2+ routes with overlapping selectors.
+12. Invariant generators (INV-01 through INV-09) — 9 shapes, ~150 scenarios. System health checks — needs invariant-aware demo-app config.
+13. HTML extended text (H-24 through H-29) — 6 shapes, ~120 scenarios. Non-breaking spaces, bidirectional text, placeholder vs value.
+
+**Wave 2C — Lower priority, significant demo-app expansion:**
+14. HTML structure generators (H-15 through H-41) — 20 shapes, ~400 scenarios. Attributes, nesting, dynamic content. Needs richer HTML fixtures.
+15. CSS advanced selectors (C-53 through C-62) — 10 shapes, ~200 scenarios. Escaped selectors, shadow DOM, container queries. Needs modern CSS fixtures.
+16. `interaction` + `navigation` + `visibility` + `storage` browser predicate types — new predicate types, needs JS event handlers.
+17. Browser interaction generators (BR-01 through BR-13) — 13 shapes, ~250 scenarios. Click handlers, form inputs. Needs interactive demo-app.
+18. Scope boundary generators (SC-01 through SC-10) — 10 shapes, ~200 scenarios. Multi-component, multi-tenant.
+19. Identity/reference generators (ID-01 through ID-10) — 10 shapes, ~200 scenarios. Cross-surface identity.
+
+*Wave 2 total: ~150 shapes, ~3,500 scenarios. Coverage: 27% → 63%*
+
+**Recommended first sprint:** Wave 2A items 7-9 (21 shapes, ~420 scenarios). These close the biggest user-facing gaps with minimal demo-app changes.
 
 **Wave 3 — Infrastructure expansion (Tier 3):**
 17. DB generators (D-01 through D-46) — needs demo-app with DB fixture

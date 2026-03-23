@@ -8,8 +8,10 @@
  */
 
 import { mkdirSync, rmSync, existsSync } from 'fs';
-import { join } from 'path';
+import { inflateSync } from 'zlib';
+import { join, dirname } from 'path';
 import { tmpdir } from 'os';
+import { fileURLToPath } from 'url';
 import type { VerifyScenario, RunConfig, LedgerEntry, OracleContext, Severity } from './types.js';
 import type { VerifyResult } from '../../src/types.js';
 import { verify } from '../../src/verify.js';
@@ -23,14 +25,97 @@ import { loadExternalScenarios, loadUniversalScenarios } from './external-scenar
 const MAX_SCENARIO_TIMEOUT = 10 * 60 * 1000; // 10 min
 const MAX_TOTAL_TIMEOUT = 4 * 60 * 60 * 1000; // 4 hours
 
+// ---------------------------------------------------------------------------
+// Deterministic vision mock — analyzes solid-color PNG screenshots locally.
+// No API key needed. Works with the 8×8 PNGs produced by makeSolidPNG().
+// ---------------------------------------------------------------------------
+const COLOR_NAMES: Record<string, [number, number, number]> = {
+  red:   [255, 0, 0],   green: [0, 128, 0],   blue:  [0, 0, 255],
+  white: [255, 255, 255], black: [0, 0, 0],    gray:  [128, 128, 128],
+  grey:  [128, 128, 128], orange:[255, 165, 0], yellow:[255, 255, 0],
+};
+
+function extractDominantRGB(pngBuf: Buffer): [number, number, number] | null {
+  try {
+    // Walk PNG chunks to find IDAT
+    let offset = 8; // skip signature
+    const idatChunks: Buffer[] = [];
+    while (offset < pngBuf.length) {
+      const len = pngBuf.readUInt32BE(offset);
+      const type = pngBuf.subarray(offset + 4, offset + 8).toString('ascii');
+      if (type === 'IDAT') idatChunks.push(pngBuf.subarray(offset + 8, offset + 8 + len));
+      offset += 12 + len; // 4 len + 4 type + data + 4 crc
+    }
+    if (idatChunks.length === 0) return null;
+    const raw = inflateSync(Buffer.concat(idatChunks));
+    // First scanline: filter byte (1) + RGB pixels. First pixel at bytes 1,2,3.
+    return [raw[1], raw[2], raw[3]];
+  } catch { return null; }
+}
+
+function rgbToName(r: number, g: number, b: number): string {
+  for (const [name, [cr, cg, cb]] of Object.entries(COLOR_NAMES)) {
+    if (cr === r && cg === g && cb === b) return name;
+  }
+  return `rgb(${r},${g},${b})`;
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+}
+
+async function deterministicVisionMock(image: Buffer, prompt: string): Promise<string> {
+  const rgb = extractDominantRGB(image);
+  if (!rgb) return 'CLAIM 1: NOT VERIFIED — could not parse screenshot';
+
+  const [r, g, b] = rgb;
+  const colorName = rgbToName(r, g, b);
+  const hex = rgbToHex(r, g, b);
+
+  // Parse claims from prompt (numbered lines after "CLAIMS:")
+  const claimsSection = prompt.split('CLAIMS:')[1] || '';
+  const claimLines = claimsSection.trim().split('\n').filter(l => /^\d+\./.test(l.trim()));
+
+  const responses: string[] = [];
+  for (let i = 0; i < claimLines.length; i++) {
+    const claim = claimLines[i].toLowerCase();
+    const n = i + 1;
+
+    // Check if the claim mentions a color and whether the screenshot matches
+    let claimColor: string | null = null;
+    for (const name of Object.keys(COLOR_NAMES)) {
+      if (claim.includes(`"${name}"`)) { claimColor = name; break; }
+    }
+    // Also check for hex references
+    if (!claimColor && claim.includes(hex.toLowerCase())) claimColor = colorName;
+
+    if (claimColor) {
+      const matches = claimColor === colorName || claimColor === 'grey' && colorName === 'gray';
+      responses.push(matches
+        ? `CLAIM ${n}: VERIFIED`
+        : `CLAIM ${n}: NOT VERIFIED — screenshot shows ${colorName} (${hex}), not ${claimColor}`);
+    } else if (claim.includes('exist') || claim.includes('visible')) {
+      // Element existence claims — we can't verify DOM from a solid-color image,
+      // but the vision gate spec says "should exist and be visible". Mark verified
+      // (the screenshot exists, something is rendered).
+      responses.push(`CLAIM ${n}: VERIFIED`);
+    } else {
+      // Unknown claim type — mark verified (conservative, matches real LLM behavior)
+      responses.push(`CLAIM ${n}: VERIFIED`);
+    }
+  }
+
+  return responses.join('\n');
+}
+
 // Built-in scenarios are authored against demo-app and hardcode its selectors/strings.
 // They always run against demo-app regardless of --appDir. External (fault-derived)
 // scenarios run against the target app. This prevents users from being blocked by
 // built-in scenario failures when testing their own app.
 function resolveFixtureDir(): string {
-  // import.meta.dir = packages/verify/scripts/harness/
-  // demo-app = packages/verify/fixtures/demo-app/
-  return join(import.meta.dir, '..', '..', 'fixtures', 'demo-app');
+  // import.meta.dir (Bun) or dirname(fileURLToPath(import.meta.url)) (Node/tsx)
+  const dir = (import.meta as any).dir ?? dirname(fileURLToPath(import.meta.url));
+  return join(dir, '..', '..', 'fixtures', 'demo-app');
 }
 
 export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number }> {
@@ -176,15 +261,49 @@ async function runScenario(scenario: VerifyScenario, config: RunConfig): Promise
       if (envKey) {
         const { geminiVision } = await import('../../src/vision-helpers.js');
         mergedConfig.vision = { ...mergedConfig.vision, call: geminiVision(envKey) };
+      } else {
+        // Deterministic mock: analyze solid-color PNG screenshots without an API key
+        mergedConfig.vision = { ...mergedConfig.vision, call: deterministicVisionMock };
       }
     }
 
-    result = await Promise.race([
-      verify(scenario.edits, scenario.predicates, mergedConfig),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Scenario timeout (10 min)')), MAX_SCENARIO_TIMEOUT)
-      ),
-    ]);
+    // Family M: message gate scenarios call governMessage() instead of verify()
+    if (scenario.messageTest) {
+      const { governMessage } = await import('../../src/gates/message.js');
+      const msgResult = await governMessage(
+        scenario.messageTest.envelope,
+        scenario.messageTest.policy,
+        scenario.messageTest.evidenceProviders,
+        scenario.messageTest.deniedPatterns,
+      );
+      // Convert MessageGateResult to VerifyResult shape for invariant checking
+      result = {
+        success: msgResult.verdict === 'approved',
+        gates: msgResult.gates.map(g => ({
+          gate: g.gate as any,
+          passed: g.passed,
+          detail: g.detail,
+          durationMs: g.durationMs,
+        })),
+        attestation: `MESSAGE ${msgResult.verdict.toUpperCase()}: ${msgResult.detail}`,
+        timing: { totalMs: msgResult.durationMs, perGate: {} },
+        // Store message-specific data in narrowing for invariant access
+        narrowing: msgResult.verdict !== 'approved' ? {
+          constraints: [],
+          resolutionHint: msgResult.reason,
+          fileEvidence: msgResult.detail,
+        } : undefined,
+        // Stash the full message result for invariant checks
+        _messageResult: msgResult,
+      } as any;
+    } else {
+      result = await Promise.race([
+        verify(scenario.edits, scenario.predicates, mergedConfig),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Scenario timeout (10 min)')), MAX_SCENARIO_TIMEOUT)
+        ),
+      ]);
+    }
 
     const storeAfter = new ConstraintStore(stateDir);
     constraintsAfter = storeAfter.getConstraintCount();

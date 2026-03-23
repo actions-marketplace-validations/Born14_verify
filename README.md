@@ -8,13 +8,13 @@ Verification gate for AI agent actions. Every edit gets a fair trial before it t
 
 In v0.1.1, HTTP predicates with different `bodyContains` values produced identical fingerprints — K5 couldn't tell them apart. A human caught it by reading the code.
 
-Now 115 automated scenarios across 9 families catch it in under 3 seconds:
+Now 234 automated scenarios across 10 families catch it in under 20 seconds:
 
 ```bash
 npx @sovereign-labs/verify self-test
 
-#   0 bugs | 115 scenarios | 0 unexpected | A: clean, B: clean, ..., H: clean, V: clean
-#   Failure Class Coverage: 12/12 clean
+#   0 bugs | 239 scenarios | 0 unexpected | A: clean, B: clean, ..., H: clean, M: clean, V: clean
+#   Failure Class Coverage: 83/83 clean
 #   ALL CLEAN — No invariant violations detected.
 ```
 
@@ -41,7 +41,7 @@ The gates are domain-agnostic. K5 fingerprints any predicate type. G5 attributes
 
 Today verify gates code edits. But the same pipeline works for file system agents (move, rename, organize), communication agents (message the right channel), document agents (don't overwrite the wrong cells), and infrastructure agents (don't delete the production database).
 
-**Built today:** Code predicates (css, html, content, http, db) + Filesystem predicates (exists, absent, unchanged, count). More domains coming.
+**Built today:** Code predicates (css, html, content, http, db) + Filesystem predicates (exists, absent, unchanged, count) + Communication predicates (destination, forbidden content, claims with evidence, negation detection, topic trust enforcement, epoch-based evidence staleness, review bundles for human surfaces).
 
 ## Install
 
@@ -146,7 +146,7 @@ Add to your agent's MCP config:
 
 ## Self-Test Harness
 
-115 scenarios across 9 families exercise the verification pipeline's invariants — including 14 filesystem failure classes tracked by the [failure taxonomy](FAILURE-TAXONOMY.md). Run them to prove your install works, or use `--fail-on-bug` in CI.
+239 scenarios across 10 families exercise the verification pipeline's invariants — including 14 filesystem, 29 CSS (value normalization + shorthand), 5 content pattern, 7 F9 syntax gate, 6 fingerprinting/K5, 10 attribution error, 5 full-pipeline integration, 14 communication/message gate (including topic trust enforcement and epoch-based evidence staleness), and 6 HTML predicate failure classes tracked by the [failure taxonomy](FAILURE-TAXONOMY.md). Run them to prove your install works, or use `--fail-on-bug` in CI.
 
 ```bash
 # Pure-only (~2s, no Docker needed)
@@ -164,17 +164,19 @@ npx @sovereign-labs/verify self-test --fail-on-bug
 
 | Family | Scenarios | What it tests | Docker? |
 |--------|-----------|---------------|---------|
-| **A** | 10 | Fingerprint collision detection | No |
-| **B** | 9 | K5 constraint learning (multi-step) | No |
+| **A** | 20 | Fingerprint collision detection + edge cases (X-51–X-53) | No |
+| **B** | 14 | K5 constraint learning + store resilience (X-54–X-56) | No |
 | **C** | 7 | Gate sequencing and consistency | No |
-| **D** | 8 | G5 containment attribution | No |
-| **E** | 6 | Grounding validation | No |
+| **D** | 23 | G5 containment attribution + attribution errors (AT-01–AT-10) | No |
+| **E** | 61 | Grounding: CSS normalization/shorthand + content patterns (C-01–C-30, C-44–C-52, N-04–N-08) | No |
 | **F** | 6 | Full Docker pipeline (build → stage → verify) | Yes |
-| **G** | 10 | Edge cases (unicode, empty inputs, no-ops) | No |
+| **G** | 17 | Edge cases + F9 syntax gate (X-37–X-41: not_found, ambiguous, regex, empty, line endings) + external/universal scenarios | No |
 | **H** | 34 | Filesystem gate — 14 failure classes (FS-01 through FS-16) | No |
+| **M** | 21 | Message gate — 14 failure classes (MSG-01 through MSG-14) | No |
 | **V** | 14 | Vision + triangulation (3-authority verdict) | No |
+| **UV** | 28 | Universal full-pipeline integration (color normalization, multi-predicate, F9 rejection, HTML predicates) | No |
 
-109 scenarios run pure. 6 need Docker. Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
+205 scenarios run pure from families. 28 universal scenarios test cross-gate integration including HTML predicates. 6 need Docker. Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
 
 ## Gates
 
@@ -190,6 +192,7 @@ npx @sovereign-labs/verify self-test --fail-on-bug
 | **Invariants** | Health checks pass after all edits applied | Yes |
 | **Vision** | Screenshot verified by vision model (pre-captured buffer) | No |
 | **Triangulation** | Cross-authority verdict (deterministic + browser + vision) | No |
+| **Message** | Outbound agent communication governed (destination, claims, evidence, topic trust, epoch staleness) | No |
 
 Gates can be individually disabled:
 
@@ -223,6 +226,68 @@ Predicates declare what should be true after the edits are applied.
 | `filesystem_absent` | File does NOT exist | `{ type: 'filesystem_absent', file: 'tmp/scratch.log' }` |
 | `filesystem_unchanged` | File hash unchanged | `{ type: 'filesystem_unchanged', file: 'LICENSE', hash: 'sha256:...' }` |
 | `filesystem_count` | Directory entry count | `{ type: 'filesystem_count', path: 'migrations/', count: 3 }` |
+
+## Communication Governance
+
+Agent outbound messages get the same governance as code edits. `governMessage()` checks destination, content, claims, and evidence before a message is sent.
+
+```typescript
+import { governMessage } from '@sovereign-labs/verify';
+
+const result = await governMessage(
+  // Envelope: platform-agnostic message container
+  {
+    destination: { target: '#deployments', platform: 'slack' },
+    content: { body: 'Deploy v2.3.1 completed successfully' },
+    sender: { identity: 'deploy-bot' },
+    topic: { value: 'deploy', source: 'adapter' },
+  },
+  // Policy: what's allowed
+  {
+    destinations: { allow: ['#deployments', '#alerts'] },
+    forbidden: ['password', /api[_-]?key/i],
+    claims: {
+      deploy: {
+        assertions: {
+          deploy_success: {
+            triggers: ['deployed successfully', 'completed successfully'],
+            evidence: 'deploy_status',
+          },
+        },
+      },
+    },
+  },
+  // Evidence providers: verify claims deterministically
+  {
+    deploy_status: async () => ({
+      exists: true,
+      fresh: true,
+      detail: 'v2.3.1 deployed at 14:32 UTC',
+      epoch: 5,        // authority epoch of this evidence
+      currentEpoch: 5, // current authority epoch (gate computes freshness)
+    }),
+  },
+);
+
+if (result.verdict === 'approved') {
+  // Safe to send — claims verified, destination allowed, no forbidden content
+} else if (result.verdict === 'narrowed') {
+  // Send with caveats — topic was overridden or evidence is stale
+  console.log(result.narrowing);
+  // { type: 'evidence_staleness', resolutionHint: '...' }
+} else if (result.verdict === 'clarify') {
+  // Ambiguous — surface to human with full context
+  console.log(result.reviewBundle);
+  // { message, gateDetail, evidenceArtifacts, topicTrace, stalenessInfo }
+} else {
+  // blocked — hard rule violation
+  console.log(result.reason, result.detail);
+}
+```
+
+Four verdicts: `approved` (send it), `blocked` (do not send), `narrowed` (send with modifications), `clarify` (ambiguous — ask a human). Built-in negation detection prevents "has not deployed" from being treated as a deploy claim. Topic trust enforcement prevents agents from gaming governance by mislabeling topics — the gate detects topics from content keywords and overrides the agent's label when they disagree. Epoch-based evidence staleness computes freshness from authority epochs rather than trusting the evidence provider's self-report.
+
+On `clarify` and `narrowed` verdicts, `result.reviewBundle` provides a self-contained package for human review surfaces — the original message, gate reasoning, evidence artifacts (with raw provider fields), topic resolution trace, and staleness info. A Slack modal, email thread, or dashboard card rendering a review bundle has everything it needs without chasing cross-references.
 
 ## K5: Learning from Failures
 

@@ -474,5 +474,317 @@
     "tags": ["css", "grounding", "narrowing", "value-mismatch", "bad-hint"],
     "transferability": "universal",
     "category": "narrowing"
+  },
+  {
+    "id": "uv-018",
+    "description": "Full pipeline: valid CSS edit + grounded predicate + K5 clean + G5 direct attribution",
+    "faultId": null,
+    "intent": "true_positive",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "color: #1a1a2e",
+        "replace": "color: navy"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "h1",
+        "property": "color",
+        "expected": "#000080",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "End-to-end: F9 finds unique search string, grounding validates h1 color exists, K5 has no constraints, G5 attributes CSS edit to CSS predicate as direct. Named color 'navy' should match hex '#000080' through normalizer.",
+    "tags": ["css", "full-pipeline", "named-color", "integration"],
+    "transferability": "universal",
+    "category": "integration"
+  },
+  {
+    "id": "uv-019",
+    "description": "Full pipeline: rgb edit value matches hex predicate through normalizer",
+    "faultId": null,
+    "intent": "true_positive",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "color: #1a1a2e",
+        "replace": "color: rgb(255,0,0)"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "h1",
+        "property": "color",
+        "expected": "#ff0000",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "F9 + grounding + K5 + G5: edit uses rgb(), predicate uses hex. The normalizer converts rgb(255,0,0) → #ff0000 so grounding sees a match. Tests the full pipeline with color format normalization.",
+    "tags": ["css", "full-pipeline", "rgb-hex", "normalizer", "integration"],
+    "transferability": "universal",
+    "category": "integration"
+  },
+  {
+    "id": "uv-020",
+    "description": "Full pipeline: content predicate + filesystem_exists combined verification",
+    "faultId": null,
+    "intent": "true_positive",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "placeholder",
+        "replace": "placeholder"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Demo App"
+      },
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "Combines content pattern matching with filesystem existence check. Both should pass since server.js exists and contains 'Demo App'. Tests cross-predicate-type pipeline.",
+    "tags": ["content", "filesystem", "full-pipeline", "multi-predicate", "integration"],
+    "transferability": "universal",
+    "category": "integration"
+  },
+  {
+    "id": "uv-021",
+    "description": "Full pipeline: CSS shorthand edit with zero-unit normalization",
+    "faultId": null,
+    "intent": "true_positive",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "margin: 2rem",
+        "replace": "margin: 0"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "body",
+        "property": "margin",
+        "expected": "0px",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "Edit sets margin to '0', predicate expects '0px'. The zero-unit normalizer converts '0px' → '0' so these match. Tests the full pipeline with zero equivalence.",
+    "tags": ["css", "full-pipeline", "zero-unit", "normalizer", "integration"],
+    "transferability": "universal",
+    "category": "integration"
+  },
+  {
+    "id": "uv-022",
+    "description": "Full pipeline: F9 rejects ambiguous edit, downstream gates never run",
+    "faultId": null,
+    "intent": "false_positive",
+    "expectedSuccess": false,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end",
+        "replace": "res.end"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "res.end"
+      }
+    ],
+    "requiresDocker": false,
+    "expectedFailedGate": "F9",
+    "rationale": "The search string 'res.end' appears multiple times in server.js. F9 should reject this as ambiguous (multiple matches) before any downstream gates run. Tests early termination on syntax failure.",
+    "tags": ["f9", "syntax", "ambiguous", "early-termination", "integration"],
+    "transferability": "universal",
+    "category": "integration"
+  },
+  {
+    "id": "uv-023",
+    "description": "HTML predicate: element exists with correct text — h1 contains 'Demo App' after no-op edit",
+    "faultId": null,
+    "intent": "regression_guard",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e; font-size: 2rem; }",
+        "replace": "h1 { color: #1a1a2e; font-size: 2rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "h1",
+        "expected": "Demo App",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "Basic HTML text content validation — h1 element exists and contains 'Demo App'. The grounding gate should find the h1 and confirm the text matches. This is the happy-path HTML predicate test.",
+    "tags": ["html", "text-content", "grounding", "happy-path"],
+    "transferability": "universal",
+    "category": "html"
+  },
+  {
+    "id": "uv-024",
+    "description": "HTML predicate: element exists check (no text assertion) — footer element should pass with 'exists'",
+    "faultId": null,
+    "intent": "regression_guard",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e; font-size: 2rem; }",
+        "replace": "h1 { color: #1a1a2e; font-size: 2rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "footer",
+        "expected": "exists",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "HTML element existence check without text assertion. The 'exists' value should bypass text content matching — just confirm the element tag is present in the route's HTML.",
+    "tags": ["html", "element-exists", "grounding", "happy-path"],
+    "transferability": "universal",
+    "category": "html"
+  },
+  {
+    "id": "uv-025",
+    "description": "HTML predicate: edit creates new element with text — verify accepts creation",
+    "faultId": null,
+    "intent": "regression_guard",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "  <footer>Powered by Node.js</footer>",
+        "replace": "  <h3>Recent Updates</h3>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "h3",
+        "expected": "Recent Updates",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "HTML element creation via edit — the h3 tag doesn't exist before the edit, but the edit.replace creates it. The grounding gate should recognize that edits create new elements and allow the predicate through (HTML creation goals are exempt from grounding rejection).",
+    "tags": ["html", "element-creation", "grounding", "creation-goal"],
+    "transferability": "universal",
+    "category": "html"
+  },
+  {
+    "id": "uv-026",
+    "description": "HTML + CSS multi-predicate: both element text and style verified together",
+    "faultId": null,
+    "intent": "regression_guard",
+    "expectedSuccess": true,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e; font-size: 2rem; }",
+        "replace": "h1 { color: #ff6600; font-size: 2rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "h1",
+        "property": "color",
+        "expected": "#ff6600",
+        "path": "/"
+      },
+      {
+        "type": "html",
+        "selector": "h1",
+        "expected": "Demo App",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "rationale": "Cross-surface verification: CSS and HTML predicates on the same element. The CSS predicate checks the color was changed, while the HTML predicate verifies the text content still matches. Tests that multi-predicate, multi-type scenarios work through the full pipeline.",
+    "tags": ["html", "css", "multi-predicate", "cross-surface", "integration"],
+    "transferability": "universal",
+    "category": "integration"
+  },
+  {
+    "id": "uv-027",
+    "description": "HTML predicate: wrong element tag — predicate claims h3 exists but only h1 exists on homepage",
+    "faultId": null,
+    "intent": "false_positive",
+    "expectedSuccess": false,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e; font-size: 2rem; }",
+        "replace": "h1 { color: #1a1a2e; font-size: 2rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "h3",
+        "expected": "Demo App",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "expectedFailedGate": "grounding",
+    "rationale": "HTML predicate references h3 but the homepage only has h1, p, nav, a, ul, li, footer. No h3 exists. Grounding should reject because the element tag is wrong (H-03 failure shape). Note: HTML predicates for non-existent elements may pass grounding if treated as creation goals — this tests the distinction between 'element exists with wrong text' vs 'wrong element entirely'.",
+    "tags": ["html", "wrong-tag", "grounding", "false-positive", "H-03"],
+    "transferability": "universal",
+    "category": "html"
+  },
+  {
+    "id": "uv-028",
+    "description": "HTML predicate: text change on existing element triggers grounding miss — pre-edit text doesn't match expected",
+    "faultId": null,
+    "intent": "false_positive",
+    "expectedSuccess": false,
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "  <footer>Powered by Node.js</footer>",
+        "replace": "  <footer>Powered by Sovereign</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "footer",
+        "expected": "Powered by Sovereign",
+        "path": "/"
+      }
+    ],
+    "requiresDocker": false,
+    "expectedFailedGate": "grounding",
+    "rationale": "Grounding validates against pre-edit source. The footer exists but contains 'Powered by Node.js', not 'Powered by Sovereign'. The grounding gate correctly rejects this as a text content mismatch (H-02 shape). This is by design — grounding catches fabricated text claims. The edit creates the correct text, but verify checks source truth, not intended truth.",
+    "tags": ["html", "text-change", "grounding", "H-02", "pre-edit-validation"],
+    "transferability": "universal",
+    "category": "html"
   }
 ]

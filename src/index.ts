@@ -84,5 +84,22 @@ export type {
   ScenarioCategory,
 } from './store/external-scenarios.js';
 
+// Message gate — governed outbound communication assertions
+export { governMessage, runMessageGate } from './gates/message.js';
+export type {
+  MessageEnvelope,
+  MessagePolicy,
+  MessageGateResult,
+  MessageGateContext,
+  MessageVerdict,
+  MessageBlockReason,
+  MessageClarifyReason,
+  ClaimResult,
+  EvidenceProvider,
+  EvidenceResult,
+  ReviewVerdict,
+  TopicResolution,
+} from './gates/message.js';
+
 // Parsers — convert external formats into Edit[]
 export { parseDiff } from './parsers/git-diff.js';

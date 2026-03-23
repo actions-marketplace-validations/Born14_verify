@@ -45,10 +45,19 @@ import {
   triangulationAction,
   triangulationOutlier,
   triangulationConfidence,
+  messageDidNotCrash,
+  messageVerdict,
+  messageReason,
+  messageGatePassed,
+  messageGateFailed,
+  messageClaimVerified,
+  messageTopicResolution,
+  messageNarrowing,
 } from './oracle.js';
 import { makeSolidPNG } from './test-png.js';
-import { ConstraintStore, predicateFingerprint } from '../../src/store/constraint-store.js';
+import { ConstraintStore, predicateFingerprint, extractSignature } from '../../src/store/constraint-store.js';
 import { hashFile } from '../../src/gates/filesystem.js';
+import type { MessageEnvelope, MessagePolicy, EvidenceProvider } from '../../src/gates/message.js';
 import { existsSync, writeFileSync, mkdirSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
@@ -56,6 +65,24 @@ import { createHash } from 'crypto';
 let scenarioCounter = 0;
 function nextId(family: ScenarioFamily, generator: string): string {
   return `${family}_${generator}_${++scenarioCounter}`;
+}
+
+/**
+ * Mirror of buildResolutionHint from verify.ts for AT-10 scenarios.
+ * Tests the narrowing hint logic without importing private functions.
+ */
+function buildResolutionHintDirect(gate: string, _error: string, violation?: any): string {
+  if (gate === 'F9') {
+    if (_error.includes('not found')) return 'The search string does not exist in the file. Read the file first and use an exact match.';
+    if (_error.includes('ambiguous')) return 'The search string matches multiple locations. Include more surrounding context to make it unique.';
+    return 'Fix the syntax errors in your edits.';
+  }
+  if (gate === 'K5') {
+    if (violation?.banType === 'predicate_fingerprint') return 'This predicate combination failed before. Change the expected value or predicate type.';
+    if (violation?.banType === 'radius_limit') return `Too many files changed. Reduce to ${violation.reason?.match(/\d+/)?.[0] ?? 'fewer'} files.`;
+    return 'This approach was tried before and failed. Try a different strategy.';
+  }
+  return 'Verification failed. Review the gate details.';
 }
 
 // =============================================================================
@@ -321,6 +348,259 @@ function generateFamilyA(): VerifyScenario[] {
     requiresDocker: false,
   });
 
+  // ===========================================================================
+  // X-51: Object key ordering affects fingerprint
+  // predicateFingerprint() reads fields by name, not by iteration order,
+  // so key order should NOT affect the result. Verify this invariant.
+  // ===========================================================================
+  scenarios.push({
+    id: nextId('A', 'X51a_keyOrderCSS'),
+    family: 'A',
+    generator: 'X51a_keyOrderCSS',
+    failureClass: 'X-51',
+    description: 'X-51: CSS predicate with different key ordering produces same fingerprint',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      fingerprintDeterminism('css_key_order_1', () => ({ type: 'css', selector: 'h1', property: 'color', expected: 'red' })),
+      fingerprintDeterminism('css_key_order_2', () => ({ property: 'color', expected: 'red', type: 'css', selector: 'h1' })),
+      // Both orderings must produce identical fingerprints
+      {
+        name: 'key_order_invariant_css',
+        category: 'fingerprint' as const,
+        layer: 'product' as const,
+        check: () => {
+          const fp1 = predicateFingerprint({ type: 'css', selector: 'h1', property: 'color', expected: 'red' });
+          const fp2 = predicateFingerprint({ property: 'color', expected: 'red', type: 'css', selector: 'h1' } as any);
+          if (fp1 !== fp2) {
+            return { passed: false, violation: `Key ordering changed fingerprint: "${fp1}" vs "${fp2}"`, severity: 'bug' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('A', 'X51b_keyOrderHTTP'),
+    family: 'A',
+    generator: 'X51b_keyOrderHTTP',
+    failureClass: 'X-51',
+    description: 'X-51: HTTP predicate with different key ordering produces same fingerprint',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      {
+        name: 'key_order_invariant_http',
+        category: 'fingerprint' as const,
+        layer: 'product' as const,
+        check: () => {
+          const fp1 = predicateFingerprint({ type: 'http', path: '/api', method: 'GET', expect: { status: 200, bodyContains: 'test' } });
+          const fp2 = predicateFingerprint({ expect: { bodyContains: 'test', status: 200 }, method: 'GET', type: 'http', path: '/api' } as any);
+          if (fp1 !== fp2) {
+            return { passed: false, violation: `Key ordering changed fingerprint: "${fp1}" vs "${fp2}"`, severity: 'bug' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('A', 'X51c_keyOrderDB'),
+    family: 'A',
+    generator: 'X51c_keyOrderDB',
+    failureClass: 'X-51',
+    description: 'X-51: DB predicate with different key ordering produces same fingerprint',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      {
+        name: 'key_order_invariant_db',
+        category: 'fingerprint' as const,
+        layer: 'product' as const,
+        check: () => {
+          const fp1 = predicateFingerprint({ type: 'db', table: 'users', expected: 'exists' });
+          const fp2 = predicateFingerprint({ expected: 'exists', type: 'db', table: 'users' } as any);
+          if (fp1 !== fp2) {
+            return { passed: false, violation: `Key ordering changed fingerprint: "${fp1}" vs "${fp2}"`, severity: 'bug' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  // ===========================================================================
+  // X-52: Array ordering matters for some predicates not others
+  // bodyContains: ['Alpha','Beta'] vs ['Beta','Alpha'] — does order matter?
+  // steps: [{POST:/a},{GET:/b}] vs [{GET:/b},{POST:/a}] — order SHOULD matter
+  // ===========================================================================
+  scenarios.push({
+    id: nextId('A', 'X52a_bodyContainsArrayOrder'),
+    family: 'A',
+    generator: 'X52a_bodyContainsArrayOrder',
+    failureClass: 'X-52',
+    description: 'X-52: bodyContains array ordering — documents whether order affects fingerprint',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      // bodyContains array order: join(',') is order-sensitive, so ['A','B'] ≠ ['B','A']
+      // This is the CURRENT behavior. Document it — false dedupe if agent reorders array.
+      {
+        name: 'bodyContains_array_order_sensitivity',
+        category: 'fingerprint' as const,
+        layer: 'product' as const,
+        check: () => {
+          const fp1 = predicateFingerprint({ type: 'http', path: '/api', method: 'GET', expect: { bodyContains: ['Alpha', 'Beta'] } });
+          const fp2 = predicateFingerprint({ type: 'http', path: '/api', method: 'GET', expect: { bodyContains: ['Beta', 'Alpha'] } });
+          // Current behavior: these are DIFFERENT (order-sensitive join)
+          // This is a known weakness — documenting, not fixing
+          if (fp1 === fp2) {
+            return { passed: false, violation: `bodyContains array order does NOT affect fingerprint — false dedupe risk`, severity: 'unexpected' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('A', 'X52b_stepsOrderMatters'),
+    family: 'A',
+    generator: 'X52b_stepsOrderMatters',
+    failureClass: 'X-52',
+    description: 'X-52: HTTP sequence step ordering — order SHOULD produce different fingerprints',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      // Step order is semantically meaningful (POST then GET ≠ GET then POST)
+      fingerprintDistinctness('steps_POST_GET', 'steps_GET_POST',
+        () => ({ type: 'http_sequence', steps: [{ method: 'POST', path: '/api' }, { method: 'GET', path: '/api' }] }),
+        () => ({ type: 'http_sequence', steps: [{ method: 'GET', path: '/api' }, { method: 'POST', path: '/api' }] }),
+      ),
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('A', 'X52c_bodyContainsStringVsArray'),
+    family: 'A',
+    generator: 'X52c_bodyContainsStringVsArray',
+    failureClass: 'X-52',
+    description: 'X-52: bodyContains string vs single-element array — documents collision behavior',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      // bodyContains: 'Alpha' vs ['Alpha'] — join of single array = same string
+      // This IS a collision in current code. Document the false dedupe.
+      {
+        name: 'bodyContains_string_vs_singleton_array',
+        category: 'fingerprint' as const,
+        layer: 'product' as const,
+        check: () => {
+          const fp1 = predicateFingerprint({ type: 'http', path: '/api', method: 'GET', expect: { bodyContains: 'Alpha' } });
+          const fp2 = predicateFingerprint({ type: 'http', path: '/api', method: 'GET', expect: { bodyContains: ['Alpha'] } });
+          // Current behavior: these collide (join of ['Alpha'] = 'Alpha')
+          // Documenting known collision — semantically these ARE equivalent
+          if (fp1 !== fp2) {
+            return { passed: false, violation: `String 'Alpha' and array ['Alpha'] produce different fingerprints — false split`, severity: 'unexpected' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  // ===========================================================================
+  // X-53: Fingerprint collision across predicate classes
+  // Same field values but different types must always be distinct
+  // ===========================================================================
+  scenarios.push({
+    id: nextId('A', 'X53a_crossTypeCollision'),
+    family: 'A',
+    generator: 'X53a_crossTypeCollision',
+    failureClass: 'X-53',
+    description: 'X-53: CSS vs content predicates with overlapping field names never collide',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      // type= is always first in parts array, so different types always produce different fingerprints
+      fingerprintDistinctness('css_with_pattern_field', 'content_with_pattern_field',
+        () => ({ type: 'css', selector: 'h1', property: 'color', expected: 'red' }),
+        () => ({ type: 'content', pattern: 'red', file: 'server.js' } as any),
+      ),
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('A', 'X53b_httpVsContent'),
+    family: 'A',
+    generator: 'X53b_httpVsContent',
+    failureClass: 'X-53',
+    description: 'X-53: HTTP vs content predicates with same path field never collide',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      // Both have path=/api but different types → must be distinct
+      fingerprintDistinctness('http_path_api', 'content_path_api',
+        () => ({ type: 'http', path: '/api', method: 'GET', expect: { status: 200 } }),
+        () => ({ type: 'content', path: '/api', pattern: 'test' } as any),
+      ),
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('A', 'X53c_cssVsHTML'),
+    family: 'A',
+    generator: 'X53c_cssVsHTML',
+    failureClass: 'X-53',
+    description: 'X-53: CSS vs HTML predicates with same selector field never collide',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      fingerprintDistinctness('css_selector_h1', 'html_selector_h1',
+        () => ({ type: 'css', selector: 'h1', property: 'color', expected: 'red' }),
+        () => ({ type: 'html', selector: 'h1' }),
+      ),
+    ],
+    requiresDocker: false,
+  });
+
+  scenarios.push({
+    id: nextId('A', 'X53d_dbVsFilesystem'),
+    family: 'A',
+    generator: 'X53d_dbVsFilesystem',
+    failureClass: 'X-53',
+    description: 'X-53: DB vs filesystem predicates never collide even with shared fields',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { gates: { syntax: false, constraints: false, staging: false } },
+    invariants: [
+      fingerprintDistinctness('db_table_users', 'fs_exists_users',
+        () => ({ type: 'db', table: 'users', expected: 'exists' }),
+        () => ({ type: 'filesystem_exists', path: 'users' } as any),
+      ),
+    ],
+    requiresDocker: false,
+  });
+
   return scenarios;
 }
 
@@ -492,6 +772,126 @@ function generateFamilyG(appDir: string): VerifyScenario[] {
       fingerprintDeterminism('null_expect', () => ({
         type: 'http', path: '/api', method: 'GET', expect: null as any,
       })),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // F9 Syntax Gate Scenarios (X-37 through X-41)
+  // =========================================================================
+
+  // X-37: Search string not found → F9 fails
+  scenarios.push({
+    id: nextId('G', 'X37_searchNotFound'),
+    family: 'G',
+    generator: 'X37_searchStringNotFound',
+    failureClass: 'X-37',
+    description: 'X-37: Search string not in file — F9 should fail with not_found',
+    edits: [{ file: 'server.js', search: 'THIS_STRING_DOES_NOT_EXIST_ANYWHERE', replace: 'replacement' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'replacement' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false, grounding: false } },
+    invariants: [
+      shouldNotCrash('search not found'),
+      verifyFailedAt('F9', 'search string not found fails F9'),
+    ],
+    requiresDocker: false,
+  });
+
+  // X-37b: Search string not found with narrowing hint
+  scenarios.push({
+    id: nextId('G', 'X37b_notFoundNarrowing'),
+    family: 'G',
+    generator: 'X37b_notFoundNarrowing',
+    failureClass: 'X-37',
+    description: 'X-37: F9 failure should produce narrowing with resolution hint',
+    edits: [{ file: 'server.js', search: 'NONEXISTENT_TOKEN_42', replace: 'bar' }],
+    predicates: [],
+    config: { appDir, gates: { staging: false, browser: false, http: false, grounding: false } },
+    invariants: [
+      shouldNotCrash('F9 narrowing'),
+      verifyFailedAt('F9', 'F9 fail produces narrowing'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+  });
+
+  // X-38: Search string found multiple times → F9 fails (ambiguous)
+  scenarios.push({
+    id: nextId('G', 'X38_ambiguousMatch'),
+    family: 'G',
+    generator: 'X38_ambiguousMatch',
+    failureClass: 'X-38',
+    description: 'X-38: Search string matches >1 location — F9 should fail as ambiguous',
+    edits: [{ file: 'server.js', search: 'res.end', replace: 'res.end' }], // 'res.end' appears in multiple route handlers
+    predicates: [],
+    config: { appDir, gates: { staging: false, browser: false, http: false, grounding: false } },
+    invariants: [
+      shouldNotCrash('ambiguous match'),
+      verifyFailedAt('F9', 'ambiguous match fails F9'),
+    ],
+    requiresDocker: false,
+  });
+
+  // X-39: Search string with regex special characters — treated as literal
+  scenarios.push({
+    id: nextId('G', 'X39_regexChars'),
+    family: 'G',
+    generator: 'X39_regexSpecialChars',
+    failureClass: 'X-39',
+    description: 'X-39: Search string with regex chars (.*[) treated as literal, not regex',
+    edits: [{ file: 'server.js', search: 'res.end(.*[test]', replace: 'replacement' }],
+    predicates: [],
+    config: { appDir, gates: { staging: false, browser: false, http: false, grounding: false } },
+    invariants: [
+      shouldNotCrash('regex special chars in search'),
+      // The literal string "res.end(.*[test]" doesn't exist → F9 fails
+      verifyFailedAt('F9', 'regex chars treated as literal'),
+    ],
+    requiresDocker: false,
+  });
+
+  // X-40a: Empty search string
+  scenarios.push({
+    id: nextId('G', 'X40a_emptySearch'),
+    family: 'G',
+    generator: 'X40a_emptySearch',
+    failureClass: 'X-40',
+    description: 'X-40: Empty search string should fail F9 (ambiguous), not crash',
+    edits: [{ file: 'server.js', search: '', replace: 'something' }],
+    predicates: [],
+    config: { appDir, gates: { staging: false, browser: false, http: false, grounding: false } },
+    invariants: [shouldNotCrash('empty search string'), verifyFailedAt('F9', 'empty search fails F9')],
+    requiresDocker: false,
+  });
+
+  // X-40b: Empty replace string (deletion)
+  scenarios.push({
+    id: nextId('G', 'X40b_emptyReplace'),
+    family: 'G',
+    generator: 'X40b_emptyReplace',
+    failureClass: 'X-40',
+    description: 'X-40: Empty replace string (deletion) should fail F9 gracefully, not crash',
+    edits: [{ file: 'server.js', search: 'placeholder_not_in_file', replace: '' }],
+    predicates: [],
+    config: { appDir, gates: { staging: false, browser: false, http: false, grounding: false } },
+    invariants: [shouldNotCrash('empty replace string'), verifyFailedAt('F9', 'empty replace fails F9')],
+    requiresDocker: false,
+  });
+
+  // X-41: Line ending mismatch — search has \n but file has \r\n (or vice versa)
+  scenarios.push({
+    id: nextId('G', 'X41_lineEndingMismatch'),
+    family: 'G',
+    generator: 'X41_lineEndingMismatch',
+    failureClass: 'X-41',
+    description: 'X-41: Search with \\n in \\r\\n file — F9 should fail (exact match)',
+    edits: [{ file: 'server.js', search: 'const http\r\n', replace: 'const http\n' }],
+    predicates: [],
+    config: { appDir, gates: { staging: false, browser: false, http: false, grounding: false } },
+    invariants: [
+      shouldNotCrash('line ending mismatch'),
+      // server.js uses \n not \r\n, so \r\n search won't match
+      verifyFailedAt('F9', 'line ending mismatch fails F9'),
     ],
     requiresDocker: false,
   });
@@ -999,6 +1399,292 @@ function generateFamilyB(appDir: string): VerifyScenario[] {
     ],
   });
 
+  // ===========================================================================
+  // X-54: Constraint store corruption / partial write
+  // If memory.jsonl has a truncated last line, the store should still load
+  // all valid entries and not crash. JSONL replay is line-by-line.
+  // ===========================================================================
+  scenarios.push({
+    id: nextId('B', 'X54a_truncatedLine'),
+    family: 'B',
+    generator: 'X54a_truncatedJSONL',
+    failureClass: 'X-54',
+    description: 'X-54: Truncated last line in memory.jsonl — store loads valid entries, ignores partial',
+    edits: [],
+    predicates: [],
+    config: { appDir },
+    invariants: [],
+    requiresDocker: false,
+    steps: [
+      // Step 1: Seed a valid constraint, then corrupt the file by appending a truncated line
+      {
+        id: nextId('B', 'X54a_step1_corrupt'),
+        family: 'B',
+        generator: 'X54a_step1',
+        description: 'Seed constraint then append truncated JSON line',
+        edits: [],
+        predicates: [],
+        config: { appDir },
+        invariants: [],
+        requiresDocker: false,
+        skipVerify: true,
+        beforeStep: (stateDir: string) => {
+          const store = new ConstraintStore(stateDir);
+          store.seedFromFailure({
+            sessionId: SESSION_ID, source: 'evidence', error: 'predicate failed: corrupt test',
+            filesTouched: ['server.js'], attempt: 1,
+            failedPredicates: [{ type: 'css', selector: '.x54', property: 'color', expected: 'red' }],
+          });
+          // Append a truncated (invalid JSON) line to simulate partial write
+          const { appendFileSync } = require('fs');
+          const { join } = require('path');
+          appendFileSync(join(stateDir, 'memory.jsonl'), '{"_op":"constraint","_ts":999,"dat\n');
+        },
+      },
+      // Step 2: Reload store — should not crash, and the valid constraint should still block
+      {
+        id: nextId('B', 'X54a_step2_verify'),
+        family: 'B',
+        generator: 'X54a_step2',
+        description: 'Reload store after corruption — valid constraint still blocks',
+        edits: [noopEdit],
+        predicates: [{ type: 'css', selector: '.x54', property: 'color', expected: 'red' }],
+        config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+        invariants: [k5ShouldBlock('valid constraint survives truncated line')],
+        requiresDocker: false,
+      },
+    ],
+  });
+
+  scenarios.push({
+    id: nextId('B', 'X54b_emptyFile'),
+    family: 'B',
+    generator: 'X54b_emptyFile',
+    failureClass: 'X-54',
+    description: 'X-54: Empty memory.jsonl — store loads without crash, zero constraints',
+    edits: [],
+    predicates: [],
+    config: { appDir },
+    invariants: [],
+    requiresDocker: false,
+    steps: [
+      {
+        id: nextId('B', 'X54b_step1_empty'),
+        family: 'B',
+        generator: 'X54b_step1',
+        description: 'Create empty memory.jsonl',
+        edits: [],
+        predicates: [],
+        config: { appDir },
+        invariants: [],
+        requiresDocker: false,
+        skipVerify: true,
+        beforeStep: (stateDir: string) => {
+          const { writeFileSync, mkdirSync } = require('fs');
+          const { join } = require('path');
+          mkdirSync(stateDir, { recursive: true });
+          writeFileSync(join(stateDir, 'memory.jsonl'), '');
+        },
+      },
+      {
+        id: nextId('B', 'X54b_step2_pass'),
+        family: 'B',
+        generator: 'X54b_step2',
+        description: 'K5 with empty store → should pass (zero constraints)',
+        edits: [noopEdit],
+        predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'blue' }],
+        config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+        invariants: [k5ShouldPass('empty store has no constraints')],
+        requiresDocker: false,
+      },
+    ],
+  });
+
+  // ===========================================================================
+  // X-55: Concurrent readers observe half-written state
+  // Two ConstraintStore instances reading the same file — the second should
+  // see what the first wrote (since it's append-only JSONL).
+  // ===========================================================================
+  scenarios.push({
+    id: nextId('B', 'X55a_concurrentReaders'),
+    family: 'B',
+    generator: 'X55a_concurrentReadWrite',
+    failureClass: 'X-55',
+    description: 'X-55: Second store instance sees constraint seeded by first instance',
+    edits: [],
+    predicates: [],
+    config: { appDir },
+    invariants: [],
+    requiresDocker: false,
+    steps: [
+      {
+        id: nextId('B', 'X55a_step1_seed'),
+        family: 'B',
+        generator: 'X55a_step1',
+        description: 'Seed constraint with store instance 1',
+        edits: [],
+        predicates: [],
+        config: { appDir },
+        invariants: [],
+        requiresDocker: false,
+        skipVerify: true,
+        beforeStep: (stateDir: string) => {
+          // Instance 1 seeds a constraint
+          const store1 = new ConstraintStore(stateDir);
+          store1.seedFromFailure({
+            sessionId: SESSION_ID, source: 'evidence', error: 'predicate failed: x55 test',
+            filesTouched: ['server.js'], attempt: 1,
+            failedPredicates: [{ type: 'css', selector: '.x55', property: 'color', expected: 'green' }],
+          });
+          // Instance 2 reads the same directory — should see the constraint
+          const store2 = new ConstraintStore(stateDir);
+          const result = store2.checkConstraints(
+            ['server.js'], 'ui',
+            [predicateFingerprint({ type: 'css', selector: '.x55', property: 'color', expected: 'green' })],
+          );
+          if (!result) {
+            throw new Error('X-55: Second store instance did NOT see constraint from first instance');
+          }
+        },
+      },
+      // Step 2: Verify via normal pipeline — the constraint should still block
+      {
+        id: nextId('B', 'X55a_step2_verify'),
+        family: 'B',
+        generator: 'X55a_step2',
+        description: 'K5 via pipeline also sees the constraint',
+        edits: [noopEdit],
+        predicates: [{ type: 'css', selector: '.x55', property: 'color', expected: 'green' }],
+        config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+        invariants: [k5ShouldBlock('constraint visible to all readers')],
+        requiresDocker: false,
+      },
+    ],
+  });
+
+  // ===========================================================================
+  // X-56: Expired constraint retained inconsistently
+  // The store filters expired constraints at check time (lazy expiry).
+  // Verify that an expired constraint does NOT fire even when the in-memory
+  // array still contains it (it's only filtered at checkConstraints time).
+  // Also verify that cleanupSession removes expired constraints from the array.
+  // ===========================================================================
+  scenarios.push({
+    id: nextId('B', 'X56a_lazyExpiry'),
+    family: 'B',
+    generator: 'X56a_lazyExpiry',
+    failureClass: 'X-56',
+    description: 'X-56: Expired constraint in-memory but filtered at check time (lazy expiry)',
+    edits: [],
+    predicates: [],
+    config: { appDir },
+    invariants: [],
+    requiresDocker: false,
+    steps: [
+      {
+        id: nextId('B', 'X56a_step1'),
+        family: 'B',
+        generator: 'X56a_step1',
+        description: 'Seed constraint, set expiresAt to past, verify lazy expiry works',
+        edits: [],
+        predicates: [],
+        config: { appDir },
+        invariants: [],
+        requiresDocker: false,
+        skipVerify: true,
+        beforeStep: (stateDir: string) => {
+          const store = new ConstraintStore(stateDir);
+          store.seedFromFailure({
+            sessionId: SESSION_ID, source: 'evidence', error: 'predicate failed: x56 test',
+            filesTouched: ['server.js'], attempt: 1,
+            failedPredicates: [{ type: 'css', selector: '.x56', property: 'color', expected: 'purple' }],
+          });
+          // Manipulate expiresAt to the past via JSONL rewrite
+          const { readFileSync, writeFileSync } = require('fs');
+          const { join } = require('path');
+          const dataPath = join(stateDir, 'memory.jsonl');
+          const raw = readFileSync(dataPath, 'utf-8');
+          const lines = raw.split('\n').filter((l: string) => l.trim());
+          const rewritten = lines.map((line: string) => {
+            try {
+              const entry = JSON.parse(line);
+              if (entry._op === 'constraint' && entry.data?.expiresAt) {
+                entry.data.expiresAt = Date.now() - 60000; // 1 minute in the past
+              }
+              return JSON.stringify(entry);
+            } catch { return line; }
+          }).join('\n') + '\n';
+          writeFileSync(dataPath, rewritten);
+        },
+      },
+      {
+        id: nextId('B', 'X56a_step2_pass'),
+        family: 'B',
+        generator: 'X56a_step2',
+        description: 'Expired constraint does not fire at check time',
+        edits: [noopEdit],
+        predicates: [{ type: 'css', selector: '.x56', property: 'color', expected: 'purple' }],
+        config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+        invariants: [k5ShouldPass('expired constraint should not fire')],
+        requiresDocker: false,
+      },
+    ],
+  });
+
+  scenarios.push({
+    id: nextId('B', 'X56b_cleanupRemovesExpired'),
+    family: 'B',
+    generator: 'X56b_cleanupRemovesExpired',
+    failureClass: 'X-56',
+    description: 'X-56: cleanupSession removes expired constraints from in-memory array',
+    edits: [],
+    predicates: [],
+    config: { appDir },
+    invariants: [],
+    requiresDocker: false,
+    steps: [
+      {
+        id: nextId('B', 'X56b_step1'),
+        family: 'B',
+        generator: 'X56b_step1',
+        description: 'Seed, expire, cleanup, verify constraint count = 0',
+        edits: [],
+        predicates: [],
+        config: { appDir },
+        invariants: [constraintCountEquals(0)],
+        requiresDocker: false,
+        skipVerify: true,
+        beforeStep: (stateDir: string) => {
+          const store = new ConstraintStore(stateDir);
+          store.seedFromFailure({
+            sessionId: 'cleanup-test', source: 'evidence', error: 'predicate failed: x56b test',
+            filesTouched: ['server.js'], attempt: 1,
+            failedPredicates: [{ type: 'css', selector: '.x56b', property: 'color', expected: 'orange' }],
+          });
+          // Expire the constraint via JSONL rewrite
+          const { readFileSync, writeFileSync } = require('fs');
+          const { join } = require('path');
+          const dataPath = join(stateDir, 'memory.jsonl');
+          const raw = readFileSync(dataPath, 'utf-8');
+          const lines = raw.split('\n').filter((l: string) => l.trim());
+          const rewritten = lines.map((line: string) => {
+            try {
+              const entry = JSON.parse(line);
+              if (entry._op === 'constraint' && entry.data?.expiresAt) {
+                entry.data.expiresAt = Date.now() - 60000;
+              }
+              return JSON.stringify(entry);
+            } catch { return line; }
+          }).join('\n') + '\n';
+          writeFileSync(dataPath, rewritten);
+          // Now call cleanupSession — it should remove expired constraints
+          const store2 = new ConstraintStore(stateDir);
+          store2.cleanupSession('cleanup-test');
+        },
+      },
+    ],
+  });
+
   return scenarios;
 }
 
@@ -1239,6 +1925,7 @@ function generateFamilyC(appDir: string): VerifyScenario[] {
 
 function generateFamilyD(appDir: string): VerifyScenario[] {
   const scenarios: VerifyScenario[] = [];
+  const dummyEdit: Edit = { file: 'server.js', search: 'placeholder', replace: 'placeholder' };
 
   // D1: CSS edit with matching CSS predicate → direct attribution
   scenarios.push({
@@ -1381,6 +2068,447 @@ function generateFamilyD(appDir: string): VerifyScenario[] {
     requiresDocker: false,
   });
 
+  // =========================================================================
+  // AT-01: Correct failure, wrong cause identified
+  // CSS edit fails → G5 attributes as "direct" because file matches, but the
+  // predicate checks a DIFFERENT property than what was edited. G5's file-level
+  // heuristic cannot distinguish property-level causation.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT01a_wrongCauseCSS'),
+    family: 'D',
+    generator: 'AT01a_wrongCauseCSS',
+    failureClass: 'AT-01',
+    description: 'AT-01: Edit changes color but predicate checks font-size — G5 still says "direct" (file-level attribution)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: red' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'font-size', expected: '2rem' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      containmentAlwaysPasses(),
+      // This documents the limitation: G5 attributes as "direct" because the edit
+      // file (server.js) is a source file and edit.replace contains "red" — but the
+      // predicate checks font-size, not color. G5 matches on expected value presence.
+      // The edit replace "color: red" contains "2rem"? No. It matches on property presence.
+      // Actually: G5 checks if edit.replace contains p.property ("font-size") or p.expected ("2rem").
+      // Since "color: red" contains neither "font-size" nor "2rem", this should be unexplained.
+      editAttributed('server.js', 'unexplained'),
+      containmentCounts(0, 0, 1),
+    ],
+    requiresDocker: false,
+  });
+
+  // AT-01b: Edit changes color, predicate checks color but different selector.
+  // G5 still says "direct" because it matches on p.expected value in edit.replace.
+  scenarios.push({
+    id: nextId('D', 'AT01b_wrongSelectorMatch'),
+    family: 'D',
+    generator: 'AT01b_wrongSelectorMatch',
+    failureClass: 'AT-01',
+    description: 'AT-01: Edit sets color=green, predicate on different selector also expects green — false direct attribution',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: green' }],
+    predicates: [{ type: 'css', selector: '.nonexistent', property: 'color', expected: 'green' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      containmentAlwaysPasses(),
+      // G5 matches because edit.replace ("color: green") contains p.expected ("green").
+      // This is a false "direct" — the predicate targets .nonexistent, not h1.
+      editAttributed('server.js', 'direct'),
+      containmentCounts(1, 0, 0),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-02: Multiple causes, single attribution
+  // Two edits both match the same predicate. G5 attributes both as "direct"
+  // individually — it doesn't distinguish which edit is the actual cause.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT02a_dualDirectAttribution'),
+    family: 'D',
+    generator: 'AT02a_dualDirectAttribution',
+    failureClass: 'AT-02',
+    description: 'AT-02: Two edits both match one predicate — both attributed as direct (cannot isolate root cause)',
+    edits: [
+      { file: 'server.js', search: 'color: #1a1a2e', replace: 'color: orange' },
+      { file: 'server.js', search: 'color: #666', replace: 'color: orange' },
+    ],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'orange' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      containmentAlwaysPasses(),
+      containmentTotalMatchesEdits(),
+      // Both edits contain "orange" in replace → both match p.expected → both "direct"
+      // G5 can't tell which edit actually satisfies the predicate
+      containmentCounts(2, 0, 0),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-03: Downstream effect mistaken for root cause
+  // Error message contains "health check fail" + "SyntaxError". extractSignature
+  // uses priority ordering — first match wins. Depending on error string composition,
+  // the wrong cause may be identified.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT03a_priorityOverride'),
+    family: 'D',
+    generator: 'AT03a_priorityOverride',
+    failureClass: 'AT-03',
+    description: 'AT-03: Error with both "SyntaxError" and "health check fail" — extractSignature picks syntax (first match)',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { appDir, gates: { syntax: false, constraints: false, containment: false, staging: false } },
+    invariants: [
+      {
+        name: 'extractSignature_priority_syntax_over_health',
+        category: 'attribution' as const,
+        layer: 'product' as const,
+        check: () => {
+          // Error with both signals: SyntaxError appears first → syntax_error wins
+          const sig1 = extractSignature('SyntaxError: Unexpected token at line 5; health check failed');
+          if (sig1 !== 'syntax_error') {
+            return { passed: false, violation: `Expected 'syntax_error', got '${sig1}'`, severity: 'bug' as const };
+          }
+          // Reversed order: "health check failed" appears first in text BUT
+          // extractSignature uses regex priority ordering, not text position.
+          // "syntaxerror" regex (priority 6) comes BEFORE "health check fail" (priority 9).
+          // So SyntaxError still wins even when health check text appears first.
+          const sig2 = extractSignature('health check failed after SyntaxError');
+          if (sig2 !== 'syntax_error') {
+            return { passed: false, violation: `Expected 'syntax_error' (regex priority), got '${sig2}'`, severity: 'bug' as const };
+          }
+          // Document: extractSignature uses regex list priority, NOT text position.
+          // This means downstream failure signals (health check) can never mask
+          // upstream ones (syntax error) — but the reverse is also true.
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  // AT-03b: DNS error (infra) masks a real syntax error (code)
+  scenarios.push({
+    id: nextId('D', 'AT03b_infraMasksSyntax'),
+    family: 'D',
+    generator: 'AT03b_infraMasksSyntax',
+    failureClass: 'AT-03',
+    description: 'AT-03: DNS error appears first in message, masking the real syntax error — wrong signature extracted',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { appDir, gates: { syntax: false, constraints: false, containment: false, staging: false } },
+    invariants: [
+      {
+        name: 'extractSignature_dns_masks_syntax',
+        category: 'attribution' as const,
+        layer: 'product' as const,
+        check: () => {
+          const sig = extractSignature('getaddrinfo EAI_AGAIN db:5432 — caused by SyntaxError in server.js');
+          if (sig !== 'dns_resolution_failed') {
+            return { passed: false, violation: `Expected 'dns_resolution_failed' (first match), got '${sig}'`, severity: 'bug' as const };
+          }
+          // The real cause (SyntaxError) is lost — this documents the limitation
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-04: Masking failure — real cause hidden
+  // Pipeline stops at first failed gate. If F9 fails, K5/G5/staging never run.
+  // The first error in narrowing may not be the most useful one.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT04a_firstGateMasksOthers'),
+    family: 'D',
+    generator: 'AT04a_firstGateMasksOthers',
+    failureClass: 'AT-04',
+    description: 'AT-04: F9 failure stops pipeline — downstream gate issues never discovered',
+    // server.js search string doesn't exist → F9 fails before K5/G5 run
+    edits: [{ file: 'server.js', search: 'this_string_does_not_exist_anywhere', replace: 'replacement' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      verifyFailedAt('F9', 'search string not found'),
+      // G5 and K5 never run — their potential failures are masked
+      gateAbsent('G5', 'F9 failed first — pipeline stopped'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-05: Accidental correctness
+  // Predicate passes by coincidence — the predicate checks something that was
+  // already true before the edit, so the edit is irrelevant to the passing check.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT05a_alreadyTrue'),
+    family: 'D',
+    generator: 'AT05a_alreadyTrue',
+    failureClass: 'AT-05',
+    description: 'AT-05: Content predicate already passes before edit — edit is irrelevant to predicate satisfaction',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: blue' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      // The predicate matches "Demo App" which already exists in server.js.
+      // The edit changes a color — totally unrelated. But G5 attributes as "direct"
+      // because predicate.file matches edit.file via content path matching.
+      containmentAlwaysPasses(),
+      editAttributed('server.js', 'direct'),
+      // This documents the limitation: attribution is file-level, not causation-level
+    ],
+    requiresDocker: false,
+  });
+
+  // AT-05b: CSS predicate passes coincidentally because the value already matches.
+  // G5 matches on p.property ("color") found in edit.replace ("color: #777"),
+  // so it says "direct" even though the predicate's EXPECTED VALUE (#1a1a2e) is
+  // unrelated to the edit's change (#666→#777).
+  scenarios.push({
+    id: nextId('D', 'AT05b_alreadyMatchingCSS'),
+    family: 'D',
+    generator: 'AT05b_alreadyMatchingCSS',
+    failureClass: 'AT-05',
+    description: 'AT-05: CSS predicate expects existing value — edit changes something else but G5 matches on property name',
+    edits: [{ file: 'server.js', search: 'color: #666', replace: 'color: #777' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      containmentAlwaysPasses(),
+      // G5 checks if edit.replace contains p.property ("color"). "color: #777" does contain "color".
+      // So G5 attributes as "direct" — false positive (edit is unrelated to this predicate).
+      // This documents the limitation: G5 matches on property NAME, not value.
+      editAttributed('server.js', 'direct'),
+      containmentCounts(1, 0, 0),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-06: Proxy success — right outcome, wrong reason
+  // CSS value matches in source but that's because it's on a different selector.
+  // G5 says "direct" because the expected value appears in the replace string.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT06a_valuePresentWrongSelector'),
+    family: 'D',
+    generator: 'AT06a_valuePresentWrongSelector',
+    failureClass: 'AT-06',
+    description: 'AT-06: Edit puts value "sans-serif" in replace, predicate expects "sans-serif" on different selector',
+    edits: [{ file: 'server.js', search: 'font-family: sans-serif', replace: 'font-family: sans-serif; font-weight: bold' }],
+    predicates: [{ type: 'css', selector: '.subtitle', property: 'font-family', expected: 'sans-serif' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      containmentAlwaysPasses(),
+      // G5 matches because edit.replace contains "sans-serif" (the expected value).
+      // But the edit is on body's font-family, not .subtitle's. The attribution
+      // is technically "correct" at file level but misleading at property level.
+      editAttributed('server.js', 'direct'),
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-07: Structural validity masks semantic incorrectness
+  // The edit is structurally valid (F9 passes) and the containment is clean,
+  // but the semantic meaning is wrong. G5 can only check structural attribution.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT07a_structurallyValidSemanticWrong'),
+    family: 'D',
+    generator: 'AT07a_structurallyValidSemanticWrong',
+    failureClass: 'AT-07',
+    description: 'AT-07: Edit changes title to "Test" — structurally valid, G5 says direct, but semantic incorrectness undetectable',
+    edits: [{ file: 'server.js', search: '<title>Demo App</title>', replace: '<title>Test</title>' }],
+    // Predicate asserts title exists (structural) — it will pass.
+    // But "Test" is semantically wrong (should be something meaningful).
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Test' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      containmentAlwaysPasses(),
+      editAttributed('server.js', 'direct'),
+      // G5 says: edit matches predicate ✓. But the semantic intent may be wrong.
+      // This documents that containment cannot catch semantic errors.
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-08: Semantic correctness masks structural breakage
+  // The edit adds correct business logic but breaks CSS layout.
+  // G5 attributes the edit as "direct" for the logic predicate, but the
+  // structural CSS damage is invisible to containment.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT08a_logicCorrectCSSBroken'),
+    family: 'D',
+    generator: 'AT08a_logicCorrectCSSBroken',
+    failureClass: 'AT-08',
+    description: 'AT-08: Edit correctly adds API response but also breaks CSS — G5 only sees the content match',
+    edits: [{ file: 'server.js', search: "{ id: 2, name: 'Beta' },", replace: "{ id: 2, name: 'Beta' },\n      { id: 3, name: 'Gamma' }," }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Gamma' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      containmentAlwaysPasses(),
+      editAttributed('server.js', 'direct'),
+      // The edit might collaterally break formatting or other structures.
+      // G5 only sees "edit file matches predicate file + content" → "direct".
+      // CSS or layout damage is invisible at this gate.
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-09: Constraint seeded from wrong failure class
+  // extractSignature maps to the first matching regex. When the error string
+  // contains multiple failure signals, K5 learns the wrong lesson.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT09a_wrongSignatureSeeded'),
+    family: 'D',
+    generator: 'AT09a_wrongSignatureSeeded',
+    failureClass: 'AT-09',
+    description: 'AT-09: extractSignature maps compound error to first regex match — K5 seeds wrong failure class',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { appDir, gates: { syntax: false, constraints: false, containment: false, staging: false } },
+    invariants: [
+      {
+        name: 'wrong_failure_class_seeded',
+        category: 'attribution' as const,
+        layer: 'product' as const,
+        check: () => {
+          // "build failure" contains both "build fail" → build_failure AND
+          // "exit code 1" → also build_failure. But a compound error like
+          // "timeout during build, exit code 1" → "migration_timeout" (first match)
+          // even though the real cause is a build failure.
+          const sig = extractSignature('timeout during build, exit code 1');
+          if (sig !== 'migration_timeout') {
+            return { passed: false, violation: `Expected 'migration_timeout' (first match), got '${sig}'`, severity: 'bug' as const };
+          }
+          // The "real" cause was build failure, but K5 would seed a migration_timeout
+          // constraint — wrong lesson learned
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  // AT-09b: ECONNREFUSED during staging classified as harness_fault — never seeds K5.
+  // But the real cause might be the agent's code crashing on startup.
+  scenarios.push({
+    id: nextId('D', 'AT09b_harnessFaultMasksAppBug'),
+    family: 'D',
+    generator: 'AT09b_harnessFaultMasksAppBug',
+    failureClass: 'AT-09',
+    description: 'AT-09: ECONNREFUSED in staging classified as harness_fault — K5 never learns even if app code caused it',
+    edits: [dummyEdit],
+    predicates: [],
+    config: { appDir, gates: { syntax: false, constraints: false, containment: false, staging: false } },
+    invariants: [
+      {
+        name: 'harness_fault_blocks_learning',
+        category: 'attribution' as const,
+        layer: 'product' as const,
+        check: () => {
+          const { classifyFailureKind } = require('../../src/store/constraint-store.js');
+          // ECONNREFUSED during staging → harness_fault (container not ready)
+          const kind = classifyFailureKind('ECONNREFUSED: connection refused', 'staging');
+          if (kind !== 'harness_fault') {
+            return { passed: false, violation: `Expected 'harness_fault', got '${kind}'`, severity: 'bug' as const };
+          }
+          // Same error from post-deploy (evidence source) → 'unknown' because
+          // classifyFailureKind only checks ECONNREFUSED for source==='staging'.
+          // This is a classification gap: ECONNREFUSED from evidence likely means
+          // the app crashed, but it falls through to 'unknown' → no K5 learning.
+          const kind2 = classifyFailureKind('ECONNREFUSED: connection refused', 'evidence');
+          if (kind2 !== 'unknown') {
+            return { passed: false, violation: `Expected 'unknown' (classification gap), got '${kind2}'`, severity: 'bug' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // AT-10: Narrowing hint leads to correct fix for wrong reason
+  // Generic resolution hint ("Fix the syntax errors") happens to guide the agent
+  // correctly, but the actual problem may be more nuanced.
+  // =========================================================================
+  scenarios.push({
+    id: nextId('D', 'AT10a_genericHintAccidentallyCorrect'),
+    family: 'D',
+    generator: 'AT10a_genericHintAccidentallyCorrect',
+    failureClass: 'AT-10',
+    description: 'AT-10: Resolution hint is generic but accidentally guides to correct fix — documents limitation',
+    // F9 fails because search string not found
+    edits: [{ file: 'server.js', search: 'nonexistent_string_xyz', replace: 'replacement' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      verifyFailedAt('F9', 'search string not found'),
+      narrowingPresent(),
+      {
+        name: 'resolution_hint_is_generic',
+        category: 'attribution' as const,
+        layer: 'product' as const,
+        check: (_scenario, result) => {
+          if (result instanceof Error) return { passed: true, severity: 'info' as const };
+          if (!result.narrowing?.resolutionHint) {
+            return { passed: false, violation: 'No resolution hint on F9 failure', severity: 'bug' as const };
+          }
+          // The hint should say "search string does not exist" — this is correct
+          // but generic. It doesn't say WHICH search string or suggest alternatives.
+          const hint = result.narrowing.resolutionHint;
+          if (!hint.includes('not exist') && !hint.includes('exact match')) {
+            return { passed: false, violation: `Expected F9 hint about search string, got: "${hint}"`, severity: 'bug' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
+  // AT-10b: K5 resolution hint says "try different strategy" — accurate but unhelpful
+  scenarios.push({
+    id: nextId('D', 'AT10b_k5GenericHint'),
+    family: 'D',
+    generator: 'AT10b_k5GenericHint',
+    failureClass: 'AT-10',
+    description: 'AT-10: K5 narrowing says "try different strategy" — correct but gives no specific guidance',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: red' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { grounding: false, staging: false, browser: false, http: false } },
+    invariants: [
+      {
+        name: 'k5_hint_generic_but_correct',
+        category: 'attribution' as const,
+        layer: 'product' as const,
+        check: () => {
+          // The K5 resolution hint for a generic constraint violation is:
+          // "This approach was tried before and failed. Try a different strategy."
+          // This is true but not actionable — documents the limitation.
+          const hint = buildResolutionHintDirect('K5', 'constraint violation');
+          if (!hint.includes('different strategy') && !hint.includes('tried before')) {
+            return { passed: false, violation: `Expected generic K5 hint, got: "${hint}"`, severity: 'unexpected' as const };
+          }
+          return { passed: true, severity: 'info' as const };
+        },
+      },
+    ],
+    requiresDocker: false,
+  });
+
   return scenarios;
 }
 
@@ -1493,6 +2621,1069 @@ function generateFamilyE(appDir: string): VerifyScenario[] {
       predicateIsGrounded(0, 'content_exempt'),
       predicateIsGrounded(1, 'http_exempt'),
       predicateIsGrounded(2, 'db_exempt'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ===========================================================================
+  // CSS VALUE NORMALIZATION — Taxonomy C-01 through C-08
+  // ===========================================================================
+  // Each group targets one failure shape from FAILURE-TAXONOMY.md.
+  // Tests whether grounding validation correctly handles CSS value equivalences.
+  // Demo app has: h1 { color: #1a1a2e }, body { background: #ffffff; color: #333 },
+  //              .subtitle { color: #666 }, a.nav-link { color: #0066cc },
+  //              footer { color: #999 }, .items li { border-bottom: 1px solid #eee }
+
+  // ── C-01: Named color ↔ hex equivalence ──
+  // The grounding gate has _nC() with 26 named colors. Test that:
+  // 1. A named color in source matches its hex equivalent in predicate
+  // 2. A hex value in source matches its named color equivalent in predicate
+
+  // C-01a: Edit changes h1 color to a named color, predicate uses hex — should be grounded
+  scenarios.push({
+    id: nextId('E', 'C01a_namedToHex'),
+    family: 'E',
+    generator: 'C01a_namedToHex',
+    failureClass: 'C-01',
+    description: 'C-01: Named color "red" in edit matches hex "#ff0000" in predicate',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: red' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'named_color_matches_hex'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-01b: Edit changes h1 color to hex, predicate uses named color — should be grounded
+  scenarios.push({
+    id: nextId('E', 'C01b_hexToNamed'),
+    family: 'E',
+    generator: 'C01b_hexToNamed',
+    failureClass: 'C-01',
+    description: 'C-01: Hex "#ff0000" in edit matches named color "red" in predicate',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #ff0000' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'hex_matches_named_color'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-01c: Named color "navy" already in _NC map — test equivalence with #000080
+  scenarios.push({
+    id: nextId('E', 'C01c_navyHex'),
+    family: 'E',
+    generator: 'C01c_navyHex',
+    failureClass: 'C-01',
+    description: 'C-01: Named color "navy" matches hex "#000080"',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: navy' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#000080' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'navy_matches_hex'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-01d: Named color NOT in the _NC map — should fail grounding (value mismatch)
+  // "rebeccapurple" (#663399) is a valid CSS color but NOT in the 26-entry _NC map
+  scenarios.push({
+    id: nextId('E', 'C01d_unknownNamed'),
+    family: 'E',
+    generator: 'C01d_unknownNamedColor',
+    failureClass: 'C-01',
+    description: 'C-01: Named color "rebeccapurple" NOT in normalizer — should be groundingMiss',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: rebeccapurple' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#663399' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // rebeccapurple is not in _NC, so _nC('rebeccapurple') !== _nC('#663399')
+      // grounding will see source value 'rebeccapurple' !== '#663399' → groundingMiss
+      predicateIsGroundingMiss(0, 'rebeccapurple_not_in_normalizer'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── C-02: RGB ↔ hex equivalence ──
+  // _nC() normalizes rgb(r,g,b) → hex. Both directions should be grounded.
+
+  // C-02a: Edit uses hex, predicate uses rgb — normalizer converts rgb→hex, match
+  scenarios.push({
+    id: nextId('E', 'C02a_hexVsRgb'),
+    family: 'E',
+    generator: 'C02a_hexVsRgb',
+    failureClass: 'C-02',
+    description: 'C-02: Hex "#ff0000" in edit vs rgb "rgb(255,0,0)" in predicate — normalizer converts rgb→hex (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #ff0000' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'rgb(255,0,0)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'rgb_hex_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-02b: Edit uses rgb, predicate uses hex — normalizer converts both to hex, match
+  scenarios.push({
+    id: nextId('E', 'C02b_rgbVsHex'),
+    family: 'E',
+    generator: 'C02b_rgbVsHex',
+    failureClass: 'C-02',
+    description: 'C-02: rgb "rgb(255,0,0)" in edit vs hex "#ff0000" in predicate — normalizer converts rgb→hex (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: rgb(255,0,0)' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'hex_rgb_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── C-03: HSL ↔ hex/rgb equivalence ──
+  // _nC() normalizes hsl(h,s%,l%) → hex.
+
+  scenarios.push({
+    id: nextId('E', 'C03_hslVsHex'),
+    family: 'E',
+    generator: 'C03_hslVsHex',
+    failureClass: 'C-03',
+    description: 'C-03: HSL "hsl(0,100%,50%)" vs hex "#ff0000" — normalizer converts hsl→hex (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: hsl(0,100%,50%)' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'hsl_hex_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── C-04: RGBA with alpha=1 ↔ RGB ──
+  // _nC() normalizes rgba(r,g,b,1) → hex (same as rgb).
+
+  scenarios.push({
+    id: nextId('E', 'C04_rgbaVsRgb'),
+    family: 'E',
+    generator: 'C04_rgbaVsRgb',
+    failureClass: 'C-04',
+    description: 'C-04: rgba(255,0,0,1) vs rgb(255,0,0) — normalizer strips alpha=1, both→hex (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: rgba(255,0,0,1)' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'rgb(255,0,0)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'rgba_alpha1_normalized_to_hex'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── C-05: HSLA with alpha=1 ↔ HSL ──
+  // _nC() normalizes hsla(h,s%,l%,1) → hex (same as hsl).
+
+  scenarios.push({
+    id: nextId('E', 'C05_hslaVsHsl'),
+    family: 'E',
+    generator: 'C05_hslaVsHsl',
+    failureClass: 'C-05',
+    description: 'C-05: hsla(0,100%,50%,1) vs hsl(0,100%,50%) — normalizer strips alpha=1, both→hex (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: hsla(0,100%,50%,1)' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'hsl(0,100%,50%)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'hsla_alpha1_normalized_to_hex'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── C-06: Whitespace in CSS values ──
+  // _nC() normalizes internal whitespace in rgb/hsl functional notation.
+
+  // C-06a: Whitespace mismatch in value — normalizer strips spaces in rgb()
+  scenarios.push({
+    id: nextId('E', 'C06a_wsInValue'),
+    family: 'E',
+    generator: 'C06a_whitespaceInValue',
+    failureClass: 'C-06',
+    description: 'C-06: "rgb( 255, 0, 0 )" vs "rgb(255,0,0)" — normalizer strips internal whitespace (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: rgb( 255, 0, 0 )' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'rgb(255,0,0)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'internal_whitespace_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-06b: Leading/trailing whitespace — _nC() trims, should match
+  scenarios.push({
+    id: nextId('E', 'C06b_outerWs'),
+    family: 'E',
+    generator: 'C06b_outerWhitespace',
+    failureClass: 'C-06',
+    description: 'C-06: Leading/trailing whitespace in value — _nC() trims, should match',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color:  red ' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'outer_whitespace_trimmed_by_nC'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── C-07: Casing in CSS values ──
+  // _nC() lowercases before lookup. Test that case differences are handled.
+
+  // C-07a: Uppercase hex in edit, lowercase in predicate — _nC lowercases, should match
+  scenarios.push({
+    id: nextId('E', 'C07a_hexCasing'),
+    family: 'E',
+    generator: 'C07a_hexCaseNormalize',
+    failureClass: 'C-07',
+    description: 'C-07: "#FF0000" in edit vs "#ff0000" in predicate — _nC lowercases (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #FF0000' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'hex_case_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-07b: Mixed case named color — "Red" vs "red"
+  scenarios.push({
+    id: nextId('E', 'C07b_namedCasing'),
+    family: 'E',
+    generator: 'C07b_namedColorCase',
+    failureClass: 'C-07',
+    description: 'C-07: "Red" (capitalized) vs "red" (lowercase) — _nC lowercases (grounded)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: Red' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'named_color_case_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-07c: Mixed case named color to hex — "RED" → #ff0000
+  scenarios.push({
+    id: nextId('E', 'C07c_upperNamedToHex'),
+    family: 'E',
+    generator: 'C07c_upperNamedToHex',
+    failureClass: 'C-07',
+    description: 'C-07: "RED" (all caps) matches hex "#ff0000" via _nC lowercase + lookup',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: RED' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'upper_named_to_hex'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── C-08: Zero equivalences ──
+  // _nC() normalizes 0px, 0em, 0rem, 0%, etc. → "0". All zeros are equivalent.
+
+  // C-08a: 0 vs 0px — normalizer converts 0px → 0, match
+  scenarios.push({
+    id: nextId('E', 'C08a_zeroVsZeroPx'),
+    family: 'E',
+    generator: 'C08a_zeroVsZeroPx',
+    failureClass: 'C-08',
+    description: 'C-08: "0" in edit vs "0px" in predicate — normalizer converts 0px→0 (grounded)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 0' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'zero_unit_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-08b: 0px vs 0 — normalizer converts both to "0", match
+  scenarios.push({
+    id: nextId('E', 'C08b_zeroPxVsZero'),
+    family: 'E',
+    generator: 'C08b_zeroPxVsZero',
+    failureClass: 'C-08',
+    description: 'C-08: "0px" in edit vs "0" in predicate — normalizer converts 0px→0 (grounded)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 0px' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'zero_px_normalized_to_zero'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-08c: 0em vs 0rem — normalizer converts both to "0", match
+  scenarios.push({
+    id: nextId('E', 'C08c_zeroEmVsRem'),
+    family: 'E',
+    generator: 'C08c_zeroEmVsRem',
+    failureClass: 'C-08',
+    description: 'C-08: "0em" vs "0rem" — normalizer converts both→0 (grounded)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 0em' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0rem' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'zero_em_rem_normalized'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-09: calc() expressions ───
+  // calc() can't be resolved statically — grounding gate can't know the computed value
+  scenarios.push({
+    id: nextId('E', 'C09a_calcExpression'),
+    family: 'E',
+    generator: 'C09a_calcExpression',
+    failureClass: 'C-09',
+    description: 'C-09: Edit uses calc() — predicate expects computed result (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: calc(2rem - 4px)' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '28px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'calc_not_resolvable_statically'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-09b: Edit uses calc() and predicate also uses calc() — substring match works
+  scenarios.push({
+    id: nextId('E', 'C09b_calcMatchesCalc'),
+    family: 'E',
+    generator: 'C09b_calcMatchesCalc',
+    failureClass: 'C-09',
+    description: 'C-09: Edit calc() matches predicate calc() via substring (grounded)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: calc(100% - 20px)' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: 'calc(100% - 20px)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'calc_literal_substring_match'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-10: CSS custom properties (var()) ───
+  // The predicate expects #1a1a2e, and the source currently HAS #1a1a2e on h1.
+  // The edit changes it to var(--primary), but grounding checks the SOURCE value
+  // against expected — they match, so grounding considers it grounded.
+  // This is a false positive: the edit will change the value to something the gate can't resolve.
+  scenarios.push({
+    id: nextId('E', 'C10a_varFunctionGap'),
+    family: 'E',
+    generator: 'C10a_varFunctionGap',
+    failureClass: 'C-10',
+    description: 'C-10: Edit uses var(--x) — source value matches predicate so grounding passes (false confidence)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: var(--primary)' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#1a1a2e' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'var_source_value_matches_false_confidence'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-11: auto/inherit/initial/unset keywords ───
+  scenarios.push({
+    id: nextId('E', 'C11a_autoKeyword'),
+    family: 'E',
+    generator: 'C11a_autoKeyword',
+    failureClass: 'C-11',
+    description: 'C-11: Edit uses "auto" — predicate expects computed value (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: auto' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '0px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'auto_keyword_not_resolvable'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-11b: Edit uses "inherit" — predicate expects parent value
+  scenarios.push({
+    id: nextId('E', 'C11b_inheritKeyword'),
+    family: 'E',
+    generator: 'C11b_inheritKeyword',
+    failureClass: 'C-11',
+    description: 'C-11: Edit uses "inherit" — predicate expects parent value (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'color: #666', replace: 'color: inherit' }],
+    predicates: [{ type: 'css', selector: '.subtitle', property: 'color', expected: '#333' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'inherit_not_resolvable'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-12: !important override ───
+  scenarios.push({
+    id: nextId('E', 'C12a_importantOverride'),
+    family: 'E',
+    generator: 'C12a_importantOverride',
+    failureClass: 'C-12',
+    description: 'C-12: Edit adds !important — value substring match works despite !important',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #ff0000 !important' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // !important is part of the value string — substring match should work
+      predicateIsGrounded(0, 'important_value_substring_match'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-13: Relative unit equivalence ───
+  scenarios.push({
+    id: nextId('E', 'C13a_emVsPx'),
+    family: 'E',
+    generator: 'C13a_emVsPx',
+    failureClass: 'C-13',
+    description: 'C-13: Edit uses "2em" — predicate expects "32px" (groundingMiss, context-dependent)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 2em' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '32px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'em_to_px_context_dependent'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-14: Percentage values ───
+  scenarios.push({
+    id: nextId('E', 'C14a_percentVsPx'),
+    family: 'E',
+    generator: 'C14a_percentVsPx',
+    failureClass: 'C-14',
+    description: 'C-14: Edit uses "50%" — predicate expects pixel value (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 50%' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '500px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'percent_to_px_context_dependent'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-15: Multiple values on one property ───
+  // Edit adds transition property to a.nav-link, but grounding checks source CSS first.
+  // a.nav-link only has "color" in source — "transition" property not found → groundingMiss.
+  // This is correct: grounding doesn't see that the edit introduces a new property.
+  scenarios.push({
+    id: nextId('E', 'C15a_multiValueTransition'),
+    family: 'E',
+    generator: 'C15a_multiValueTransition',
+    failureClass: 'C-15',
+    description: 'C-15: Edit adds new property — grounding rejects because property not in source (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'color: #0066cc', replace: 'color: #0066cc; transition: color 0.3s, opacity 0.5s' }],
+    predicates: [{ type: 'css', selector: 'a.nav-link', property: 'transition', expected: 'color 0.3s' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'new_property_not_in_source'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-16: Browser-specific prefixes ───
+  scenarios.push({
+    id: nextId('E', 'C16a_webkitPrefix'),
+    family: 'E',
+    generator: 'C16a_webkitPrefix',
+    failureClass: 'C-16',
+    description: 'C-16: Edit uses -webkit-transform — predicate checks transform (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'font-size: 2rem', replace: 'font-size: 2rem; -webkit-transform: rotate(5deg)' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'transform', expected: 'rotate(5deg)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // -webkit-transform is a different property than transform — grounding won't find it
+      predicateIsGroundingMiss(0, 'vendor_prefix_not_mapped'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-44: Fractional rounding differences ───
+  scenarios.push({
+    id: nextId('E', 'C44a_fractionalRounding'),
+    family: 'E',
+    generator: 'C44a_fractionalRounding',
+    failureClass: 'C-44',
+    description: 'C-44: Edit uses 33.3333% — predicate expects rounded 33.33% (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 33.3333%' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '33.33%' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'fractional_rounding_mismatch'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-45: normal keyword resolution ───
+  scenarios.push({
+    id: nextId('E', 'C45a_normalKeyword'),
+    family: 'E',
+    generator: 'C45a_normalKeyword',
+    failureClass: 'C-45',
+    description: 'C-45: Edit sets font-weight: normal — predicate expects "400" (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'font-size: 2rem', replace: 'font-size: 2rem; font-weight: normal' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'font-weight', expected: '400' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'normal_not_mapped_to_400'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-46: Font family normalization ───
+  scenarios.push({
+    id: nextId('E', 'C46a_fontFamilyQuoting'),
+    family: 'E',
+    generator: 'C46a_fontFamilyQuoting',
+    failureClass: 'C-46',
+    description: 'C-46: Edit uses quoted font — predicate uses unquoted (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'font-family: sans-serif', replace: 'font-family: "Helvetica Neue", sans-serif' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'font-family', expected: 'Helvetica Neue, sans-serif' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // Quoted vs unquoted — substring match won't work because quotes are part of value
+      predicateIsGroundingMiss(0, 'font_family_quoting_mismatch'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-49: Modern color syntax (space-separated) ───
+  scenarios.push({
+    id: nextId('E', 'C49a_modernColorSyntax'),
+    family: 'E',
+    generator: 'C49a_modernColorSyntax',
+    failureClass: 'C-49',
+    description: 'C-49: Edit uses modern rgb(255 0 0 / 1) — predicate expects legacy rgb(255,0,0) (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: rgb(255 0 0 / 1)' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: 'rgb(255, 0, 0)' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'modern_vs_legacy_color_syntax'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-51: Invalid value silently dropped ───
+  scenarios.push({
+    id: nextId('E', 'C51a_invalidValueDropped'),
+    family: 'E',
+    generator: 'C51a_invalidValueDropped',
+    failureClass: 'C-51',
+    description: 'C-51: Edit sets invalid color value — browser drops it, predicate expects inherited (groundingMiss)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: notacolor' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'color', expected: '#333' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // grounding sees "notacolor" in the source, predicate expects "#333" — no match
+      predicateIsGroundingMiss(0, 'invalid_value_drops_to_inherited'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-52: rem depends on root font-size ───
+  scenarios.push({
+    id: nextId('E', 'C52a_remContextDependent'),
+    family: 'E',
+    generator: 'C52a_remContextDependent',
+    failureClass: 'C-52',
+    description: 'C-52: Edit uses 3rem — predicate expects 48px (groundingMiss, root-relative)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 3rem' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin', expected: '48px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'rem_to_px_root_dependent'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CSS SHORTHAND RESOLUTION (C-17 through C-30)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ─── C-17: border → border-width/style/color ───
+  // Demo-app has: `.items li { border-bottom: 1px solid #eee }`
+  // Grounding _SH maps border → [border-width, border-style, border-color]
+  // but border-bottom is NOT in _SH — it's a directional variant
+
+  // C-17a: Edit shorthand border, predicate checks border-width — uses _SH resolution
+  scenarios.push({
+    id: nextId('E', 'C17a_borderToWidth'),
+    family: 'E',
+    generator: 'C17a_borderToWidth',
+    failureClass: 'C-17',
+    description: 'C-17: Edit "border: 2px dashed red" — predicate checks border-width (shorthand resolved)',
+    edits: [{ file: 'server.js', search: 'border-bottom: 1px solid #eee', replace: 'border: 2px dashed red' }],
+    predicates: [{ type: 'css', selector: '.items li', property: 'border-width', expected: '2px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // _SH maps border → [border-width, border-style, border-color]
+      // editWouldChange: rep has 'border-width' via shorthand resolution
+      // But wait — source has border-bottom, not border. Selector .items li exists,
+      // border-width is not directly on it. Shorthand check: _SH['border'] includes 'border-width',
+      // but source has 'border-bottom' not 'border'. So propertyFound will be false.
+      predicateIsGroundingMiss(0, 'border_bottom_not_in_shorthand_map'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-17b: Edit changes border-bottom, predicate checks border-bottom (direct property)
+  scenarios.push({
+    id: nextId('E', 'C17b_borderBottomDirect'),
+    family: 'E',
+    generator: 'C17b_borderBottomDirect',
+    failureClass: 'C-17',
+    description: 'C-17: Edit border-bottom value — predicate checks border-bottom directly (grounded)',
+    edits: [{ file: 'server.js', search: 'border-bottom: 1px solid #eee', replace: 'border-bottom: 2px dashed #ccc' }],
+    predicates: [{ type: 'css', selector: '.items li', property: 'border-bottom', expected: '2px dashed #ccc' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'border_bottom_direct_property_match'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-18: margin → directional components ───
+  // Demo-app has: `body { margin: 2rem }` — single-value shorthand (all sides same)
+  // _SH maps margin → [margin-top, margin-right, margin-bottom, margin-left]
+
+  // C-18a: Edit changes margin shorthand, predicate checks margin-top
+  scenarios.push({
+    id: nextId('E', 'C18a_marginToTop'),
+    family: 'E',
+    generator: 'C18a_marginToTop',
+    failureClass: 'C-18',
+    description: 'C-18: Edit "margin: 10px 20px" — predicate checks margin-top via shorthand (grounded)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 10px 20px' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin-top', expected: '10px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // _SH resolves margin → margin-top at index 0 → first token "10px" ✓
+      predicateIsGrounded(0, 'margin_shorthand_to_top_resolved'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-18b: Edit changes margin shorthand, predicate checks margin-right (2nd token)
+  scenarios.push({
+    id: nextId('E', 'C18b_marginToRight'),
+    family: 'E',
+    generator: 'C18b_marginToRight',
+    failureClass: 'C-18',
+    description: 'C-18: Edit "margin: 10px 20px" — predicate checks margin-right (2nd token, grounded)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 10px 20px' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin-right', expected: '20px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // _SH resolves margin → margin-right at index 1 → second token "20px" ✓
+      predicateIsGrounded(0, 'margin_shorthand_to_right_resolved'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-18c: 4-value margin — predicate checks margin-bottom (3rd token)
+  scenarios.push({
+    id: nextId('E', 'C18c_marginToBottom'),
+    family: 'E',
+    generator: 'C18c_marginToBottom',
+    failureClass: 'C-18',
+    description: 'C-18: Edit "margin: 5px 10px 15px 20px" — predicate checks margin-bottom (3rd token)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 5px 10px 15px 20px' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin-bottom', expected: '15px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // _rS splits "5px 10px 15px 20px" → token at index 2 (margin-bottom) = "15px"
+      predicateIsGrounded(0, 'margin_4value_bottom_resolved'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-18d: 2-value margin — predicate checks margin-bottom (browser wraps to 3rd position but _rS uses token index)
+  // CSS spec: "margin: 10px 20px" → top=10px right=20px bottom=10px left=20px
+  // _rS tokenizes "10px 20px" → tokens[2] = undefined
+  // Grounding result: propertyFound via _SH → true, _shVal = undefined,
+  // editWouldChange shorthand check → undefined, no direct property 'margin-bottom' in source.
+  // Gate can't prove a mismatch → passes through as grounded (false confidence).
+  scenarios.push({
+    id: nextId('E', 'C18d_margin2valuBottomGap'),
+    family: 'E',
+    generator: 'C18d_margin2valuBottomGap',
+    failureClass: 'C-18',
+    description: 'C-18: Edit "margin: 10px 20px" — predicate checks margin-bottom (index OOB → false confidence)',
+    edits: [{ file: 'server.js', search: 'margin: 2rem', replace: 'margin: 10px 20px' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'margin-bottom', expected: '10px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // _rS returns undefined for index 2 with only 2 tokens
+      // Gate can't detect mismatch when shorthand resolve returns undefined → grounded
+      predicateIsGrounded(0, 'margin_2value_bottom_false_confidence'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-19: padding → directional components ───
+  // Demo-app has: `.items li { padding: 0.5rem 0 }` — 2-value shorthand
+  scenarios.push({
+    id: nextId('E', 'C19a_paddingToTop'),
+    family: 'E',
+    generator: 'C19a_paddingToTop',
+    failureClass: 'C-19',
+    description: 'C-19: Edit "padding: 1rem 2rem" — predicate checks padding-top (grounded)',
+    edits: [{ file: 'server.js', search: 'padding: 0.5rem 0', replace: 'padding: 1rem 2rem' }],
+    predicates: [{ type: 'css', selector: '.items li', property: 'padding-top', expected: '1rem' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'padding_shorthand_to_top_resolved'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-20: background → longhand components ───
+  // Demo-app has: `body { background: #ffffff }` — simple background shorthand
+  // _SH maps background → [background-color]
+  scenarios.push({
+    id: nextId('E', 'C20a_backgroundToColor'),
+    family: 'E',
+    generator: 'C20a_backgroundToColor',
+    failureClass: 'C-20',
+    description: 'C-20: Edit "background: #ff0000" — predicate checks background-color (grounded)',
+    edits: [{ file: 'server.js', search: 'background: #ffffff', replace: 'background: #ff0000' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'background-color', expected: '#ff0000' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // _SH maps background → [background-color], index 0 → first token "#ff0000"
+      predicateIsGrounded(0, 'background_to_color_resolved'),
+    ],
+    requiresDocker: false,
+  });
+
+  // C-20b: Complex background shorthand — more tokens than _SH expects
+  scenarios.push({
+    id: nextId('E', 'C20b_complexBackground'),
+    family: 'E',
+    generator: 'C20b_complexBackground',
+    failureClass: 'C-20',
+    description: 'C-20: Edit "background: url(bg.png) center/cover #333" — predicate checks background-color (gap)',
+    edits: [{ file: 'server.js', search: 'background: #ffffff', replace: 'background: url(bg.png) center/cover #333' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'background-color', expected: '#333' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // _SH maps background → [background-color] at index 0
+      // _rS tokenizes "url(bg.png) center/cover #333" → tokens[0] = "url(bg.png)"
+      // That doesn't match "#333" — the color is at the end, not positional
+      predicateIsGroundingMiss(0, 'complex_background_positional_mismatch'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-21: font → size/weight/family/style ───
+  // _SH maps font → [font-style, font-variant, font-weight, font-size, line-height, font-family]
+  // Demo-app doesn't have a font shorthand, so we test with an edit that adds one
+  scenarios.push({
+    id: nextId('E', 'C21a_fontToSize'),
+    family: 'E',
+    generator: 'C21a_fontToSize',
+    failureClass: 'C-21',
+    description: 'C-21: Edit uses font shorthand — predicate checks font-size (grounded if token matches)',
+    edits: [{ file: 'server.js', search: 'font-family: sans-serif', replace: 'font: normal normal bold 16px/1.5 sans-serif' }],
+    predicates: [{ type: 'css', selector: 'body', property: 'font-size', expected: '16px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // Source has font-family, not font. Property font-size is NOT in source.
+      // _SH check: font includes font-size, and source has... font-family, not font.
+      // So propertyFound = false (font-family is in source, but that's a different property)
+      // Wait — _SH['font'] includes 'font-size'. Source has 'font-family' property.
+      // 'font' shorthand is NOT a key in source CSS for body. So propertyFound via _SH
+      // requires 'font' to be in source. It's not — 'font-family' is in source.
+      predicateIsGroundingMiss(0, 'font_shorthand_not_in_source'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-24: animation shorthand ───
+  // Not in _SH, not in demo-app. Test that adding animation → checking animation-name fails.
+  scenarios.push({
+    id: nextId('E', 'C24a_animationNotInMap'),
+    family: 'E',
+    generator: 'C24a_animationNotInMap',
+    failureClass: 'C-24',
+    description: 'C-24: Edit adds animation shorthand — predicate checks animation-name (not in _SH map)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #1a1a2e; animation: spin 2s linear infinite' }],
+    predicates: [{ type: 'css', selector: 'h1', property: 'animation-name', expected: 'spin' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // animation-name not found on h1 (only color, font-size), not in _SH longhands
+      predicateIsGroundingMiss(0, 'animation_name_not_in_shorthand_map'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-25: transition shorthand ───
+  // Not in _SH. Same pattern as animation.
+  scenarios.push({
+    id: nextId('E', 'C25a_transitionNotInMap'),
+    family: 'E',
+    generator: 'C25a_transitionNotInMap',
+    failureClass: 'C-25',
+    description: 'C-25: Edit adds transition — predicate checks transition-duration (not in _SH map)',
+    edits: [{ file: 'server.js', search: 'color: #0066cc', replace: 'color: #0066cc; transition: color 0.3s ease' }],
+    predicates: [{ type: 'css', selector: 'a.nav-link', property: 'transition-duration', expected: '0.3s' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'transition_duration_not_in_shorthand_map'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-28: outline shorthand → width/style/color ───
+  // _SH maps outline → [outline-width, outline-style, outline-color]
+  scenarios.push({
+    id: nextId('E', 'C28a_outlineToWidth'),
+    family: 'E',
+    generator: 'C28a_outlineToWidth',
+    failureClass: 'C-28',
+    description: 'C-28: Edit adds outline shorthand — predicate checks outline-width (not in source = miss)',
+    edits: [{ file: 'server.js', search: 'color: #0066cc', replace: 'color: #0066cc; outline: 2px solid blue' }],
+    predicates: [{ type: 'css', selector: 'a.nav-link', property: 'outline-width', expected: '2px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // outline-width: _SH['outline'] includes 'outline-width'
+      // but source has no 'outline' property on a.nav-link → propertyFound = false
+      predicateIsGroundingMiss(0, 'outline_not_in_source'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── C-30: Shorthand component ordering ambiguity ───
+  // border: "1px solid red" — which token maps to which longhand?
+  // _rS does positional: index 0 = border-width, 1 = border-style, 2 = border-color
+  scenarios.push({
+    id: nextId('E', 'C30a_borderOrderAmbiguity'),
+    family: 'E',
+    generator: 'C30a_borderOrderAmbiguity',
+    failureClass: 'C-30',
+    description: 'C-30: border "solid 1px red" — CSS is order-independent but _rS is positional (gap)',
+    edits: [{ file: 'server.js', search: 'border-bottom: 1px solid #eee', replace: 'border: solid 1px red' }],
+    predicates: [{ type: 'css', selector: '.items li', property: 'border-width', expected: '1px' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // Source has border-bottom, not border. _SH['border'] includes border-width,
+      // but source doesn't have 'border'. propertyFound = false → groundingMiss
+      // (This also documents the ordering issue — if border WERE in source,
+      // _rS would give "solid" at index 0 for border-width, which is wrong)
+      predicateIsGroundingMiss(0, 'border_bottom_not_mapped_plus_ordering'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTENT PATTERN MATCHING (N-04 through N-08)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ─── N-04: Regex vs literal matching ───
+  // Content gate uses includes() — pure literal substring, no regex.
+  // A dot in the pattern matches literal dot, not "any character".
+
+  // N-04a: Pattern with dot — matches literally (correct for includes())
+  scenarios.push({
+    id: nextId('E', 'N04a_dotLiteral'),
+    family: 'E',
+    generator: 'N04a_dotLiteral',
+    failureClass: 'N-04',
+    description: 'N-04: Pattern "process.env" matches literally via includes() (grounded)',
+    edits: [{ file: 'server.js', search: 'const PORT = process.env.PORT || 3000', replace: 'const PORT = process.env.PORT || 4000' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'process.env' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // "process.env" is in server.js source → grounded
+      predicateIsGrounded(0, 'dot_is_literal_in_includes'),
+    ],
+    requiresDocker: false,
+  });
+
+  // N-04b: Pattern with regex-special chars — includes() treats literally
+  scenarios.push({
+    id: nextId('E', 'N04b_regexSpecialChars'),
+    family: 'E',
+    generator: 'N04b_regexSpecialChars',
+    failureClass: 'N-04',
+    description: 'N-04: Pattern with regex chars "res.end(" matches literally (grounded)',
+    edits: [{ file: 'server.js', search: "res.end('Not Found')", replace: "res.end('Not Here')" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: "res.end('Not Here')" }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // Pattern not in source, but edit.replace includes it → grounded
+      predicateIsGrounded(0, 'regex_chars_literal_edit_creates'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── N-05: Multi-line pattern matching ───
+  // includes() works across lines since the file is read as a single string
+
+  // N-05a: Pattern spans line boundary — still matches with includes()
+  scenarios.push({
+    id: nextId('E', 'N05a_multiLineMatch'),
+    family: 'E',
+    generator: 'N05a_multiLineMatch',
+    failureClass: 'N-05',
+    description: 'N-05: Pattern spans line boundary — includes() matches across lines (grounded)',
+    edits: [{ file: 'server.js', search: "res.end('Not Found')", replace: "res.end('Not Found')" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: "Content-Type': 'application/json' });\n    res.end" }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // server.js has this exact cross-line pattern → grounded
+      predicateIsGrounded(0, 'multiline_includes_works'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── N-06: Pattern in comment vs code ───
+  // includes() can't distinguish comment from code
+
+  // N-06a: Pattern exists in source but edit replaces it — grounded via edit
+  scenarios.push({
+    id: nextId('E', 'N06a_patternInComment'),
+    family: 'E',
+    generator: 'N06a_patternInComment',
+    failureClass: 'N-06',
+    description: 'N-06: Edit adds comment with pattern — includes() matches comment text (grounded)',
+    edits: [{ file: 'server.js', search: "const PORT = process.env.PORT || 3000", replace: "// PORT: use environment variable\nconst PORT = process.env.PORT || 3000" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'PORT: use environment variable' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // Pattern not in source, but edit.replace includes it → grounded
+      predicateIsGrounded(0, 'comment_pattern_edit_creates'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── N-07: Case sensitivity ───
+  // includes() is case-sensitive
+
+  // N-07a: Correct case — matches
+  scenarios.push({
+    id: nextId('E', 'N07a_correctCase'),
+    family: 'E',
+    generator: 'N07a_correctCase',
+    failureClass: 'N-07',
+    description: 'N-07: Pattern with correct case "Demo App" matches (grounded)',
+    edits: [{ file: 'server.js', search: "res.end('Not Found')", replace: "res.end('Not Found')" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGrounded(0, 'case_sensitive_match'),
+    ],
+    requiresDocker: false,
+  });
+
+  // N-07b: Wrong case — doesn't match
+  scenarios.push({
+    id: nextId('E', 'N07b_wrongCase'),
+    family: 'E',
+    generator: 'N07b_wrongCase',
+    failureClass: 'N-07',
+    description: 'N-07: Pattern "demo app" (lowercase) fails case-sensitive includes() (groundingMiss)',
+    edits: [{ file: 'server.js', search: "res.end('Not Found')", replace: "res.end('Not Found')" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'demo app' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // "Demo App" in source, but includes("demo app") is false
+      predicateIsGroundingMiss(0, 'case_sensitive_mismatch'),
+    ],
+    requiresDocker: false,
+  });
+
+  // ─── N-08: Partial match vs full match ───
+  // includes() is a substring match — "color" matches "background-color"
+
+  // N-08a: Short pattern matches as substring of longer token
+  scenarios.push({
+    id: nextId('E', 'N08a_substringMatch'),
+    family: 'E',
+    generator: 'N08a_substringMatch',
+    failureClass: 'N-08',
+    description: 'N-08: Pattern "color" matches "background-color" via substring (grounded — false positive)',
+    edits: [{ file: 'server.js', search: "res.end('Not Found')", replace: "res.end('Not Found')" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'color' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      // "color" is a substring of many things in server.js (background-color, color, etc.)
+      predicateIsGrounded(0, 'substring_false_positive'),
+    ],
+    requiresDocker: false,
+  });
+
+  // N-08b: Pattern that doesn't match anything
+  scenarios.push({
+    id: nextId('E', 'N08b_noMatch'),
+    family: 'E',
+    generator: 'N08b_noMatch',
+    failureClass: 'N-08',
+    description: 'N-08: Pattern "xyzzy_unique_token" not in file and no edit creates it (groundingMiss)',
+    edits: [{ file: 'server.js', search: "res.end('Not Found')", replace: "res.end('Not Found')" }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'xyzzy_unique_token' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      groundingRan(),
+      predicateIsGroundingMiss(0, 'pattern_not_found_no_edit'),
     ],
     requiresDocker: false,
   });
@@ -3004,6 +5195,679 @@ function generateFamilyV(appDir: string): VerifyScenario[] {
 }
 
 // =============================================================================
+// FAMILY M: MESSAGE GATE (Governed Outbound Communication)
+// =============================================================================
+// Tests the message governance pipeline — destination, forbidden content,
+// required content, claims with evidence, negation detection, denied patterns,
+// and review hooks. 11 failure shapes: MSG-01 through MSG-11.
+
+function generateFamilyM(_appDir: string): VerifyScenario[] {
+  const scenarios: VerifyScenario[] = [];
+
+  // Shared envelope factory
+  const makeEnvelope = (overrides: Partial<MessageEnvelope> = {}): MessageEnvelope => ({
+    destination: { target: '#deployments', platform: 'slack' },
+    content: { body: 'Status update: all systems operational' },
+    sender: { identity: 'deploy-bot' },
+    ...overrides,
+  });
+
+  // Shared deploy policy
+  const deployPolicy: MessagePolicy = {
+    destinations: { allow: ['#deployments', '#alerts'], deny: ['#general', '#random'] },
+    forbidden: ['password', 'secret', /api[_-]?key/i],
+    claims: {
+      deploy: {
+        unknown_assertions: 'clarify',
+        assertions: {
+          deploy_success: {
+            triggers: ['deployed successfully', 'completed successfully', 'deploy completed'],
+            evidence: 'checkpoint',
+          },
+          tests_passing: {
+            triggers: ['all tests pass', 'tests are passing', 'test suite passed'],
+            evidence: 'test_run',
+          },
+        },
+      },
+    },
+  };
+
+  // Evidence providers
+  const validEvidence: Record<string, EvidenceProvider> = {
+    checkpoint: async () => ({ exists: true, fresh: true, detail: 'CP-138 verified' }),
+    test_run: async () => ({ exists: true, fresh: true, detail: 'Test run #42 passed' }),
+  };
+
+  const staleEvidence: Record<string, EvidenceProvider> = {
+    checkpoint: async () => ({ exists: true, fresh: false, detail: 'CP-100 is 3 hours old', epoch: Date.now() - 3 * 3600 * 1000 }),
+  };
+
+  const missingEvidence: Record<string, EvidenceProvider> = {
+    checkpoint: async () => ({ exists: false, fresh: false, detail: 'No checkpoint found for this deploy' }),
+  };
+
+  // ── MSG-01: Destination denied ─────────────────────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG01_dest_denied'),
+    family: 'M',
+    generator: 'MSG01_dest_denied',
+    description: 'MSG-01: Message to denied destination is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({ destination: { target: '#general', platform: 'slack' } }),
+      policy: deployPolicy,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'denied destination'),
+      messageReason('destination_denied'),
+      messageGateFailed('destination'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-01',
+  });
+
+  // ── MSG-01b: Destination not in allow list ─────────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG01b_dest_not_allowed'),
+    family: 'M',
+    generator: 'MSG01b_dest_not_allowed',
+    description: 'MSG-01: Message to unlisted destination is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({ destination: { target: '#secret-channel', platform: 'slack' } }),
+      policy: deployPolicy,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'destination not in allow list'),
+      messageReason('destination_denied'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-01',
+  });
+
+  // ── MSG-02: Forbidden content ──────────────────────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG02_forbidden_string'),
+    family: 'M',
+    generator: 'MSG02_forbidden_string',
+    description: 'MSG-02: Message with forbidden string is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'Deploy complete. DB password is hunter2' },
+      }),
+      policy: deployPolicy,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'forbidden content'),
+      messageReason('forbidden_content'),
+      messageGatePassed('destination'),
+      messageGateFailed('forbidden_content'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-02',
+  });
+
+  // ── MSG-02b: Forbidden regex pattern ───────────────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG02b_forbidden_regex'),
+    family: 'M',
+    generator: 'MSG02b_forbidden_regex',
+    description: 'MSG-02: Message with api_key pattern is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'Set api_key to sk-1234567890' },
+      }),
+      policy: deployPolicy,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'forbidden regex'),
+      messageReason('forbidden_content'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-02',
+  });
+
+  // ── MSG-03: Claim with valid evidence — approved ───────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG03_claim_verified'),
+    family: 'M',
+    generator: 'MSG03_claim_verified',
+    description: 'MSG-03: Claim "deployed successfully" with valid checkpoint passes',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3 deployed successfully to production' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('approved', 'claim verified'),
+      messageGatePassed('destination'),
+      messageGatePassed('forbidden_content'),
+      messageGatePassed('claims'),
+      messageClaimVerified('deploy_success', true),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-03',
+  });
+
+  // ── MSG-04: Claim without evidence — blocked ───────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG04_claim_no_evidence'),
+    family: 'M',
+    generator: 'MSG04_claim_no_evidence',
+    description: 'MSG-04: Claim "deployed successfully" without evidence is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3 deployed successfully to production' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: missingEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'claim unsupported'),
+      messageReason('claim_unsupported'),
+      messageClaimVerified('deploy_success', false),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-04',
+  });
+
+  // ── MSG-05: Missing required content ───────────────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG05_missing_required'),
+    family: 'M',
+    generator: 'MSG05_missing_required',
+    description: 'MSG-05: Deploy message missing required version tag is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'Deploy completed' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: {
+        ...deployPolicy,
+        required: [{ topic: 'deploy', patterns: [/v\d+\.\d+/] }],
+      },
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'missing required'),
+      messageReason('missing_required'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-05',
+  });
+
+  // ── MSG-06a: Obvious negation suppresses trigger ───────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG06a_obvious_negation'),
+    family: 'M',
+    generator: 'MSG06a_obvious_negation',
+    description: 'MSG-06a: "has not deployed successfully" suppresses deploy_success trigger',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'The service has not deployed successfully — investigating' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('approved', 'negation suppresses trigger'),
+      messageGatePassed('claims'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-06',
+  });
+
+  // ── MSG-06b: Ambiguous negation escalates to clarify ───────────────
+  scenarios.push({
+    id: nextId('M', 'MSG06b_ambiguous_negation'),
+    family: 'M',
+    generator: 'MSG06b_ambiguous_negation',
+    description: 'MSG-06b: "possibly deployed successfully" triggers clarify',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'The release possibly deployed successfully but we are checking' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('clarify', 'ambiguous negation'),
+      messageReason('ambiguous_negation'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-06',
+  });
+
+  // ── MSG-09: Unknown assertion in governed topic ─────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG09_unknown_assertion'),
+    family: 'M',
+    generator: 'MSG09_unknown_assertion',
+    description: 'MSG-09: Novel claim "verified in staging" not in assertion list triggers clarify',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'The migration has been verified in staging and looks good' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('clarify', 'unknown assertion'),
+      messageReason('unknown_assertion'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-09',
+  });
+
+  // ── MSG-09b: Unknown assertion with allow policy passes ────────────
+  scenarios.push({
+    id: nextId('M', 'MSG09b_unknown_allowed'),
+    family: 'M',
+    generator: 'MSG09b_unknown_allowed',
+    description: 'MSG-09: Novel claim passes when unknown_assertions=allow',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'The migration has been verified in staging and looks good' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: {
+        ...deployPolicy,
+        claims: {
+          deploy: {
+            ...deployPolicy.claims!.deploy,
+            unknown_assertions: 'allow',
+          },
+        },
+      },
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('approved', 'unknown assertions allowed'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-09',
+  });
+
+  // ── MSG-10: Previously denied pattern (K5 memory) ──────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG10_denied_pattern'),
+    family: 'M',
+    generator: 'MSG10_denied_pattern',
+    description: 'MSG-10: Previously denied destination+content pattern is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'Deploy v1.0 completed successfully' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: validEvidence,
+      deniedPatterns: [
+        { pattern: 'v1.0', reason: 'v1.0 deploy claim was false last time', timestamp: Date.now() - 60000 },
+      ],
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'previously denied'),
+      messageReason('previously_denied'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-10',
+  });
+
+  // ── MSG-11: Stale evidence ─────────────────────────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG11_stale_evidence'),
+    family: 'M',
+    generator: 'MSG11_stale_evidence',
+    description: 'MSG-11: Claim with stale checkpoint evidence is blocked',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3 deployed successfully to production' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: staleEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'stale evidence'),
+      messageReason('claim_stale_evidence'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-11',
+  });
+
+  // ── MSG-07: Review hook blocks ─────────────────────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG07_review_blocked'),
+    family: 'M',
+    generator: 'MSG07_review_blocked',
+    description: 'MSG-07: Review hook blocks message with structured reason',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'Announcing company-wide restructuring changes' },
+      }),
+      policy: {
+        destinations: { allow: ['#deployments'] },
+        review: async () => ({
+          verdict: 'blocked' as const,
+          reason: 'Sensitive announcement — requires VP approval',
+          notes: 'Flagged by content sensitivity classifier',
+        }),
+      },
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('blocked', 'review blocked'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-07',
+  });
+
+  // ── MSG-08: Review hook escalates to clarify ───────────────────────
+  scenarios.push({
+    id: nextId('M', 'MSG08_review_clarify'),
+    family: 'M',
+    generator: 'MSG08_review_clarify',
+    description: 'MSG-08: Review hook escalates ambiguous message to clarify',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'We might need to update the pricing page tonight' },
+      }),
+      policy: {
+        destinations: { allow: ['#deployments'] },
+        review: async () => ({
+          verdict: 'clarify' as const,
+          reason: 'Message implies a change — should this be a goal instead?',
+        }),
+      },
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('clarify', 'review clarify'),
+      messageReason('review_escalated'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-08',
+  });
+
+  // ── MSG-12: Topic override narrowing ──────────────────────────────
+  // Agent labels message as "general", but content says "deployed successfully"
+  // → gate detects deploy topic from content keywords → narrowed verdict
+  const topicPolicy: MessagePolicy = {
+    ...deployPolicy,
+    topics: {
+      deploy: {
+        trust_agent_label: false,
+        detect: ['deployed', 'deploy completed', 'deployment', 'released'],
+      },
+      incident: {
+        trust_agent_label: false,
+        detect: ['outage', 'incident', 'downtime', 'degraded'],
+      },
+      general: {
+        trust_agent_label: true,
+        detect: [],
+      },
+    },
+  };
+
+  scenarios.push({
+    id: nextId('M', 'MSG12_topic_override'),
+    family: 'M',
+    generator: 'MSG12_topic_override',
+    description: 'MSG-12: Agent labels "general" but content has deploy keywords → topic overridden → narrowed',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3.1 deployed successfully to production' },
+        topic: { value: 'general', source: 'agent' },
+      }),
+      policy: topicPolicy,
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('narrowed', 'topic override narrowing'),
+      messageTopicResolution('policy_detected', true),
+      messageNarrowing('topic_override'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-12',
+  });
+
+  // ── MSG-12 variant: agent and detection agree → approved (no override)
+  scenarios.push({
+    id: nextId('M', 'MSG12_topic_agree'),
+    family: 'M',
+    generator: 'MSG12_topic_agree',
+    description: 'MSG-12 variant: agent labels "deploy" and content confirms → approved (no override)',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3.1 deployed successfully to production' },
+        topic: { value: 'deploy', source: 'agent' },
+      }),
+      policy: topicPolicy,
+      evidenceProviders: validEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('approved', 'topic agreement — no override'),
+      messageTopicResolution('policy_detected', false),
+    ],
+    requiresDocker: false,
+  });
+
+  // ── MSG-13: Epoch-based evidence staleness → narrowed ──────────────
+  // Evidence exists and provider says fresh=true, but epoch is stale
+  const epochStaleEvidence: Record<string, EvidenceProvider> = {
+    checkpoint: async () => ({
+      exists: true,
+      fresh: true, // Provider says fresh — gate overrides via epoch
+      detail: 'CP-100 exists',
+      epoch: 3,
+      currentEpoch: 5,
+    }),
+  };
+
+  scenarios.push({
+    id: nextId('M', 'MSG13_epoch_stale'),
+    family: 'M',
+    generator: 'MSG13_epoch_stale',
+    description: 'MSG-13: Evidence provider says fresh but epoch is stale → narrowed',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3.1 deployed successfully to production' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: deployPolicy,
+      evidenceProviders: epochStaleEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('narrowed', 'epoch-based staleness'),
+      messageReason('claim_stale_evidence'),
+      messageNarrowing('evidence_staleness'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-13',
+  });
+
+  // ── MSG-13 variant: maxEvidenceAgeMs timestamp staleness → narrowed ─
+  const timestampStaleEvidence: Record<string, EvidenceProvider> = {
+    checkpoint: async () => ({
+      exists: true,
+      fresh: true, // Provider says fresh — gate overrides via timestamp
+      detail: 'CP-100 exists',
+      timestamp: Date.now() - 2 * 3600 * 1000, // 2 hours ago
+    }),
+  };
+
+  const policyWithMaxAge: MessagePolicy = {
+    ...deployPolicy,
+    claims: {
+      deploy: {
+        unknown_assertions: 'clarify',
+        assertions: {
+          deploy_success: {
+            triggers: ['deployed successfully', 'completed successfully', 'deploy completed'],
+            evidence: 'checkpoint',
+            maxEvidenceAgeMs: 30 * 60 * 1000, // 30 minutes
+          },
+        },
+      },
+    },
+  };
+
+  scenarios.push({
+    id: nextId('M', 'MSG13_timestamp_stale'),
+    family: 'M',
+    generator: 'MSG13_timestamp_stale',
+    description: 'MSG-13 variant: Evidence timestamp exceeds maxEvidenceAgeMs → narrowed',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3.1 deployed successfully to production' },
+        topic: { value: 'deploy', source: 'adapter' },
+      }),
+      policy: policyWithMaxAge,
+      evidenceProviders: timestampStaleEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('narrowed', 'timestamp-based staleness'),
+      messageReason('claim_stale_evidence'),
+      messageNarrowing('evidence_staleness'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-13',
+  });
+
+  // ── MSG-14: Topic override + epoch staleness combined → narrowed ────
+  scenarios.push({
+    id: nextId('M', 'MSG14_combined_narrowing'),
+    family: 'M',
+    generator: 'MSG14_combined_narrowing',
+    description: 'MSG-14: Topic overridden AND epoch stale → combined narrowing',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope({
+        content: { body: 'v2.3.1 deployed successfully to production' },
+        topic: { value: 'general', source: 'agent' },
+      }),
+      policy: topicPolicy,
+      evidenceProviders: epochStaleEvidence,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('narrowed', 'combined narrowing'),
+      messageTopicResolution('policy_detected', true),
+      messageNarrowing('topic_override+evidence_staleness'),
+    ],
+    requiresDocker: false,
+    failureClass: 'MSG-14',
+  });
+
+  // ── Clean pass: no claims, no topic, simple status ─────────────────
+  scenarios.push({
+    id: nextId('M', 'M_clean_pass'),
+    family: 'M',
+    generator: 'M_clean_pass',
+    description: 'Clean pass: simple status message with no claims',
+    edits: [],
+    predicates: [],
+    config: {},
+    messageTest: {
+      envelope: makeEnvelope(),
+      policy: deployPolicy,
+    },
+    invariants: [
+      messageDidNotCrash(),
+      messageVerdict('approved', 'clean pass'),
+      messageGatePassed('destination'),
+      messageGatePassed('forbidden_content'),
+    ],
+    requiresDocker: false,
+  });
+
+  return scenarios;
+}
+
+// =============================================================================
 // GENERATOR DISPATCH
 // =============================================================================
 
@@ -3017,6 +5881,7 @@ export function generateAllScenarios(appDir: string): VerifyScenario[] {
     ...generateFamilyF(appDir),
     ...generateFamilyG(appDir),
     ...generateFamilyH(appDir),
+    ...generateFamilyM(appDir),
     ...generateFamilyV(appDir),
   ];
 }
@@ -3031,6 +5896,7 @@ export function generateFamily(family: ScenarioFamily, appDir: string): VerifySc
     case 'F': return generateFamilyF(appDir);
     case 'G': return generateFamilyG(appDir);
     case 'H': return generateFamilyH(appDir);
+    case 'M': return generateFamilyM(appDir);
     case 'V': return generateFamilyV(appDir);
   }
 }

@@ -1043,6 +1043,212 @@ export function shouldNotCrash(description: string): InvariantCheck {
 // EXPORTS
 // =============================================================================
 
+// =============================================================================
+// MESSAGE GATE INVARIANTS — Family M
+// =============================================================================
+
+/**
+ * Message verdict matches expected.
+ */
+export function messageVerdict(expected: string, reason?: string): InvariantCheck {
+  return {
+    name: `message_verdict_${expected}`,
+    category: 'message',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) {
+        return { passed: false, violation: `Message gate crashed: ${result.message}`, severity: 'bug' };
+      }
+      const msgResult = (result as any)._messageResult;
+      if (!msgResult) {
+        return { passed: false, violation: 'No _messageResult on result (not a message scenario?)', severity: 'bug' };
+      }
+      if (msgResult.verdict !== expected) {
+        return {
+          passed: false,
+          violation: `Expected verdict '${expected}', got '${msgResult.verdict}' (${reason || msgResult.detail})`,
+          severity: 'bug',
+        };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Message block/clarify reason matches expected.
+ */
+export function messageReason(expected: string, reason?: string): InvariantCheck {
+  return {
+    name: `message_reason_${expected}`,
+    category: 'message',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) {
+        return { passed: false, violation: `Message gate crashed: ${result.message}`, severity: 'bug' };
+      }
+      const msgResult = (result as any)._messageResult;
+      if (!msgResult) {
+        return { passed: false, violation: 'No _messageResult', severity: 'bug' };
+      }
+      if (msgResult.reason !== expected) {
+        return {
+          passed: false,
+          violation: `Expected reason '${expected}', got '${msgResult.reason}' (${reason || msgResult.detail})`,
+          severity: 'bug',
+        };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * A specific message gate passed.
+ */
+export function messageGatePassed(gateName: string): InvariantCheck {
+  return {
+    name: `message_gate_passed_${gateName}`,
+    category: 'message',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) {
+        return { passed: false, violation: `Crashed: ${result.message}`, severity: 'bug' };
+      }
+      const msgResult = (result as any)._messageResult;
+      if (!msgResult) return { passed: false, violation: 'No _messageResult', severity: 'bug' };
+      const gate = msgResult.gates.find((g: any) => g.gate === gateName);
+      if (!gate) return { passed: false, violation: `Gate '${gateName}' not found in results`, severity: 'bug' };
+      if (!gate.passed) return { passed: false, violation: `Gate '${gateName}' failed: ${gate.detail}`, severity: 'bug' };
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * A specific message gate failed.
+ */
+export function messageGateFailed(gateName: string): InvariantCheck {
+  return {
+    name: `message_gate_failed_${gateName}`,
+    category: 'message',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) {
+        return { passed: false, violation: `Crashed: ${result.message}`, severity: 'bug' };
+      }
+      const msgResult = (result as any)._messageResult;
+      if (!msgResult) return { passed: false, violation: 'No _messageResult', severity: 'bug' };
+      const gate = msgResult.gates.find((g: any) => g.gate === gateName);
+      if (!gate) return { passed: false, violation: `Gate '${gateName}' not found`, severity: 'bug' };
+      if (gate.passed) return { passed: false, violation: `Gate '${gateName}' should have failed but passed`, severity: 'bug' };
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * A claim was verified (or not) as expected.
+ */
+export function messageClaimVerified(assertionName: string, expectedVerified: boolean): InvariantCheck {
+  return {
+    name: `message_claim_${assertionName}_${expectedVerified ? 'verified' : 'unverified'}`,
+    category: 'message',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) {
+        return { passed: false, violation: `Crashed: ${result.message}`, severity: 'bug' };
+      }
+      const msgResult = (result as any)._messageResult;
+      if (!msgResult) return { passed: false, violation: 'No _messageResult', severity: 'bug' };
+      if (!msgResult.claims || msgResult.claims.length === 0) {
+        return { passed: false, violation: `No claims in result (expected '${assertionName}')`, severity: 'bug' };
+      }
+      const claim = msgResult.claims.find((c: any) => c.assertion === assertionName);
+      if (!claim) {
+        return { passed: false, violation: `Claim '${assertionName}' not found in results`, severity: 'bug' };
+      }
+      if (claim.verified !== expectedVerified) {
+        return {
+          passed: false,
+          violation: `Claim '${assertionName}' verified=${claim.verified}, expected ${expectedVerified}`,
+          severity: 'bug',
+        };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Message gate should not crash.
+ */
+export function messageDidNotCrash(reason?: string): InvariantCheck {
+  return {
+    name: 'message_did_not_crash',
+    category: 'message',
+    layer: 'harness',
+    check: (_scenario, result) => {
+      if (result instanceof Error) {
+        return { passed: false, violation: `Message gate crashed: ${result.message} (${reason || ''})`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert that the message gate result has a topic resolution with specific properties.
+ */
+export function messageTopicResolution(expectedSource: string, overridden: boolean): InvariantCheck {
+  return {
+    name: `message_topic_resolution_${expectedSource}_${overridden ? 'overridden' : 'kept'}`,
+    category: 'message',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: false, violation: `Crashed: ${result.message}`, severity: 'bug' };
+      const msgResult = (result as unknown as { _messageResult?: import('../src/gates/message.js').MessageGateResult })._messageResult;
+      if (!msgResult) return { passed: false, violation: 'No messageResult on result', severity: 'bug' };
+      if (!msgResult.topicResolution) {
+        return { passed: false, violation: `Expected topicResolution with source=${expectedSource}, got none`, severity: 'bug' };
+      }
+      if (msgResult.topicResolution.source !== expectedSource) {
+        return { passed: false, violation: `Expected topicResolution.source=${expectedSource}, got ${msgResult.topicResolution.source}`, severity: 'bug' };
+      }
+      if (msgResult.topicResolution.overridden !== overridden) {
+        return { passed: false, violation: `Expected topicResolution.overridden=${overridden}, got ${msgResult.topicResolution.overridden}`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert that the message gate result has a narrowing field with specific type.
+ */
+export function messageNarrowing(expectedType: string): InvariantCheck {
+  return {
+    name: `message_narrowing_${expectedType}`,
+    category: 'message',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: false, violation: `Crashed: ${result.message}`, severity: 'bug' };
+      const msgResult = (result as unknown as { _messageResult?: import('../src/gates/message.js').MessageGateResult })._messageResult;
+      if (!msgResult) return { passed: false, violation: 'No messageResult on result', severity: 'bug' };
+      if (!msgResult.narrowing) {
+        return { passed: false, violation: `Expected narrowing with type=${expectedType}, got none`, severity: 'bug' };
+      }
+      if (msgResult.narrowing.type !== expectedType) {
+        return { passed: false, violation: `Expected narrowing.type=${expectedType}, got ${msgResult.narrowing.type}`, severity: 'bug' };
+      }
+      if (!msgResult.narrowing.resolutionHint) {
+        return { passed: false, violation: `Narrowing has no resolutionHint`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
 export const UNIVERSAL_INVARIANTS: InvariantCheck[] = [
   ...PRODUCT_INVARIANTS,
   ...HARNESS_INVARIANTS,
@@ -1056,7 +1262,10 @@ export function checkInvariants(
   result: VerifyResult | Error,
   context: OracleContext,
 ): Array<{ name: string; category: string; layer: string; passed: boolean; violation?: string; severity: string }> {
-  const allInvariants = [...UNIVERSAL_INVARIANTS, ...scenario.invariants];
+  // Family M (message gate) scenarios skip universal invariants — they test governMessage(), not verify()
+  const allInvariants = scenario.family === 'M'
+    ? scenario.invariants
+    : [...UNIVERSAL_INVARIANTS, ...scenario.invariants];
   return allInvariants.map(inv => {
     try {
       const verdict = inv.check(scenario, result, context);

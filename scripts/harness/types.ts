@@ -10,7 +10,7 @@ import type { Edit, Predicate, VerifyConfig, VerifyResult } from '../../src/type
 // SCENARIO
 // =============================================================================
 
-export type ScenarioFamily = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'V';
+export type ScenarioFamily = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'M' | 'V';
 
 export interface VerifyScenario {
   id: string;
@@ -38,6 +38,18 @@ export interface VerifyScenario {
    * Used for pure constraint-manipulation steps (B4, B5, B6, B8).
    */
   skipVerify?: boolean;
+
+  /**
+   * Message gate test data — for Family M scenarios.
+   * When present, runner calls governMessage() instead of verify().
+   * The MessageGateResult is converted to a VerifyResult shape for invariant checking.
+   */
+  messageTest?: {
+    envelope: import('../../src/gates/message.js').MessageEnvelope;
+    policy: import('../../src/gates/message.js').MessagePolicy;
+    evidenceProviders?: Record<string, import('../../src/gates/message.js').EvidenceProvider>;
+    deniedPatterns?: Array<{ pattern: string; reason: string; timestamp: number }>;
+  };
 }
 
 // =============================================================================
@@ -47,7 +59,7 @@ export interface VerifyScenario {
 export type InvariantCategory =
   | 'fingerprint' | 'k5' | 'gate_sequence' | 'containment'
   | 'grounding' | 'pipeline' | 'robustness'
-  | 'vision' | 'triangulation';
+  | 'vision' | 'triangulation' | 'message';
 
 export type InvariantLayer = 'product' | 'harness';
 

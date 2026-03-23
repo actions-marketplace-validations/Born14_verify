@@ -8,13 +8,13 @@ Verification gate for AI agent actions. Every edit gets a fair trial before it t
 
 In v0.1.1, HTTP predicates with different `bodyContains` values produced identical fingerprints — K5 couldn't tell them apart. A human caught it by reading the code.
 
-Now 425 automated scenarios across 12 families catch it in under 30 seconds:
+Now 506 automated scenarios across 12 families catch it in under 30 seconds:
 
 ```bash
 npx @sovereign-labs/verify self-test
 
-#   0 bugs | 425 scenarios | 0 unexpected | A: clean, ..., I: clean, ..., P: clean, V: clean
-#   Failure Class Coverage: 246/452 shapes covered
+#   0 bugs | 506 scenarios | 0 unexpected | A: clean, ..., I: clean, ..., P: clean, V: clean
+#   Failure Class Coverage: 258/258 clean
 #   ALL CLEAN — No invariant violations detected.
 ```
 
@@ -146,7 +146,7 @@ Add to your agent's MCP config:
 
 ## Self-Test Harness
 
-269 scenarios across 12 families exercise the verification pipeline's invariants — including 14 filesystem, 29 CSS (value normalization + shorthand), 8 content pattern, 10 F9 syntax gate, 8 fingerprinting/K5, 10 attribution error, 9 HTTP gate, 4 cross-predicate interaction, 14 communication/message gate (including topic trust enforcement and epoch-based evidence staleness), and 9 HTML predicate failure classes tracked by the [failure taxonomy](FAILURE-TAXONOMY.md). Run them to prove your install works, or use `--fail-on-bug` in CI.
+506 scenarios across 12 families exercise the verification pipeline's invariants — including 14 filesystem, 29 CSS (value normalization + shorthand), 8 content pattern, 10 F9 syntax gate, 8 fingerprinting/K5, 10 attribution error, 9 HTTP gate, 28 cross-predicate interaction (including 6 product compositions and 3 temporal compositions), 14 communication/message gate (including topic trust enforcement and epoch-based evidence staleness), 18 DB schema grounding (type aliases, fabricated references, case sensitivity), and 9 HTML predicate failure classes tracked by the [failure taxonomy](FAILURE-TAXONOMY.md). A decomposition engine (`decomposeFailure()`) maps observations to taxonomy shape IDs — 91 shape rules across 12 domains, pure functions, zero LLM, with diagnostics (`computeDecompositionDiagnostics()`), composition operators (product ×, temporal ⊗), and round-trip decomposition verification. Run them to prove your install works, or use `--fail-on-bug` in CI.
 
 ```bash
 # Pure-only (~2s, no Docker needed)
@@ -168,17 +168,17 @@ npx @sovereign-labs/verify self-test --fail-on-bug
 | **B** | 14 | K5 constraint learning + store resilience (X-54–X-56) | No |
 | **C** | 7 | Gate sequencing and consistency | No |
 | **D** | 23 | G5 containment attribution + attribution errors (AT-01–AT-10) | No |
-| **E** | 79 | Grounding: CSS normalization/shorthand + content patterns (C-01–C-62, N-04–N-08) | No |
+| **E** | 95 | Grounding: CSS normalization/shorthand + content patterns (C-01–C-62, N-04–N-08) | No |
 | **F** | 6 | Full Docker pipeline (build → stage → verify) | Yes |
-| **G** | 157 | Edge cases, F9 syntax, HTML (H-03–H-40), content (N-03–N-12), CSS advanced, scope/identity, cross-cutting (X-05–X-75), invariants, DB/temporal/concurrency/observer/drift + universal scenarios | No |
+| **G** | 209 | Edge cases, F9 syntax, HTML (H-01–H-40), content (N-03–N-12), CSS selectors deep (C-34–C-62), HTTP deep (P-10–P-35), scope/identity, cross-cutting (X-05–X-75), invariants, DB grounding (D-01–D-12, fabricated refs, type aliases), temporal/concurrency/observer/drift + universal scenarios | No |
 | **H** | 47 | Filesystem gate — 22 failure classes (FS-01 through FS-34) | No |
-| **I** | 15 | Cross-predicate interactions (I-01–I-12) | No |
+| **I** | 28 | Cross-predicate interactions + product/temporal compositions (I-01–I-12, I-05×–I-10×, I-T01–T03) | No |
 | **M** | 21 | Message gate — 14 failure classes (MSG-01 through MSG-14) | No |
 | **P** | 18 | HTTP gate — status, body, regex, content-type, sequence (P-01–P-09) | Yes |
 | **V** | 14 | Vision + triangulation (3-authority verdict) | No |
 | **UV** | 28 | Universal full-pipeline integration (color normalization, multi-predicate, F9 rejection, HTML predicates) | No |
 
-397 scenarios run pure from families. 28 universal scenarios test cross-gate integration including HTML predicates. 24 need Docker (6 F + 18 P). 246 of 452 known failure shapes covered (55%). Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
+492 pure scenarios + 14 multi-step K5 scenarios = 506 total. 28 universal scenarios test cross-gate integration including HTML predicates. 24 need Docker (6 F + 18 P). 258 failure classes covered across 567 known failure shapes (46% atomic coverage). Decomposition engine maps observations to taxonomy shape IDs — 91 shape rules across 12 domains (16 CSS, 6 HTML, 6 HTTP, 12 DB, 5 content, 7 filesystem, 11 cross-cutting, 6 interaction, 4 attribution, plus staging/vision/invariant/message), with Phase 2 hardening: minimal basis enforcement, deterministic sort, decomposition scoring, claim-type driven decomposition, temporal mode integration, and composition operators (product ×, temporal ⊗) with round-trip verification. DB grounding validates predicates against init.sql schema with type alias normalization (serial→integer, varchar(N)→varchar, bool→boolean). 310 decomposition/composition tests, 1,249+ assertions. Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
 
 ## Gates
 

@@ -141,7 +141,10 @@ export function groundInReality(appDir: string): GroundingContext {
   // Deduplicate routes
   const uniqueRoutes = [...new Set(routes)];
 
-  const context: GroundingContext = { routeCSSMap, htmlElements, routes: uniqueRoutes, routeClassTokens };
+  // Parse DB schema from init.sql (if present)
+  const dbSchema = findAndParseSchema(appDir);
+
+  const context: GroundingContext = { routeCSSMap, htmlElements, routes: uniqueRoutes, routeClassTokens, ...(dbSchema ? { dbSchema } : {}) };
 
   // Cache with current max mtime
   _groundingCache.set(appDir, { context, maxMtimeMs: getMaxMtime(appDir) });
@@ -439,6 +442,56 @@ export function validateAgainstGrounding<T extends {
       }
     }
 
+    // ── DB predicates: validate table/column/type against parsed init.sql schema ──
+    if (p.type === 'db' && grounding.dbSchema && grounding.dbSchema.length > 0) {
+      const assertion = (p as any).assertion as string | undefined;
+      const tableName = (p as any).table as string | undefined;
+      const columnName = (p as any).column as string | undefined;
+
+      if (tableName && assertion) {
+        // Find table (case-insensitive)
+        const tableEntry = grounding.dbSchema.find(
+          t => t.table.toLowerCase() === tableName.toLowerCase()
+        );
+
+        if (assertion === 'table_exists') {
+          if (!tableEntry) {
+            return { ...p, groundingMiss: true, groundingReason: `Table "${tableName}" not found in init.sql schema` };
+          }
+        }
+
+        if (assertion === 'column_exists' && columnName) {
+          if (!tableEntry) {
+            return { ...p, groundingMiss: true, groundingReason: `Table "${tableName}" not found in init.sql schema (checking column "${columnName}")` };
+          }
+          const colEntry = tableEntry.columns.find(
+            c => c.name.toLowerCase() === columnName.toLowerCase()
+          );
+          if (!colEntry) {
+            return { ...p, groundingMiss: true, groundingReason: `Column "${columnName}" not found in table "${tableName}"` };
+          }
+        }
+
+        if (assertion === 'column_type' && columnName && p.expected) {
+          if (!tableEntry) {
+            return { ...p, groundingMiss: true, groundingReason: `Table "${tableName}" not found in init.sql schema (checking column type)` };
+          }
+          const colEntry = tableEntry.columns.find(
+            c => c.name.toLowerCase() === columnName.toLowerCase()
+          );
+          if (!colEntry) {
+            return { ...p, groundingMiss: true, groundingReason: `Column "${columnName}" not found in table "${tableName}" (checking type)` };
+          }
+          // Compare types with alias normalization
+          const actualNorm = normalizeDBType(colEntry.type);
+          const expectedNorm = normalizeDBType(p.expected);
+          if (actualNorm !== expectedNorm) {
+            return { ...p, groundingMiss: true, groundingReason: `Column "${tableName}.${columnName}" type is "${colEntry.type}" (normalized: "${actualNorm}") but predicate claims "${p.expected}" (normalized: "${expectedNorm}")` };
+          }
+        }
+      }
+    }
+
     return p;
   });
 }
@@ -463,7 +516,7 @@ function findSourceFiles(dir: string, maxDepth = 3, depth = 0): string[] {
         files.push(...findSourceFiles(fullPath, maxDepth, depth + 1));
       } else {
         const ext = extname(entry.name).toLowerCase();
-        if (['.js', '.ts', '.jsx', '.tsx', '.html', '.css', '.vue', '.svelte', '.php', '.rb', '.py'].includes(ext)) {
+        if (['.js', '.ts', '.jsx', '.tsx', '.html', '.css', '.vue', '.svelte', '.php', '.rb', '.py', '.sql'].includes(ext)) {
           files.push(fullPath);
         }
       }
@@ -670,6 +723,122 @@ function _hslToHex(h: number, s: number, l: number): string {
 }
 const _SH: Record<string,string[]> = {border:['border-width','border-style','border-color'],'border-top':['border-top-width','border-top-style','border-top-color'],'border-right':['border-right-width','border-right-style','border-right-color'],'border-bottom':['border-bottom-width','border-bottom-style','border-bottom-color'],'border-left':['border-left-width','border-left-style','border-left-color'],margin:['margin-top','margin-right','margin-bottom','margin-left'],padding:['padding-top','padding-right','padding-bottom','padding-left'],background:['background-color'],font:['font-style','font-variant','font-weight','font-size','line-height','font-family'],outline:['outline-width','outline-style','outline-color']};
 function _rS(sp: string, sv: string, lp: string): string|undefined { const ls=_SH[sp]; if(!ls) return; const i=ls.indexOf(lp); if(i===-1) return; const t=sv.trim().split(/\s+/); return t[i]; }
+
+// =============================================================================
+// DB SCHEMA PARSING — init.sql → GroundingContext.dbSchema
+// =============================================================================
+
+/** Type alias normalization map: PostgreSQL type variants → canonical form. */
+const DB_TYPE_ALIASES: Record<string, string> = {
+  'serial': 'integer',
+  'bigserial': 'bigint',
+  'smallserial': 'smallint',
+  'int': 'integer',
+  'int4': 'integer',
+  'int8': 'bigint',
+  'int2': 'smallint',
+  'bool': 'boolean',
+  'character varying': 'varchar',
+  'character': 'char',
+  'double precision': 'double',
+  'float4': 'real',
+  'float8': 'double',
+  'timestamptz': 'timestamp with time zone',
+  'timetz': 'time with time zone',
+};
+
+/** Normalize a DB column type for comparison (lowercase, strip size, apply aliases). */
+export function normalizeDBType(raw: string): string {
+  let t = raw.trim().toLowerCase();
+  // Strip size/precision: varchar(50) → varchar, integer(11) → integer
+  t = t.replace(/\s*\([^)]*\)/, '');
+  // Apply aliases
+  return DB_TYPE_ALIASES[t] ?? t;
+}
+
+/**
+ * Parse a SQL file (init.sql) and extract table/column/type information.
+ * Handles standard CREATE TABLE statements with column definitions.
+ */
+export function parseInitSQL(sql: string): Array<{ table: string; columns: Array<{ name: string; type: string; nullable: boolean; hasDefault: boolean }> }> {
+  const tables: Array<{ table: string; columns: Array<{ name: string; type: string; nullable: boolean; hasDefault: boolean }> }> = [];
+
+  // Strip SQL comments
+  const clean = sql.replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // Match CREATE TABLE blocks
+  const tablePattern = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?["']?(\w+)["']?\s*\(([\s\S]*?)\)\s*;/gi;
+  let tableMatch;
+
+  while ((tableMatch = tablePattern.exec(clean)) !== null) {
+    const tableName = tableMatch[1];
+    const body = tableMatch[2];
+    const columns: Array<{ name: string; type: string; nullable: boolean; hasDefault: boolean }> = [];
+
+    // Split body by commas, but respect parentheses (for REFERENCES, DEFAULT gen_random_uuid(), etc.)
+    const parts: string[] = [];
+    let depth = 0;
+    let current = '';
+    for (const ch of body) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth--;
+      else if (ch === ',' && depth === 0) {
+        parts.push(current.trim());
+        current = '';
+        continue;
+      }
+      current += ch;
+    }
+    if (current.trim()) parts.push(current.trim());
+
+    for (const part of parts) {
+      const trimmed = part.trim();
+      // Skip constraints (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, CONSTRAINT)
+      if (/^(PRIMARY\s+KEY|FOREIGN\s+KEY|UNIQUE|CHECK|CONSTRAINT)\b/i.test(trimmed)) continue;
+
+      // Match: column_name TYPE [constraints...]
+      const colMatch = trimmed.match(/^["']?(\w+)["']?\s+(\w+(?:\s*\([^)]*\))?(?:\s+(?:varying|precision|with(?:out)?\s+time\s+zone))?)/i);
+      if (colMatch) {
+        const colName = colMatch[1];
+        const rawType = colMatch[2];
+        const nullable = !/NOT\s+NULL/i.test(trimmed);
+        const hasDefault = /DEFAULT\b/i.test(trimmed);
+        columns.push({ name: colName, type: rawType, nullable, hasDefault });
+      }
+    }
+
+    if (columns.length > 0) {
+      tables.push({ table: tableName, columns });
+    }
+  }
+
+  return tables;
+}
+
+/**
+ * Find and parse init.sql from the app directory.
+ * Searches: appDir/init.sql, appDir/migrations/*.sql, appDir/db/init.sql
+ */
+function findAndParseSchema(appDir: string): GroundingContext['dbSchema'] | undefined {
+  const candidates = [
+    join(appDir, 'init.sql'),
+    join(appDir, 'db', 'init.sql'),
+    join(appDir, 'sql', 'init.sql'),
+    join(appDir, 'schema.sql'),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      try {
+        const sql = readFileSync(candidate, 'utf-8');
+        const parsed = parseInitSQL(sql);
+        if (parsed.length > 0) return parsed;
+      } catch { /* read error */ }
+    }
+  }
+
+  return undefined;
+}
 
 function extractClassTokens(content: string, route: string): Set<string> {
   const tokens = new Set<string>();

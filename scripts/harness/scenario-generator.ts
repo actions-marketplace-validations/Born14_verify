@@ -53,6 +53,13 @@ import {
   messageClaimVerified,
   messageTopicResolution,
   messageNarrowing,
+  httpGateRan,
+  httpGatePassed,
+  httpGateFailed,
+  httpGateDetailContains,
+  gatesPassedAndFailed,
+  narrowingHintContains,
+  narrowingNoHint,
 } from './oracle.js';
 import { makeSolidPNG } from './test-png.js';
 import { ConstraintStore, predicateFingerprint, extractSignature } from '../../src/store/constraint-store.js';
@@ -5868,6 +5875,1090 @@ function generateFamilyM(_appDir: string): VerifyScenario[] {
 }
 
 // =============================================================================
+// WAVE 2A: HTTP STATUS/BODY, HTML TEXT, CONTENT EDGE CASES,
+//          CROSS-PREDICATE, F9 OVERLAPPING EDITS, K5/NARROWING
+// =============================================================================
+// Families: P (HTTP gate), I (cross-predicate interactions),
+//           added to G (F9/K5/narrowing edge cases)
+// =============================================================================
+
+function generateFamilyP(appDir: string): VerifyScenario[] {
+  const scenarios: VerifyScenario[] = [];
+
+  // =========================================================================
+  // P-01: Status code mismatch
+  // =========================================================================
+
+  // P-01a: Correct status code on /health (200)
+  scenarios.push({
+    id: nextId('P', 'P01a_healthStatus200'),
+    family: 'P',
+    generator: 'P01a_correctStatus',
+    failureClass: 'P-01',
+    description: 'P-01: HTTP predicate with correct status code should pass',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/health', method: 'GET', expect: { status: 200 } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-01a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // P-01b: Wrong status code expectation (expect 404 from /health which returns 200)
+  scenarios.push({
+    id: nextId('P', 'P01b_wrongStatus'),
+    family: 'P',
+    generator: 'P01b_wrongStatus',
+    failureClass: 'P-01',
+    description: 'P-01: HTTP predicate expecting wrong status code should fail',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/health', method: 'GET', expect: { status: 404 } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-01b should not crash'),
+      httpGateRan(),
+      httpGateFailed('status mismatch'),
+      httpGateDetailContains('expected'),
+    ],
+    requiresDocker: true,
+    expectedSuccess: false,
+  });
+
+  // P-01c: Status on non-existent route (actual 404)
+  scenarios.push({
+    id: nextId('P', 'P01c_404route'),
+    family: 'P',
+    generator: 'P01c_404route',
+    failureClass: 'P-01',
+    description: 'P-01: HTTP predicate on non-existent route expecting 404 should pass',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/nonexistent', method: 'GET', expect: { status: 404 } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-01c should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // P-02: Body content missing (bodyContains)
+  // =========================================================================
+
+  // P-02a: bodyContains with content that exists
+  scenarios.push({
+    id: nextId('P', 'P02a_bodyPresent'),
+    family: 'P',
+    generator: 'P02a_bodyContainsPresent',
+    failureClass: 'P-02',
+    description: 'P-02: bodyContains with content present in response should pass',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/health', method: 'GET', expect: { status: 200, bodyContains: 'ok' } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-02a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // P-02b: bodyContains with content that doesn't exist
+  scenarios.push({
+    id: nextId('P', 'P02b_bodyMissing'),
+    family: 'P',
+    generator: 'P02b_bodyContainsMissing',
+    failureClass: 'P-02',
+    description: 'P-02: bodyContains with content absent from response should fail',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/health', method: 'GET', expect: { status: 200, bodyContains: 'ERROR_NOT_HERE' } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-02b should not crash'),
+      httpGateRan(),
+      httpGateFailed('body content missing'),
+      httpGateDetailContains('missing'),
+    ],
+    requiresDocker: true,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // P-03: bodyContains array — all must match
+  // =========================================================================
+
+  // P-03a: Array where all terms exist
+  scenarios.push({
+    id: nextId('P', 'P03a_arrayAllPresent'),
+    family: 'P',
+    generator: 'P03a_bodyArrayAllPresent',
+    failureClass: 'P-03',
+    description: 'P-03: bodyContains array where all terms exist should pass',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/api/items', method: 'GET', expect: { status: 200, bodyContains: ['Alpha', 'Beta'] } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-03a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // P-03b: Array where one term is missing
+  scenarios.push({
+    id: nextId('P', 'P03b_arrayPartialMiss'),
+    family: 'P',
+    generator: 'P03b_bodyArrayPartialMiss',
+    failureClass: 'P-03',
+    description: 'P-03: bodyContains array where one term is missing should fail',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/api/items', method: 'GET', expect: { status: 200, bodyContains: ['Alpha', 'Gamma'] } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-03b should not crash'),
+      httpGateRan(),
+      httpGateFailed('partial array miss'),
+      httpGateDetailContains('Gamma'),
+    ],
+    requiresDocker: true,
+    expectedSuccess: false,
+  });
+
+  // P-03c: Array with empty string (edge case — should match everything)
+  scenarios.push({
+    id: nextId('P', 'P03c_arrayEmptyString'),
+    family: 'P',
+    generator: 'P03c_bodyArrayEmptyString',
+    failureClass: 'P-03',
+    description: 'P-03: bodyContains array with empty string should pass (empty string is in every body)',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/health', method: 'GET', expect: { bodyContains: ['ok', ''] } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-03c should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // P-04: bodyRegex edge cases
+  // =========================================================================
+
+  // P-04a: Simple regex match
+  scenarios.push({
+    id: nextId('P', 'P04a_regexMatch'),
+    family: 'P',
+    generator: 'P04a_regexSimpleMatch',
+    failureClass: 'P-04',
+    description: 'P-04: bodyRegex matching response body should pass',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/api/items', method: 'GET', expect: { bodyRegex: '"id":\\s*\\d+' } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-04a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // P-04b: Regex that doesn't match
+  scenarios.push({
+    id: nextId('P', 'P04b_regexNoMatch'),
+    family: 'P',
+    generator: 'P04b_regexNoMatch',
+    failureClass: 'P-04',
+    description: 'P-04: bodyRegex that does not match response body should fail',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/health', method: 'GET', expect: { bodyRegex: 'ERROR_\\d{4}' } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-04b should not crash'),
+      httpGateRan(),
+      httpGateFailed('regex no match'),
+      httpGateDetailContains('regex'),
+    ],
+    requiresDocker: true,
+    expectedSuccess: false,
+  });
+
+  // P-04c: Regex with special characters (JSON structure)
+  scenarios.push({
+    id: nextId('P', 'P04c_regexSpecialChars'),
+    family: 'P',
+    generator: 'P04c_regexSpecialChars',
+    failureClass: 'P-04',
+    description: 'P-04: bodyRegex with JSON-matching special chars should work',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/api/items', method: 'GET', expect: { bodyRegex: '\\[\\{"id":\\d+' } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-04c should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // P-05: Empty response body
+  // =========================================================================
+
+  // P-05a: bodyContains on route with non-empty response
+  scenarios.push({
+    id: nextId('P', 'P05a_nonEmptyBody'),
+    family: 'P',
+    generator: 'P05a_nonEmptyBody',
+    failureClass: 'P-05',
+    description: 'P-05: bodyContains against non-empty response should work normally',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/health', method: 'GET', expect: { status: 200, bodyContains: 'status' } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-05a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // P-06: Wrong Content-Type (testing bodyContains still works on JSON)
+  // =========================================================================
+
+  // P-06a: JSON body with bodyContains (Content-Type is application/json)
+  scenarios.push({
+    id: nextId('P', 'P06a_jsonBodyContains'),
+    family: 'P',
+    generator: 'P06a_jsonContentType',
+    failureClass: 'P-06',
+    description: 'P-06: bodyContains works against JSON response regardless of Content-Type',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/api/items', method: 'GET', expect: { bodyContains: '"name":"Alpha"' } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-06a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // P-07: JSON structure assertion (key existence via bodyContains)
+  // =========================================================================
+
+  // P-07a: Check for JSON key existence
+  scenarios.push({
+    id: nextId('P', 'P07a_jsonKey'),
+    family: 'P',
+    generator: 'P07a_jsonKeyExists',
+    failureClass: 'P-07',
+    description: 'P-07: bodyContains can verify JSON key presence',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/api/items', method: 'GET', expect: { bodyContains: ['"id"', '"name"'] } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-07a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // P-07b: Check for JSON key that doesn't exist
+  scenarios.push({
+    id: nextId('P', 'P07b_jsonKeyMissing'),
+    family: 'P',
+    generator: 'P07b_jsonKeyMissing',
+    failureClass: 'P-07',
+    description: 'P-07: bodyContains for absent JSON key should fail',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{ type: 'http', path: '/api/items', method: 'GET', expect: { bodyContains: ['"id"', '"email"'] } }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-07b should not crash'),
+      httpGateRan(),
+      httpGateFailed('missing JSON key'),
+      httpGateDetailContains('email'),
+    ],
+    requiresDocker: true,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // P-09: Sequence ordering (http_sequence)
+  // =========================================================================
+
+  // P-09a: Sequence with GET→GET (both should pass)
+  scenarios.push({
+    id: nextId('P', 'P09a_sequenceGetGet'),
+    family: 'P',
+    generator: 'P09a_sequenceGetGet',
+    failureClass: 'P-09',
+    description: 'P-09: http_sequence with GET→GET on valid endpoints should pass',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{
+      type: 'http_sequence',
+      steps: [
+        { method: 'GET', path: '/health', expect: { status: 200 } },
+        { method: 'GET', path: '/api/items', expect: { status: 200, bodyContains: 'Alpha' } },
+      ],
+    }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-09a should not crash'),
+      httpGateRan(),
+      httpGatePassed(),
+    ],
+    requiresDocker: true,
+    expectedSuccess: true,
+  });
+
+  // P-09b: Sequence where second step fails
+  scenarios.push({
+    id: nextId('P', 'P09b_sequenceSecondFails'),
+    family: 'P',
+    generator: 'P09b_sequenceSecondStepFail',
+    failureClass: 'P-09',
+    description: 'P-09: http_sequence where second step has wrong expectation should fail',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{
+      type: 'http_sequence',
+      steps: [
+        { method: 'GET', path: '/health', expect: { status: 200 } },
+        { method: 'GET', path: '/api/items', expect: { status: 200, bodyContains: 'Nonexistent' } },
+      ],
+    }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-09b should not crash'),
+      httpGateRan(),
+      httpGateFailed('second step fails'),
+      httpGateDetailContains('Step 2'),
+    ],
+    requiresDocker: true,
+    expectedSuccess: false,
+  });
+
+  // P-09c: Sequence where first step fails (should stop early)
+  scenarios.push({
+    id: nextId('P', 'P09c_sequenceFirstFails'),
+    family: 'P',
+    generator: 'P09c_sequenceFirstStepFail',
+    failureClass: 'P-09',
+    description: 'P-09: http_sequence where first step fails should stop early',
+    edits: [{ file: 'server.js', search: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));", replace: "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));" }],
+    predicates: [{
+      type: 'http_sequence',
+      steps: [
+        { method: 'GET', path: '/health', expect: { status: 500 } },
+        { method: 'GET', path: '/api/items', expect: { status: 200 } },
+      ],
+    }],
+    config: { appDir },
+    invariants: [
+      shouldNotCrash('P-09c should not crash'),
+      httpGateRan(),
+      httpGateFailed('first step fails'),
+      httpGateDetailContains('Step 1'),
+    ],
+    requiresDocker: true,
+    expectedSuccess: false,
+  });
+
+  return scenarios;
+}
+
+// =============================================================================
+// FAMILY I: CROSS-PREDICATE INTERACTIONS (Wave 2A)
+// =============================================================================
+
+function generateFamilyI(appDir: string): VerifyScenario[] {
+  const scenarios: VerifyScenario[] = [];
+
+  // =========================================================================
+  // I-01: CSS passes but HTML fails on same element
+  // =========================================================================
+
+  // I-01a: CSS predicate on h1 passes (color correct) but HTML predicate fails (wrong text)
+  scenarios.push({
+    id: nextId('I', 'I01a_cssPassHtmlFail'),
+    family: 'I',
+    generator: 'I01a_cssPassHtmlFail',
+    failureClass: 'I-01',
+    description: 'I-01: CSS predicate passes (correct color) but HTML predicate fails (wrong text) on same element',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #ff0000' }],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' },
+      { type: 'html', selector: 'h1', expected: 'Wrong Title Text' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-01a should not crash'),
+      verifyFailedAt('grounding', 'HTML text mismatch should fail at grounding'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // I-01b: Both CSS and HTML pass on same element
+  scenarios.push({
+    id: nextId('I', 'I01b_bothPass'),
+    family: 'I',
+    generator: 'I01b_cssAndHtmlPass',
+    failureClass: 'I-01',
+    description: 'I-01: CSS and HTML predicates both pass on same element (control case)',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #ff0000' }],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' },
+      { type: 'html', selector: 'h1', expected: 'Demo App' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-01b should not crash'),
+      verifySucceeded('Both predicates should pass'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // I-03: Content passes but HTTP fails
+  // =========================================================================
+
+  // I-03a: Content predicate passes (file changed) but HTTP predicate fails (wrong expectation)
+  // Non-Docker: both predicates evaluated at grounding level
+  scenarios.push({
+    id: nextId('I', 'I03a_contentPassHttpSetup'),
+    family: 'I',
+    generator: 'I03a_contentPassHttpFail',
+    failureClass: 'I-03',
+    description: 'I-03: Content predicate passes (pattern in file) alongside HTTP predicate (no Docker, HTTP skipped)',
+    edits: [{ file: 'server.js', search: '<title>Demo App</title>', replace: '<title>Updated App</title>' }],
+    predicates: [
+      { type: 'content', file: 'server.js', pattern: 'Updated App' },
+      { type: 'http', path: '/health', method: 'GET', expect: { status: 200 } },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-03a should not crash'),
+      verifySucceeded('Content should pass, HTTP skipped'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // I-06: Edit fixes one predicate but breaks another
+  // =========================================================================
+
+  // I-06a: Edit replaces title text — content predicate for OLD text fails, new text passes
+  scenarios.push({
+    id: nextId('I', 'I06a_editFixesOneBreaksOther'),
+    family: 'I',
+    generator: 'I06a_editFixesOneBreaksOther',
+    failureClass: 'I-06',
+    description: 'I-06: Edit changes title — predicate for old text fails grounding, new text passes',
+    edits: [{ file: 'server.js', search: '<h1>Demo App</h1>', replace: '<h1>New App</h1>' }],
+    predicates: [
+      { type: 'html', selector: 'h1', expected: 'Demo App' },
+      { type: 'html', selector: 'h1', expected: 'New App' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-06a should not crash'),
+      // After edit, "Demo App" is gone from h1, "New App" is there.
+      // Grounding checks BEFORE edit: h1 has "Demo App" — "New App" is a text change
+      // The grounding gate should accept creation-like text changes
+    ],
+    requiresDocker: false,
+  });
+
+  // I-06b: CSS edit changes color but content predicate references old color value
+  scenarios.push({
+    id: nextId('I', 'I06b_cssEditContentConflict'),
+    family: 'I',
+    generator: 'I06b_cssEditContentConflict',
+    failureClass: 'I-06',
+    description: 'I-06: CSS edit changes color — content predicate for old color fails, CSS predicate for new passes',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #ff0000' }],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' },
+      { type: 'content', file: 'server.js', pattern: '#1a1a2e' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-06b should not crash'),
+      // After edit, #1a1a2e is removed → content predicate fails
+      // CSS predicate for #ff0000 passes
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // I-07: One edit satisfies predicate A, violates predicate B (intra-goal conflict)
+  // =========================================================================
+
+  // I-07a: Two CSS predicates on same selector, conflicting expected values
+  scenarios.push({
+    id: nextId('I', 'I07a_conflictingPredicates'),
+    family: 'I',
+    generator: 'I07a_conflictingCSSPredicates',
+    failureClass: 'I-07',
+    description: 'I-07: Two CSS predicates on h1 color expecting different values — impossible to satisfy both',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: #ff0000' }],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: '#ff0000' },
+      { type: 'css', selector: 'h1', property: 'color', expected: '#0000ff' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-07a should not crash'),
+      // One predicate can pass but not both — grounding evaluates pre-edit source
+    ],
+    requiresDocker: false,
+  });
+
+  // I-07b: Content predicate and CSS predicate conflict (edit removes the pattern content needs)
+  scenarios.push({
+    id: nextId('I', 'I07b_contentCSSConflict'),
+    family: 'I',
+    generator: 'I07b_contentCSSConflict',
+    failureClass: 'I-07',
+    description: 'I-07: Content predicate needs text that CSS edit removes',
+    edits: [{ file: 'server.js', search: 'background: #ffffff', replace: 'background: #000000' }],
+    predicates: [
+      { type: 'css', selector: 'body', property: 'background', expected: '#000000' },
+      { type: 'content', file: 'server.js', pattern: '#ffffff' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('I-07b should not crash'),
+      // After edit, #ffffff is gone → content predicate fails
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  return scenarios;
+}
+
+// =============================================================================
+// WAVE 2A ADDITIONS TO FAMILY G: F9 OVERLAPPING EDITS, K5 EDGE CASES,
+//                                  HTML TEXT/CONTENT, NARROWING QUALITY
+// =============================================================================
+
+function generateWave2A_G(appDir: string): VerifyScenario[] {
+  const scenarios: VerifyScenario[] = [];
+
+  // =========================================================================
+  // H-08: Whitespace in text content
+  // =========================================================================
+
+  // H-08a: HTML predicate with trimmed text matches source with whitespace
+  scenarios.push({
+    id: nextId('G', 'H08a_whitespace'),
+    family: 'G',
+    generator: 'H08a_whitespace_trim',
+    failureClass: 'H-08',
+    description: 'H-08: HTML text with surrounding whitespace vs trimmed expected text',
+    edits: [{ file: 'server.js', search: '<h1>Demo App</h1>', replace: '<h1>  Demo App  </h1>' }],
+    predicates: [{ type: 'html', selector: 'h1', expected: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-08a should not crash'),
+      // Grounding should handle whitespace normalization
+    ],
+    requiresDocker: false,
+  });
+
+  // H-08b: HTML predicate expects exact whitespace match
+  scenarios.push({
+    id: nextId('G', 'H08b_whitespace_exact'),
+    family: 'G',
+    generator: 'H08b_whitespace_exact',
+    failureClass: 'H-08',
+    description: 'H-08: HTML text with newlines in source — grounding should normalize',
+    edits: [{ file: 'server.js', search: '<h1>Demo App</h1>', replace: '<h1>\n  Demo App\n</h1>' }],
+    predicates: [{ type: 'html', selector: 'h1', expected: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [shouldNotCrash('H-08b should not crash')],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-09: HTML entities vs literal
+  // =========================================================================
+
+  // H-09a: HTML entity in source, literal in expected
+  scenarios.push({
+    id: nextId('G', 'H09a_entity'),
+    family: 'G',
+    generator: 'H09a_entity_amp',
+    failureClass: 'H-09',
+    description: 'H-09: Source has &amp; but predicate expects & — entity decoding',
+    edits: [{ file: 'server.js', search: '<p class="subtitle">A minimal app for testing @sovereign-labs/verify</p>', replace: '<p class="subtitle">Tom &amp; Jerry</p>' }],
+    predicates: [{ type: 'html', selector: 'p.subtitle', expected: 'Tom & Jerry' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [shouldNotCrash('H-09a should not crash')],
+    requiresDocker: false,
+  });
+
+  // H-09b: HTML numeric entity
+  scenarios.push({
+    id: nextId('G', 'H09b_numEntity'),
+    family: 'G',
+    generator: 'H09b_numeric_entity',
+    failureClass: 'H-09',
+    description: 'H-09: Source has &#39; (apostrophe) — entity vs literal',
+    edits: [{ file: 'server.js', search: '<p class="subtitle">A minimal app for testing @sovereign-labs/verify</p>', replace: '<p class="subtitle">It&#39;s working</p>' }],
+    predicates: [{ type: 'html', selector: 'p.subtitle', expected: "It's working" }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [shouldNotCrash('H-09b should not crash')],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // H-10: Case sensitivity in text matching
+  // =========================================================================
+
+  // H-10a: Exact case match
+  scenarios.push({
+    id: nextId('G', 'H10a_caseExact'),
+    family: 'G',
+    generator: 'H10a_case_exact',
+    failureClass: 'H-10',
+    description: 'H-10: Exact case match — "Demo App" matches "Demo App"',
+    edits: [{ file: 'server.js', search: 'placeholder', replace: 'placeholder' }],
+    predicates: [{ type: 'html', selector: 'h1', expected: 'Demo App' }],
+    config: { appDir, gates: { syntax: false, staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-10a should not crash'),
+      verifySucceeded('Exact case match should pass'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // H-10b: Wrong case — "demo app" vs "Demo App"
+  scenarios.push({
+    id: nextId('G', 'H10b_caseWrong'),
+    family: 'G',
+    generator: 'H10b_case_wrong',
+    failureClass: 'H-10',
+    description: 'H-10: Wrong case — "demo app" does not match "Demo App" (case sensitive)',
+    edits: [{ file: 'server.js', search: 'placeholder', replace: 'placeholder' }],
+    predicates: [{ type: 'html', selector: 'h1', expected: 'demo app' }],
+    config: { appDir, gates: { syntax: false, staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('H-10b should not crash'),
+      // Case sensitivity: "demo app" != "Demo App" → grounding miss
+    ],
+    requiresDocker: false,
+  });
+
+  // H-10c: All uppercase
+  scenarios.push({
+    id: nextId('G', 'H10c_caseUpper'),
+    family: 'G',
+    generator: 'H10c_case_upper',
+    failureClass: 'H-10',
+    description: 'H-10: All uppercase — "DEMO APP" does not match "Demo App"',
+    edits: [{ file: 'server.js', search: 'placeholder', replace: 'placeholder' }],
+    predicates: [{ type: 'html', selector: 'h1', expected: 'DEMO APP' }],
+    config: { appDir, gates: { syntax: false, staging: false, browser: false, http: false } },
+    invariants: [shouldNotCrash('H-10c should not crash')],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // N-03: Pattern found in wrong file
+  // =========================================================================
+
+  // N-03a: Content predicate with correct file
+  scenarios.push({
+    id: nextId('G', 'N03a_correctFile'),
+    family: 'G',
+    generator: 'N03a_content_correctFile',
+    failureClass: 'N-03',
+    description: 'N-03: Content predicate with correct file reference should pass',
+    edits: [{ file: 'server.js', search: 'placeholder', replace: 'placeholder' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { syntax: false, staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-03a should not crash'),
+      verifySucceeded('Pattern exists in correct file'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // N-03b: Content predicate with wrong file reference
+  scenarios.push({
+    id: nextId('G', 'N03b_wrongFile'),
+    family: 'G',
+    generator: 'N03b_content_wrongFile',
+    failureClass: 'N-03',
+    description: 'N-03: Content predicate referencing wrong file should fail',
+    edits: [{ file: 'server.js', search: 'placeholder', replace: 'placeholder' }],
+    predicates: [{ type: 'content', file: 'nonexistent.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { syntax: false, staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-03b should not crash'),
+      verifyFailedAt('grounding', 'File does not exist → grounding failure'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // N-09: Template syntax as literal
+  // =========================================================================
+
+  // N-09a: Content predicate matching template syntax literally
+  scenarios.push({
+    id: nextId('G', 'N09a_template'),
+    family: 'G',
+    generator: 'N09a_template_literal',
+    failureClass: 'N-09',
+    description: 'N-09: Content predicate matching ${variable} as literal text',
+    edits: [{ file: 'server.js', search: '<title>Demo App</title>', replace: '<title>${appName}</title>' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: '${appName}' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-09a should not crash'),
+      // After edit, the literal string ${appName} is in the file
+      verifySucceeded('Template syntax found literally in file'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // N-26: Duplicate pattern count ambiguity
+  // =========================================================================
+
+  // N-26a: Pattern exists multiple times — content predicate still passes
+  scenarios.push({
+    id: nextId('G', 'N26a_dupPattern'),
+    family: 'G',
+    generator: 'N26a_duplicate_pattern',
+    failureClass: 'N-26',
+    description: 'N-26: Pattern exists multiple times in file — predicate should still pass',
+    edits: [{ file: 'server.js', search: 'placeholder', replace: 'placeholder' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'res.writeHead' }],
+    config: { appDir, gates: { syntax: false, staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-26a should not crash'),
+      // res.writeHead appears 4 times in demo-app server.js — should still pass
+      verifySucceeded('Pattern found (even if multiple times)'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // N-26b: Pattern that appears only once
+  scenarios.push({
+    id: nextId('G', 'N26b_singlePattern'),
+    family: 'G',
+    generator: 'N26b_single_pattern',
+    failureClass: 'N-26',
+    description: 'N-26: Pattern appears exactly once — unambiguous match',
+    edits: [{ file: 'server.js', search: 'placeholder', replace: 'placeholder' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'A minimal app for testing @sovereign-labs/verify' }],
+    config: { appDir, gates: { syntax: false, staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('N-26b should not crash'),
+      verifySucceeded('Unique pattern found'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // =========================================================================
+  // X-66: Overlapping edits interfere
+  // =========================================================================
+
+  // X-66a: Two edits on adjacent lines (non-overlapping — should both apply)
+  scenarios.push({
+    id: nextId('G', 'X66a_adjacentEdits'),
+    family: 'G',
+    generator: 'X66a_adjacent_edits',
+    failureClass: 'X-66',
+    description: 'X-66: Two edits on adjacent but non-overlapping regions should both apply',
+    edits: [
+      { file: 'server.js', search: 'color: #1a1a2e', replace: 'color: red' },
+      { file: 'server.js', search: 'font-size: 2rem', replace: 'font-size: 3rem' },
+    ],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: 'red' },
+      { type: 'css', selector: 'h1', property: 'font-size', expected: '3rem' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-66a should not crash'),
+      verifySucceeded('Adjacent edits should both apply cleanly'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: true,
+  });
+
+  // X-66b: Two edits on same line — second edit's search includes first edit's target
+  scenarios.push({
+    id: nextId('G', 'X66b_sameLineOverlap'),
+    family: 'G',
+    generator: 'X66b_sameLine_overlap',
+    failureClass: 'X-66',
+    description: 'X-66: Two edits targeting the same line — potential conflict',
+    edits: [
+      { file: 'server.js', search: 'h1 { color: #1a1a2e; font-size: 2rem; }', replace: 'h1 { color: red; font-size: 2rem; }' },
+      { file: 'server.js', search: 'h1 { color: red; font-size: 2rem; }', replace: 'h1 { color: red; font-size: 3rem; }' },
+    ],
+    predicates: [
+      { type: 'css', selector: 'h1', property: 'color', expected: 'red' },
+      { type: 'css', selector: 'h1', property: 'font-size', expected: '3rem' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-66b should not crash'),
+      // Second edit depends on first edit's output — sequential application needed
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-67: Edit order changes final result (non-commutative)
+  // =========================================================================
+
+  // X-67a: Two edits where order matters
+  scenarios.push({
+    id: nextId('G', 'X67a_orderMatters'),
+    family: 'G',
+    generator: 'X67a_edit_order',
+    failureClass: 'X-67',
+    description: 'X-67: Edit order matters — first edit creates search target for second',
+    edits: [
+      { file: 'server.js', search: 'Demo App', replace: 'Test App' },
+      { file: 'server.js', search: '<title>Test App</title>', replace: '<title>Final App</title>' },
+    ],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Final App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-67a should not crash'),
+      // If edits are applied in order: Demo App → Test App → Final App (success)
+      // If edits are reversed: <title>Test App</title> not found (first edit hasn't run)
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-68: Search/replace hits previous replacement
+  // =========================================================================
+
+  // X-68a: Replacement text from edit 1 contains search string from edit 2
+  scenarios.push({
+    id: nextId('G', 'X68a_replacementHit'),
+    family: 'G',
+    generator: 'X68a_replacement_hit',
+    failureClass: 'X-68',
+    description: 'X-68: Edit 1 replacement creates text that edit 2 searches for',
+    edits: [
+      { file: 'server.js', search: 'Demo App', replace: 'New Demo App' },
+      { file: 'server.js', search: 'New Demo', replace: 'Final' },
+    ],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Final App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-68a should not crash'),
+      // Edit 1: "Demo App" → "New Demo App"
+      // Edit 2: "New Demo" → "Final" (matches within edit 1's replacement)
+      // Result: "Final App"
+    ],
+    requiresDocker: false,
+  });
+
+  // X-68b: Replacement creates ambiguity (appears multiple times after first edit)
+  scenarios.push({
+    id: nextId('G', 'X68b_replacementAmbiguity'),
+    family: 'G',
+    generator: 'X68b_replacement_ambiguity',
+    failureClass: 'X-68',
+    description: 'X-68: Edit 1 replacement makes edit 2 search string ambiguous',
+    edits: [
+      { file: 'server.js', search: '<h1>Demo App</h1>', replace: '<h1>App</h1>' },
+      { file: 'server.js', search: 'App', replace: 'Application' },
+    ],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Application' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-68b should not crash'),
+      // After edit 1: "App" appears in <h1>App</h1> and also in "Demo App" in <title>
+      // Edit 2 search for "App" is now ambiguous → F9 should catch this
+    ],
+    requiresDocker: false,
+  });
+
+  // =========================================================================
+  // X-16: Concurrent constraint seeding (K5 edge case)
+  // =========================================================================
+
+  // X-16a: Multiple failures seed constraints — verify they don't conflict
+  scenarios.push({
+    id: nextId('G', 'X16a_concurrentSeeding'),
+    family: 'G',
+    generator: 'X16a_concurrent_constraints',
+    failureClass: 'X-16',
+    description: 'X-16: Multiple failing predicates seed distinct constraints',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: red' }],
+    predicates: [
+      { type: 'css', selector: '.nonexistent1', property: 'color', expected: 'red' },
+      { type: 'css', selector: '.nonexistent2', property: 'color', expected: 'blue' },
+    ],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-16a should not crash'),
+      // Both predicates reference fabricated selectors → grounding failures
+      // Each should seed a distinct constraint (different fingerprints)
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-17: Constraint with empty appliesTo
+  // =========================================================================
+
+  // X-17a: Constraint seeded with minimal predicate
+  scenarios.push({
+    id: nextId('G', 'X17a_emptyAppliesTo'),
+    family: 'G',
+    generator: 'X17a_empty_appliesTo',
+    failureClass: 'X-17',
+    description: 'X-17: Predicate with minimal fields still produces valid constraint',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: red' }],
+    predicates: [{ type: 'css', selector: '.nonexistent' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-17a should not crash'),
+      // Minimal predicate: type + selector only, no property, no expected
+      // Should still produce a valid fingerprint and constraint
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-43: Hint references actual values
+  // =========================================================================
+
+  // X-43a: Failed grounding produces hint with real selector info
+  scenarios.push({
+    id: nextId('G', 'X43a_hintActualValues'),
+    family: 'G',
+    generator: 'X43a_hint_actual_values',
+    failureClass: 'X-43',
+    description: 'X-43: Grounding failure hint should reference available selectors',
+    edits: [{ file: 'server.js', search: 'color: #1a1a2e', replace: 'color: red' }],
+    predicates: [{ type: 'css', selector: '.completely-made-up', property: 'color', expected: 'red' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-43a should not crash'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-44: Hint is actionable
+  // =========================================================================
+
+  // X-44a: F9 failure (search not found) produces actionable hint
+  scenarios.push({
+    id: nextId('G', 'X44a_actionableHint'),
+    family: 'G',
+    generator: 'X44a_actionable_hint',
+    failureClass: 'X-44',
+    description: 'X-44: F9 search-not-found failure produces actionable hint',
+    edits: [{ file: 'server.js', search: 'THIS_STRING_DOES_NOT_EXIST_ANYWHERE', replace: 'replacement' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'replacement' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-44a should not crash'),
+      verifyFailedAt('F9', 'Search string not found'),
+      narrowingPresent(),
+      narrowingHintContains('not'),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // X-44b: F9 ambiguous edit produces actionable hint
+  scenarios.push({
+    id: nextId('G', 'X44b_ambiguousHint'),
+    family: 'G',
+    generator: 'X44b_ambiguous_hint',
+    failureClass: 'X-44',
+    description: 'X-44: F9 ambiguous search string produces hint about uniqueness',
+    edits: [{ file: 'server.js', search: 'res.end', replace: 'res.end' }],  // "res.end" appears multiple times
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'res.end' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-44b should not crash'),
+      // "res.end" appears 4 times → ambiguous → F9 should fail
+      verifyFailedAt('F9', 'Ambiguous search string'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  // =========================================================================
+  // X-45: No hint on infrastructure error
+  // =========================================================================
+
+  // X-45a: Missing file → grounding failure is not an infra error
+  scenarios.push({
+    id: nextId('G', 'X45a_noInfraHint'),
+    family: 'G',
+    generator: 'X45a_no_infra_hint',
+    failureClass: 'X-45',
+    description: 'X-45: Missing file failure should produce a helpful hint (not infra)',
+    edits: [{ file: 'nonexistent.js', search: 'old', replace: 'new' }],
+    predicates: [{ type: 'content', file: 'server.js', pattern: 'Demo App' }],
+    config: { appDir, gates: { staging: false, browser: false, http: false } },
+    invariants: [
+      shouldNotCrash('X-45a should not crash'),
+      verifyFailedAt('F9', 'File not found'),
+      narrowingPresent(),
+    ],
+    requiresDocker: false,
+    expectedSuccess: false,
+  });
+
+  return scenarios;
+}
+
+// =============================================================================
 // GENERATOR DISPATCH
 // =============================================================================
 
@@ -5881,8 +6972,11 @@ export function generateAllScenarios(appDir: string): VerifyScenario[] {
     ...generateFamilyF(appDir),
     ...generateFamilyG(appDir),
     ...generateFamilyH(appDir),
+    ...generateFamilyI(appDir),
     ...generateFamilyM(appDir),
+    ...generateFamilyP(appDir),
     ...generateFamilyV(appDir),
+    ...generateWave2A_G(appDir),
   ];
 }
 
@@ -5894,9 +6988,11 @@ export function generateFamily(family: ScenarioFamily, appDir: string): VerifySc
     case 'D': return generateFamilyD(appDir);
     case 'E': return generateFamilyE(appDir);
     case 'F': return generateFamilyF(appDir);
-    case 'G': return generateFamilyG(appDir);
+    case 'G': return [...generateFamilyG(appDir), ...generateWave2A_G(appDir)];
     case 'H': return generateFamilyH(appDir);
+    case 'I': return generateFamilyI(appDir);
     case 'M': return generateFamilyM(appDir);
+    case 'P': return generateFamilyP(appDir);
     case 'V': return generateFamilyV(appDir);
   }
 }

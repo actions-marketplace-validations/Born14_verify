@@ -10,7 +10,7 @@ import type { Edit, Predicate, VerifyConfig, VerifyResult } from '../../src/type
 // SCENARIO
 // =============================================================================
 
-export type ScenarioFamily = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'M' | 'V';
+export type ScenarioFamily = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'M' | 'P' | 'V';
 
 export interface VerifyScenario {
   id: string;

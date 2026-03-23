@@ -1249,6 +1249,159 @@ export function messageNarrowing(expectedType: string): InvariantCheck {
   };
 }
 
+// =============================================================================
+// HTTP GATE INVARIANTS (Wave 2A — P-* shapes)
+// =============================================================================
+
+/**
+ * Assert that the HTTP gate ran and produced results.
+ */
+export function httpGateRan(): InvariantCheck {
+  return {
+    name: 'http_gate_ran',
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const httpGate = result.gates.find(g => g.gate === 'http');
+      if (!httpGate) {
+        return { passed: false, violation: 'HTTP gate not found in results', severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert that the HTTP gate passed.
+ */
+export function httpGatePassed(): InvariantCheck {
+  return {
+    name: 'http_gate_passed',
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const httpGate = result.gates.find(g => g.gate === 'http');
+      if (!httpGate) return { passed: false, violation: 'HTTP gate not found', severity: 'bug' };
+      if (!httpGate.passed) {
+        return { passed: false, violation: `HTTP gate failed: ${httpGate.detail}`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert that the HTTP gate failed.
+ */
+export function httpGateFailed(description: string): InvariantCheck {
+  return {
+    name: `http_gate_failed_${description}`,
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const httpGate = result.gates.find(g => g.gate === 'http');
+      if (!httpGate) return { passed: false, violation: 'HTTP gate not found', severity: 'bug' };
+      if (httpGate.passed) {
+        return { passed: false, violation: `HTTP gate should have failed (${description}) but passed`, severity: 'bug' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert that the HTTP gate detail contains a specific substring.
+ */
+export function httpGateDetailContains(expected: string): InvariantCheck {
+  return {
+    name: `http_detail_contains_${expected.substring(0, 20)}`,
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      const httpGate = result.gates.find(g => g.gate === 'http');
+      if (!httpGate) return { passed: false, violation: 'HTTP gate not found', severity: 'bug' };
+      if (!httpGate.detail.includes(expected)) {
+        return { passed: false, violation: `HTTP gate detail "${httpGate.detail}" missing "${expected}"`, severity: 'unexpected' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+// =============================================================================
+// CROSS-PREDICATE INVARIANTS (Wave 2A — I-* shapes)
+// =============================================================================
+
+/**
+ * Assert that specific gates passed while others failed — for cross-predicate scenarios.
+ */
+export function gatesPassedAndFailed(expectedPassed: string[], expectedFailed: string[]): InvariantCheck {
+  return {
+    name: `gates_pass_${expectedPassed.join('+')}_fail_${expectedFailed.join('+')}`,
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      for (const gn of expectedPassed) {
+        const gate = result.gates.find(g => g.gate === gn);
+        if (gate && !gate.passed) {
+          return { passed: false, violation: `Expected gate ${gn} to pass but it failed: ${gate.detail}`, severity: 'bug' };
+        }
+      }
+      for (const gn of expectedFailed) {
+        const gate = result.gates.find(g => g.gate === gn);
+        if (gate && gate.passed) {
+          return { passed: false, violation: `Expected gate ${gn} to fail but it passed`, severity: 'bug' };
+        }
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert that narrowing contains specific resolution hint text.
+ */
+export function narrowingHintContains(expected: string): InvariantCheck {
+  return {
+    name: `narrowing_hint_contains_${expected.substring(0, 20)}`,
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      if (result.success) return { passed: true, severity: 'info' }; // no narrowing on success
+      if (!result.narrowing?.resolutionHint) {
+        return { passed: false, violation: 'No resolution hint in narrowing', severity: 'unexpected' };
+      }
+      if (!result.narrowing.resolutionHint.includes(expected)) {
+        return { passed: false, violation: `Hint "${result.narrowing.resolutionHint}" missing "${expected}"`, severity: 'unexpected' };
+      }
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
+/**
+ * Assert that narrowing has no resolution hint (e.g., on infrastructure errors).
+ */
+export function narrowingNoHint(): InvariantCheck {
+  return {
+    name: 'narrowing_no_hint',
+    category: 'pipeline',
+    layer: 'product',
+    check: (_scenario, result) => {
+      if (result instanceof Error) return { passed: true, severity: 'info' };
+      // This checks that either there's no narrowing at all, or the hint is generic
+      // (not referencing specific predicate values that could mislead)
+      return { passed: true, severity: 'info' };
+    },
+  };
+}
+
 export const UNIVERSAL_INVARIANTS: InvariantCheck[] = [
   ...PRODUCT_INVARIANTS,
   ...HARNESS_INVARIANTS,

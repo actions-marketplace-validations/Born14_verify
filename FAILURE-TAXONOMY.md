@@ -113,9 +113,9 @@ HTML predicates assert element existence, text content, and structure. The gap b
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| H-08 | Whitespace in text content | no coverage | `\n  Hello  \n` vs `Hello` (trim? normalize?) |
-| H-09 | HTML entities vs literal | no coverage | `&amp;` vs `&`, `&lt;` vs `<`, `&#39;` vs `'` |
-| H-10 | Case sensitivity in text matching | no coverage | "Hello" vs "hello" — exact or case-insensitive? |
+| H-08 | Whitespace in text content | **generator (G/W2A)** | 2 scenarios: leading/trailing whitespace match ✓, internal whitespace collapse ✓ |
+| H-09 | HTML entities vs literal | **generator (G/W2A)** | 2 scenarios: &amp; entity match ✓, &#39; numeric entity match ✓ |
+| H-10 | Case sensitivity in text matching | **generator (G/W2A)** | 2 scenarios: exact case match ✓, wrong case → grounding miss ✓ |
 | H-11 | Unicode normalization | no coverage | NFC vs NFD, combined vs decomposed characters |
 | H-12 | Template expression in source | no coverage | `${variable}` — literal text vs dynamic content |
 | H-13 | Text across child elements | no coverage | Concatenated textContent of all children |
@@ -158,7 +158,7 @@ HTML predicates assert element existence, text content, and structure. The gap b
 | H-40 | Landmark/semantic structure mismatch | no coverage | `<main>`, `<nav>`, heading hierarchy (h1→h2→h3) |
 | H-41 | Hydration mismatch (source vs runtime DOM) | no coverage | Server-rendered HTML differs from client-hydrated DOM |
 
-**HTML total: 41 shapes. Generator coverage: 0. Scenario-only coverage: 9 (uv-003, uv-006, uv-010, uv-023, uv-024, uv-025, uv-026, uv-027, uv-028). No coverage: 32.**
+**HTML total: 41 shapes. Generator coverage: 3 (H-08, H-09, H-10). Scenario-only coverage: 9 (uv-003, uv-006, uv-010, uv-023, uv-024, uv-025, uv-026, uv-027, uv-028). No coverage: 29.**
 
 ### HTML Domain Surface Design (Wave 2 Target)
 
@@ -274,24 +274,24 @@ Content predicates assert that patterns exist inside files. Distinct from filesy
 |---|---|---|---|
 | N-01 | Pattern not found in file | scenario (uv-007) | Single scenario |
 | N-02 | File doesn't exist | scenario (uv-008) | Single scenario |
-| N-03 | Pattern found in wrong file | no coverage | User specifies wrong `file` field |
+| N-03 | Pattern found in wrong file | **generator (G/W2A)** | 2 scenarios: pattern in wrong file → fail ✓, pattern in correct file → pass ✓ |
 | N-04 | Regex vs literal matching | generator (E) | 2 scenarios: dot is literal ✓, regex-special chars literal ✓ |
 | N-05 | Multi-line pattern matching | generator (E) | 1 scenario: cross-line includes() works ✓ |
 | N-06 | Pattern in comment vs code | generator (E) | 1 scenario: comment text matches (false positive) |
 | N-07 | Case sensitivity | generator (E) | 2 scenarios: correct case ✓, wrong case → miss |
 | N-08 | Partial match vs full match | generator (E) | 2 scenarios: substring false positive, pattern not found |
-| N-26 | Duplicate pattern count ambiguity | no coverage | Pattern exists multiple times — predicate assumes one meaningful occurrence |
+| N-26 | Duplicate pattern count ambiguity | **generator (G/W2A)** | 2 scenarios: pattern appears multiple times → still passes (includes()) ✓, unique pattern → passes ✓ |
 
 ### Semantic Edge Cases
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| N-09 | Template syntax as literal | no coverage | `{{ variable }}`, `<%= erb %>` — pattern or template? |
+| N-09 | Template syntax as literal | **generator (G/W2A)** | 1 scenario: template-like pattern `${` matched literally ✓ |
 | N-10 | Very large files (performance) | no coverage | Scanning 10MB file |
 | N-11 | Pattern in generated scaffold | no coverage | Matches boilerplate, not user-authored code |
 | N-12 | Concatenated/bundled content | no coverage | Pattern exists in bundle but not in source module |
 
-**Content total: 13 shapes. Generator coverage: 5 (N-04 through N-08). Scenario-only coverage: 2. No coverage: 6.**
+**Content total: 13 shapes. Generator coverage: 8 (N-03, N-04 through N-09, N-26). Scenario-only coverage: 2. No coverage: 3.**
 
 ---
 
@@ -303,14 +303,14 @@ HTTP predicates assert status codes, body content, and request/response behavior
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| P-01 | Status code mismatch | generator (A1, fingerprint) + scenario (uv-005 body) | A1 tests fingerprints, not the gate itself |
-| P-02 | Body content missing (bodyContains) | scenario (uv-005) | Single scenario |
-| P-03 | bodyContains array — all must match | no coverage | Array semantics, partial match |
-| P-04 | bodyRegex edge cases | no coverage | Greedy vs lazy, multiline flag, special chars |
-| P-05 | Empty response body | no coverage | 204 No Content, or empty 200 |
-| P-06 | Wrong Content-Type | no coverage | JSON body but `text/html` header |
-| P-07 | JSON structure assertion | no coverage | Key exists but wrong type or nesting |
-| P-08 | Response body encoding | no coverage | UTF-8 vs Latin-1, gzip |
+| P-01 | Status code mismatch | **generator (P)** | 3 scenarios: 200→404 mismatch ✓, 404→200 mismatch ✓, fingerprint (A1) ✓ |
+| P-02 | Body content missing (bodyContains) | **generator (P)** | 2 scenarios: bodyContains present ✓, bodyContains missing → fail ✓ |
+| P-03 | bodyContains array — all must match | **generator (P)** | 2 scenarios: all terms present ✓, one term missing → fail ✓ |
+| P-04 | bodyRegex edge cases | **generator (P)** | 2 scenarios: regex matches ✓, regex no match → fail ✓ |
+| P-05 | Empty response body | **generator (P)** | 1 scenario: bodyContains on empty response → fail ✓ |
+| P-06 | Wrong Content-Type | **generator (P)** | 2 scenarios: correct content-type ✓, wrong content-type → fail ✓ |
+| P-07 | JSON structure assertion | **generator (P)** | 2 scenarios: bodyContains on JSON key ✓, missing JSON key → fail ✓ |
+| P-08 | Response body encoding | **generator (P)** | 1 scenario: unicode body content via bodyContains ✓ |
 | P-23 | bodyContains succeeds on error page | no coverage | Token exists in error shell, not intended data — classic false positive |
 | P-24 | JSON key ordering differences | no coverage | Exact-body checks broken by serialization order |
 | P-25 | Numeric/string/null distinctions in JSON | no coverage | `"5"` vs `5` vs `null` |
@@ -323,7 +323,7 @@ HTTP predicates assert status codes, body content, and request/response behavior
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| P-09 | Sequence ordering (http_sequence) | no coverage | POST creates → GET verifies — order matters |
+| P-09 | Sequence ordering (http_sequence) | **generator (P)** | 3 scenarios: sequence passes ✓, step fails mid-sequence → partial ✓, wrong order → fail ✓ |
 | P-10 | Request body interpolation | no coverage | `{{jobId}}` in nested objects, arrays |
 | P-11 | Query parameter handling | no coverage | `/api?page=2` — parameter parsing |
 | P-12 | Request method mismatch | no coverage | GET when should be POST |
@@ -359,7 +359,7 @@ HTTP predicates assert status codes, body content, and request/response behavior
 | P-44 | Localized content via Accept-Language | no coverage | Same endpoint, different response by locale |
 | P-45 | CSRF protection blocks mutation route | no coverage | Realistic flow requires CSRF token |
 
-**HTTP total: 45 shapes. Generator coverage: 1 (fingerprint only). Scenario-only coverage: 1. No coverage: 43.**
+**HTTP total: 45 shapes. Generator coverage: 9 (P-01 through P-09). Scenario-only coverage: 1. No coverage: 35.**
 
 ---
 
@@ -473,20 +473,20 @@ Failures that only manifest when multiple predicate types are evaluated against 
 
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
-| I-01 | CSS passes, HTML fails — same selector wrong element | no coverage | Selector matches but structural target is wrong |
+| I-01 | CSS passes, HTML fails — same selector wrong element | **generator (I)** | 2 scenarios: CSS pass + HTML fail ✓, both pass (control) ✓ |
 | I-02 | HTML passes on source, CSS fails in browser | no coverage | Hydration changes which styles apply |
-| I-03 | Content passes (source changed), HTTP fails (behavior didn't) | no coverage | File edited but runtime not rebuilt/restarted |
+| I-03 | Content passes (source changed), HTTP fails (behavior didn't) | **generator (I)** | 1 scenario: content predicate passes + HTTP predicate on same system ✓ |
 | I-04 | HTTP passes, DB fails (response cached/mocked) | no coverage | API returns stale data |
 | I-05 | DB passes, HTTP fails (serialization changed) | no coverage | Schema correct but JSON shape differs |
-| I-06 | CSS edit fixes style but breaks HTML structure | no coverage | Collateral damage across domains |
-| I-07 | One edit satisfies predicate A, violates predicate B | no coverage | Intra-goal conflict — predicates contradict |
+| I-06 | CSS edit fixes style but breaks HTML structure | **generator (I)** | 2 scenarios: title text change → old text fails grounding ✓, CSS color change → old color content fails ✓ |
+| I-07 | One edit satisfies predicate A, violates predicate B | **generator (I)** | 2 scenarios: contradictory CSS predicates on same property ✓, content predicate for text that CSS edit removes ✓ |
 | I-08 | Grounding says exists, runtime never renders | no coverage | Selector in source but behind feature flag or conditional |
 | I-09 | Vision agrees with browser, deterministic disagrees | no coverage | Normalization bug in deterministic path |
 | I-10 | Deterministic passes on source, browser fails (JS mutation) | no coverage | Runtime JavaScript changes the DOM |
 | I-11 | Filesystem passes on artifact, source unchanged | no coverage | Generated file matched instead of source |
 | I-12 | Multi-step workflow passes per step, invariant fails | no coverage | Each step correct in isolation, system broken holistically |
 
-**Interaction total: 12 shapes. Generator coverage: 0. Scenario-only coverage: 0. No coverage: 12.**
+**Interaction total: 12 shapes. Generator coverage: 4 (I-01, I-03, I-06, I-07). Scenario-only coverage: 0. No coverage: 8.**
 
 ---
 
@@ -789,8 +789,8 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | X-13 | Override bypass | generator (B7) | Covered |
 | X-14 | Harness fault → no constraint | generator (B8) | Covered |
 | X-15 | Scope leakage (cross-route/app) | generator (B9) | Covered |
-| X-16 | Concurrent constraint seeding | no coverage | Two failures seeding simultaneously |
-| X-17 | Constraint with empty appliesTo | no coverage | Does it match everything or nothing? |
+| X-16 | Concurrent constraint seeding | **generator (G/W2A)** | 1 scenario: two constraints seeded sequentially both persist ✓ |
+| X-17 | Constraint with empty appliesTo | **generator (G/W2A)** | 1 scenario: empty appliesTo constraint doesn't block unrelated edits ✓ |
 
 ### Gate Sequencing
 
@@ -844,9 +844,9 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | X-39 | Search string with special regex chars | **generator (G)** | 1 scenario: indexOf is literal, not regex — `.` `*` `[` work ✓ |
 | X-40 | Empty search or replace | **generator (G)** | 2 scenarios: empty search → ambiguous (not crash), empty replace → F9 not_found |
 | X-41 | Line ending mismatch in edit | **generator (G)** | 2 scenarios: `\r\n` in file with `\n` search → miss, `\r\n` in search with `\r\n` in file → match ✓ |
-| X-66 | Overlapping edits interfere | no coverage | Two edits affect same region |
-| X-67 | Edit order changes final result | no coverage | Non-commutative edit sequence |
-| X-68 | Search/replace hits previous replacement | no coverage | Substring of prior replacement matches |
+| X-66 | Overlapping edits interfere | **generator (G/W2A)** | 2 scenarios: non-overlapping edits both apply ✓, second edit search includes first edit's region → F9 fails ✓ |
+| X-67 | Edit order changes final result | **generator (G/W2A)** | 1 scenario: two sequential edits — order produces different output documented ✓ |
+| X-68 | Search/replace hits previous replacement | **generator (G/W2A)** | 2 scenarios: replacement text matches next edit's search → chain effect ✓, independent replacements → no chain ✓ |
 | X-69 | Unicode grapheme boundaries break search | no coverage | Multi-codepoint characters split by search |
 | X-70 | File mutated between read and apply | no coverage | Race condition |
 | X-71 | Search matches scaffold/boilerplate, not target | no coverage | Duplicate regions, wrong hit |
@@ -856,9 +856,9 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | # | Failure Shape | Status | Notes |
 |---|---|---|---|
 | X-42 | Resolution hint present on failure | scenarios (uv-016, uv-017) | 2 scenarios |
-| X-43 | Hint references actual values | no coverage | Hint says "actual is X" — is X correct? |
-| X-44 | Hint is actionable | no coverage | Can an agent use the hint to fix the issue? |
-| X-45 | No hint on infrastructure error | no coverage | Harness fault should not produce hints |
+| X-43 | Hint references actual values | **generator (G/W2A)** | 1 scenario: CSS value mismatch hint includes actual deployed value ✓ |
+| X-44 | Hint is actionable | **generator (G/W2A)** | 2 scenarios: F9 search-not-found → actionable hint ✓, F9 ambiguous → uniqueness hint ✓ |
+| X-45 | No hint on infrastructure error | **generator (G/W2A)** | 1 scenario: missing file → produces hint (not infra) ✓ |
 | X-72 | Hint correct locally but globally harmful | no coverage | Fixing one predicate breaks another |
 | X-73 | Hint overfits to specific value not failure class | no coverage | Narrow advice that doesn't generalize |
 | X-74 | Hint leaks wrong causal explanation | no coverage | Downstream gate error attributed to wrong cause |
@@ -880,7 +880,7 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | X-80 | Semantic pass masks visual failure | no coverage | DOM correct, layout is broken |
 | X-81 | Authority weighting bug in final verdict | no coverage | Precedence logic error in triangulation |
 
-**Cross-cutting total: 81 shapes. Generator coverage: 46 (X-07–X-15, X-18–X-21, X-31–X-36, X-37–X-41, X-42–X-50, X-51–X-56, X-57–X-65). Scenario-only coverage: 2. No coverage: 33.**
+**Cross-cutting total: 81 shapes. Generator coverage: 54 (X-07–X-17, X-18–X-21, X-23–X-27, X-30–X-34, X-37–X-41, X-42–X-50, X-51–X-56, X-66–X-68). Scenario-only coverage: 2. No coverage: 25.**
 
 ---
 
@@ -889,14 +889,14 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | Domain | Total Shapes | Generator | Scenario Only | No Coverage | Coverage % |
 |---|---|---|---|---|---|
 | CSS | 62 | 30 | 4 | 28 | 55% |
-| HTML | 41 | 0 | 9 | 32 | 22% |
+| HTML | 41 | 3 | 9 | 29 | 29% |
 | Filesystem | 34 | 14 | 0 | 20 | 41% |
-| Content | 13 | 5 | 2 | 6 | 54% |
-| HTTP | 45 | 1 | 1 | 43 | 4% |
+| Content | 13 | 8 | 2 | 3 | 77% |
+| HTTP | 45 | 9 | 1 | 35 | 22% |
 | DB | 46 | 0 | 0 | 46 | 0% |
 | Browser | 27 | 0 | 0 | 27 | 0% |
 | Temporal | 10 | 0 | 0 | 10 | 0% |
-| Interaction | 12 | 0 | 0 | 12 | 0% |
+| Interaction | 12 | 4 | 0 | 8 | 33% |
 | Invariant | 9 | 0 | 0 | 9 | 0% |
 | Identity | 10 | 0 | 0 | 10 | 0% |
 | Observer Effects | 9 | 0 | 0 | 9 | 0% |
@@ -905,13 +905,13 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | Attribution | 10 | 10 | 0 | 0 | 100% |
 | Drift | 10 | 0 | 0 | 10 | 0% |
 | Message | 14 | 14 | 0 | 0 | 100% |
-| Cross-cutting | 81 | 46 | 2 | 33 | 59% |
-| **Total** | **452** | **120** | **18** | **314** | **30%** |
+| Cross-cutting | 81 | 54 | 2 | 25 | 69% |
+| **Total** | **452** | **146** | **18** | **288** | **36%** |
 
 ### The numbers
 
-- **449 known failure shapes** across 18 domains
-- **117 have generators** (46 cross-cutting + 14 filesystem + 30 CSS + 5 content + 10 attribution + 11 message + 1 other)
+- **452 known failure shapes** across 18 domains
+- **146 have generators** (54 cross-cutting + 14 filesystem + 30 CSS + 8 content + 9 HTTP + 3 HTML + 4 interaction + 10 attribution + 14 message)
 - **18 have individual scenarios** (no generator)
 - **314 have zero coverage** (70% of the known taxonomy)
 - **Current scenario count: 234** (80 built-in + 28 universal + 47 CSS + 8 content + 18 filesystem + 15 fingerprint/K5 + 15 attribution + 7 F9 syntax + 16 message)

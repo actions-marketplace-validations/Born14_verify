@@ -8,13 +8,13 @@ Verification gate for AI agent actions. Every edit gets a fair trial before it t
 
 In v0.1.1, HTTP predicates with different `bodyContains` values produced identical fingerprints — K5 couldn't tell them apart. A human caught it by reading the code.
 
-Now 234 automated scenarios across 10 families catch it in under 20 seconds:
+Now 269 automated scenarios across 12 families catch it in under 25 seconds:
 
 ```bash
 npx @sovereign-labs/verify self-test
 
-#   0 bugs | 239 scenarios | 0 unexpected | A: clean, B: clean, ..., H: clean, M: clean, V: clean
-#   Failure Class Coverage: 83/83 clean
+#   0 bugs | 269 scenarios | 0 unexpected | A: clean, ..., I: clean, ..., P: clean, V: clean
+#   Failure Class Coverage: 91/91 clean
 #   ALL CLEAN — No invariant violations detected.
 ```
 
@@ -146,7 +146,7 @@ Add to your agent's MCP config:
 
 ## Self-Test Harness
 
-239 scenarios across 10 families exercise the verification pipeline's invariants — including 14 filesystem, 29 CSS (value normalization + shorthand), 5 content pattern, 7 F9 syntax gate, 6 fingerprinting/K5, 10 attribution error, 5 full-pipeline integration, 14 communication/message gate (including topic trust enforcement and epoch-based evidence staleness), and 6 HTML predicate failure classes tracked by the [failure taxonomy](FAILURE-TAXONOMY.md). Run them to prove your install works, or use `--fail-on-bug` in CI.
+269 scenarios across 12 families exercise the verification pipeline's invariants — including 14 filesystem, 29 CSS (value normalization + shorthand), 8 content pattern, 10 F9 syntax gate, 8 fingerprinting/K5, 10 attribution error, 9 HTTP gate, 4 cross-predicate interaction, 14 communication/message gate (including topic trust enforcement and epoch-based evidence staleness), and 9 HTML predicate failure classes tracked by the [failure taxonomy](FAILURE-TAXONOMY.md). Run them to prove your install works, or use `--fail-on-bug` in CI.
 
 ```bash
 # Pure-only (~2s, no Docker needed)
@@ -170,13 +170,15 @@ npx @sovereign-labs/verify self-test --fail-on-bug
 | **D** | 23 | G5 containment attribution + attribution errors (AT-01–AT-10) | No |
 | **E** | 61 | Grounding: CSS normalization/shorthand + content patterns (C-01–C-30, C-44–C-52, N-04–N-08) | No |
 | **F** | 6 | Full Docker pipeline (build → stage → verify) | Yes |
-| **G** | 17 | Edge cases + F9 syntax gate (X-37–X-41: not_found, ambiguous, regex, empty, line endings) + external/universal scenarios | No |
+| **G** | 68 | Edge cases, F9 syntax (X-37–X-41, X-66–X-68), HTML text (H-08–H-10), content (N-03, N-09, N-26), K5 edges (X-16, X-17), narrowing (X-43–X-45) + universal scenarios | No |
 | **H** | 34 | Filesystem gate — 14 failure classes (FS-01 through FS-16) | No |
+| **I** | 7 | Cross-predicate interactions (I-01, I-03, I-06, I-07) | No |
 | **M** | 21 | Message gate — 14 failure classes (MSG-01 through MSG-14) | No |
+| **P** | 18 | HTTP gate — status, body, regex, content-type, sequence (P-01–P-09) | Yes |
 | **V** | 14 | Vision + triangulation (3-authority verdict) | No |
 | **UV** | 28 | Universal full-pipeline integration (color normalization, multi-predicate, F9 rejection, HTML predicates) | No |
 
-205 scenarios run pure from families. 28 universal scenarios test cross-gate integration including HTML predicates. 6 need Docker. Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
+241 scenarios run pure from families. 28 universal scenarios test cross-gate integration including HTML predicates. 24 need Docker (6 F + 18 P). Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
 
 ## Gates
 
@@ -288,6 +290,25 @@ if (result.verdict === 'approved') {
 Four verdicts: `approved` (send it), `blocked` (do not send), `narrowed` (send with modifications), `clarify` (ambiguous — ask a human). Built-in negation detection prevents "has not deployed" from being treated as a deploy claim. Topic trust enforcement prevents agents from gaming governance by mislabeling topics — the gate detects topics from content keywords and overrides the agent's label when they disagree. Epoch-based evidence staleness computes freshness from authority epochs rather than trusting the evidence provider's self-report.
 
 On `clarify` and `narrowed` verdicts, `result.reviewBundle` provides a self-contained package for human review surfaces — the original message, gate reasoning, evidence artifacts (with raw provider fields), topic resolution trace, and staleness info. A Slack modal, email thread, or dashboard card rendering a review bundle has everything it needs without chasing cross-references.
+
+### Platform Adapters
+
+The message gate is platform-agnostic. Adapters translate between platform vocabulary and `MessageEnvelope`:
+
+- **[@sovereign-labs/verify-slack](https://github.com/Born14/verify-slack)** — Slack adapter. Governs bot messages, renders review bundles as Block Kit cards, handles approve/reject actions.
+
+```bash
+npm install @sovereign-labs/verify-slack @sovereign-labs/verify @slack/bolt
+```
+
+```typescript
+import { createSlackGovernor } from '@sovereign-labs/verify-slack';
+
+const govern = createSlackGovernor({ policy, evidenceProviders, reviewChannel: '#review' });
+app.message(async ({ message, client }) => {
+  const { result } = await govern(message, client);
+});
+```
 
 ## K5: Learning from Failures
 

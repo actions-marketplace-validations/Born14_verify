@@ -105,14 +105,16 @@ function parseArgs(args: string[]): ParsedArgs {
     D  Containment (G5) attribution
     E  Grounding validation
     F  Full Docker pipeline (auto-enables --docker)
-    G  Edge cases & robustness
+    G  Edge cases, F9 syntax, HTML text, content, K5 edges, narrowing
+    I  Cross-predicate interactions
+    P  HTTP gate (auto-enables --docker)
 `);
       process.exit(0);
     }
   }
 
-  // Auto-enable Docker when Family F is explicitly requested
-  if (families?.includes('F') && !dockerEnabled) {
+  // Auto-enable Docker when Family F or P is explicitly requested
+  if (families?.some(f => f === 'F' || f === 'P') && !dockerEnabled) {
     dockerEnabled = true;
   }
 

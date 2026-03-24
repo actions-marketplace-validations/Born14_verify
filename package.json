@@ -1,6 +1,6 @@
 {
   "name": "@sovereign-labs/verify",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Verification gate for AI agent actions. Deterministic predicates, browser-level visual checks, constraint learning from failures. Every edit gets a fair trial before it touches your users.",
   "type": "module",
   "main": "./src/index.ts",
@@ -37,7 +37,8 @@
     "scripts/harness/scenario-generator.ts",
     "scripts/harness/db-harness.ts",
     "scripts/harness/ledger.ts",
-    "scripts/harness/report.ts"
+    "scripts/harness/report.ts",
+    "scripts/harness/external-scenario-loader.ts"
   ],
   "license": "MIT",
   "keywords": [

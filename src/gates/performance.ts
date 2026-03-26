@@ -399,7 +399,7 @@ export function runPerformanceGate(ctx: GateContext): GateResult & { predicateRe
 
   for (let i = 0; i < perfPreds.length; i++) {
     const p = perfPreds[i];
-    const result = validatePerformancePredicate(p, ctx.config.appDir);
+    const result = validatePerformancePredicate(p, ctx.stageDir ?? ctx.config.appDir);
     results.push({ ...result, predicateId: `perf_p${i}` });
 
     if (!result.passed) {

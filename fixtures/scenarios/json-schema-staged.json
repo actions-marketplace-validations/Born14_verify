@@ -1,0 +1,2505 @@
+[
+  {
+    "id": "json-schema-0001",
+    "requiresDocker": false,
+    "description": "json-schema items: nested items — valid nested array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[\n  [\n    [\n      [\n        1\n      ]\n    ],\n    [\n      [\n        2\n      ],\n      [\n        3\n      ]\n    ]\n  ],\n  [\n    [\n      [\n        4\n      ],\n      [\n        5\n      ],\n      [\n        6\n      ]\n    ]\n  ]\n]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "items"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/items: valid nested array"
+  },
+  {
+    "id": "json-schema-0002",
+    "requiresDocker": false,
+    "description": "json-schema items: nested items — nested array with invalid type",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[\n  [\n    [\n      [\n        \"1\"\n      ]\n    ],\n    [\n      [\n        2\n      ],\n      [\n        3\n      ]\n    ]\n  ],\n  [\n    [\n      [\n        4\n      ],\n      [\n        5\n      ],\n      [\n        6\n      ]\n    ]\n  ]\n]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "items"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/items: nested array with invalid type"
+  },
+  {
+    "id": "json-schema-0003",
+    "requiresDocker": false,
+    "description": "json-schema items: nested items — not deep enough",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[\n  [\n    [\n      1\n    ],\n    [\n      2\n    ],\n    [\n      3\n    ]\n  ],\n  [\n    [\n      4\n    ],\n    [\n      5\n    ],\n    [\n      6\n    ]\n  ]\n]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "items"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/items: not deep enough"
+  },
+  {
+    "id": "json-schema-0004",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — an integer is an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an integer is an integer"
+  },
+  {
+    "id": "json-schema-0005",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — a float with zero fractional part is an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float with zero fractional part is an integer"
+  },
+  {
+    "id": "json-schema-0006",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — a float is not an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is not an integer"
+  },
+  {
+    "id": "json-schema-0007",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — a string is not an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is not an integer"
+  },
+  {
+    "id": "json-schema-0008",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — a string is still not an integer, even if it looks like one",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"1\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is still not an integer, even if it looks like one"
+  },
+  {
+    "id": "json-schema-0009",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — an object is not an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is not an integer"
+  },
+  {
+    "id": "json-schema-0010",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — an array is not an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is not an integer"
+  },
+  {
+    "id": "json-schema-0011",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — a boolean is not an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a boolean is not an integer"
+  },
+  {
+    "id": "json-schema-0012",
+    "requiresDocker": false,
+    "description": "json-schema type: integer type matches integers — null is not an integer",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is not an integer"
+  },
+  {
+    "id": "json-schema-0013",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — an integer is a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an integer is a number"
+  },
+  {
+    "id": "json-schema-0014",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — a float with zero fractional part is a number (and an integer)",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float with zero fractional part is a number (and an integer)"
+  },
+  {
+    "id": "json-schema-0015",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — a float is a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is a number"
+  },
+  {
+    "id": "json-schema-0016",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — a string is not a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is not a number"
+  },
+  {
+    "id": "json-schema-0017",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — a string is still not a number, even if it looks like one",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"1\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is still not a number, even if it looks like one"
+  },
+  {
+    "id": "json-schema-0018",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — an object is not a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is not a number"
+  },
+  {
+    "id": "json-schema-0019",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — an array is not a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is not a number"
+  },
+  {
+    "id": "json-schema-0020",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — a boolean is not a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a boolean is not a number"
+  },
+  {
+    "id": "json-schema-0021",
+    "requiresDocker": false,
+    "description": "json-schema type: number type matches numbers — null is not a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "number"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is not a number"
+  },
+  {
+    "id": "json-schema-0022",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — 1 is not a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: 1 is not a string"
+  },
+  {
+    "id": "json-schema-0023",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — a float is not a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is not a string"
+  },
+  {
+    "id": "json-schema-0024",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — a string is a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is a string"
+  },
+  {
+    "id": "json-schema-0025",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — a string is still a string, even if it looks like a number",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"1\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is still a string, even if it looks like a number"
+  },
+  {
+    "id": "json-schema-0026",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — an empty string is still a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an empty string is still a string"
+  },
+  {
+    "id": "json-schema-0027",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — an object is not a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is not a string"
+  },
+  {
+    "id": "json-schema-0028",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — an array is not a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is not a string"
+  },
+  {
+    "id": "json-schema-0029",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — a boolean is not a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a boolean is not a string"
+  },
+  {
+    "id": "json-schema-0030",
+    "requiresDocker": false,
+    "description": "json-schema type: string type matches strings — null is not a string",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is not a string"
+  },
+  {
+    "id": "json-schema-0031",
+    "requiresDocker": false,
+    "description": "json-schema type: object type matches objects — an integer is not an object",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an integer is not an object"
+  },
+  {
+    "id": "json-schema-0032",
+    "requiresDocker": false,
+    "description": "json-schema type: object type matches objects — a float is not an object",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is not an object"
+  },
+  {
+    "id": "json-schema-0033",
+    "requiresDocker": false,
+    "description": "json-schema type: object type matches objects — a string is not an object",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is not an object"
+  },
+  {
+    "id": "json-schema-0034",
+    "requiresDocker": false,
+    "description": "json-schema type: object type matches objects — an object is an object",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is an object"
+  },
+  {
+    "id": "json-schema-0035",
+    "requiresDocker": false,
+    "description": "json-schema type: object type matches objects — an array is not an object",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is not an object"
+  },
+  {
+    "id": "json-schema-0036",
+    "requiresDocker": false,
+    "description": "json-schema type: object type matches objects — a boolean is not an object",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a boolean is not an object"
+  },
+  {
+    "id": "json-schema-0037",
+    "requiresDocker": false,
+    "description": "json-schema type: object type matches objects — null is not an object",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is not an object"
+  },
+  {
+    "id": "json-schema-0038",
+    "requiresDocker": false,
+    "description": "json-schema type: array type matches arrays — an integer is not an array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an integer is not an array"
+  },
+  {
+    "id": "json-schema-0039",
+    "requiresDocker": false,
+    "description": "json-schema type: array type matches arrays — a float is not an array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is not an array"
+  },
+  {
+    "id": "json-schema-0040",
+    "requiresDocker": false,
+    "description": "json-schema type: array type matches arrays — a string is not an array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is not an array"
+  },
+  {
+    "id": "json-schema-0041",
+    "requiresDocker": false,
+    "description": "json-schema type: array type matches arrays — an object is not an array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is not an array"
+  },
+  {
+    "id": "json-schema-0042",
+    "requiresDocker": false,
+    "description": "json-schema type: array type matches arrays — an array is an array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is an array"
+  },
+  {
+    "id": "json-schema-0043",
+    "requiresDocker": false,
+    "description": "json-schema type: array type matches arrays — a boolean is not an array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a boolean is not an array"
+  },
+  {
+    "id": "json-schema-0044",
+    "requiresDocker": false,
+    "description": "json-schema type: array type matches arrays — null is not an array",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "array"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is not an array"
+  },
+  {
+    "id": "json-schema-0045",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — an integer is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an integer is not a boolean"
+  },
+  {
+    "id": "json-schema-0046",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — zero is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "0"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: zero is not a boolean"
+  },
+  {
+    "id": "json-schema-0047",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — a float is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is not a boolean"
+  },
+  {
+    "id": "json-schema-0048",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — a string is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is not a boolean"
+  },
+  {
+    "id": "json-schema-0049",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — an empty string is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an empty string is not a boolean"
+  },
+  {
+    "id": "json-schema-0050",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — an object is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is not a boolean"
+  },
+  {
+    "id": "json-schema-0051",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — an array is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is not a boolean"
+  },
+  {
+    "id": "json-schema-0052",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — true is a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: true is a boolean"
+  },
+  {
+    "id": "json-schema-0053",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — false is a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: false is a boolean"
+  },
+  {
+    "id": "json-schema-0054",
+    "requiresDocker": false,
+    "description": "json-schema type: boolean type matches booleans — null is not a boolean",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is not a boolean"
+  },
+  {
+    "id": "json-schema-0055",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — an integer is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an integer is not null"
+  },
+  {
+    "id": "json-schema-0056",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — a float is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is not null"
+  },
+  {
+    "id": "json-schema-0057",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — zero is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "0"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: zero is not null"
+  },
+  {
+    "id": "json-schema-0058",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — a string is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is not null"
+  },
+  {
+    "id": "json-schema-0059",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — an empty string is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an empty string is not null"
+  },
+  {
+    "id": "json-schema-0060",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — an object is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is not null"
+  },
+  {
+    "id": "json-schema-0061",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — an array is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is not null"
+  },
+  {
+    "id": "json-schema-0062",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — true is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: true is not null"
+  },
+  {
+    "id": "json-schema-0063",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — false is not null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: false is not null"
+  },
+  {
+    "id": "json-schema-0064",
+    "requiresDocker": false,
+    "description": "json-schema type: null type matches only the null object — null is null",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": "null"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is null"
+  },
+  {
+    "id": "json-schema-0065",
+    "requiresDocker": false,
+    "description": "json-schema type: multiple types can be specified in an array — an integer is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an integer is valid"
+  },
+  {
+    "id": "json-schema-0066",
+    "requiresDocker": false,
+    "description": "json-schema type: multiple types can be specified in an array — a string is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a string is valid"
+  },
+  {
+    "id": "json-schema-0067",
+    "requiresDocker": false,
+    "description": "json-schema type: multiple types can be specified in an array — a float is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "1.1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a float is invalid"
+  },
+  {
+    "id": "json-schema-0068",
+    "requiresDocker": false,
+    "description": "json-schema type: multiple types can be specified in an array — an object is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an object is invalid"
+  },
+  {
+    "id": "json-schema-0069",
+    "requiresDocker": false,
+    "description": "json-schema type: multiple types can be specified in an array — an array is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: an array is invalid"
+  },
+  {
+    "id": "json-schema-0070",
+    "requiresDocker": false,
+    "description": "json-schema type: multiple types can be specified in an array — a boolean is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: a boolean is invalid"
+  },
+  {
+    "id": "json-schema-0071",
+    "requiresDocker": false,
+    "description": "json-schema type: multiple types can be specified in an array — null is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is invalid"
+  },
+  {
+    "id": "json-schema-0072",
+    "requiresDocker": false,
+    "description": "json-schema type: type as array with one item — string is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: string is valid"
+  },
+  {
+    "id": "json-schema-0073",
+    "requiresDocker": false,
+    "description": "json-schema type: type as array with one item — number is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "123"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "string"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: number is invalid"
+  },
+  {
+    "id": "json-schema-0074",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array or object — array is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[\n  1,\n  2,\n  3\n]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: array is valid"
+  },
+  {
+    "id": "json-schema-0075",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array or object — object is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{\n  \"foo\": 123\n}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: object is valid"
+  },
+  {
+    "id": "json-schema-0076",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array or object — number is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "123"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: number is invalid"
+  },
+  {
+    "id": "json-schema-0077",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array or object — string is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: string is invalid"
+  },
+  {
+    "id": "json-schema-0078",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array or object — null is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is invalid"
+  },
+  {
+    "id": "json-schema-0079",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array, object or null — array is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "[\n  1,\n  2,\n  3\n]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object",
+            "null"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: array is valid"
+  },
+  {
+    "id": "json-schema-0080",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array, object or null — object is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "{\n  \"foo\": 123\n}"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object",
+            "null"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: object is valid"
+  },
+  {
+    "id": "json-schema-0081",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array, object or null — null is valid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "null"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object",
+            "null"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: null is valid"
+  },
+  {
+    "id": "json-schema-0082",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array, object or null — number is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "123"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object",
+            "null"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: number is invalid"
+  },
+  {
+    "id": "json-schema-0083",
+    "requiresDocker": false,
+    "description": "json-schema type: type: array, object or null — string is invalid",
+    "edits": [
+      {
+        "file": "test-data.json",
+        "search": "",
+        "replace": "\"foo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "serialization",
+        "file": "test-data.json",
+        "schema": {
+          "type": [
+            "array",
+            "object",
+            "null"
+          ]
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "intent": "false_positive",
+    "tags": [
+      "serialization",
+      "json-schema",
+      "type"
+    ],
+    "rationale": "JSON Schema Test Suite draft2020-12/type: string is invalid"
+  }
+]

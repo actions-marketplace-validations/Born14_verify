@@ -1,68 +1,457 @@
 [
   {
-    "id": "a11-001",
-    "description": "alt_text: demo-app has img with class but check existing alt",
-    "edits": [],
-    "predicates": [
-      {
-        "type": "a11y",
-        "a11yCheck": "alt_text",
-        "expected": "no_findings"
-      }
-    ],
-    "expectedSuccess": true,
-    "tags": [
-      "a11y",
-      "alt_text"
-    ],
-    "rationale": "scanner does not detect missing alt on img.logo in server.js template literal"
-  },
-  {
-    "id": "a11-002",
-    "description": "alt_text: edit adds alt to image, expect clean",
+    "id": "a11y-0001",
+    "requiresDocker": false,
+    "description": "a11y alt_text: img without alt attribute",
     "edits": [
       {
-        "file": "server.js",
-        "search": "<img class=\"logo\"",
-        "replace": "<img class=\"logo\" alt=\"Company logo\""
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"photo.jpg\">\n</body>\n</html>"
       }
     ],
     "predicates": [
       {
         "type": "a11y",
         "a11yCheck": "alt_text",
-        "expected": "no_findings"
+        "expected": "has_findings"
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "alt_text"
     ],
-    "rationale": "After adding alt attribute, alt_text check should pass"
+    "rationale": "A11y gate should detect: img without alt attribute"
   },
   {
-    "id": "a11-003",
-    "description": "heading_hierarchy clean: demo-app has proper heading order",
-    "edits": [],
+    "id": "a11y-0002",
+    "requiresDocker": false,
+    "description": "a11y alt_text: img with src and class but no alt",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"logo.png\" class=\"logo\" width=\"100\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text"
+    ],
+    "rationale": "A11y gate should detect: img with src and class but no alt"
+  },
+  {
+    "id": "a11y-0003",
+    "requiresDocker": false,
+    "description": "a11y alt_text: img with id but no alt",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"banner.jpg\" id=\"hero\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text"
+    ],
+    "rationale": "A11y gate should detect: img with id but no alt"
+  },
+  {
+    "id": "a11y-0004",
+    "requiresDocker": false,
+    "description": "a11y alt_text: multiple imgs, second missing alt",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"a.jpg\" alt=\"A\"><img src=\"b.jpg\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text"
+    ],
+    "rationale": "A11y gate should detect: multiple imgs, second missing alt"
+  },
+  {
+    "id": "a11y-0005",
+    "requiresDocker": false,
+    "description": "a11y alt_text: img with title but no alt",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"pic.jpg\" title=\"A picture\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text"
+    ],
+    "rationale": "A11y gate should detect: img with title but no alt"
+  },
+  {
+    "id": "a11y-0006",
+    "requiresDocker": false,
+    "description": "a11y alt_text: img with style but no alt",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"bg.jpg\" style=\"width:100%\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text"
+    ],
+    "rationale": "A11y gate should detect: img with style but no alt"
+  },
+  {
+    "id": "a11y-0007",
+    "requiresDocker": false,
+    "description": "a11y alt_text: img with data attributes but no alt",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"hero.jpg\" data-src=\"hero-2x.jpg\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text"
+    ],
+    "rationale": "A11y gate should detect: img with data attributes but no alt"
+  },
+  {
+    "id": "a11y-0008",
+    "requiresDocker": false,
+    "description": "a11y alt_text: img with loading lazy but no alt",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<img src=\"gallery.jpg\" loading=\"lazy\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text"
+    ],
+    "rationale": "A11y gate should detect: img with loading lazy but no alt"
+  },
+  {
+    "id": "a11y-0009",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: empty h1 tag",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1></h1><p>Content</p>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
         "a11yCheck": "heading_hierarchy",
-        "expected": "no_findings"
+        "expected": "has_findings"
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "heading_hierarchy"
     ],
-    "rationale": "demo-app uses h1→h2 hierarchy without skips"
+    "rationale": "A11y gate should detect: empty h1 tag"
   },
   {
-    "id": "a11-004",
-    "description": "landmark: demo-app has nav element",
-    "edits": [],
+    "id": "a11y-0010",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: empty h2 tag",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>Title</h1><h2></h2>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: empty h2 tag"
+  },
+  {
+    "id": "a11y-0011",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: h1 with only whitespace",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>   </h1>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: h1 with only whitespace"
+  },
+  {
+    "id": "a11y-0012",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: empty h3 tag",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>Title</h1><h2>Sub</h2><h3></h3>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: empty h3 tag"
+  },
+  {
+    "id": "a11y-0013",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: skipped level h1 to h3",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>Title</h1><h3>Subtitle</h3>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: skipped level h1 to h3"
+  },
+  {
+    "id": "a11y-0014",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: skipped level h2 to h4",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>Title</h1><h2>Section</h2><h4>Sub</h4>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: skipped level h2 to h4"
+  },
+  {
+    "id": "a11y-0015",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: skipped level h1 to h4",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>Title</h1><h4>Deep</h4>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: skipped level h1 to h4"
+  },
+  {
+    "id": "a11y-0016",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: skipped level h1 to h5",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>Title</h1><h5>Very deep</h5>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: skipped level h1 to h5"
+  },
+  {
+    "id": "a11y-0017",
+    "requiresDocker": false,
+    "description": "a11y heading_hierarchy: skipped level h3 to h6",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<h1>A</h1><h2>B</h2><h3>C</h3><h6>F</h6>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy"
+    ],
+    "rationale": "A11y gate should detect: skipped level h3 to h6"
+  },
+  {
+    "id": "a11y-0018",
+    "requiresDocker": false,
+    "description": "a11y landmark: no main or nav elements",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<div>Content without landmarks</div>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
@@ -71,33 +460,232 @@
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "landmark"
     ],
-    "rationale": "demo-app lacks a <main> landmark element"
+    "rationale": "A11y gate should detect: no main or nav elements"
   },
   {
-    "id": "a11-005",
-    "description": "aria_label: check interactive elements for labels",
-    "edits": [],
+    "id": "a11y-0019",
+    "requiresDocker": false,
+    "description": "a11y landmark: has nav but no main",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<nav><a href=\"/\">Home</a></nav><div>Content</div>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
-        "a11yCheck": "aria_label"
+        "a11yCheck": "landmark",
+        "expected": "has_findings"
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "landmark"
+    ],
+    "rationale": "A11y gate should detect: has nav but no main"
+  },
+  {
+    "id": "a11y-0020",
+    "requiresDocker": false,
+    "description": "a11y landmark: only divs and spans",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<div><span>Header</span></div><div><p>Body</p></div>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "landmark",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "landmark"
+    ],
+    "rationale": "A11y gate should detect: only divs and spans"
+  },
+  {
+    "id": "a11y-0021",
+    "requiresDocker": false,
+    "description": "a11y aria_label: empty button",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<button></button>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "aria_label"
     ],
-    "rationale": "demo-app buttons have text content, inputs have type/placeholder"
+    "rationale": "A11y gate should detect: empty button"
   },
   {
-    "id": "a11-006",
-    "description": "form_labels: demo-app inputs may lack labels",
-    "edits": [],
+    "id": "a11y-0022",
+    "requiresDocker": false,
+    "description": "a11y aria_label: button with only whitespace",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<button>   </button>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "aria_label"
+    ],
+    "rationale": "A11y gate should detect: button with only whitespace"
+  },
+  {
+    "id": "a11y-0023",
+    "requiresDocker": false,
+    "description": "a11y aria_label: button with only icon (i tag)",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<button><i class=\"fa fa-search\"></i></button>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "aria_label"
+    ],
+    "rationale": "A11y gate should detect: button with only icon (i tag)"
+  },
+  {
+    "id": "a11y-0024",
+    "requiresDocker": false,
+    "description": "a11y aria_label: button with only svg icon",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<button><svg viewBox=\"0 0 24 24\"><path d=\"M0 0\"/></svg></button>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "aria_label"
+    ],
+    "rationale": "A11y gate should detect: button with only svg icon"
+  },
+  {
+    "id": "a11y-0025",
+    "requiresDocker": false,
+    "description": "a11y aria_label: button with only span.icon",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<button><span class=\"icon\">★</span></button>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "aria_label"
+    ],
+    "rationale": "A11y gate should detect: button with only span.icon"
+  },
+  {
+    "id": "a11y-0026",
+    "requiresDocker": false,
+    "description": "a11y aria_label: multiple empty buttons",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<button></button><button></button>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "aria_label"
+    ],
+    "rationale": "A11y gate should detect: multiple empty buttons"
+  },
+  {
+    "id": "a11y-0027",
+    "requiresDocker": false,
+    "description": "a11y form_labels: text input without any label",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<form><input type=\"text\" name=\"email\"></form>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
@@ -106,34 +694,414 @@
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "form_labels"
     ],
-    "rationale": "demo-app has <input class=\"search\"> without <label> element"
+    "rationale": "A11y gate should detect: text input without any label"
   },
   {
-    "id": "a11-007",
-    "description": "link_text: demo-app links have text content",
-    "edits": [],
+    "id": "a11y-0028",
+    "requiresDocker": false,
+    "description": "a11y form_labels: input with non-matching label for",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<form><label for=\"wrong\">Email</label><input type=\"text\" id=\"email\" name=\"email\"></form>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels"
+    ],
+    "rationale": "A11y gate should detect: input with non-matching label for"
+  },
+  {
+    "id": "a11y-0029",
+    "requiresDocker": false,
+    "description": "a11y form_labels: textarea without label",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<form><textarea name=\"comment\"></textarea></form>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels"
+    ],
+    "rationale": "A11y gate should detect: textarea without label"
+  },
+  {
+    "id": "a11y-0030",
+    "requiresDocker": false,
+    "description": "a11y form_labels: select without label",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<form><select name=\"color\"><option>Red</option></select></form>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels"
+    ],
+    "rationale": "A11y gate should detect: select without label"
+  },
+  {
+    "id": "a11y-0031",
+    "requiresDocker": false,
+    "description": "a11y form_labels: email input without label",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<form><input type=\"email\" name=\"user_email\"></form>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels"
+    ],
+    "rationale": "A11y gate should detect: email input without label"
+  },
+  {
+    "id": "a11y-0032",
+    "requiresDocker": false,
+    "description": "a11y form_labels: password input without label",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<form><input type=\"password\" name=\"pwd\"></form>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels"
+    ],
+    "rationale": "A11y gate should detect: password input without label"
+  },
+  {
+    "id": "a11y-0033",
+    "requiresDocker": false,
+    "description": "a11y form_labels: number input without label",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<form><input type=\"number\" name=\"quantity\"></form>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels"
+    ],
+    "rationale": "A11y gate should detect: number input without label"
+  },
+  {
+    "id": "a11y-0034",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"click here\"",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/page\">click here</a>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
         "a11yCheck": "link_text",
-        "expected": "no_findings"
+        "expected": "has_findings"
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "link_text"
     ],
-    "rationale": "demo-app nav links have descriptive text like \"Home\", \"About\""
+    "rationale": "A11y gate should detect: link text \"click here\""
   },
   {
-    "id": "a11-008",
-    "description": "lang_attr: demo-app has <html> without lang",
-    "edits": [],
+    "id": "a11y-0035",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"here\"",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/page\">here</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"here\""
+  },
+  {
+    "id": "a11y-0036",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"read more\"",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/article\">read more</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"read more\""
+  },
+  {
+    "id": "a11y-0037",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"more\"",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/list\">more</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"more\""
+  },
+  {
+    "id": "a11y-0038",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"link\"",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/doc\">link</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"link\""
+  },
+  {
+    "id": "a11y-0039",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"this\"",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/thing\">this</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"this\""
+  },
+  {
+    "id": "a11y-0040",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"Click Here\" (mixed case)",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/page\">Click Here</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"Click Here\" (mixed case)"
+  },
+  {
+    "id": "a11y-0041",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"READ MORE\" (uppercase)",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/page\">READ MORE</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"READ MORE\" (uppercase)"
+  },
+  {
+    "id": "a11y-0042",
+    "requiresDocker": false,
+    "description": "a11y link_text: link text \"Here\" (capitalized)",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/page\">Here</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text"
+    ],
+    "rationale": "A11y gate should detect: link text \"Here\" (capitalized)"
+  },
+  {
+    "id": "a11y-0043",
+    "requiresDocker": false,
+    "description": "a11y lang_attr: html without lang attribute",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body><p>Hello</p></body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
@@ -142,92 +1110,453 @@
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "lang_attr"
     ],
-    "rationale": "demo-app <html> tag lacks lang attribute"
+    "rationale": "A11y gate should detect: html without lang attribute"
   },
   {
-    "id": "a11-009",
-    "description": "autoplay clean: no media elements in demo-app",
-    "edits": [],
+    "id": "a11y-0044",
+    "requiresDocker": false,
+    "description": "a11y lang_attr: html with class but no lang",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html class=\"no-js\">\n<head><title>Test</title></head>\n<body><p>Content</p></body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "lang_attr",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "lang_attr"
+    ],
+    "rationale": "A11y gate should detect: html with class but no lang"
+  },
+  {
+    "id": "a11y-0045",
+    "requiresDocker": false,
+    "description": "a11y lang_attr: html with id but no lang",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html id=\"root\">\n<head><title>Test</title></head>\n<body><p>Content</p></body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "lang_attr",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "lang_attr"
+    ],
+    "rationale": "A11y gate should detect: html with id but no lang"
+  },
+  {
+    "id": "a11y-0046",
+    "requiresDocker": false,
+    "description": "a11y lang_attr: html with data attribute but no lang",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html data-theme=\"dark\">\n<head><title>Test</title></head>\n<body><p>Content</p></body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "lang_attr",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "lang_attr"
+    ],
+    "rationale": "A11y gate should detect: html with data attribute but no lang"
+  },
+  {
+    "id": "a11y-0047",
+    "requiresDocker": false,
+    "description": "a11y autoplay: video with autoplay",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<video src=\"clip.mp4\" autoplay></video>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
         "a11yCheck": "autoplay",
-        "expected": "no_findings"
+        "expected": "has_findings"
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "autoplay"
     ],
-    "rationale": "demo-app has no video/audio elements"
+    "rationale": "A11y gate should detect: video with autoplay"
   },
   {
-    "id": "a11-010",
-    "description": "skip_nav: demo-app lacks skip nav link",
-    "edits": [],
+    "id": "a11y-0048",
+    "requiresDocker": false,
+    "description": "a11y autoplay: audio with autoplay",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<audio src=\"music.mp3\" autoplay></audio>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "autoplay"
+    ],
+    "rationale": "A11y gate should detect: audio with autoplay"
+  },
+  {
+    "id": "a11y-0049",
+    "requiresDocker": false,
+    "description": "a11y autoplay: video with autoplay and other attrs",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<video src=\"clip.mp4\" controls autoplay loop></video>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "autoplay"
+    ],
+    "rationale": "A11y gate should detect: video with autoplay and other attrs"
+  },
+  {
+    "id": "a11y-0050",
+    "requiresDocker": false,
+    "description": "a11y autoplay: audio with autoplay and controls",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<audio autoplay controls><source src=\"song.mp3\"></audio>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "autoplay"
+    ],
+    "rationale": "A11y gate should detect: audio with autoplay and controls"
+  },
+  {
+    "id": "a11y-0051",
+    "requiresDocker": false,
+    "description": "a11y autoplay: video autoplay with muted",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<video src=\"bg.mp4\" autoplay muted></video>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "autoplay"
+    ],
+    "rationale": "A11y gate should detect: video autoplay with muted"
+  },
+  {
+    "id": "a11y-0052",
+    "requiresDocker": false,
+    "description": "a11y autoplay: audio autoplay with preload",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<audio src=\"alert.wav\" autoplay preload=\"auto\"></audio>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "autoplay"
+    ],
+    "rationale": "A11y gate should detect: audio autoplay with preload"
+  },
+  {
+    "id": "a11y-0053",
+    "requiresDocker": false,
+    "description": "a11y skip_nav: main element without skip link",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<main><h1>Content</h1></main>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
         "a11yCheck": "skip_nav",
-        "expected": "no_findings"
+        "expected": "has_findings"
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
       "skip_nav"
     ],
-    "rationale": "scanner does not detect missing skip nav in demo-app"
+    "rationale": "A11y gate should detect: main element without skip link"
   },
   {
-    "id": "a11-011",
-    "description": "multi: heading_hierarchy + link_text both clean",
-    "edits": [],
+    "id": "a11y-0054",
+    "requiresDocker": false,
+    "description": "a11y skip_nav: main with nav but no skip link",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<nav><a href=\"/\">Home</a></nav><main><h1>Content</h1></main>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
-        "a11yCheck": "heading_hierarchy",
-        "expected": "no_findings"
-      },
-      {
-        "type": "a11y",
-        "a11yCheck": "link_text",
-        "expected": "no_findings"
+        "a11yCheck": "skip_nav",
+        "expected": "has_findings"
       }
     ],
     "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
-      "multi"
+      "skip_nav"
     ],
-    "rationale": "Both a11y checks pass on demo-app"
+    "rationale": "A11y gate should detect: main with nav but no skip link"
   },
   {
-    "id": "a11-012",
-    "description": "multi: clean check + failing check",
-    "edits": [],
+    "id": "a11y-0055",
+    "requiresDocker": false,
+    "description": "a11y skip_nav: main with multiple sections but no skip",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<header><nav><a href=\"/\">Home</a><a href=\"/about\">About</a></nav></header><main><h1>Content</h1><p>Body</p></main>\n</body>\n</html>"
+      }
+    ],
     "predicates": [
       {
         "type": "a11y",
-        "a11yCheck": "heading_hierarchy",
-        "expected": "no_findings"
-      },
-      {
-        "type": "a11y",
-        "a11yCheck": "lang_attr",
-        "expected": "no_findings"
+        "a11yCheck": "skip_nav",
+        "expected": "has_findings"
       }
     ],
-    "expectedSuccess": false,
+    "expectedSuccess": true,
+    "intent": "false_negative",
     "tags": [
       "a11y",
-      "multi_fail"
+      "skip_nav"
     ],
-    "rationale": "lang_attr finds missing lang attribute, gate fails"
+    "rationale": "A11y gate should detect: main with multiple sections but no skip"
+  },
+  {
+    "id": "a11y-0056",
+    "requiresDocker": false,
+    "description": "a11y focus_management: element with tabindex=5",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<div tabindex=\"5\">Focusable</div>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management"
+    ],
+    "rationale": "A11y gate should detect: element with tabindex=5"
+  },
+  {
+    "id": "a11y-0057",
+    "requiresDocker": false,
+    "description": "a11y focus_management: element with tabindex=99",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<button tabindex=\"99\">Submit</button>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management"
+    ],
+    "rationale": "A11y gate should detect: element with tabindex=99"
+  },
+  {
+    "id": "a11y-0058",
+    "requiresDocker": false,
+    "description": "a11y focus_management: element with tabindex=10",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<a href=\"/\" tabindex=\"10\">Home</a>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management"
+    ],
+    "rationale": "A11y gate should detect: element with tabindex=10"
+  },
+  {
+    "id": "a11y-0059",
+    "requiresDocker": false,
+    "description": "a11y focus_management: element with tabindex=2",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<input type=\"text\" tabindex=\"2\">\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management"
+    ],
+    "rationale": "A11y gate should detect: element with tabindex=2"
+  },
+  {
+    "id": "a11y-0060",
+    "requiresDocker": false,
+    "description": "a11y focus_management: span with tabindex=50",
+    "edits": [
+      {
+        "file": "test-a11y.html",
+        "search": "",
+        "replace": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n<span tabindex=\"50\">Interactive</span>\n</body>\n</html>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management"
+    ],
+    "rationale": "A11y gate should detect: span with tabindex=50"
   }
 ]

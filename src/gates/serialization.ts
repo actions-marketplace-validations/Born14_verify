@@ -128,16 +128,23 @@ function validateSchema(
   data: unknown,
   schema: Record<string, unknown>,
 ): { passed: boolean; detail: string } {
-  const schemaType = schema.type as string | undefined;
+  const rawType = schema.type;
+  const schemaTypes: string[] | undefined = rawType
+    ? (Array.isArray(rawType) ? rawType as string[] : [rawType as string])
+    : undefined;
 
-  if (schemaType) {
+  if (schemaTypes) {
     const actualType = Array.isArray(data) ? 'array' : (data === null ? 'null' : typeof data);
-    if (actualType !== schemaType) {
-      return { passed: false, detail: `schema type mismatch: expected ${schemaType}, got ${actualType}` };
+    const matchesAny = schemaTypes.some(st => {
+      if (st === 'integer') return typeof data === 'number' && Number.isInteger(data);
+      return actualType === st;
+    });
+    if (!matchesAny) {
+      return { passed: false, detail: `schema type mismatch: expected ${schemaTypes.join('|')}, got ${actualType}` };
     }
   }
 
-  if (schemaType === 'object' && typeof data === 'object' && data !== null) {
+  if (schemaTypes?.includes('object') && typeof data === 'object' && data !== null) {
     const obj = data as Record<string, unknown>;
     const required = (schema.required as string[]) ?? [];
     for (const key of required) {
@@ -157,7 +164,7 @@ function validateSchema(
     }
   }
 
-  if (schemaType === 'array' && Array.isArray(data)) {
+  if (schemaTypes?.includes('array') && Array.isArray(data)) {
     const items = schema.items as Record<string, unknown> | undefined;
     if (items && data.length > 0) {
       const result = validateSchema(data[0], items);
@@ -192,7 +199,7 @@ export function runSerializationGate(ctx: GateContext): GateResult & { predicate
 
   for (let i = 0; i < serPreds.length; i++) {
     const p = serPreds[i];
-    const result = validateSerializationPredicate(p, ctx.config.appDir);
+    const result = validateSerializationPredicate(p, ctx.stageDir ?? ctx.config.appDir);
     results.push({ ...result, predicateId: `ser_p${i}` });
 
     if (!result.passed) {

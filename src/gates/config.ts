@@ -210,7 +210,7 @@ export function runConfigGate(ctx: GateContext): GateResult & { predicateResults
 
   for (let i = 0; i < configPreds.length; i++) {
     const p = configPreds[i];
-    const result = validateConfigPredicate(p, ctx.config.appDir);
+    const result = validateConfigPredicate(p, ctx.stageDir ?? ctx.config.appDir);
     results.push({ ...result, predicateId: `cfg_p${i}` });
 
     if (!result.passed) {

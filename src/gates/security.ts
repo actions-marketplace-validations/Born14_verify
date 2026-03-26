@@ -375,7 +375,8 @@ export function runSecurityGate(ctx: GateContext): GateResult & { predicateResul
     };
   }
 
-  const sourceFiles = readSourceFiles(ctx.config.appDir);
+  const scanDir = ctx.stageDir ?? ctx.config.appDir;
+  const sourceFiles = readSourceFiles(scanDir);
   const results: PredicateResult[] = [];
   let allPassed = true;
   const details: string[] = [];

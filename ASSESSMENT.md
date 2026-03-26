@@ -120,13 +120,13 @@ Do not hedge on the loop's value to appear "balanced." The loop works. It has pr
 
 | Component | Status | Confidence |
 |-----------|--------|------------|
-| Pipeline (17 gates) | Shipped v0.5.2 on npm | High |
-| `govern()` convergence loop | Shipped, 15 scenarios, convergence detection proven | High |
-| Self-test harness | 333 tests, 21,321 assertions, 0 failures | High |
-| Scenario corpus | 5,694 total (727 per-gate + 28 universal + 4,939 WPT) | High |
-| Staged scenario files | 16 domain-specific + 1 universal + 1 WPT = 18 files | High |
-| Harvest scripts | 18 generators producing deterministic scenarios from fixtures | High |
-| Tiered self-test (Phase IV) | Pure (738) + Live Docker (45) + Playwright (10, placeholder) | High |
+| Pipeline (18 gates) | Shipped v0.5.2 on npm | High |
+| `govern()` convergence loop | Shipped, 24 scenarios (15 core + 9 pipeline integration), convergence detection proven | High |
+| Self-test harness | 346 tests, 21,320 assertions, 0 failures (1 skip — vision gate, missing API key) | High |
+| Scenario corpus | 8,271 total (952 per-gate + 28 universal + 7,291 WPT) | High |
+| Staged scenario files | 19 domain-specific + 1 universal + 1 WPT = 21 files | High |
+| Harvest scripts | 22 generators producing deterministic scenarios from fixtures | High |
+| Tiered self-test (Phase IV) | Pure (747) + Live Docker (45) + Playwright (10, placeholder) | High |
 | Decomposition engine (349 rules, 24 domains) | 376/603 failure classes covered (63%) | High |
 | Failure taxonomy (603 shapes, 27 domains) | Complete algebra, 349 with decomposition rules | High |
 | External scenarios (21 custom) | Working, loaded from `.verify/custom-scenarios.json` | High |
@@ -141,33 +141,47 @@ Do not hedge on the loop's value to appear "balanced." The loop works. It has pr
 
 Phase V industrialized scenario generation and fixed a critical K5 constraint bleeding bug.
 
-**Scenario harvesting:** 18 generator scripts in `scripts/harvest/` produce deterministic scenarios from the demo-app fixtures. Each gate has its own staged JSON file in `fixtures/scenarios/`. The generators read real fixture data (file hashes, directory counts, terraform state, etc.) so scenarios stay grounded in reality.
+**Scenario harvesting:** 22 generator scripts in `scripts/harvest/` produce deterministic scenarios from the demo-app fixtures. Each gate has its own staged JSON file in `fixtures/scenarios/`. The generators read real fixture data (file hashes, directory counts, terraform state, etc.) so scenarios stay grounded in reality.
 
 | Gate | Staged File | Scenarios |
 |------|------------|-----------|
-| A11y | `a11y-staged.json` | 12 |
-| Config | `config-staged.json` | 22 |
-| Content | `content-staged.json` | 66 |
-| DB | `db-staged.json` | 116 |
-| F9 (Syntax) | `f9-staged.json` | 91 |
-| Filesystem | `filesystem-staged.json` | 25 |
-| G5 (Containment) | `g5-staged.json` | 16 |
+| WPT | `wpt-staged.json` | 7,291 |
 | HTML | `html-staged.json` | 174 |
-| HTTP | `http-staged.json` | 67 |
-| Infrastructure | `infrastructure-staged.json` | 18 |
-| K5 (Constraints) | `k5-staged.json` | 50 |
-| Message | `message-staged.json` | 14 |
-| Performance | `performance-staged.json` | 14 |
-| Security | `security-staged.json` | 20 |
-| Serialization | `serialization-staged.json` | 16 |
-| Triangulation | `triangulation-staged.json` | 6 |
+| DB | `db-staged.json` | 103 |
+| Secrets | `secrets-staged.json` | 95 |
+| F9 (Syntax) | `f9-staged.json` | 91 |
+| JSON Schema | `json-schema-staged.json` | 83 |
+| Content | `content-staged.json` | 66 |
+| HTTP | `http-staged.json` | 66 |
+| Axe A11y | `axe-a11y-staged.json` | 39 |
 | Universal | `universal.json` | 28 |
-| WPT | `wpt-staged.json` | 4,939 |
-| **Total** | | **5,694** |
+| Filesystem | `filesystem-staged.json` | 25 |
+| K5 (Constraints) | `k5-staged.json` | 25 |
+| Config | `config-staged.json` | 22 |
+| Security | `security-staged.json` | 20 |
+| Infrastructure | `infrastructure-staged.json` | 17 |
+| Serialization | `serialization-staged.json` | 16 |
+| G5 (Containment) | `g5-staged.json` | 16 |
+| Performance | `performance-staged.json` | 14 |
+| Message | `message-staged.json` | 14 |
+| A11y | `a11y-staged.json` | 60 |
+| Triangulation | `triangulation-staged.json` | 6 |
+| **Total** | | **8,271** |
 
 **K5 constraint bleeding fix:** Constraints seeded by a failing `verify()` call were persisting to `{appDir}/.verify/memory.jsonl` and poisoning subsequent calls. Session-scoped cleanup now runs automatically in both success and failure paths. Each `verify()` call is isolated by default. `govern()` uses `learning: 'persistent'` to preserve cross-attempt learning in convergence loops.
 
 **Grounding gate enhancement:** Route-scoped CSS extraction (`extractRouteBlocks`, `extractRouteHTML`), class token extraction for data-dependent predicate detection, mtime-based cache invalidation.
+
+### Layer 6: External Corpus Harvesters (March 25-26, 2026)
+
+Layer 6 built harvesters for thin gates using external test corpora patterns. Three new harvest scripts generate scenarios that precisely match each gate's regex capabilities.
+
+**New harvesters:**
+- `stage-json-schema-leaves.ts` — JSON Schema Test Suite patterns for serialization gate. 83 scenarios covering type validation, required fields, recursive properties, items. Strict `canGateEvaluate()` filter ensures only schemas our `validateSchema()` actually supports.
+- `stage-secrets-patterns.ts` — Security gate scenarios covering 9 of 13 check types. 95 scenarios with test strings synthesized to precisely match each scanner's regex (not external pattern databases). 5 families for `secrets_in_code` matching exact regex capabilities (password, api_key, token, AWS, private key).
+- `stage-act-rules.ts` — A11y gate scenarios inspired by W3C ACT Rules. 60 detection-only scenarios across 10 check types. Pass scenarios excluded due to demo-app contamination (a11y gate scans all HTML files in stageDir).
+
+**Net change:** +238 scenarios (a11y 12→60, json-schema +83 new, secrets +95 new). Total corpus: 8,271 (952 per-gate + 28 universal + 7,291 WPT). 22 harvest scripts.
 
 ### Phase IV: Live Infrastructure Testing (March 24, 2026)
 

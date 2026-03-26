@@ -34,11 +34,15 @@ export function runSyntaxGate(ctx: GateContext): SyntaxGateResult {
     const filePath = join(ctx.stageDir ?? ctx.config.appDir, edit.file);
 
     if (!existsSync(filePath)) {
+      // File creation: empty search + non-empty replace = create new file (valid edit)
+      if (edit.search === '' && edit.replace) {
+        continue; // File creation is syntactically valid — applyEdits will handle it
+      }
       failures.push({ file: edit.file, search: edit.search.substring(0, 80), reason: 'file_missing' });
       continue;
     }
 
-    // Empty search string is always ambiguous (matches every position)
+    // Empty search string on an existing file is ambiguous
     if (!edit.search) {
       failures.push({ file: edit.file, search: '(empty)', reason: 'ambiguous_match', matchCount: -1 });
       continue;
@@ -105,6 +109,22 @@ export function applyEdits(
     const filePath = join(targetDir, edit.file);
 
     if (!existsSync(filePath)) {
+      // Support file creation: empty search + non-empty replace = create new file
+      if (edit.search === '' && edit.replace) {
+        try {
+          const dir = filePath.substring(0, filePath.lastIndexOf('/') > 0 ? filePath.lastIndexOf('/') : filePath.lastIndexOf('\\'));
+          if (dir && !existsSync(dir)) {
+            const { mkdirSync } = require('fs');
+            mkdirSync(dir, { recursive: true });
+          }
+          const { writeFileSync: wfs } = require('fs');
+          wfs(filePath, edit.replace.replace(/\r\n/g, '\n'), 'utf-8');
+          results.push({ file: edit.file, applied: true });
+        } catch (e) {
+          results.push({ file: edit.file, applied: false, reason: `create failed: ${(e as Error).message}` });
+        }
+        continue;
+      }
       results.push({ file: edit.file, applied: false, reason: 'file not found' });
       continue;
     }

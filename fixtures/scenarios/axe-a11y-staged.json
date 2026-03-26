@@ -1,0 +1,1090 @@
+[
+  {
+    "id": "axe-a11y-001",
+    "requiresDocker": false,
+    "description": "axe image-alt: img without alt attribute (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"photo.jpg\">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe image-alt violation: img without alt should be caught"
+  },
+  {
+    "id": "axe-a11y-002",
+    "requiresDocker": false,
+    "description": "axe image-alt: img with empty alt=\"\" (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"photo.jpg\" alt=\"\">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe image-alt violation: empty alt is decorative but scanner may flag"
+  },
+  {
+    "id": "axe-a11y-003",
+    "requiresDocker": false,
+    "description": "axe image-alt: img with whitespace-only alt (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"photo.jpg\" alt=\"  \">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "alt_text",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe image-alt violation: whitespace-only alt"
+  },
+  {
+    "id": "axe-a11y-004",
+    "requiresDocker": false,
+    "description": "axe image-alt: img with descriptive alt (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"photo.jpg\" alt=\"A sunset over mountains\">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "alt_text",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe image-alt pass: img with descriptive alt text"
+  },
+  {
+    "id": "axe-a11y-005",
+    "requiresDocker": false,
+    "description": "axe image-alt: img with role=\"presentation\" (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"decorative.jpg\" role=\"presentation\">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "alt_text",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe image-alt pass: presentational images exempt"
+  },
+  {
+    "id": "axe-a11y-006",
+    "requiresDocker": false,
+    "description": "axe image-alt: img with aria-label (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"icon.svg\" aria-label=\"Settings icon\">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "alt_text",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe image-alt pass: aria-label provides accessible name"
+  },
+  {
+    "id": "axe-a11y-007",
+    "requiresDocker": false,
+    "description": "axe heading-order: h1 then h3 (skip h2, violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<h1>Title</h1><h3>Subtitle</h3>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe heading-order violation: h1→h3 skips h2"
+  },
+  {
+    "id": "axe-a11y-008",
+    "requiresDocker": false,
+    "description": "axe heading-order: h2 then h4 (skip h3, violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<h2>Section</h2><h4>Subsection</h4>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe heading-order violation: h2→h4 skips h3"
+  },
+  {
+    "id": "axe-a11y-009",
+    "requiresDocker": false,
+    "description": "axe heading-order: h1 then h2 then h3 (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<h1>Title</h1><h2>Section</h2><h3>Sub</h3>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "heading_hierarchy",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe heading-order pass: sequential heading levels"
+  },
+  {
+    "id": "axe-a11y-010",
+    "requiresDocker": false,
+    "description": "axe empty-heading: h1 with no text (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<h1></h1>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe empty-heading: empty heading element"
+  },
+  {
+    "id": "axe-a11y-011",
+    "requiresDocker": false,
+    "description": "axe empty-heading: h2 with hidden-only text (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<h2><span style=\"display:none\">Hidden</span></h2>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "heading_hierarchy",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "heading_hierarchy",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe empty-heading: heading with only visually hidden text"
+  },
+  {
+    "id": "axe-a11y-012",
+    "requiresDocker": false,
+    "description": "axe button-name: empty button (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<button></button>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "aria_label",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe button-name violation: button without text or label"
+  },
+  {
+    "id": "axe-a11y-013",
+    "requiresDocker": false,
+    "description": "axe button-name: button with only SVG icon (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<button><svg viewBox=\"0 0 24 24\"><path d=\"M12 2L2 22h20z\"/></svg></button>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "aria_label",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe button-name violation: icon-only button without aria-label"
+  },
+  {
+    "id": "axe-a11y-014",
+    "requiresDocker": false,
+    "description": "axe button-name: button with text (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<button>Submit</button>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "aria_label",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe button-name pass: button has visible text"
+  },
+  {
+    "id": "axe-a11y-015",
+    "requiresDocker": false,
+    "description": "axe button-name: button with aria-label (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<button aria-label=\"Close dialog\"><svg viewBox=\"0 0 24 24\"><path d=\"M18 6L6 18M6 6l12 12\"/></svg></button>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "aria_label",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe button-name pass: icon button with aria-label"
+  },
+  {
+    "id": "axe-a11y-016",
+    "requiresDocker": false,
+    "description": "axe label: input without any label (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<input type=\"text\">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe label violation: text input without label, aria-label, or title"
+  },
+  {
+    "id": "axe-a11y-017",
+    "requiresDocker": false,
+    "description": "axe label: textarea without label (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<textarea></textarea>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe label violation: textarea without associated label"
+  },
+  {
+    "id": "axe-a11y-018",
+    "requiresDocker": false,
+    "description": "axe label: select without label (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<select><option>A</option></select>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "form_labels",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "form_labels",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe label violation: select without label"
+  },
+  {
+    "id": "axe-a11y-019",
+    "requiresDocker": false,
+    "description": "axe link-name: empty link (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<a href=\"/page\"></a>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe link-name violation: link with no text"
+  },
+  {
+    "id": "axe-a11y-020",
+    "requiresDocker": false,
+    "description": "axe link-name: link with \"click here\" text (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<a href=\"/page\">click here</a>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe link-name violation: non-descriptive \"click here\" text"
+  },
+  {
+    "id": "axe-a11y-021",
+    "requiresDocker": false,
+    "description": "axe link-name: link with \"read more\" text (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<a href=\"/article\">read more</a>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "link_text",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe link-name violation: non-descriptive \"read more\" text"
+  },
+  {
+    "id": "axe-a11y-022",
+    "requiresDocker": false,
+    "description": "axe link-name: link with descriptive text (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<a href=\"/about\">About our team</a>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "link_text",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe link-name pass: descriptive link text"
+  },
+  {
+    "id": "axe-a11y-023",
+    "requiresDocker": false,
+    "description": "axe link-name: link with aria-label (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<a href=\"/settings\" aria-label=\"User settings\"><svg></svg></a>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "link_text",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "link_text",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe link-name pass: icon link with aria-label"
+  },
+  {
+    "id": "axe-a11y-024",
+    "requiresDocker": false,
+    "description": "axe html-has-lang: html without lang (violation)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "lang_attr",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "lang_attr",
+      "axe",
+      "violation"
+    ],
+    "rationale": "demo-app html tag lacks lang attribute"
+  },
+  {
+    "id": "axe-a11y-025",
+    "requiresDocker": false,
+    "description": "axe tabindex: positive tabindex (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<div tabindex=\"5\">Focusable</div>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe tabindex violation: tabindex > 0 disrupts natural tab order"
+  },
+  {
+    "id": "axe-a11y-026",
+    "requiresDocker": false,
+    "description": "axe tabindex: tabindex=\"1\" (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<input type=\"text\" tabindex=\"1\">\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe tabindex violation: any positive tabindex is an anti-pattern"
+  },
+  {
+    "id": "axe-a11y-027",
+    "requiresDocker": false,
+    "description": "axe tabindex: tabindex=\"0\" (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<div tabindex=\"0\">Focusable</div>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "focus_management",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe tabindex pass: tabindex=\"0\" is natural tab order"
+  },
+  {
+    "id": "axe-a11y-028",
+    "requiresDocker": false,
+    "description": "axe tabindex: tabindex=\"-1\" (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<div tabindex=\"-1\">Programmatic focus</div>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "focus_management",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe tabindex pass: tabindex=\"-1\" allows programmatic focus only"
+  },
+  {
+    "id": "axe-a11y-029",
+    "requiresDocker": false,
+    "description": "axe focus: outline:none without focus-visible (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<style>button { outline: none; }</style>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "focus_management",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "focus_management",
+      "axe",
+      "violation"
+    ],
+    "rationale": "Removing focus outline without :focus-visible alternative harms keyboard users"
+  },
+  {
+    "id": "axe-a11y-030",
+    "requiresDocker": false,
+    "description": "axe autoplay: video with autoplay (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<video autoplay src=\"intro.mp4\"></video>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "autoplay",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe no-autoplay-audio violation: video with autoplay attribute"
+  },
+  {
+    "id": "axe-a11y-031",
+    "requiresDocker": false,
+    "description": "axe autoplay: audio with autoplay (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<audio autoplay src=\"music.mp3\"></audio>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "autoplay",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe no-autoplay-audio violation: audio with autoplay"
+  },
+  {
+    "id": "axe-a11y-032",
+    "requiresDocker": false,
+    "description": "axe autoplay: video without autoplay (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<video controls src=\"intro.mp4\"></video>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "autoplay",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "autoplay",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe pass: video with controls but no autoplay"
+  },
+  {
+    "id": "axe-a11y-033",
+    "requiresDocker": false,
+    "description": "axe landmark: page without main element (violation)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "landmark",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "landmark",
+      "axe",
+      "violation"
+    ],
+    "rationale": "demo-app lacks <main> landmark element"
+  },
+  {
+    "id": "axe-a11y-034",
+    "requiresDocker": false,
+    "description": "axe landmark: page with main element (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<main>Content</main>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "landmark",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "landmark",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe landmark pass: page has <main> element"
+  },
+  {
+    "id": "axe-a11y-035",
+    "requiresDocker": false,
+    "description": "axe landmark: page with role=\"main\" (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<div role=\"main\">Content</div>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "landmark",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "landmark",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe landmark pass: role=\"main\" on div"
+  },
+  {
+    "id": "axe-a11y-036",
+    "requiresDocker": false,
+    "description": "axe skip-link: main without skip nav (violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<main id=\"main\">Content</main>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "skip_nav",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "false_negative",
+    "tags": [
+      "a11y",
+      "skip_nav",
+      "axe",
+      "violation"
+    ],
+    "rationale": "axe skip-link: main content without skip navigation link"
+  },
+  {
+    "id": "axe-a11y-037",
+    "requiresDocker": false,
+    "description": "axe skip-link: main with skip nav link (pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<a href=\"#main\">Skip to main content</a><main id=\"main\">Content</main>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "skip_nav",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "skip_nav",
+      "axe",
+      "pass"
+    ],
+    "rationale": "axe skip-link pass: skip nav link targets main content"
+  },
+  {
+    "id": "axe-a11y-038",
+    "requiresDocker": false,
+    "description": "axe multi: img no-alt + empty button (dual violation)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"x.jpg\"><button></button>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "has_findings"
+      },
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "has_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "multi",
+      "axe"
+    ],
+    "rationale": "Multiple a11y violations should all be caught independently"
+  },
+  {
+    "id": "axe-a11y-039",
+    "requiresDocker": false,
+    "description": "axe multi: clean img + labeled button (dual pass)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<img src=\"x.jpg\" alt=\"Photo\"><button>Click</button>\n<footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "a11y",
+        "a11yCheck": "alt_text",
+        "expected": "no_findings"
+      },
+      {
+        "type": "a11y",
+        "a11yCheck": "aria_label",
+        "expected": "no_findings"
+      }
+    ],
+    "expectedSuccess": true,
+    "intent": "regression_guard",
+    "tags": [
+      "a11y",
+      "multi",
+      "axe"
+    ],
+    "rationale": "Both checks should pass with proper elements"
+  }
+]

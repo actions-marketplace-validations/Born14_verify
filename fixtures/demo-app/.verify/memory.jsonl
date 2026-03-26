@@ -1,9 +1,4 @@
-{"_op":"outcome","_ts":1774343371253,"data":{"timestamp":1774343371253,"sessionId":"s_1774343371053_qnl2","goal":"Fingerprint test","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774343386522,"data":{"timestamp":1774343386521,"sessionId":"s_1774343383835_lziu","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774343388385,"data":{"timestamp":1774343388384,"sessionId":"s_1774343386564_gznd","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774343388725,"data":{"timestamp":1774343388725,"sessionId":"s_1774343388427_sj91","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774345504283,"data":{"timestamp":1774345504282,"sessionId":"s_1774345504228_fx71","success":false,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":["grounding"],"failureKind":"app_failure","failedPredicateFingerprints":["type=http|path=/api/items|method=GET|body=\"name\":\"Alpha\""]}}
-{"_op":"outcome","_ts":1774345563949,"data":{"timestamp":1774345563948,"sessionId":"s_1774345563505_8p5u","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774345678190,"data":{"timestamp":1774345678189,"sessionId":"s_1774345677728_03cx","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774345678463,"data":{"timestamp":1774345678463,"sessionId":"s_1774345678218_efqi","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
-{"_op":"outcome","_ts":1774345678715,"data":{"timestamp":1774345678715,"sessionId":"s_1774345678508_ssia","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
+{"_op":"outcome","_ts":1774506581423,"data":{"timestamp":1774506581423,"sessionId":"s_1774506581316_sh55","goal":"Fingerprint test","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
+{"_op":"outcome","_ts":1774506594739,"data":{"timestamp":1774506594739,"sessionId":"s_1774506593984_4ubi","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
+{"_op":"outcome","_ts":1774506595151,"data":{"timestamp":1774506595150,"sessionId":"s_1774506594766_hfpt","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}
+{"_op":"outcome","_ts":1774506595511,"data":{"timestamp":1774506595511,"sessionId":"s_1774506595195_awmz","success":true,"changeType":"logic","filesTouched":["server.js"],"gatesFailed":[]}}

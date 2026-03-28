@@ -87,6 +87,7 @@ jobs:
     name: Baseline Self-Test
     needs: supply
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     outputs:
       failing_count: ${{ steps.baseline.outputs.failing }}
       total_count: ${{ steps.baseline.outputs.total }}

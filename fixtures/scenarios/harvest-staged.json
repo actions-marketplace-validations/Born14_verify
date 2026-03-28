@@ -1,0 +1,1949 @@
+[
+  {
+    "id": "harvest-edit-trailing-whitespace",
+    "description": "[HARVEST:edit] Search string has trailing space that source does not",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000; ",
+        "replace": "const PORT = 8080;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "whitespace",
+      "should_fail"
+    ],
+    "rationale": "Trailing whitespace in search string prevents match — edit fails to apply"
+  },
+  {
+    "id": "harvest-edit-leading-whitespace",
+    "description": "[HARVEST:edit] Search string has wrong indentation (2 spaces vs 4)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "    const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = 8080;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "whitespace",
+      "should_fail"
+    ],
+    "rationale": "Wrong indentation in search string prevents match"
+  },
+  {
+    "id": "harvest-edit-tab-vs-space",
+    "description": "[HARVEST:edit] Search uses tabs but source uses spaces",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "\tconst PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = 8080;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "whitespace",
+      "should_fail"
+    ],
+    "rationale": "Tab/space mismatch prevents edit application"
+  },
+  {
+    "id": "harvest-edit-crlf-vs-lf",
+    "description": "[HARVEST:edit] Search uses \\r\\n but source uses \\n",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;\r\nconst server = http.createServer",
+        "replace": "const PORT = 8080;\nconst server = http.createServer"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "encoding",
+      "should_fail"
+    ],
+    "rationale": "CRLF vs LF line ending mismatch prevents match"
+  },
+  {
+    "id": "harvest-edit-truncated-search",
+    "description": "[HARVEST:edit] Search string is truncated mid-line",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env",
+        "replace": "const PORT = 8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "partial",
+      "should_fail"
+    ],
+    "rationale": "Truncated search matches but replacement corrupts the line"
+  },
+  {
+    "id": "harvest-edit-missing-context-line",
+    "description": "[HARVEST:edit] Multi-line search missing the middle line",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const http = require('http');\nconst server = http.createServer",
+        "replace": "const http = require('http');\nconst PORT = 9999;\nconst server = http.createServer"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "9999"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "partial",
+      "should_fail"
+    ],
+    "rationale": "Search spans two lines but skips the PORT line between them — no match"
+  },
+  {
+    "id": "harvest-edit-already-applied",
+    "description": "[HARVEST:edit] Edit was already applied — search string no longer exists",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = 8080;",
+        "replace": "const PORT = 9090;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "stale",
+      "should_fail"
+    ],
+    "rationale": "Source has PORT=3000 not PORT=8080 — prior edit assumed, search fails"
+  },
+  {
+    "id": "harvest-edit-wrong-file",
+    "description": "[HARVEST:edit] Edit targets wrong file — content exists in server.js not config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = 8080;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "stale",
+      "should_fail"
+    ],
+    "rationale": "JavaScript code does not exist in JSON config file"
+  },
+  {
+    "id": "harvest-edit-duplicate-match",
+    "description": "[HARVEST:edit] Search string matches multiple locations in file",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end(",
+        "replace": "res.end('modified' + "
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "modified"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "ambiguous",
+      "should_fail"
+    ],
+    "rationale": "res.end( appears many times in server.js — ambiguous match should fail F9"
+  },
+  {
+    "id": "harvest-edit-unescaped-regex",
+    "description": "[HARVEST:edit] Search contains regex metacharacters that need escaping",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/health') {",
+        "replace": "if (req.url.match(/^\\/healthz?$/)) {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "healthz"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "special_chars",
+      "should_pass"
+    ],
+    "rationale": "Search string is exact match (not regex), should find the literal string"
+  },
+  {
+    "id": "harvest-edit-unicode-in-search",
+    "description": "[HARVEST:edit] Search string contains unicode that source does not have",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "// → Health endpoint",
+        "replace": "// Health endpoint v2"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Health endpoint v2"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "special_chars",
+      "should_fail"
+    ],
+    "rationale": "Unicode arrow not in source comments — search fails"
+  },
+  {
+    "id": "harvest-edit-null-byte",
+    "description": "[HARVEST:edit] Search string contains null byte",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT\u0000 = process.env.PORT",
+        "replace": "const PORT = 8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "special_chars",
+      "should_fail"
+    ],
+    "rationale": "Null byte in search string prevents match"
+  },
+  {
+    "id": "harvest-edit-nonexistent-file",
+    "description": "[HARVEST:edit] Edit targets a file that does not exist",
+    "edits": [
+      {
+        "file": "routes/api.js",
+        "search": "module.exports = router;",
+        "replace": "module.exports = router;\n// patched"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "routes/api.js",
+        "pattern": "patched"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "missing",
+      "should_fail"
+    ],
+    "rationale": "routes/api.js does not exist in demo-app — edit cannot apply"
+  },
+  {
+    "id": "harvest-edit-empty-search",
+    "description": "[HARVEST:edit] Search string is empty",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "",
+        "replace": "// injected\n"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "injected"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "malformed",
+      "should_fail"
+    ],
+    "rationale": "Empty search string — malformed edit"
+  },
+  {
+    "id": "harvest-edit-search-equals-replace",
+    "description": "[HARVEST:edit] Search and replace are identical — noop edit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "PORT"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "malformed",
+      "should_pass"
+    ],
+    "rationale": "Noop edit — content already matches, should pass"
+  },
+  {
+    "id": "harvest-edit-conflicting-edits",
+    "description": "[HARVEST:edit] Two edits target the same line — second one fails",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "ordering",
+      "should_pass"
+    ],
+    "rationale": "Single edit on unique line should succeed"
+  },
+  {
+    "id": "harvest-edit-overlapping-search",
+    "description": "[HARVEST:edit] Search string is a substring of another edit target",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "PORT",
+        "replace": "SERVER_PORT"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "SERVER_PORT"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "ordering",
+      "should_fail"
+    ],
+    "rationale": "PORT appears many times — ambiguous match"
+  },
+  {
+    "id": "harvest-edit-bom-marker",
+    "description": "[HARVEST:edit] Search string has UTF-8 BOM prefix",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "﻿const http = require('http');",
+        "replace": "const http = require('http'); // patched"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "patched"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "encoding",
+      "should_fail"
+    ],
+    "rationale": "BOM marker in search string prevents match against clean source"
+  },
+  {
+    "id": "harvest-edit-multiline-valid",
+    "description": "[HARVEST:edit] Multi-line search and replace that matches exactly",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' },\n      { id: 2, name: 'Bravo' }",
+        "replace": "{ id: 1, name: 'Alpha' },\n      { id: 2, name: 'Bravo' },\n      { id: 3, name: 'Charlie' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Charlie"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "valid",
+      "should_pass"
+    ],
+    "rationale": "Exact multi-line match in items array — should succeed"
+  },
+  {
+    "id": "harvest-edit-add-new-route",
+    "description": "[HARVEST:edit] Insert new route handler at known anchor point",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "} else if (req.url === '/health')",
+        "replace": "} else if (req.url === '/version') {\n    res.writeHead(200);\n    res.end('1.0.0');\n  } else if (req.url === '/health')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/version"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "edit_failure",
+      "valid",
+      "should_pass"
+    ],
+    "rationale": "Anchor string is unique, new route inserted before health endpoint"
+  },
+  {
+    "id": "harvest-build-nonexistent-image",
+    "description": "[HARVEST:build] Dockerfile uses nonexistent base image",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM node:99-nonexistent"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "node:99"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "base_image",
+      "should_fail"
+    ],
+    "rationale": "Base image does not exist in registry — docker build fails at FROM"
+  },
+  {
+    "id": "harvest-build-empty-from",
+    "description": "[HARVEST:build] Dockerfile FROM is empty",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "WORKDIR"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "base_image",
+      "should_fail"
+    ],
+    "rationale": "Empty FROM directive — Dockerfile parse error"
+  },
+  {
+    "id": "harvest-build-scratch-no-binary",
+    "description": "[HARVEST:build] Dockerfile uses scratch but copies a Node.js file (no runtime)",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM scratch"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "scratch"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "base_image",
+      "should_fail"
+    ],
+    "rationale": "scratch has no node binary — CMD [\"node\", \"server.js\"] will fail"
+  },
+  {
+    "id": "harvest-build-copy-nonexistent",
+    "description": "[HARVEST:build] COPY references a file that does not exist",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY app.js ."
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "app.js"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "copy",
+      "should_fail"
+    ],
+    "rationale": "app.js does not exist in build context — COPY fails"
+  },
+  {
+    "id": "harvest-build-copy-directory-as-file",
+    "description": "[HARVEST:build] COPY tries to copy a directory without trailing slash",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY test-data server.js"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "test-data"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "copy",
+      "should_fail"
+    ],
+    "rationale": "Cannot COPY directory onto a file path"
+  },
+  {
+    "id": "harvest-build-copy-outside-context",
+    "description": "[HARVEST:build] COPY references parent directory (outside build context)",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY ../../../etc/passwd ."
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "passwd"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "copy",
+      "should_fail"
+    ],
+    "rationale": "Cannot COPY from outside Docker build context"
+  },
+  {
+    "id": "harvest-build-invalid-instruction",
+    "description": "[HARVEST:build] Dockerfile has invalid instruction",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOS 3000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOS"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "syntax",
+      "should_fail"
+    ],
+    "rationale": "EXPOS is not a valid Dockerfile instruction"
+  },
+  {
+    "id": "harvest-build-run-syntax-error",
+    "description": "[HARVEST:build] RUN command has shell syntax error",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "CMD [\"node\", \"server.js\"]",
+        "replace": "RUN if then fi\nCMD [\"node\", \"server.js\"]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "if then fi"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "syntax",
+      "should_fail"
+    ],
+    "rationale": "Shell syntax error in RUN — build fails"
+  },
+  {
+    "id": "harvest-build-healthcheck-wrong-port",
+    "description": "[HARVEST:build] Healthcheck probes wrong port",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "http://localhost:3000/health",
+        "replace": "http://localhost:9999/health"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "9999"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "healthcheck",
+      "should_fail"
+    ],
+    "rationale": "App listens on 3000 but healthcheck probes 9999 — health fails"
+  },
+  {
+    "id": "harvest-build-healthcheck-wrong-path",
+    "description": "[HARVEST:build] Healthcheck probes nonexistent endpoint",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "http://localhost:3000/health",
+        "replace": "http://localhost:3000/nonexistent"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/nonexistent"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "healthcheck",
+      "should_fail"
+    ],
+    "rationale": "No /nonexistent endpoint — healthcheck fails"
+  },
+  {
+    "id": "harvest-build-expose-wrong-port",
+    "description": "[HARVEST:build] EXPOSE declares different port than app listens on",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOSE 8080"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "port",
+      "should_pass"
+    ],
+    "rationale": "EXPOSE is documentation only — app still works on 3000, EXPOSE mismatch is cosmetic"
+  },
+  {
+    "id": "harvest-build-cmd-wrong-file",
+    "description": "[HARVEST:build] CMD references nonexistent script",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "CMD [\"node\", \"server.js\"]",
+        "replace": "CMD [\"node\", \"app.js\"]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "app.js"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "entrypoint",
+      "should_fail"
+    ],
+    "rationale": "app.js does not exist — container starts but crashes immediately"
+  },
+  {
+    "id": "harvest-build-cmd-wrong-runtime",
+    "description": "[HARVEST:build] CMD uses wrong runtime",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "CMD [\"node\", \"server.js\"]",
+        "replace": "CMD [\"python3\", \"server.js\"]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "python3"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "entrypoint",
+      "should_fail"
+    ],
+    "rationale": "python3 not installed in node:alpine — container crashes"
+  },
+  {
+    "id": "harvest-build-cmd-shell-form",
+    "description": "[HARVEST:build] CMD uses shell form (works but different signal handling)",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "CMD [\"node\", \"server.js\"]",
+        "replace": "CMD node server.js"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "entrypoint",
+      "should_pass"
+    ],
+    "rationale": "Shell form CMD works — different signal behavior but app runs"
+  },
+  {
+    "id": "harvest-build-compose-wrong-build-context",
+    "description": "[HARVEST:build] docker-compose build context points to wrong directory",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "build: .",
+        "replace": "build: ./nonexistent"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "nonexistent"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "compose",
+      "should_fail"
+    ],
+    "rationale": "Build context directory does not exist — compose build fails"
+  },
+  {
+    "id": "harvest-build-compose-invalid-yaml",
+    "description": "[HARVEST:build] docker-compose has invalid YAML syntax",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "services:",
+        "replace": "services:\n  app:\n    build: .\n  app:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "services"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "compose",
+      "should_fail"
+    ],
+    "rationale": "Duplicate key \"app\" in YAML — compose parse error"
+  },
+  {
+    "id": "harvest-build-compose-port-conflict",
+    "description": "[HARVEST:build] docker-compose maps to privileged port",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "\"${VERIFY_HOST_PORT:-3000}:3000\"",
+        "replace": "\"80:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "\"80:3000\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "compose",
+      "should_fail"
+    ],
+    "rationale": "Port 80 may be in use or require privileges — bind failure"
+  },
+  {
+    "id": "harvest-build-multistage-missing-stage",
+    "description": "[HARVEST:build] COPY --from references nonexistent build stage",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY --from=builder /app/dist .\nCOPY server.js ."
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "--from=builder"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "multistage",
+      "should_fail"
+    ],
+    "rationale": "No \"builder\" stage defined — COPY --from fails"
+  },
+  {
+    "id": "harvest-build-missing-package-json",
+    "description": "[HARVEST:build] Dockerfile tries npm install but no package.json",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY server.js .\nRUN npm install"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "npm install"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "dependency",
+      "should_fail"
+    ],
+    "rationale": "No package.json in build context — npm install fails"
+  },
+  {
+    "id": "harvest-build-valid-add-label",
+    "description": "[HARVEST:build] Add LABEL metadata to Dockerfile",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "WORKDIR /app",
+        "replace": "LABEL maintainer=\"test@example.com\"\nWORKDIR /app"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "maintainer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "valid",
+      "should_pass"
+    ],
+    "rationale": "LABEL is valid metadata — does not affect build"
+  },
+  {
+    "id": "harvest-build-valid-add-env",
+    "description": "[HARVEST:build] Add ENV variable to Dockerfile",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "ENV NODE_ENV=production\nEXPOSE 3000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "NODE_ENV"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "build_failure",
+      "valid",
+      "should_pass"
+    ],
+    "rationale": "Valid ENV directive — sets environment variable"
+  },
+  {
+    "id": "harvest-health-health-removed",
+    "description": "[HARVEST:health] Health endpoint handler removed from server",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/health') {\n    res.writeHead(200);\n    res.end('OK');",
+        "replace": "if (req.url === '/removed') {\n    res.writeHead(200);\n    res.end('OK');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "endpoint",
+      "should_fail"
+    ],
+    "rationale": "Health endpoint renamed — /health returns 404 now"
+  },
+  {
+    "id": "harvest-health-health-wrong-status",
+    "description": "[HARVEST:health] Health endpoint returns 500 instead of 200",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/health') {\n    res.writeHead(200);",
+        "replace": "if (req.url === '/health') {\n    res.writeHead(500);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "endpoint",
+      "should_fail"
+    ],
+    "rationale": "Health endpoint returns 500 — healthcheck fails"
+  },
+  {
+    "id": "harvest-health-health-empty-response",
+    "description": "[HARVEST:health] Health endpoint returns 200 but empty body",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end('OK');",
+        "replace": "res.end('');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200,
+          "bodyContains": "OK"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "endpoint",
+      "should_fail"
+    ],
+    "rationale": "Health returns 200 but empty body — bodyContains check fails"
+  },
+  {
+    "id": "harvest-health-health-json-not-text",
+    "description": "[HARVEST:health] Health endpoint returns JSON instead of plain text",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end('OK');",
+        "replace": "res.end(JSON.stringify({ status: \"healthy\" }));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200,
+          "bodyContains": "OK"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "endpoint",
+      "should_fail"
+    ],
+    "rationale": "Health returns JSON not \"OK\" — bodyContains \"OK\" fails"
+  },
+  {
+    "id": "harvest-health-startup-exception",
+    "description": "[HARVEST:health] App throws during request handling",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/health') {",
+        "replace": "if (req.url === '/health') {\n    throw new Error('deliberate crash');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "crash",
+      "should_fail"
+    ],
+    "rationale": "Uncaught exception on health check — process crashes or returns 500"
+  },
+  {
+    "id": "harvest-health-infinite-loop",
+    "description": "[HARVEST:health] Health endpoint enters infinite loop (timeout)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/health') {\n    res.writeHead(200);\n    res.end('OK');",
+        "replace": "if (req.url === '/health') {\n    while(true) {} // hang\n    res.writeHead(200);\n    res.end('OK');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "crash",
+      "should_fail"
+    ],
+    "rationale": "Infinite loop — health request times out"
+  },
+  {
+    "id": "harvest-health-listen-wrong-port",
+    "description": "[HARVEST:health] Server listens on different port than expected",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = 9999;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "port",
+      "should_fail"
+    ],
+    "rationale": "App listens on 9999 but compose maps 3000 — connection refused"
+  },
+  {
+    "id": "harvest-health-db-dependency-check",
+    "description": "[HARVEST:health] Health endpoint checks DB but DB not available",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end('OK');",
+        "replace": "const db = require('./db'); await db.query('SELECT 1'); res.end('OK');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "dependency",
+      "should_fail"
+    ],
+    "rationale": "Health depends on DB module that does not exist — require fails"
+  },
+  {
+    "id": "harvest-health-compose-short-timeout",
+    "description": "[HARVEST:health] Healthcheck timeout too short for slow startup",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "timeout: 3s",
+        "replace": "timeout: 1ms"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "1ms"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "config",
+      "should_fail"
+    ],
+    "rationale": "1ms timeout — no HTTP request can complete in time"
+  },
+  {
+    "id": "harvest-health-compose-wrong-healthcheck-cmd",
+    "description": "[HARVEST:health] Healthcheck command uses curl but only wget available",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "[\"CMD\", \"wget\", \"-q\", \"-O-\", \"http://localhost:3000/health\"]",
+        "replace": "[\"CMD\", \"curl\", \"-f\", \"http://localhost:3000/health\"]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "curl"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "config",
+      "should_fail"
+    ],
+    "rationale": "node:alpine has wget not curl — healthcheck command fails"
+  },
+  {
+    "id": "harvest-health-compose-retries-zero",
+    "description": "[HARVEST:health] Healthcheck retries set to 0",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "retries: 3",
+        "replace": "retries: 0"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "retries: 0"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "config",
+      "should_fail"
+    ],
+    "rationale": "Zero retries — first failure marks container as unhealthy permanently"
+  },
+  {
+    "id": "harvest-health-health-ok-but-api-broken",
+    "description": "[HARVEST:health] Health returns 200 but API endpoint is broken",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "} else if (req.url === '/api/items')",
+        "replace": "} else if (req.url === '/api/broken')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/api/items",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "partial",
+      "should_fail"
+    ],
+    "rationale": "Health passes but /api/items renamed to /api/broken — API predicate fails"
+  },
+  {
+    "id": "harvest-health-health-ok-homepage-broken",
+    "description": "[HARVEST:health] Health returns 200 but homepage serves wrong content",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<h1>Demo App</h1>",
+        "replace": "<h1></h1>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "h1",
+        "content": "Demo App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "health_check",
+      "partial",
+      "should_fail"
+    ],
+    "rationale": "Health fine, homepage h1 emptied — HTML content predicate fails"
+  },
+  {
+    "id": "harvest-health-valid-health-json",
+    "description": "[HARVEST:health] Health endpoint returns JSON with uptime",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end('OK');",
+        "replace": "res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200,
+          "bodyContains": "ok"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "health_check",
+      "valid",
+      "should_pass"
+    ],
+    "rationale": "JSON health response contains \"ok\" — bodyContains check passes"
+  },
+  {
+    "id": "harvest-health-valid-add-readiness",
+    "description": "[HARVEST:health] Add separate readiness endpoint",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "} else if (req.url === '/health')",
+        "replace": "} else if (req.url === '/ready') {\n    res.writeHead(200);\n    res.end('READY');\n  } else if (req.url === '/health')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/ready"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "health_check",
+      "valid",
+      "should_pass"
+    ],
+    "rationale": "New endpoint added at unique anchor point — does not break health"
+  },
+  {
+    "id": "harvest-cascade-css-specificity-override",
+    "description": "[HARVEST:cascade] Adding a more specific rule overrides inherited style on other elements",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "body { font-family: sans-serif; margin: 0; padding: 20px; }",
+        "replace": "body { font-family: sans-serif; margin: 0; padding: 20px; }\n    body * { color: red; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": ".nav-link",
+        "property": "color",
+        "expected": "rgb(51, 51, 51)"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "css_cascade",
+      "should_fail"
+    ],
+    "rationale": "body * { color: red } overrides .nav-link color — cascade changes unrelated elements"
+  },
+  {
+    "id": "harvest-cascade-css-shorthand-clobber",
+    "description": "[HARVEST:cascade] Shorthand property clobbers previously set longhand",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "body { font-family: sans-serif; margin: 0; padding: 20px; }",
+        "replace": "body { font-family: sans-serif; margin: 0; padding: 20px; border-top: 2px solid blue; border: none; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "body",
+        "property": "border-top-width",
+        "expected": "2px"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "css_cascade",
+      "should_fail"
+    ],
+    "rationale": "border: none after border-top resets border-top — shorthand clobbers longhand"
+  },
+  {
+    "id": "harvest-cascade-css-import-order",
+    "description": "[HARVEST:cascade] New style block before existing one changes cascade order",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<style>",
+        "replace": "<style>\n    .nav-link { color: purple; }\n    </style>\n    <style>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": ".nav-link",
+        "property": "color",
+        "expected": "rgb(51, 51, 51)"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "css_cascade",
+      "should_fail"
+    ],
+    "rationale": "New style block adds conflicting .nav-link color — last declaration wins, original overrides"
+  },
+  {
+    "id": "harvest-cascade-route-shadow",
+    "description": "[HARVEST:cascade] New route handler shadows existing one (matched first)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/' && req.method === 'GET')",
+        "replace": "if (req.url === '/' && req.method === 'GET') {\n    res.writeHead(200);\n    res.end('SHADOW');\n  } else if (req.url === '/' && req.method === 'GET')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/",
+        "expect": {
+          "status": 200,
+          "bodyContains": "Demo App"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "route",
+      "should_fail"
+    ],
+    "rationale": "First matching handler returns \"SHADOW\" — original homepage never reached"
+  },
+  {
+    "id": "harvest-cascade-catch-all-shadow",
+    "description": "[HARVEST:cascade] Catch-all route added before specific routes",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/' && req.method === 'GET')",
+        "replace": "if (true) {\n    res.writeHead(200);\n    res.end('catch-all');\n  } else if (req.url === '/' && req.method === 'GET')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200,
+          "bodyContains": "OK"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "route",
+      "should_fail"
+    ],
+    "rationale": "Catch-all intercepts ALL requests including /health"
+  },
+  {
+    "id": "harvest-cascade-items-array-cleared",
+    "description": "[HARVEST:cascade] Edit to items array on one route breaks another route that reads it",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' },\n      { id: 2, name: 'Bravo' }",
+        "replace": "/* items removed */"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/api/items",
+        "expect": {
+          "status": 200,
+          "bodyContains": "Alpha"
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "shared_state",
+      "should_fail"
+    ],
+    "rationale": "Items data removed — /api/items returns empty or errors"
+  },
+  {
+    "id": "harvest-cascade-constant-rename-breaks-reference",
+    "description": "[HARVEST:cascade] Renaming a variable breaks all references to it",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const SERVER_PORT = process.env.PORT || 3000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "SERVER_PORT"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "shared_state",
+      "should_fail"
+    ],
+    "rationale": "PORT renamed to SERVER_PORT but server.listen(PORT) still references old name — crash"
+  },
+  {
+    "id": "harvest-cascade-unclosed-tag-breaks-page",
+    "description": "[HARVEST:cascade] Unclosed div tag breaks all subsequent HTML rendering",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<h1>Demo App</h1>",
+        "replace": "<div><h1>Demo App</h1>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "nav",
+        "content": "exists"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "html_structure",
+      "should_fail"
+    ],
+    "rationale": "Unclosed <div> may swallow the nav element depending on parser behavior"
+  },
+  {
+    "id": "harvest-cascade-style-tag-unclosed",
+    "description": "[HARVEST:cascade] Unclosed style tag makes rest of page invisible",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "</style>",
+        "replace": "/* unclosed"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "h1",
+        "content": "Demo App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "html_structure",
+      "should_fail"
+    ],
+    "rationale": "Unclosed <style> — browser treats rest of HTML as CSS, page content invisible"
+  },
+  {
+    "id": "harvest-cascade-homepage-edit-breaks-about",
+    "description": "[HARVEST:cascade] CSS edit on homepage leaks to /about page",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "body { font-family: sans-serif; margin: 0; padding: 20px; }",
+        "replace": "body { font-family: sans-serif; margin: 0; padding: 20px; display: none; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/about",
+        "expect": {
+          "status": 200,
+          "bodyContains": "About"
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "cross_route",
+      "should_pass"
+    ],
+    "rationale": "display:none is CSS — HTTP response still contains About text, bodyContains passes"
+  },
+  {
+    "id": "harvest-cascade-require-removed",
+    "description": "[HARVEST:cascade] Removing require breaks runtime",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const http = require('http');",
+        "replace": "// http removed"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "dependency_chain",
+      "should_fail"
+    ],
+    "rationale": "http module not imported — http.createServer throws ReferenceError, app crashes"
+  },
+  {
+    "id": "harvest-cascade-config-invalid-json",
+    "description": "[HARVEST:cascade] Edit makes config.json invalid — any reader breaks",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"appName\": \"demo-app\"",
+        "replace": "\"appName\": \"demo-app\","
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "demo-app"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "config",
+      "should_fail"
+    ],
+    "rationale": "Trailing comma makes JSON invalid — any JSON.parse fails"
+  },
+  {
+    "id": "harvest-cascade-init-sql-syntax-error",
+    "description": "[HARVEST:cascade] SQL syntax error breaks database initialization",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE",
+        "replace": "CRAETE TABLE"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CRAETE"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "config",
+      "should_fail"
+    ],
+    "rationale": "SQL syntax error — database initialization fails"
+  },
+  {
+    "id": "harvest-cascade-dockerfile-port-vs-server",
+    "description": "[HARVEST:cascade] Dockerfile EXPOSE changed but server.js PORT unchanged — mismatch",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 8080"
+      },
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000; // unchanged"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "8080"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "3000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "multi_file",
+      "should_pass"
+    ],
+    "rationale": "EXPOSE is cosmetic, PORT still 3000 — app works but documentation misleading"
+  },
+  {
+    "id": "harvest-cascade-compose-env-vs-server",
+    "description": "[HARVEST:cascade] Compose changes PORT env but server has hardcoded fallback",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "multi_file",
+      "should_pass"
+    ],
+    "rationale": "Server reads process.env.PORT — compose change takes effect at runtime"
+  },
+  {
+    "id": "harvest-cascade-valid-add-route-and-test",
+    "description": "[HARVEST:cascade] Add new route to server.js and reference in config.json",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "} else if (req.url === '/health')",
+        "replace": "} else if (req.url === '/metrics') {\n    res.writeHead(200);\n    res.end(JSON.stringify({ requests: 0 }));\n  } else if (req.url === '/health')"
+      },
+      {
+        "file": "config.json",
+        "search": "\"appName\": \"demo-app\"",
+        "replace": "\"appName\": \"demo-app\",\n  \"metricsEnabled\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/metrics"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "metricsEnabled"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "harvest",
+      "cascade_failure",
+      "valid",
+      "should_pass"
+    ],
+    "rationale": "New route at unique anchor + valid JSON addition — both files valid"
+  }
+]

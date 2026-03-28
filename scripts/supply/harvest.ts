@@ -840,6 +840,577 @@ function harvestOpenAPI(_inputDir: string, maxScenarios: number): HarvesterResul
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 9. Harvester: Edit Application Failures
+// ─────────────────────────────────────────────────────────────────────────────
+
+function harvestEditFailures(_inputDir: string, maxScenarios: number): HarvesterResult {
+  const scenarios: Scenario[] = [];
+
+  // Real-world edit failure patterns harvested from GitHub PR/diff patterns
+  const editFailures: Array<{
+    id: string;
+    category: string;
+    description: string;
+    file: string;
+    search: string;
+    replace: string;
+    predicates: Array<Record<string, any>>;
+    shouldPass: boolean;
+    rationale: string;
+  }> = [
+    // --- Whitespace/encoding failures ---
+    { id: 'trailing-whitespace', category: 'whitespace',
+      description: 'Search string has trailing space that source does not',
+      file: 'server.js', search: "const PORT = process.env.PORT || 3000; ", replace: 'const PORT = 8080;',
+      predicates: [{ type: 'content', file: 'server.js', pattern: '8080' }],
+      shouldPass: false, rationale: 'Trailing whitespace in search string prevents match — edit fails to apply' },
+    { id: 'leading-whitespace', category: 'whitespace',
+      description: 'Search string has wrong indentation (2 spaces vs 4)',
+      file: 'server.js', search: "    const PORT = process.env.PORT || 3000;", replace: 'const PORT = 8080;',
+      predicates: [{ type: 'content', file: 'server.js', pattern: '8080' }],
+      shouldPass: false, rationale: 'Wrong indentation in search string prevents match' },
+    { id: 'tab-vs-space', category: 'whitespace',
+      description: 'Search uses tabs but source uses spaces',
+      file: 'server.js', search: "\tconst PORT = process.env.PORT || 3000;", replace: 'const PORT = 8080;',
+      predicates: [{ type: 'content', file: 'server.js', pattern: '8080' }],
+      shouldPass: false, rationale: 'Tab/space mismatch prevents edit application' },
+    { id: 'crlf-vs-lf', category: 'encoding',
+      description: 'Search uses \\r\\n but source uses \\n',
+      file: 'server.js', search: "const PORT = process.env.PORT || 3000;\r\nconst server = http.createServer", replace: 'const PORT = 8080;\nconst server = http.createServer',
+      predicates: [{ type: 'content', file: 'server.js', pattern: '8080' }],
+      shouldPass: false, rationale: 'CRLF vs LF line ending mismatch prevents match' },
+
+    // --- Partial/truncated matches ---
+    { id: 'truncated-search', category: 'partial',
+      description: 'Search string is truncated mid-line',
+      file: 'server.js', search: "const PORT = process.env", replace: 'const PORT = 8080',
+      predicates: [{ type: 'content', file: 'server.js', pattern: '8080' }],
+      shouldPass: false, rationale: 'Truncated search matches but replacement corrupts the line' },
+    { id: 'missing-context-line', category: 'partial',
+      description: 'Multi-line search missing the middle line',
+      file: 'server.js', search: "const http = require('http');\nconst server = http.createServer", replace: "const http = require('http');\nconst PORT = 9999;\nconst server = http.createServer",
+      predicates: [{ type: 'content', file: 'server.js', pattern: '9999' }],
+      shouldPass: false, rationale: 'Search spans two lines but skips the PORT line between them — no match' },
+
+    // --- Stale/moved content ---
+    { id: 'already-applied', category: 'stale',
+      description: 'Edit was already applied — search string no longer exists',
+      file: 'server.js', search: "const PORT = 8080;", replace: "const PORT = 9090;",
+      predicates: [{ type: 'content', file: 'server.js', pattern: '9090' }],
+      shouldPass: false, rationale: 'Source has PORT=3000 not PORT=8080 — prior edit assumed, search fails' },
+    { id: 'wrong-file', category: 'stale',
+      description: 'Edit targets wrong file — content exists in server.js not config.json',
+      file: 'config.json', search: "const PORT = process.env.PORT || 3000;", replace: "const PORT = 8080;",
+      predicates: [{ type: 'content', file: 'config.json', pattern: '8080' }],
+      shouldPass: false, rationale: 'JavaScript code does not exist in JSON config file' },
+
+    // --- Ambiguous/duplicate matches ---
+    { id: 'duplicate-match', category: 'ambiguous',
+      description: 'Search string matches multiple locations in file',
+      file: 'server.js', search: "res.end(", replace: "res.end('modified' + ",
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'modified' }],
+      shouldPass: false, rationale: 'res.end( appears many times in server.js — ambiguous match should fail F9' },
+
+    // --- Special character issues ---
+    { id: 'unescaped-regex', category: 'special_chars',
+      description: 'Search contains regex metacharacters that need escaping',
+      file: 'server.js', search: "if (req.url === '/health') {", replace: "if (req.url.match(/^\\/healthz?$/)) {",
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'healthz' }],
+      shouldPass: true, rationale: 'Search string is exact match (not regex), should find the literal string' },
+    { id: 'unicode-in-search', category: 'special_chars',
+      description: 'Search string contains unicode that source does not have',
+      file: 'server.js', search: "// → Health endpoint", replace: "// Health endpoint v2",
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'Health endpoint v2' }],
+      shouldPass: false, rationale: 'Unicode arrow not in source comments — search fails' },
+    { id: 'null-byte', category: 'special_chars',
+      description: 'Search string contains null byte',
+      file: 'server.js', search: "const PORT\x00 = process.env.PORT", replace: "const PORT = 8080",
+      predicates: [{ type: 'content', file: 'server.js', pattern: '8080' }],
+      shouldPass: false, rationale: 'Null byte in search string prevents match' },
+
+    // --- Nonexistent file ---
+    { id: 'nonexistent-file', category: 'missing',
+      description: 'Edit targets a file that does not exist',
+      file: 'routes/api.js', search: "module.exports = router;", replace: "module.exports = router;\n// patched",
+      predicates: [{ type: 'content', file: 'routes/api.js', pattern: 'patched' }],
+      shouldPass: false, rationale: 'routes/api.js does not exist in demo-app — edit cannot apply' },
+    { id: 'empty-search', category: 'malformed',
+      description: 'Search string is empty',
+      file: 'server.js', search: '', replace: '// injected\n',
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'injected' }],
+      shouldPass: false, rationale: 'Empty search string — malformed edit' },
+    { id: 'search-equals-replace', category: 'malformed',
+      description: 'Search and replace are identical — noop edit',
+      file: 'server.js', search: "const PORT = process.env.PORT || 3000;", replace: "const PORT = process.env.PORT || 3000;",
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'PORT' }],
+      shouldPass: true, rationale: 'Noop edit — content already matches, should pass' },
+
+    // --- Multi-edit ordering ---
+    { id: 'conflicting-edits', category: 'ordering',
+      description: 'Two edits target the same line — second one fails',
+      file: 'server.js', search: "const PORT = process.env.PORT || 3000;", replace: "const PORT = 4000;",
+      predicates: [{ type: 'content', file: 'server.js', pattern: '4000' }],
+      shouldPass: true, rationale: 'Single edit on unique line should succeed' },
+    { id: 'overlapping-search', category: 'ordering',
+      description: 'Search string is a substring of another edit target',
+      file: 'server.js', search: "PORT", replace: "SERVER_PORT",
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'SERVER_PORT' }],
+      shouldPass: false, rationale: 'PORT appears many times — ambiguous match' },
+
+    // --- Encoding edge cases ---
+    { id: 'bom-marker', category: 'encoding',
+      description: 'Search string has UTF-8 BOM prefix',
+      file: 'server.js', search: "\uFEFFconst http = require('http');", replace: "const http = require('http'); // patched",
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'patched' }],
+      shouldPass: false, rationale: 'BOM marker in search string prevents match against clean source' },
+
+    // --- Valid complex edits that should succeed ---
+    { id: 'multiline-valid', category: 'valid',
+      description: 'Multi-line search and replace that matches exactly',
+      file: 'server.js', search: "{ id: 1, name: 'Alpha' },\n      { id: 2, name: 'Bravo' }", replace: "{ id: 1, name: 'Alpha' },\n      { id: 2, name: 'Bravo' },\n      { id: 3, name: 'Charlie' }",
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'Charlie' }],
+      shouldPass: true, rationale: 'Exact multi-line match in items array — should succeed' },
+    { id: 'add-new-route', category: 'valid',
+      description: 'Insert new route handler at known anchor point',
+      file: 'server.js', search: "} else if (req.url === '/health')", replace: "} else if (req.url === '/version') {\n    res.writeHead(200);\n    res.end('1.0.0');\n  } else if (req.url === '/health')",
+      predicates: [{ type: 'content', file: 'server.js', pattern: '/version' }],
+      shouldPass: true, rationale: 'Anchor string is unique, new route inserted before health endpoint' },
+  ];
+
+  for (const ef of editFailures) {
+    if (scenarios.length >= maxScenarios) break;
+    scenarios.push({
+      id: `harvest-edit-${ef.id}`,
+      description: `[HARVEST:edit] ${ef.description}`,
+      edits: [{ file: ef.file, search: ef.search, replace: ef.replace }],
+      predicates: ef.predicates,
+      expectedSuccess: ef.shouldPass,
+      tags: ['harvest', 'edit_failure', ef.category, ef.shouldPass ? 'should_pass' : 'should_fail'],
+      rationale: ef.rationale,
+    });
+  }
+
+  return { source: 'edit_failures', scenarios, metadata: { patterns: editFailures.length } };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. Harvester: Build/Dockerfile Failures
+// ─────────────────────────────────────────────────────────────────────────────
+
+function harvestBuildFailures(_inputDir: string, maxScenarios: number): HarvesterResult {
+  const scenarios: Scenario[] = [];
+
+  const buildPatterns: Array<{
+    id: string;
+    category: string;
+    description: string;
+    edits: Array<{ file: string; search: string; replace: string }>;
+    predicates: Array<Record<string, any>>;
+    shouldPass: boolean;
+    rationale: string;
+  }> = [
+    // --- Base image failures ---
+    { id: 'nonexistent-image', category: 'base_image',
+      description: 'Dockerfile uses nonexistent base image',
+      edits: [{ file: 'Dockerfile', search: 'FROM node:20-alpine', replace: 'FROM node:99-nonexistent' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'node:99' }],
+      shouldPass: false, rationale: 'Base image does not exist in registry — docker build fails at FROM' },
+    { id: 'empty-from', category: 'base_image',
+      description: 'Dockerfile FROM is empty',
+      edits: [{ file: 'Dockerfile', search: 'FROM node:20-alpine', replace: 'FROM' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'WORKDIR' }],
+      shouldPass: false, rationale: 'Empty FROM directive — Dockerfile parse error' },
+    { id: 'scratch-no-binary', category: 'base_image',
+      description: 'Dockerfile uses scratch but copies a Node.js file (no runtime)',
+      edits: [{ file: 'Dockerfile', search: 'FROM node:20-alpine', replace: 'FROM scratch' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'scratch' }],
+      shouldPass: false, rationale: 'scratch has no node binary — CMD ["node", "server.js"] will fail' },
+
+    // --- COPY/ADD failures ---
+    { id: 'copy-nonexistent', category: 'copy',
+      description: 'COPY references a file that does not exist',
+      edits: [{ file: 'Dockerfile', search: 'COPY server.js .', replace: 'COPY app.js .' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'app.js' }],
+      shouldPass: false, rationale: 'app.js does not exist in build context — COPY fails' },
+    { id: 'copy-directory-as-file', category: 'copy',
+      description: 'COPY tries to copy a directory without trailing slash',
+      edits: [{ file: 'Dockerfile', search: 'COPY server.js .', replace: 'COPY test-data server.js' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'test-data' }],
+      shouldPass: false, rationale: 'Cannot COPY directory onto a file path' },
+    { id: 'copy-outside-context', category: 'copy',
+      description: 'COPY references parent directory (outside build context)',
+      edits: [{ file: 'Dockerfile', search: 'COPY server.js .', replace: 'COPY ../../../etc/passwd .' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'passwd' }],
+      shouldPass: false, rationale: 'Cannot COPY from outside Docker build context' },
+
+    // --- Syntax errors in Dockerfile ---
+    { id: 'invalid-instruction', category: 'syntax',
+      description: 'Dockerfile has invalid instruction',
+      edits: [{ file: 'Dockerfile', search: 'EXPOSE 3000', replace: 'EXPOS 3000' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'EXPOS' }],
+      shouldPass: false, rationale: 'EXPOS is not a valid Dockerfile instruction' },
+    { id: 'run-syntax-error', category: 'syntax',
+      description: 'RUN command has shell syntax error',
+      edits: [{ file: 'Dockerfile', search: 'CMD ["node", "server.js"]', replace: 'RUN if then fi\nCMD ["node", "server.js"]' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'if then fi' }],
+      shouldPass: false, rationale: 'Shell syntax error in RUN — build fails' },
+
+    // --- Healthcheck failures ---
+    { id: 'healthcheck-wrong-port', category: 'healthcheck',
+      description: 'Healthcheck probes wrong port',
+      edits: [{ file: 'Dockerfile', search: 'http://localhost:3000/health', replace: 'http://localhost:9999/health' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: '9999' }],
+      shouldPass: false, rationale: 'App listens on 3000 but healthcheck probes 9999 — health fails' },
+    { id: 'healthcheck-wrong-path', category: 'healthcheck',
+      description: 'Healthcheck probes nonexistent endpoint',
+      edits: [{ file: 'Dockerfile', search: 'http://localhost:3000/health', replace: 'http://localhost:3000/nonexistent' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: '/nonexistent' }],
+      shouldPass: false, rationale: 'No /nonexistent endpoint — healthcheck fails' },
+
+    // --- Port/networking ---
+    { id: 'expose-wrong-port', category: 'port',
+      description: 'EXPOSE declares different port than app listens on',
+      edits: [{ file: 'Dockerfile', search: 'EXPOSE 3000', replace: 'EXPOSE 8080' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'EXPOSE 8080' }],
+      shouldPass: true, rationale: 'EXPOSE is documentation only — app still works on 3000, EXPOSE mismatch is cosmetic' },
+
+    // --- CMD/ENTRYPOINT ---
+    { id: 'cmd-wrong-file', category: 'entrypoint',
+      description: 'CMD references nonexistent script',
+      edits: [{ file: 'Dockerfile', search: 'CMD ["node", "server.js"]', replace: 'CMD ["node", "app.js"]' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'app.js' }],
+      shouldPass: false, rationale: 'app.js does not exist — container starts but crashes immediately' },
+    { id: 'cmd-wrong-runtime', category: 'entrypoint',
+      description: 'CMD uses wrong runtime',
+      edits: [{ file: 'Dockerfile', search: 'CMD ["node", "server.js"]', replace: 'CMD ["python3", "server.js"]' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'python3' }],
+      shouldPass: false, rationale: 'python3 not installed in node:alpine — container crashes' },
+    { id: 'cmd-shell-form', category: 'entrypoint',
+      description: 'CMD uses shell form (works but different signal handling)',
+      edits: [{ file: 'Dockerfile', search: 'CMD ["node", "server.js"]', replace: 'CMD node server.js' }],
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'http' }],
+      shouldPass: true, rationale: 'Shell form CMD works — different signal behavior but app runs' },
+
+    // --- docker-compose failures ---
+    { id: 'compose-wrong-build-context', category: 'compose',
+      description: 'docker-compose build context points to wrong directory',
+      edits: [{ file: 'docker-compose.yml', search: 'build: .', replace: 'build: ./nonexistent' }],
+      predicates: [{ type: 'content', file: 'docker-compose.yml', pattern: 'nonexistent' }],
+      shouldPass: false, rationale: 'Build context directory does not exist — compose build fails' },
+    { id: 'compose-invalid-yaml', category: 'compose',
+      description: 'docker-compose has invalid YAML syntax',
+      edits: [{ file: 'docker-compose.yml', search: 'services:', replace: 'services:\n  app:\n    build: .\n  app:' }],
+      predicates: [{ type: 'content', file: 'docker-compose.yml', pattern: 'services' }],
+      shouldPass: false, rationale: 'Duplicate key "app" in YAML — compose parse error' },
+    { id: 'compose-port-conflict', category: 'compose',
+      description: 'docker-compose maps to privileged port',
+      edits: [{ file: 'docker-compose.yml', search: '"${VERIFY_HOST_PORT:-3000}:3000"', replace: '"80:3000"' }],
+      predicates: [{ type: 'content', file: 'docker-compose.yml', pattern: '"80:3000"' }],
+      shouldPass: false, rationale: 'Port 80 may be in use or require privileges — bind failure' },
+
+    // --- Multi-stage build failures ---
+    { id: 'multistage-missing-stage', category: 'multistage',
+      description: 'COPY --from references nonexistent build stage',
+      edits: [{ file: 'Dockerfile', search: 'COPY server.js .', replace: 'COPY --from=builder /app/dist .\nCOPY server.js .' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: '--from=builder' }],
+      shouldPass: false, rationale: 'No "builder" stage defined — COPY --from fails' },
+
+    // --- Dependency failures ---
+    { id: 'missing-package-json', category: 'dependency',
+      description: 'Dockerfile tries npm install but no package.json',
+      edits: [{ file: 'Dockerfile', search: 'COPY server.js .', replace: 'COPY server.js .\nRUN npm install' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'npm install' }],
+      shouldPass: false, rationale: 'No package.json in build context — npm install fails' },
+
+    // --- Valid Dockerfile edits ---
+    { id: 'valid-add-label', category: 'valid',
+      description: 'Add LABEL metadata to Dockerfile',
+      edits: [{ file: 'Dockerfile', search: 'WORKDIR /app', replace: 'LABEL maintainer="test@example.com"\nWORKDIR /app' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'maintainer' }],
+      shouldPass: true, rationale: 'LABEL is valid metadata — does not affect build' },
+    { id: 'valid-add-env', category: 'valid',
+      description: 'Add ENV variable to Dockerfile',
+      edits: [{ file: 'Dockerfile', search: 'EXPOSE 3000', replace: 'ENV NODE_ENV=production\nEXPOSE 3000' }],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: 'NODE_ENV' }],
+      shouldPass: true, rationale: 'Valid ENV directive — sets environment variable' },
+  ];
+
+  for (const bp of buildPatterns) {
+    if (scenarios.length >= maxScenarios) break;
+    scenarios.push({
+      id: `harvest-build-${bp.id}`,
+      description: `[HARVEST:build] ${bp.description}`,
+      edits: bp.edits,
+      predicates: bp.predicates,
+      expectedSuccess: bp.shouldPass,
+      tags: ['harvest', 'build_failure', bp.category, bp.shouldPass ? 'should_pass' : 'should_fail'],
+      rationale: bp.rationale,
+    });
+  }
+
+  return { source: 'build_failures', scenarios, metadata: { patterns: buildPatterns.length } };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. Harvester: Health Check Failures
+// ─────────────────────────────────────────────────────────────────────────────
+
+function harvestHealthCheckFailures(_inputDir: string, maxScenarios: number): HarvesterResult {
+  const scenarios: Scenario[] = [];
+
+  const healthPatterns: Array<{
+    id: string;
+    category: string;
+    description: string;
+    edits: Array<{ file: string; search: string; replace: string }>;
+    predicates: Array<Record<string, any>>;
+    shouldPass: boolean;
+    rationale: string;
+  }> = [
+    // --- Health endpoint removed/broken ---
+    { id: 'health-removed', category: 'endpoint',
+      description: 'Health endpoint handler removed from server',
+      edits: [{ file: 'server.js', search: "if (req.url === '/health') {\n    res.writeHead(200);\n    res.end('OK');", replace: "if (req.url === '/removed') {\n    res.writeHead(200);\n    res.end('OK');" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'Health endpoint renamed — /health returns 404 now' },
+    { id: 'health-wrong-status', category: 'endpoint',
+      description: 'Health endpoint returns 500 instead of 200',
+      edits: [{ file: 'server.js', search: "if (req.url === '/health') {\n    res.writeHead(200);", replace: "if (req.url === '/health') {\n    res.writeHead(500);" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'Health endpoint returns 500 — healthcheck fails' },
+    { id: 'health-empty-response', category: 'endpoint',
+      description: 'Health endpoint returns 200 but empty body',
+      edits: [{ file: 'server.js', search: "res.end('OK');", replace: "res.end('');" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200, bodyContains: 'OK' } }],
+      shouldPass: false, rationale: 'Health returns 200 but empty body — bodyContains check fails' },
+    { id: 'health-json-not-text', category: 'endpoint',
+      description: 'Health endpoint returns JSON instead of plain text',
+      edits: [{ file: 'server.js', search: "res.end('OK');", replace: 'res.end(JSON.stringify({ status: "healthy" }));' }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200, bodyContains: 'OK' } }],
+      shouldPass: false, rationale: 'Health returns JSON not "OK" — bodyContains "OK" fails' },
+
+    // --- App starts but crashes under load ---
+    { id: 'startup-exception', category: 'crash',
+      description: 'App throws during request handling',
+      edits: [{ file: 'server.js', search: "if (req.url === '/health') {", replace: "if (req.url === '/health') {\n    throw new Error('deliberate crash');" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'Uncaught exception on health check — process crashes or returns 500' },
+    { id: 'infinite-loop', category: 'crash',
+      description: 'Health endpoint enters infinite loop (timeout)',
+      edits: [{ file: 'server.js', search: "if (req.url === '/health') {\n    res.writeHead(200);\n    res.end('OK');", replace: "if (req.url === '/health') {\n    while(true) {} // hang\n    res.writeHead(200);\n    res.end('OK');" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'Infinite loop — health request times out' },
+
+    // --- Port mismatch ---
+    { id: 'listen-wrong-port', category: 'port',
+      description: 'Server listens on different port than expected',
+      edits: [{ file: 'server.js', search: "const PORT = process.env.PORT || 3000;", replace: "const PORT = 9999;" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'App listens on 9999 but compose maps 3000 — connection refused' },
+
+    // --- Dependency not ready ---
+    { id: 'db-dependency-check', category: 'dependency',
+      description: 'Health endpoint checks DB but DB not available',
+      edits: [{ file: 'server.js', search: "res.end('OK');", replace: "const db = require('./db'); await db.query('SELECT 1'); res.end('OK');" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'Health depends on DB module that does not exist — require fails' },
+
+    // --- Healthcheck configuration ---
+    { id: 'compose-short-timeout', category: 'config',
+      description: 'Healthcheck timeout too short for slow startup',
+      edits: [{ file: 'docker-compose.yml', search: 'timeout: 3s', replace: 'timeout: 1ms' }],
+      predicates: [{ type: 'content', file: 'docker-compose.yml', pattern: '1ms' }],
+      shouldPass: false, rationale: '1ms timeout — no HTTP request can complete in time' },
+    { id: 'compose-wrong-healthcheck-cmd', category: 'config',
+      description: 'Healthcheck command uses curl but only wget available',
+      edits: [{ file: 'docker-compose.yml', search: '["CMD", "wget", "-q", "-O-", "http://localhost:3000/health"]', replace: '["CMD", "curl", "-f", "http://localhost:3000/health"]' }],
+      predicates: [{ type: 'content', file: 'docker-compose.yml', pattern: 'curl' }],
+      shouldPass: false, rationale: 'node:alpine has wget not curl — healthcheck command fails' },
+    { id: 'compose-retries-zero', category: 'config',
+      description: 'Healthcheck retries set to 0',
+      edits: [{ file: 'docker-compose.yml', search: 'retries: 3', replace: 'retries: 0' }],
+      predicates: [{ type: 'content', file: 'docker-compose.yml', pattern: 'retries: 0' }],
+      shouldPass: false, rationale: 'Zero retries — first failure marks container as unhealthy permanently' },
+
+    // --- Partial health ---
+    { id: 'health-ok-but-api-broken', category: 'partial',
+      description: 'Health returns 200 but API endpoint is broken',
+      edits: [{ file: 'server.js', search: "} else if (req.url === '/api/items')", replace: "} else if (req.url === '/api/broken')" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/api/items', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'Health passes but /api/items renamed to /api/broken — API predicate fails' },
+    { id: 'health-ok-homepage-broken', category: 'partial',
+      description: 'Health returns 200 but homepage serves wrong content',
+      edits: [{ file: 'server.js', search: "<h1>Demo App</h1>", replace: "<h1></h1>" }],
+      predicates: [{ type: 'html', selector: 'h1', content: 'Demo App' }],
+      shouldPass: false, rationale: 'Health fine, homepage h1 emptied — HTML content predicate fails' },
+
+    // --- Valid health changes ---
+    { id: 'valid-health-json', category: 'valid',
+      description: 'Health endpoint returns JSON with uptime',
+      edits: [{ file: 'server.js', search: "res.end('OK');", replace: "res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200, bodyContains: 'ok' } }],
+      shouldPass: true, rationale: 'JSON health response contains "ok" — bodyContains check passes' },
+    { id: 'valid-add-readiness', category: 'valid',
+      description: 'Add separate readiness endpoint',
+      edits: [{ file: 'server.js', search: "} else if (req.url === '/health')", replace: "} else if (req.url === '/ready') {\n    res.writeHead(200);\n    res.end('READY');\n  } else if (req.url === '/health')" }],
+      predicates: [{ type: 'content', file: 'server.js', pattern: '/ready' }],
+      shouldPass: true, rationale: 'New endpoint added at unique anchor point — does not break health' },
+  ];
+
+  for (const hp of healthPatterns) {
+    if (scenarios.length >= maxScenarios) break;
+    scenarios.push({
+      id: `harvest-health-${hp.id}`,
+      description: `[HARVEST:health] ${hp.description}`,
+      edits: hp.edits,
+      predicates: hp.predicates,
+      expectedSuccess: hp.shouldPass,
+      tags: ['harvest', 'health_check', hp.category, hp.shouldPass ? 'should_pass' : 'should_fail'],
+      rationale: hp.rationale,
+    });
+  }
+
+  return { source: 'health_check_failures', scenarios, metadata: { patterns: healthPatterns.length } };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. Harvester: Cascade Failures (Edit A breaks unrelated thing B)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function harvestCascadeFailures(_inputDir: string, maxScenarios: number): HarvesterResult {
+  const scenarios: Scenario[] = [];
+
+  const cascadePatterns: Array<{
+    id: string;
+    category: string;
+    description: string;
+    edits: Array<{ file: string; search: string; replace: string }>;
+    predicates: Array<Record<string, any>>;
+    shouldPass: boolean;
+    rationale: string;
+  }> = [
+    // --- CSS specificity cascades ---
+    { id: 'css-specificity-override', category: 'css_cascade',
+      description: 'Adding a more specific rule overrides inherited style on other elements',
+      edits: [{ file: 'server.js', search: "body { font-family: sans-serif; margin: 0; padding: 20px; }", replace: "body { font-family: sans-serif; margin: 0; padding: 20px; }\n    body * { color: red; }" }],
+      predicates: [{ type: 'css', selector: '.nav-link', property: 'color', expected: 'rgb(51, 51, 51)' }],
+      shouldPass: false, rationale: 'body * { color: red } overrides .nav-link color — cascade changes unrelated elements' },
+    { id: 'css-shorthand-clobber', category: 'css_cascade',
+      description: 'Shorthand property clobbers previously set longhand',
+      edits: [{ file: 'server.js', search: "body { font-family: sans-serif; margin: 0; padding: 20px; }", replace: "body { font-family: sans-serif; margin: 0; padding: 20px; border-top: 2px solid blue; border: none; }" }],
+      predicates: [{ type: 'css', selector: 'body', property: 'border-top-width', expected: '2px' }],
+      shouldPass: false, rationale: 'border: none after border-top resets border-top — shorthand clobbers longhand' },
+    { id: 'css-import-order', category: 'css_cascade',
+      description: 'New style block before existing one changes cascade order',
+      edits: [{ file: 'server.js', search: '<style>', replace: '<style>\n    .nav-link { color: purple; }\n    </style>\n    <style>' }],
+      predicates: [{ type: 'css', selector: '.nav-link', property: 'color', expected: 'rgb(51, 51, 51)' }],
+      shouldPass: false, rationale: 'New style block adds conflicting .nav-link color — last declaration wins, original overrides' },
+
+    // --- Route handler conflicts ---
+    { id: 'route-shadow', category: 'route',
+      description: 'New route handler shadows existing one (matched first)',
+      edits: [{ file: 'server.js', search: "if (req.url === '/' && req.method === 'GET')", replace: "if (req.url === '/' && req.method === 'GET') {\n    res.writeHead(200);\n    res.end('SHADOW');\n  } else if (req.url === '/' && req.method === 'GET')" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/', expect: { status: 200, bodyContains: 'Demo App' } }],
+      shouldPass: false, rationale: 'First matching handler returns "SHADOW" — original homepage never reached' },
+    { id: 'catch-all-shadow', category: 'route',
+      description: 'Catch-all route added before specific routes',
+      edits: [{ file: 'server.js', search: "if (req.url === '/' && req.method === 'GET')", replace: "if (true) {\n    res.writeHead(200);\n    res.end('catch-all');\n  } else if (req.url === '/' && req.method === 'GET')" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/health', expect: { status: 200, bodyContains: 'OK' } }],
+      shouldPass: false, rationale: 'Catch-all intercepts ALL requests including /health' },
+
+    // --- Shared state corruption ---
+    { id: 'items-array-cleared', category: 'shared_state',
+      description: 'Edit to items array on one route breaks another route that reads it',
+      edits: [{ file: 'server.js', search: "{ id: 1, name: 'Alpha' },\n      { id: 2, name: 'Bravo' }", replace: "/* items removed */" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/api/items', expect: { status: 200, bodyContains: 'Alpha' } }],
+      shouldPass: false, rationale: 'Items data removed — /api/items returns empty or errors' },
+    { id: 'constant-rename-breaks-reference', category: 'shared_state',
+      description: 'Renaming a variable breaks all references to it',
+      edits: [{ file: 'server.js', search: "const PORT = process.env.PORT || 3000;", replace: "const SERVER_PORT = process.env.PORT || 3000;" }],
+      predicates: [{ type: 'content', file: 'server.js', pattern: 'SERVER_PORT' }],
+      shouldPass: false, rationale: 'PORT renamed to SERVER_PORT but server.listen(PORT) still references old name — crash' },
+
+    // --- HTML structure cascades ---
+    { id: 'unclosed-tag-breaks-page', category: 'html_structure',
+      description: 'Unclosed div tag breaks all subsequent HTML rendering',
+      edits: [{ file: 'server.js', search: '<h1>Demo App</h1>', replace: '<div><h1>Demo App</h1>' }],
+      predicates: [{ type: 'html', selector: 'nav', content: 'exists' }],
+      shouldPass: false, rationale: 'Unclosed <div> may swallow the nav element depending on parser behavior' },
+    { id: 'style-tag-unclosed', category: 'html_structure',
+      description: 'Unclosed style tag makes rest of page invisible',
+      edits: [{ file: 'server.js', search: '</style>', replace: '/* unclosed' }],
+      predicates: [{ type: 'html', selector: 'h1', content: 'Demo App' }],
+      shouldPass: false, rationale: 'Unclosed <style> — browser treats rest of HTML as CSS, page content invisible' },
+
+    // --- Cross-route CSS leaks ---
+    { id: 'homepage-edit-breaks-about', category: 'cross_route',
+      description: 'CSS edit on homepage leaks to /about page',
+      edits: [{ file: 'server.js', search: "body { font-family: sans-serif; margin: 0; padding: 20px; }", replace: "body { font-family: sans-serif; margin: 0; padding: 20px; display: none; }" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/about', expect: { status: 200, bodyContains: 'About' } }],
+      shouldPass: true, rationale: 'display:none is CSS — HTTP response still contains About text, bodyContains passes' },
+
+    // --- Import/require chain breaks ---
+    { id: 'require-removed', category: 'dependency_chain',
+      description: 'Removing require breaks runtime',
+      edits: [{ file: 'server.js', search: "const http = require('http');", replace: "// http removed" }],
+      predicates: [{ type: 'http', method: 'GET', path: '/', expect: { status: 200 } }],
+      shouldPass: false, rationale: 'http module not imported — http.createServer throws ReferenceError, app crashes' },
+
+    // --- Config file cascades ---
+    { id: 'config-invalid-json', category: 'config',
+      description: 'Edit makes config.json invalid — any reader breaks',
+      edits: [{ file: 'config.json', search: '"appName": "demo-app"', replace: '"appName": "demo-app",' }],
+      predicates: [{ type: 'content', file: 'config.json', pattern: 'demo-app' }],
+      shouldPass: false, rationale: 'Trailing comma makes JSON invalid — any JSON.parse fails' },
+    { id: 'init-sql-syntax-error', category: 'config',
+      description: 'SQL syntax error breaks database initialization',
+      edits: [{ file: 'init.sql', search: 'CREATE TABLE', replace: 'CRAETE TABLE' }],
+      predicates: [{ type: 'content', file: 'init.sql', pattern: 'CRAETE' }],
+      shouldPass: false, rationale: 'SQL syntax error — database initialization fails' },
+
+    // --- Multi-file cascades ---
+    { id: 'dockerfile-port-vs-server', category: 'multi_file',
+      description: 'Dockerfile EXPOSE changed but server.js PORT unchanged — mismatch',
+      edits: [
+        { file: 'Dockerfile', search: 'EXPOSE 3000', replace: 'EXPOSE 8080' },
+        { file: 'server.js', search: "const PORT = process.env.PORT || 3000;", replace: "const PORT = process.env.PORT || 3000; // unchanged" },
+      ],
+      predicates: [{ type: 'content', file: 'Dockerfile', pattern: '8080' }, { type: 'content', file: 'server.js', pattern: '3000' }],
+      shouldPass: true, rationale: 'EXPOSE is cosmetic, PORT still 3000 — app works but documentation misleading' },
+    { id: 'compose-env-vs-server', category: 'multi_file',
+      description: 'Compose changes PORT env but server has hardcoded fallback',
+      edits: [{ file: 'docker-compose.yml', search: 'PORT=3000', replace: 'PORT=8080' }],
+      predicates: [{ type: 'content', file: 'docker-compose.yml', pattern: '8080' }],
+      shouldPass: true, rationale: 'Server reads process.env.PORT — compose change takes effect at runtime' },
+
+    // --- Valid multi-file edits ---
+    { id: 'valid-add-route-and-test', category: 'valid',
+      description: 'Add new route to server.js and reference in config.json',
+      edits: [
+        { file: 'server.js', search: "} else if (req.url === '/health')", replace: "} else if (req.url === '/metrics') {\n    res.writeHead(200);\n    res.end(JSON.stringify({ requests: 0 }));\n  } else if (req.url === '/health')" },
+        { file: 'config.json', search: '"appName": "demo-app"', replace: '"appName": "demo-app",\n  "metricsEnabled": true' },
+      ],
+      predicates: [{ type: 'content', file: 'server.js', pattern: '/metrics' }, { type: 'content', file: 'config.json', pattern: 'metricsEnabled' }],
+      shouldPass: true, rationale: 'New route at unique anchor + valid JSON addition — both files valid' },
+  ];
+
+  for (const cp of cascadePatterns) {
+    if (scenarios.length >= maxScenarios) break;
+    scenarios.push({
+      id: `harvest-cascade-${cp.id}`,
+      description: `[HARVEST:cascade] ${cp.description}`,
+      edits: cp.edits,
+      predicates: cp.predicates,
+      expectedSuccess: cp.shouldPass,
+      tags: ['harvest', 'cascade_failure', cp.category, cp.shouldPass ? 'should_pass' : 'should_fail'],
+      rationale: cp.rationale,
+    });
+  }
+
+  return { source: 'cascade_failures', scenarios, metadata: { patterns: cascadePatterns.length } };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Harvester Registry
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -852,6 +1423,10 @@ const HARVESTERS: Record<string, Harvester> = {
   cve: harvestCVE,
   stylelint: harvestStylelint,
   openapi: harvestOpenAPI,
+  edit: harvestEditFailures,
+  build: harvestBuildFailures,
+  health: harvestHealthCheckFailures,
+  cascade: harvestCascadeFailures,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -331,6 +331,23 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
   const totalStart = Date.now();
   const batchSize = config.parallelBatch ?? 10;
 
+  // Progress tracker for live CI visibility
+  let completed = 0;
+  let passed = 0;
+  let failed = 0;
+  const total = scenarios.length;
+
+  function logBatchProgress(phaseName: string) {
+    const pct = Math.round((completed / total) * 100);
+    const elapsed = ((Date.now() - totalStart) / 1000).toFixed(0);
+    console.log(`  ── Progress: ${completed}/${total} [${pct}%] | ✓${passed} ✗${failed} | ${elapsed}s elapsed (${phaseName}) ──`);
+  }
+
+  function trackEntry(entry: any) {
+    completed++;
+    if (entry.clean) passed++; else failed++;
+  }
+
   // Separate into phases
   const pure = scenarios.filter(s => !s.requiresDocker && !s.requiresHttpMock && !s.requiresPlaywright && !s.requiresLiveHttp && !s.steps);
   const httpMock = scenarios.filter(s => s.requiresHttpMock && !s.requiresDocker);
@@ -348,8 +365,10 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
       const results = await Promise.all(batch.map(s => runScenario(s, config)));
       for (const entry of results) {
         ledger.append(entry);
+        trackEntry(entry);
         printProgress(entry);
       }
+      logBatchProgress('Phase 1: pure');
     }
   }
 
@@ -365,8 +384,10 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
         if (Date.now() - totalStart > MAX_TOTAL_TIMEOUT) break;
         const entry = await runScenario(s, config, mockServer!.url);
         ledger.append(entry);
+        trackEntry(entry);
         printProgress(entry);
       }
+      logBatchProgress('Phase 1.5: httpMock');
     } finally {
       if (mockServer) {
         await stopMockServer(mockServer);
@@ -381,8 +402,10 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
       if (Date.now() - totalStart > MAX_TOTAL_TIMEOUT) break;
       const entry = await runMultiStepScenario(scenario, config);
       ledger.append(entry);
+      trackEntry(entry);
       printProgress(entry);
     }
+    logBatchProgress('Phase 2: K5');
   }
 
   // Phase 3: Docker scenarios — pattern-simulated (sequential)
@@ -397,8 +420,10 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
         if (Date.now() - totalStart > MAX_TOTAL_TIMEOUT) break;
         const entry = await runScenario(scenario, config);
         ledger.append(entry);
+        trackEntry(entry);
         printProgress(entry);
       }
+      logBatchProgress('Phase 3: docker');
     }
   }
 
@@ -430,8 +455,10 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
             if (Date.now() - totalStart > MAX_TOTAL_TIMEOUT) break;
             const entry = await runScenario(scenario, config, undefined, dbHarness);
             ledger.append(entry);
+            trackEntry(entry);
             printProgress(entry);
           }
+          logBatchProgress('Phase 4: liveDocker');
         }
 
         // Phase 5: Playwright scenarios (--full tier) — real browser rendering
@@ -445,8 +472,10 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
               if (Date.now() - totalStart > MAX_TOTAL_TIMEOUT) break;
               const entry = await runScenario(scenario, config, undefined, dbHarness);
               ledger.append(entry);
+              trackEntry(entry);
               printProgress(entry);
             }
+            logBatchProgress('Phase 5: playwright');
           }
         }
       } catch (err: any) {

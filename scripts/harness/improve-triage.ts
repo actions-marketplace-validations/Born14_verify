@@ -305,11 +305,14 @@ export function bundleViolations(entries: LedgerEntry[]): EvidenceBundle[] {
   let bundleCounter = 0;
   for (const [key, violations] of groups) {
     const triage = triageByInvariantKey(key);
-    bundles.push({
+    const bundle: EvidenceBundle = {
       id: `bundle_${++bundleCounter}`,
       violations,
       triage,
-    });
+    };
+    // Refine: extract gate from violation text when triage rule has no target
+    refineTriage(bundle);
+    bundles.push(bundle);
   }
 
   return bundles;
@@ -362,6 +365,56 @@ function triageByInvariantKey(key: string): EvidenceBundle['triage'] {
   };
 }
 
+// Gate name → source file mapping for violation-text extraction
+const GATE_FILE_MAP: Record<string, string> = {
+  security: 'src/gates/security.ts',
+  a11y: 'src/gates/a11y.ts',
+  grounding: 'src/gates/grounding.ts',
+  browser: 'src/gates/browser.ts',
+  constraints: 'src/gates/constraints.ts',
+  containment: 'src/gates/containment.ts',
+  syntax: 'src/gates/syntax.ts',
+  http: 'src/gates/http.ts',
+  vision: 'src/gates/vision.ts',
+  triangulation: 'src/gates/triangulation.ts',
+  filesystem: 'src/gates/filesystem.ts',
+  performance: 'src/gates/performance.ts',
+  config: 'src/gates/config.ts',
+  serialization: 'src/gates/serialization.ts',
+  infrastructure: 'src/gates/infrastructure.ts',
+  staging: 'src/gates/staging.ts',
+  propagation: 'src/gates/propagation.ts',
+  observation: 'src/gates/observation.ts',
+  contention: 'src/gates/contention.ts',
+  temporal: 'src/gates/temporal.ts',
+  state: 'src/gates/state.ts',
+  capacity: 'src/gates/capacity.ts',
+  access: 'src/gates/access.ts',
+  message: 'src/gates/message.ts',
+  invariants: 'src/gates/invariants.ts',
+};
+
+/**
+ * Refine triage for bundles with null targetFile by extracting
+ * the failing gate name from violation text.
+ * Pattern: "verify failed at {gate} but should pass"
+ */
+function refineTriage(bundle: EvidenceBundle): void {
+  if (bundle.triage.targetFile) return; // already resolved
+  for (const v of bundle.violations) {
+    const match = v.violation.match(/failed at (\w+)/);
+    if (match) {
+      const gate = match[1].toLowerCase();
+      const file = GATE_FILE_MAP[gate];
+      if (file) {
+        bundle.triage.targetFile = file;
+        bundle.triage.targetFunction = `run${gate.charAt(0).toUpperCase()}${gate.slice(1)}Gate()`;
+        return;
+      }
+    }
+  }
+}
+
 // =============================================================================
 // BOUNDED SURFACE — files the improvement engine is allowed to edit
 // =============================================================================
@@ -398,6 +451,19 @@ export const BOUNDED_SURFACE: ReadonlyArray<{ file: string; description: string 
   { file: 'src/gates/syntax.ts', description: 'F9 edit application' },
   { file: 'src/gates/vision.ts', description: 'Vision model screenshot verification' },
   { file: 'src/gates/triangulation.ts', description: 'Cross-authority verdict synthesis' },
+  { file: 'src/gates/security.ts', description: 'Security scanning (secrets, eval, XSS, CSRF, etc.)' },
+  { file: 'src/gates/a11y.ts', description: 'Accessibility checks (alt text, labels, headings, etc.)' },
+  { file: 'src/gates/performance.ts', description: 'Performance checks (bundle size, connections, etc.)' },
+  { file: 'src/gates/config.ts', description: 'Configuration consistency checks' },
+  { file: 'src/gates/serialization.ts', description: 'Data serialization validation' },
+  { file: 'src/gates/observation.ts', description: 'Observation/drift detection' },
+  { file: 'src/gates/propagation.ts', description: 'Cross-file change propagation' },
+  { file: 'src/gates/contention.ts', description: 'Edit contention detection' },
+  { file: 'src/gates/temporal.ts', description: 'Temporal ordering verification' },
+  { file: 'src/gates/state.ts', description: 'State consistency checks' },
+  { file: 'src/gates/capacity.ts', description: 'Capacity/size limit checks' },
+  { file: 'src/gates/access.ts', description: 'Access control verification' },
+  { file: 'src/gates/message.ts', description: 'Message/communication verification' },
 ];
 
 export const FROZEN_FILES = new Set([

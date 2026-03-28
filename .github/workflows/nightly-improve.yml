@@ -195,9 +195,17 @@ jobs:
 
           bun run src/cli.ts improve $ARGS 2>&1 | tee improve-output.txt || true
 
-          # Parse verdict from output
-          VERDICT=$(grep -oP 'VERDICT: \K\w+' improve-output.txt || echo "unknown")
-          IMPROVEMENTS=$(grep -oP 'Improvements: \K\d+' improve-output.txt || echo "0")
+          # Parse verdict from output — improve prints "Summary: N accepted, N rejected, N skipped"
+          ACCEPTED=$(grep -oP '(\d+) accepted' improve-output.txt | grep -oP '\d+' || echo "0")
+          REJECTED=$(grep -oP '(\d+) rejected' improve-output.txt | grep -oP '\d+' || echo "0")
+          if [ "$ACCEPTED" -gt 0 ] 2>/dev/null; then
+            VERDICT="accepted"
+          elif [ "$REJECTED" -gt 0 ] 2>/dev/null; then
+            VERDICT="no_improvement"
+          else
+            VERDICT="unknown"
+          fi
+          IMPROVEMENTS="$ACCEPTED"
           echo "verdict=$VERDICT" >> $GITHUB_OUTPUT
           echo "improvements=$IMPROVEMENTS" >> $GITHUB_OUTPUT
 

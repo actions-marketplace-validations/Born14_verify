@@ -1,0 +1,885 @@
+[
+  {
+    "id": "jv-health-001",
+    "description": "JV-01: Health endpoint changed from JSON to plain text, predicate expects JSON status field",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));",
+        "replace": "res.writeHead(200, { 'Content-Type': 'text/plain' });\n    res.end('healthy');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "res.end('healthy')"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "{ status: 'ok' }"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "health_check",
+      "JV-01"
+    ],
+    "rationale": "Edit replaces JSON health response — predicate expecting old JSON format fails observation"
+  },
+  {
+    "id": "jv-health-002",
+    "description": "JV-01: Server health moved to /ready but docker-compose healthcheck still probes /health",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/health') {",
+        "replace": "if (req.url === '/ready') {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "req.url === '/ready'"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "http://localhost:3000/health"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "health_check",
+      "JV-01"
+    ],
+    "rationale": "Edit succeeds but creates inconsistency — compose still checks /health while server serves /ready. Both predicates pass because edit only touches server.js and compose is unchanged."
+  },
+  {
+    "id": "jv-health-003",
+    "description": "JV-01: Health endpoint changed to 503 during maintenance, predicate expects 200 pattern",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));",
+        "replace": "res.writeHead(503, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'maintenance' }));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "status: 'maintenance'"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "retries: 3"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "health_check",
+      "JV-01"
+    ],
+    "rationale": "Health returns 503 but compose will retry 3 times — both predicates independently pass"
+  },
+  {
+    "id": "jv-health-004",
+    "description": "JV-01: Edit changes health response headers, Dockerfile HEALTHCHECK still uses wget",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ status: 'ok' }));",
+        "replace": "res.writeHead(200, { 'Content-Type': 'application/json', 'X-Health': 'v2' });\n    res.end(JSON.stringify({ status: 'ok', version: 2 }));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "'X-Health': 'v2'"
+      },
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "wget -q -O-"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "health_check",
+      "JV-01"
+    ],
+    "rationale": "Server adds header but Dockerfile health still uses wget — both predicates independently pass"
+  },
+  {
+    "id": "jv-health-005",
+    "description": "JV-01 control: Edit health response and update compose healthcheck in sync (no conflict)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/health') {",
+        "replace": "if (req.url === '/healthz') {"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "http://localhost:3000/health",
+        "replace": "http://localhost:3000/healthz"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "req.url === '/healthz'"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "http://localhost:3000/healthz"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "health_check",
+      "JV-01",
+      "control"
+    ],
+    "rationale": "Both files updated consistently — no observer conflict"
+  },
+  {
+    "id": "jv-schema-006",
+    "description": "JV-02: Migration adds phone column to users, predicate expects both email VARCHAR and phone",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    email VARCHAR(255) NOT NULL,",
+        "replace": "    email TEXT NOT NULL,\n    phone VARCHAR(20),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "email VARCHAR(255) NOT NULL"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "phone VARCHAR(20)"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "schema_introspection",
+      "JV-02"
+    ],
+    "rationale": "Migration changes email from VARCHAR(255) to TEXT — predicate expecting old type fails"
+  },
+  {
+    "id": "jv-schema-007",
+    "description": "JV-02: Migration renames password_hash to pwd_hash, predicate checks old column name",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    password_hash TEXT NOT NULL,",
+        "replace": "    pwd_hash TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "pwd_hash TEXT NOT NULL"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "password_hash TEXT NOT NULL"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "schema_introspection",
+      "JV-02"
+    ],
+    "rationale": "Column renamed — predicate checking old name \"password_hash\" fails introspection"
+  },
+  {
+    "id": "jv-schema-008",
+    "description": "JV-02: Migration changes sessions.id from UUID to SERIAL, predicate expects UUID",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),",
+        "replace": "    id SERIAL PRIMARY KEY,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "id SERIAL PRIMARY KEY"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "gen_random_uuid()"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "schema_introspection",
+      "JV-02"
+    ],
+    "rationale": "Migration replaces UUID with SERIAL — predicate checking gen_random_uuid fails"
+  },
+  {
+    "id": "jv-schema-009",
+    "description": "JV-02: Migration replaces sessions token index, predicate expects old index name",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_token ON sessions(token);",
+        "replace": "CREATE UNIQUE INDEX idx_sessions_token_v2 ON sessions(token);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "idx_sessions_token_v2"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "idx_sessions_token ON sessions(token)"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "schema_introspection",
+      "JV-02"
+    ],
+    "rationale": "Old index replaced — predicate checking original index name fails during migration window"
+  },
+  {
+    "id": "jv-schema-010",
+    "description": "JV-02: Migration changes posts.view_count default, predicate expects DEFAULT 0",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    view_count INTEGER DEFAULT 0,",
+        "replace": "    view_count INTEGER DEFAULT 100,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "view_count INTEGER DEFAULT 100"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "view_count INTEGER DEFAULT 0"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "schema_introspection",
+      "JV-02"
+    ],
+    "rationale": "Default changed from 0 to 100 — predicate expecting old default fails mid-migration"
+  },
+  {
+    "id": "jv-schema-011",
+    "description": "JV-02 control: Migration adds column, predicate only checks new column exists (no old state check)",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    is_active BOOLEAN DEFAULT true,",
+        "replace": "    is_active BOOLEAN DEFAULT true,\n    role VARCHAR(20) DEFAULT 'user',"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "role VARCHAR(20) DEFAULT 'user'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "schema_introspection",
+      "JV-02",
+      "control"
+    ],
+    "rationale": "Only checking new state — no conflict with pre-migration schema"
+  },
+  {
+    "id": "jv-hash-012",
+    "description": "JV-03: Config.json name changes, predicate expects both old \"Demo App\" and new name",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"Production App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "Production App"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "Demo App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "hash_conflict",
+      "JV-03"
+    ],
+    "rationale": "File hash changes mid-write — predicate checking old \"Demo App\" name fails"
+  },
+  {
+    "id": "jv-hash-013",
+    "description": "JV-03: .env DATABASE_URL rotated, predicate expects both old and new URLs",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo\"",
+        "replace": "DATABASE_URL=\"postgres://db.internal:5432/demo_prod\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "db.internal:5432/demo_prod"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "localhost:5432/demo"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "hash_conflict",
+      "JV-03"
+    ],
+    "rationale": "DATABASE_URL rotated — predicate checking old localhost URL fails mid-write"
+  },
+  {
+    "id": "jv-hash-014",
+    "description": "JV-03: Homepage title changes, predicate expects both old and new title in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<title>Demo App</title>",
+        "replace": "<title>Live Dashboard</title>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "<title>Live Dashboard</title>"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "<title>Demo App</title>"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "hash_conflict",
+      "JV-03"
+    ],
+    "rationale": "Title changed — hash computed before write sees Demo App, after write sees Live Dashboard"
+  },
+  {
+    "id": "jv-hash-015",
+    "description": "JV-03: Dockerfile base image changes, predicate expects both old node:20 and new image",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM node:22-alpine"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "FROM node:22-alpine"
+      },
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "FROM node:20-alpine"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "hash_conflict",
+      "JV-03"
+    ],
+    "rationale": "Base image changed — file hash mid-write catches inconsistent state"
+  },
+  {
+    "id": "jv-hash-016",
+    "description": "JV-03: docker-compose PORT env changes, predicate expects both old and new PORT",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "- PORT=3000",
+        "replace": "- PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "PORT=8080"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "PORT=3000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "hash_conflict",
+      "JV-03"
+    ],
+    "rationale": "PORT changed — predicate verifying old PORT=3000 fails when hash computed after write"
+  },
+  {
+    "id": "jv-hash-017",
+    "description": "JV-03 control: Edit config.json port, predicate only checks new value (no stale observation)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "hash_conflict",
+      "JV-03",
+      "control"
+    ],
+    "rationale": "Only checking post-write state — no stale hash conflict"
+  },
+  {
+    "id": "co-bolster-200",
+    "description": "contention-verify: Two edits to server.js, second overwrites first",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'First' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'First' }",
+        "replace": "{ id: 1, name: 'Second' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "First"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Two edits to server.js, second overwrites first"
+  },
+  {
+    "id": "co-bolster-201",
+    "description": "contention-verify: Edit server.js and config.json with conflicting ports",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "server.listen(port",
+        "replace": "server.listen(8080"
+      },
+      {
+        "file": "config.json",
+        "search": "\"port\": 5432",
+        "replace": "\"port\": 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Edit server.js and config.json with conflicting ports"
+  },
+  {
+    "id": "co-bolster-202",
+    "description": "contention-verify: Edit .env and compose with different ports",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5000"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "\"3000:3000\"",
+        "replace": "\"6000:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "6000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Edit .env and compose with different ports"
+  },
+  {
+    "id": "co-bolster-203",
+    "description": "contention-verify: Two migrations on same table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "m1",
+          "sql": "ALTER TABLE users ADD COLUMN bio TEXT;"
+        },
+        {
+          "name": "m2",
+          "sql": "ALTER TABLE users DROP COLUMN bio;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Two migrations on same table"
+  },
+  {
+    "id": "co-bolster-204",
+    "description": "contention-verify: Edit init.sql and server.js with mismatched column names",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email_address VARCHAR(255) NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email_address"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Edit init.sql and server.js with mismatched column names"
+  },
+  {
+    "id": "co-bolster-205",
+    "description": "contention-verify: Compose restart policy conflicts with Dockerfile CMD",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "restart: unless-stopped",
+        "replace": "restart: \"no\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "restart"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+  },
+  {
+    "id": "co-bolster-206",
+    "description": "contention-verify: Edit both health endpoint and healthcheck with different paths",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/healthz'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/healthz"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Edit both health endpoint and healthcheck with different paths"
+  },
+  {
+    "id": "co-bolster-207",
+    "description": "contention-verify: Config.json and .env disagree on debug",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"debug\": true"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "\"debug\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Config.json and .env disagree on debug"
+  },
+  {
+    "id": "co-bolster-208",
+    "description": "contention-verify: Control: single edit, consistent check",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "control"
+    ],
+    "rationale": "Control: single edit, consistent check"
+  },
+  {
+    "id": "co-bolster-209",
+    "description": "contention-verify: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4444"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "4444"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "co-bolster-210",
+    "description": "contention-verify: Control: edit config.json, check config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"maxRetries\": 3",
+        "replace": "\"maxRetries\": 5"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"maxRetries\": 5"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "control"
+    ],
+    "rationale": "Control: edit config.json, check config.json"
+  },
+  {
+    "id": "co-bolster-211",
+    "description": "contention-verify: Two edits to different routes, check both present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'One' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 2, name: 'Beta' }",
+        "replace": "{ id: 2, name: 'Two' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "One"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "verify",
+      "control"
+    ],
+    "rationale": "Two edits to different routes, check both present"
+  },
+  {
+    "id": "co-bolster-212",
+    "description": "contention-verify: Migration adds column that server.js doesnt reference",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "metadata"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE posts ADD COLUMN metadata JSONB;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "verify",
+      "contention_gap"
+    ],
+    "rationale": "Migration adds column that server.js doesnt reference"
+  }
+]

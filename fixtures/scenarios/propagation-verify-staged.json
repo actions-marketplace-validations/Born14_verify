@@ -1,0 +1,749 @@
+[
+  {
+    "id": "pv-schema-001",
+    "description": "PV-01: bio column added to init.sql (schema valid), server.js has no bio reference (query unaware)",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    bio TEXT,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "bio"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "schema_query",
+      "PV-01"
+    ],
+    "rationale": "Schema gate would pass (column exists) but query gate fails (app unaware) — verification chain gap"
+  },
+  {
+    "id": "pv-schema-002",
+    "description": "PV-01: Email index added to init.sql, server.js has no email query to benefit",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_token ON sessions(token);",
+        "replace": "CREATE INDEX idx_sessions_token ON sessions(token);\nCREATE INDEX idx_users_email ON users(email);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "schema_query",
+      "PV-01"
+    ],
+    "rationale": "Index exists in schema but app has no email query — schema verification doesnt propagate to query layer"
+  },
+  {
+    "id": "pv-schema-003",
+    "description": "PV-01: posts renamed to articles in schema, server.js has no articles reference",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE posts",
+        "replace": "CREATE TABLE articles"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "articles"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "schema_query",
+      "PV-01"
+    ],
+    "rationale": "Schema verification passes (articles table exists) but query verification fails (code uses old name)"
+  },
+  {
+    "id": "pv-schema-004",
+    "description": "PV-01: FK from posts.user_id verified in schema, config has no user-post relationship setting",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "user_id INTEGER NOT NULL REFERENCES users(id),",
+        "replace": "user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "CASCADE"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "schema_query",
+      "PV-01"
+    ],
+    "rationale": "Schema constraint verification passes but config verification unaware of cascade policy"
+  },
+  {
+    "id": "pv-schema-005",
+    "description": "PV-01 control: Add bio column, check init.sql for bio",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    bio TEXT,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio TEXT"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "schema_query",
+      "PV-01",
+      "control"
+    ],
+    "rationale": "Same-file check — column is present in schema"
+  },
+  {
+    "id": "pv-snapshot-006",
+    "description": "PV-02: server.js port changed, content check for old PORT=3000 pattern fails",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 8080;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "PORT || 3000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "stale_snapshot",
+      "PV-02"
+    ],
+    "rationale": "File exists (gate 1 passes) but content check uses stale pattern from before edit"
+  },
+  {
+    "id": "pv-snapshot-007",
+    "description": "PV-02: config.json name changed, hash check uses pre-edit snapshot",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"New App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "config.json",
+        "hash": "2937cf6d9bd7155b92003b846dbfb4f68bc530603f3df347ada174d7f09d6a95"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "stale_snapshot",
+      "PV-02"
+    ],
+    "rationale": "File exists and is valid, but hash check uses stale snapshot — verification chain broken"
+  },
+  {
+    "id": "pv-snapshot-008",
+    "description": "PV-02: .env DATABASE_URL changed, content check for old localhost URL",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo\"",
+        "replace": "DATABASE_URL=\"postgres://db-primary:5432/demo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "postgres://localhost:5432"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "stale_snapshot",
+      "PV-02"
+    ],
+    "rationale": "File exists check passes but content verification uses pre-edit snapshot of DATABASE_URL"
+  },
+  {
+    "id": "pv-snapshot-009",
+    "description": "PV-02: init.sql posts renamed to articles, content check for \"posts\" fails",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE posts",
+        "replace": "CREATE TABLE articles"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE posts"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "stale_snapshot",
+      "PV-02"
+    ],
+    "rationale": "Schema file exists but content verification for \"posts\" uses stale snapshot after rename"
+  },
+  {
+    "id": "pv-snapshot-010",
+    "description": "PV-02 control: config.json name changed, check for new name",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"Fresh App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"name\": \"Fresh App\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "stale_snapshot",
+      "PV-02",
+      "control"
+    ],
+    "rationale": "Content check uses fresh evidence — should pass"
+  },
+  {
+    "id": "pv-functional-011",
+    "description": "PV-03: API items renamed to \"products\" in response, health check OK but items list pattern fails",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, label: 'Alpha' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "name: 'Alpha'"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "health_functional",
+      "PV-03"
+    ],
+    "rationale": "Health endpoint passes (unchanged) but functional check for items.name fails — health gate doesnt cascade"
+  },
+  {
+    "id": "pv-functional-012",
+    "description": "PV-03: Homepage title removed, health check OK but content predicate for \"Demo App\" fails",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<h1>Demo App</h1>",
+        "replace": "<h1></h1>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "<h1>Demo App</h1>"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "health_functional",
+      "PV-03"
+    ],
+    "rationale": "Health endpoint responds OK but homepage content is broken — health gate passes, functional fails"
+  },
+  {
+    "id": "pv-functional-013",
+    "description": "PV-03: server.js port changed to 8080, Dockerfile healthcheck still targets 3000",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 8080;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "localhost:8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "health_functional",
+      "PV-03"
+    ],
+    "rationale": "Health route exists but Dockerfile healthcheck targets wrong port — health→deploy verification gap"
+  },
+  {
+    "id": "pv-functional-014",
+    "description": "PV-03: /about route handler removed, health OK but nav link to /about still exists",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "a class=\"nav-link\" href=\"/about\">About</a>",
+        "replace": "a class=\"nav-link\" href=\"/about\">About (broken)</a>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "href=\"/about\">About</a>"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "health_functional",
+      "PV-03"
+    ],
+    "rationale": "Health check passes but nav link text changed — health gate doesnt propagate to content gate"
+  },
+  {
+    "id": "pv-functional-015",
+    "description": "PV-03 control: Health endpoint unchanged, check for health response pattern",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "status: 'ok'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "health_functional",
+      "PV-03",
+      "control"
+    ],
+    "rationale": "No edit — health response pattern should be found"
+  },
+  {
+    "id": "pv-bolster-100",
+    "description": "PV-bolster: server.js port changed, config.json unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "server.js port changed, config.json unaware"
+  },
+  {
+    "id": "pv-bolster-101",
+    "description": "PV-bolster: config.json port changed, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "config.json port changed, server.js unaware"
+  },
+  {
+    "id": "pv-bolster-102",
+    "description": "PV-bolster: .env port changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": ".env port changed, Dockerfile unaware"
+  },
+  {
+    "id": "pv-bolster-103",
+    "description": "PV-bolster: Dockerfile EXPOSE changed, .env unaware",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+  },
+  {
+    "id": "pv-bolster-104",
+    "description": "PV-bolster: health response changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "healthy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "health response changed, Dockerfile unaware"
+  },
+  {
+    "id": "pv-bolster-105",
+    "description": "PV-bolster: app name changed in config, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"New App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "New App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "app name changed in config, server.js unaware"
+  },
+  {
+    "id": "pv-bolster-106",
+    "description": "PV-bolster: NODE_ENV changed, server.js unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "NODE_ENV changed, server.js unaware"
+  },
+  {
+    "id": "pv-bolster-107",
+    "description": "PV-bolster: SECRET_KEY changed, config.json unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-secret-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "new-secret"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "SECRET_KEY changed, config.json unaware"
+  },
+  {
+    "id": "pv-bolster-108",
+    "description": "PV-bolster: control: server.js port changed, verify in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js port changed, verify in server.js"
+  },
+  {
+    "id": "pv-bolster-109",
+    "description": "PV-bolster: control: config.json port changed, config gate reads it",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "app.port",
+        "expected": "5000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster",
+      "control"
+    ],
+    "rationale": "control: config.json port changed, config gate reads it"
+  },
+  {
+    "id": "pv-bolster-110",
+    "description": "PV-bolster: control: .env PORT changed, config gate reads it",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster",
+      "control"
+    ],
+    "rationale": "control: .env PORT changed, config gate reads it"
+  },
+  {
+    "id": "pv-bolster-111",
+    "description": "PV-bolster: control: server.js still exists after edit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// modified"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js still exists after edit"
+  },
+  {
+    "id": "pv-bolster-112",
+    "description": "PV-bolster: fabricated: package.json does not exist",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "package.json"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster"
+    ],
+    "rationale": "fabricated: package.json does not exist"
+  },
+  {
+    "id": "pv-bolster-113",
+    "description": "PV-bolster: control: server.js exists without edits",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js exists without edits"
+  },
+  {
+    "id": "pv-bolster-114",
+    "description": "PV-bolster: control: server.js has createServer",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "verify",
+      "pv-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js has createServer"
+  }
+]

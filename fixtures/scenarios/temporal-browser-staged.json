@@ -325,5 +325,487 @@
       "pure"
     ],
     "rationale": "CSS edited — old value should no longer be present"
+  },
+  {
+    "id": "tb-bolster-100",
+    "description": "TB-04: Edit adds mobile-only CSS, predicate checks desktop-visible property",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }",
+        "replace": "footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }\n  @media (max-width: 768px) { .mobile-banner { display: block; color: red; } }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": ".mobile-banner",
+        "property": "display",
+        "expected": "block",
+        "path": "/"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "media_query",
+      "TB-04"
+    ],
+    "rationale": "Media query not applied at default viewport — temporal viewport mismatch"
+  },
+  {
+    "id": "tb-bolster-101",
+    "description": "TB-04: Edit adds responsive font-size, predicate checks at default viewport",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e;",
+        "replace": "h1 { color: #1a1a2e; font-size: 2rem; }\n  @media (min-width: 1200px) { h1 { font-size: 4rem; } }\n  .dummy-mq-anchor { color: #1a1a2e;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "h1",
+        "property": "font-size",
+        "expected": "64px",
+        "path": "/"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "media_query",
+      "TB-04"
+    ],
+    "rationale": "Media query not applied at default viewport — temporal viewport mismatch"
+  },
+  {
+    "id": "tb-bolster-102",
+    "description": "TB-04: Control: edit adds visible CSS rule (no media query)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".subtitle { color: #666; margin-top: 0.5rem; }",
+        "replace": ".subtitle { color: #666; margin-top: 0.5rem; font-weight: bold; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "font-weight: bold"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "media_query",
+      "TB-04",
+      "control"
+    ],
+    "rationale": "Media query not applied at default viewport — temporal viewport mismatch"
+  },
+  {
+    "id": "tb-bolster-103",
+    "description": "TB-05: Edit h1 color, check for old color in content",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e;",
+        "replace": "h1 { color: #ff6600;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "h1 { color: #1a1a2e"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "stale_css",
+      "TB-05"
+    ],
+    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+  },
+  {
+    "id": "tb-bolster-104",
+    "description": "TB-05: Edit footer color, check for old color",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }",
+        "replace": "footer { margin-top: 2rem; color: #333; font-size: 0.8rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "color: #999"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "stale_css",
+      "TB-05"
+    ],
+    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+  },
+  {
+    "id": "tb-bolster-105",
+    "description": "TB-05: Edit nav-link color, check for old in content",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "a.nav-link { color: #0066cc; text-decoration: none; margin-right: 1rem; }",
+        "replace": "a.nav-link { color: #ff0000; text-decoration: none; margin-right: 1rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "a.nav-link { color: #0066cc"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "stale_css",
+      "TB-05"
+    ],
+    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+  },
+  {
+    "id": "tb-bolster-106",
+    "description": "TB-05: Edit subtitle color, check new value in content (control)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".subtitle { color: #666; margin-top: 0.5rem; }",
+        "replace": ".subtitle { color: #111; margin-top: 0.5rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "color: #111"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "stale_css",
+      "TB-05",
+      "control"
+    ],
+    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+  },
+  {
+    "id": "tb-bolster-107",
+    "description": "TB-05: Edit .hero background, check old value absent",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".hero { background: #3498db;",
+        "replace": ".hero { background: #e74c3c;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": ".hero { background: #3498db"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "stale_css",
+      "TB-05"
+    ],
+    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+  },
+  {
+    "id": "tb-bolster-108",
+    "description": "TB-06: Edit homepage h1 color, check about page h1 (different route, shared selector)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e;",
+        "replace": "h1 { color: #ff0000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "#ff0000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "cross_route_bleed",
+      "TB-06",
+      "control"
+    ],
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+  },
+  {
+    "id": "tb-bolster-109",
+    "description": "TB-06: Edit homepage body background, check it propagated",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "background: #ffffff;",
+        "replace": "background: #000000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "#000000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "cross_route_bleed",
+      "TB-06",
+      "control"
+    ],
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+  },
+  {
+    "id": "tb-bolster-110",
+    "description": "TB-06: Edit .roster-link color on /roster, check homepage has no .roster-link color ref",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".roster-link { color: orange;",
+        "replace": ".roster-link { color: green;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": ".roster-link { color: orange"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "cross_route_bleed",
+      "TB-06"
+    ],
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+  },
+  {
+    "id": "tb-bolster-111",
+    "description": "TB-06: Edit edge-cases .animated color, check homepage unaffected",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".animated { color: #9b59b6;",
+        "replace": ".animated { color: #2ecc71;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": ".animated { color: #9b59b6"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "browser",
+      "cross_route_bleed",
+      "TB-06"
+    ],
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+  },
+  {
+    "id": "tb-bolster-112",
+    "description": "TB-06: Control: edit about-page hero, verify change present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".hero { background: #3498db;",
+        "replace": ".hero { background: #1abc9c;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "#1abc9c"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "cross_route_bleed",
+      "TB-06",
+      "control"
+    ],
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+  },
+  {
+    "id": "tb-bolster-113",
+    "description": "TB-07: Add body color rule, but #main body color has higher specificity",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "body { font-family:",
+        "replace": "body { color: red; font-family:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "body { color: red"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "specificity_override",
+      "TB-07",
+      "control"
+    ],
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+  },
+  {
+    "id": "tb-bolster-114",
+    "description": "TB-07: Add .hero color via class, ID selector overrides",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".hero { background: #3498db;",
+        "replace": ".hero { background: #3498db; color: blue; }\n  #hero-override { color: green; }\n  .hero-spec-anchor {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "#hero-override"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "specificity_override",
+      "TB-07",
+      "control"
+    ],
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+  },
+  {
+    "id": "tb-bolster-115",
+    "description": "TB-07: Add !important to subtitle, check it persists",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".subtitle { color: #666; margin-top: 0.5rem; }",
+        "replace": ".subtitle { color: #666 !important; margin-top: 0.5rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "!important"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "specificity_override",
+      "TB-07",
+      "control"
+    ],
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+  },
+  {
+    "id": "tb-bolster-116",
+    "description": "TB-07: Add inline style override via template, check CSS class still present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<h1>",
+        "replace": "<h1 style=\"color:red\">"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "style=\"color:red\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "specificity_override",
+      "TB-07",
+      "control"
+    ],
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+  },
+  {
+    "id": "tb-bolster-117",
+    "description": "TB-07: Control: CSS rule with no conflict, straightforward check",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "a.nav-link { color: #0066cc;",
+        "replace": "a.nav-link { color: #0066cc; font-weight: 700;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "font-weight: 700"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "browser",
+      "specificity_override",
+      "TB-07",
+      "control"
+    ],
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
   }
 ]

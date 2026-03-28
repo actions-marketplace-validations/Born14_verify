@@ -1,0 +1,867 @@
+[
+  {
+    "id": "im-timeout-001",
+    "description": "IM-01: Server adds 10s delay to /api/items, sequence of 5 calls exceeds timeout budget",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items') {\n    res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify([",
+        "replace": "if (req.url === '/api/items') {\n    await new Promise(r => setTimeout(r, 10000));\n    res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify(["
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/api/items",
+        "expect": {
+          "status": 200
+        }
+      },
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "timeout_budget",
+      "IM-01"
+    ],
+    "rationale": "API endpoint has 10s artificial delay — cumulative calls exceed verification timeout"
+  },
+  {
+    "id": "im-timeout-002",
+    "description": "IM-01: init.sql adds pg_sleep(5) per table creation, 4 tables = 20s total",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE users (",
+        "replace": "SELECT pg_sleep(5);\nCREATE TABLE users ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "db",
+        "table": "users",
+        "assertion": "table_exists"
+      },
+      {
+        "type": "db",
+        "table": "settings",
+        "assertion": "table_exists"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "timeout_budget",
+      "IM-01"
+    ],
+    "rationale": "Each table creation delayed by 5s sleep — 4 tables = 20s migration, exceeds timeout"
+  },
+  {
+    "id": "im-timeout-003",
+    "description": "IM-01: Health endpoint sleeps 4s, Docker healthcheck retries 3 times at 5s interval",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end(JSON.stringify({ status: 'ok' }));",
+        "replace": "setTimeout(() => res.end(JSON.stringify({ status: 'ok' })), 4000);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "retries: 3"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "timeout_budget",
+      "IM-01"
+    ],
+    "rationale": "Health endpoint responds in 4s but healthcheck timeout is 3s — all retries fail"
+  },
+  {
+    "id": "im-timeout-004",
+    "description": "IM-01: Sequence of /health + /api/items + /about, each adds 8s, total > 20s budget",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer(async (req, res) => {\n  await new Promise(r => setTimeout(r, 8000));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      },
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/api/items",
+        "expect": {
+          "status": 200
+        }
+      },
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/about",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "timeout_budget",
+      "IM-01"
+    ],
+    "rationale": "Each request adds 8s delay — 3 sequential probes = 24s, exceeds typical 10s per-request timeout"
+  },
+  {
+    "id": "im-timeout-005",
+    "description": "IM-01 control: All endpoints respond immediately, well within timeout",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "status: 'ok'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "timeout_budget",
+      "IM-01",
+      "control"
+    ],
+    "rationale": "No artificial delays — all responses immediate"
+  },
+  {
+    "id": "im-conn-006",
+    "description": "IM-02: Server creates new DB connection per request without closing, pool exhausted",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const http = require('http');",
+        "replace": "const http = require('http');\nconst connections = [];\nfunction leakConnection() { connections.push({ fd: connections.length, opened: Date.now() }); }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "leakConnection"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "connections.push"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "connection_leak",
+      "IM-02"
+    ],
+    "rationale": "Connection array grows unbounded — each request leaks, eventual pool exhaustion"
+  },
+  {
+    "id": "im-conn-007",
+    "description": "IM-02: Server opens log file handle per request, never closes them",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const http = require('http');",
+        "replace": "const http = require('http');\nconst fs = require('fs');\nconst handles = [];"
+      },
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  handles.push(fs.openSync('/tmp/req-' + Date.now() + '.log', 'w'));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "fs.openSync"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "handles.push"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "connection_leak",
+      "IM-02"
+    ],
+    "rationale": "File descriptors leaked per request — EMFILE after enough requests"
+  },
+  {
+    "id": "im-conn-008",
+    "description": "IM-02: Server sets Connection: keep-alive but never destroys sockets",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Connection', 'keep-alive');\n  res.setHeader('Keep-Alive', 'timeout=300');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "keep-alive"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "timeout=300"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "connection_leak",
+      "IM-02"
+    ],
+    "rationale": "Keep-alive with 300s timeout — connections accumulate during verification sequence"
+  },
+  {
+    "id": "im-conn-009",
+    "description": "IM-02: Server adds process.on listener per request (memory leak pattern)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  process.on('uncaughtException', () => {});"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "process.on('uncaughtException'"
+      },
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "connection_leak",
+      "IM-02"
+    ],
+    "rationale": "Listener added per request — MaxListenersExceededWarning then eventual OOM"
+  },
+  {
+    "id": "im-conn-010",
+    "description": "IM-02 control: No connection leaks, standard request handling",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "require('http')"
+      },
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "connection_leak",
+      "IM-02",
+      "control"
+    ],
+    "rationale": "Standard http.createServer — connections handled and released properly by Node.js"
+  },
+  {
+    "id": "im-temp-011",
+    "description": "IM-03: Server writes temp file per request to /tmp, no rotation config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const http = require('http');",
+        "replace": "const http = require('http');\nconst fs = require('fs');\nlet reqCount = 0;"
+      },
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  fs.writeFileSync(`/tmp/req-${++reqCount}.json`, JSON.stringify({url: req.url, ts: Date.now()}));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "writeFileSync"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "reqCount"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "temp_accumulation",
+      "IM-03"
+    ],
+    "rationale": "Temp files written per request with no cleanup — /tmp fills during long verification"
+  },
+  {
+    "id": "im-temp-012",
+    "description": "IM-03: Compose has tmpfs 1MB limit, server writes 100KB per request temp file",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "healthcheck:",
+        "replace": "tmpfs:\n      - /tmp:size=1m\n    healthcheck:"
+      },
+      {
+        "file": "server.js",
+        "search": "const http = require('http');",
+        "replace": "const http = require('http');\nconst fs = require('fs');\nlet n = 0;"
+      },
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  fs.writeFileSync(`/tmp/data-${++n}.bin`, Buffer.alloc(102400));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "size=1m"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Buffer.alloc(102400)"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "temp_accumulation",
+      "IM-03"
+    ],
+    "rationale": "100KB per request into 1MB tmpfs — 10 requests fills it, subsequent writes fail"
+  },
+  {
+    "id": "im-temp-013",
+    "description": "IM-03: Upload endpoint stores to /tmp with no max-size or max-files",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/echo' && req.method === 'POST') {",
+        "replace": "if (req.url === '/api/upload' && req.method === 'POST') {\n  let body = [];\n  req.on('data', c => body.push(c));\n  req.on('end', () => { require('fs').writeFileSync('/tmp/upload-' + Date.now(), Buffer.concat(body)); res.writeHead(200); res.end('saved'); });\n  return;\n  }\n  if (req.url === '/api/echo' && req.method === 'POST') {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/api/upload"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "writeFileSync('/tmp/upload-'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "temp_accumulation",
+      "IM-03"
+    ],
+    "rationale": "Uploads saved to /tmp with no size limit or rotation — disk fills across step sequence"
+  },
+  {
+    "id": "im-temp-014",
+    "description": "IM-03: Dockerfile caches build layers, no prune, predicate checks image count",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM node:20-alpine\nRUN echo \"build-$(date +%s)\" > /tmp/build-marker"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "build-marker"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "build: ."
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "temp_accumulation",
+      "IM-03"
+    ],
+    "rationale": "Each rebuild creates new layer — without docker system prune, disk fills with stale layers"
+  },
+  {
+    "id": "im-temp-015",
+    "description": "IM-03 control: No temp files created during request handling",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      },
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "temp_accumulation",
+      "IM-03",
+      "control"
+    ],
+    "rationale": "Standard request handler — no temp files written, no accumulation"
+  },
+  {
+    "id": "im-bolster-100",
+    "description": "IM-bolster: server.js port changed, config.json unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "server.js port changed, config.json unaware"
+  },
+  {
+    "id": "im-bolster-101",
+    "description": "IM-bolster: config.json port changed, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "config.json port changed, server.js unaware"
+  },
+  {
+    "id": "im-bolster-102",
+    "description": "IM-bolster: .env port changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": ".env port changed, Dockerfile unaware"
+  },
+  {
+    "id": "im-bolster-103",
+    "description": "IM-bolster: Dockerfile EXPOSE changed, .env unaware",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+  },
+  {
+    "id": "im-bolster-104",
+    "description": "IM-bolster: health response changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "healthy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "health response changed, Dockerfile unaware"
+  },
+  {
+    "id": "im-bolster-105",
+    "description": "IM-bolster: app name changed in config, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"New App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "New App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "app name changed in config, server.js unaware"
+  },
+  {
+    "id": "im-bolster-106",
+    "description": "IM-bolster: NODE_ENV changed, server.js unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "NODE_ENV changed, server.js unaware"
+  },
+  {
+    "id": "im-bolster-107",
+    "description": "IM-bolster: SECRET_KEY changed, config.json unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-secret-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "new-secret"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "SECRET_KEY changed, config.json unaware"
+  },
+  {
+    "id": "im-bolster-108",
+    "description": "IM-bolster: control: server.js port changed, verify in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js port changed, verify in server.js"
+  },
+  {
+    "id": "im-bolster-109",
+    "description": "IM-bolster: control: config.json port changed, config gate reads it",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "app.port",
+        "expected": "5000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster",
+      "control"
+    ],
+    "rationale": "control: config.json port changed, config gate reads it"
+  },
+  {
+    "id": "im-bolster-110",
+    "description": "IM-bolster: control: .env PORT changed, config gate reads it",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster",
+      "control"
+    ],
+    "rationale": "control: .env PORT changed, config gate reads it"
+  },
+  {
+    "id": "im-bolster-111",
+    "description": "IM-bolster: control: server.js still exists after edit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// modified"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js still exists after edit"
+  },
+  {
+    "id": "im-bolster-112",
+    "description": "IM-bolster: fabricated: package.json does not exist",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "package.json"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster"
+    ],
+    "rationale": "fabricated: package.json does not exist"
+  },
+  {
+    "id": "im-bolster-113",
+    "description": "IM-bolster: control: server.js exists without edits",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js exists without edits"
+  },
+  {
+    "id": "im-bolster-114",
+    "description": "IM-bolster: control: server.js has createServer",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "capacity",
+      "multistep",
+      "im-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js has createServer"
+  }
+]

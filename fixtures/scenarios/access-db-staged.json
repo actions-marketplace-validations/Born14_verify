@@ -1,0 +1,815 @@
+[
+  {
+    "id": "hd-grant-001",
+    "description": "HD-01: init.sql creates users table but no GRANT to app_user role",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE users (",
+        "replace": "CREATE ROLE app_user LOGIN PASSWORD 'app123';\nCREATE TABLE users ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE ROLE app_user"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT.*app_user"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "database",
+      "missing_grant",
+      "HD-01"
+    ],
+    "rationale": "Role app_user created but no GRANT statement exists — SELECT/INSERT will fail"
+  },
+  {
+    "id": "hd-grant-002",
+    "description": "HD-01: Server does INSERT INTO posts but no INSERT grant in init.sql",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// INSERT INTO posts (user_id, title) VALUES ($1, $2)"
+      },
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE posts (",
+        "replace": "GRANT SELECT ON posts TO app_user;\nCREATE TABLE posts ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "INSERT INTO posts"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT INSERT"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "database",
+      "missing_grant",
+      "HD-01"
+    ],
+    "rationale": "Server does INSERT but init.sql only GRANTs SELECT — INSERT permission denied"
+  },
+  {
+    "id": "hd-grant-003",
+    "description": "HD-01: Agent adds audit_log table but no GRANT statement for any role",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "CREATE TABLE audit_log (\n    id SERIAL PRIMARY KEY,\n    action VARCHAR(100) NOT NULL,\n    performed_by INTEGER REFERENCES users(id),\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE audit_log"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT.*audit_log"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "database",
+      "missing_grant",
+      "HD-01"
+    ],
+    "rationale": "audit_log table created but no GRANT — no role can access it"
+  },
+  {
+    "id": "hd-grant-004",
+    "description": "HD-01: Server runs ALTER TABLE users but init.sql grants only SELECT/INSERT",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// ALTER TABLE users ADD COLUMN avatar TEXT;"
+      },
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "GRANT SELECT, INSERT ON users TO app_user;\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "ALTER TABLE users"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT.*ALTER"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "database",
+      "missing_grant",
+      "HD-01"
+    ],
+    "rationale": "Server runs ALTER but only SELECT/INSERT granted — ALTER requires table ownership or explicit grant"
+  },
+  {
+    "id": "hd-grant-005",
+    "description": "HD-01: Server purges expired sessions but init.sql only grants SELECT on sessions",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// DELETE FROM sessions WHERE expires_at < NOW()"
+      },
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_token",
+        "replace": "GRANT SELECT ON sessions TO app_user;\nCREATE INDEX idx_sessions_token"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "DELETE FROM sessions"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT DELETE.*sessions"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "database",
+      "missing_grant",
+      "HD-01"
+    ],
+    "rationale": "Server deletes expired sessions but only SELECT granted — DELETE permission denied"
+  },
+  {
+    "id": "hd-grant-006",
+    "description": "HD-01 control: init.sql has GRANT ALL on users to app_user",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "GRANT ALL ON users TO app_user;\nGRANT ALL ON posts TO app_user;\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT ALL ON users"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT ALL ON posts"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "missing_grant",
+      "HD-01",
+      "control"
+    ],
+    "rationale": "Proper GRANT ALL on both tables — no permission issues"
+  },
+  {
+    "id": "hd-conn-007",
+    "description": "HD-02: .env DATABASE_URL points to localhost but config.json database host is remote",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "localhost:5432"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"host\": \"localhost\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "connection_denied",
+      "HD-02",
+      "control"
+    ],
+    "rationale": "Both point to localhost — connection config is consistent"
+  },
+  {
+    "id": "hd-conn-008",
+    "description": "HD-02: .env DATABASE_URL says \"demo\" but config.prod.json says \"demo_prod\"",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "/demo\""
+      },
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "\"name\": \"demo_prod\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "connection_denied",
+      "HD-02"
+    ],
+    "rationale": "Both patterns exist in their files — but db names mismatch means prod connection will fail"
+  },
+  {
+    "id": "hd-conn-009",
+    "description": "HD-02: Config db host changed to remote but .env still says localhost",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"host\": \"localhost\"",
+        "replace": "\"host\": \"db-primary.prod.internal\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "db-primary.prod.internal"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "db-primary.prod.internal"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "database",
+      "connection_denied",
+      "HD-02"
+    ],
+    "rationale": "Config points to remote host but .env DATABASE_URL still has localhost — connection will use wrong host"
+  },
+  {
+    "id": "hd-conn-010",
+    "description": "HD-02: .env DATABASE_URL changed to port 5433 but config.json still says 5432",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "postgres://localhost:5432/demo",
+        "replace": "postgres://localhost:5433/demo"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": ":5433/"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 5432"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "connection_denied",
+      "HD-02"
+    ],
+    "rationale": ".env port is 5433, config says 5432 — which source wins depends on app, both values present in files"
+  },
+  {
+    "id": "hd-conn-011",
+    "description": "HD-02: .env sets DB_PASSWORD but docker-compose uses POSTGRES_PASSWORD",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nDB_PASSWORD=app_secret_123"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "- PORT=3000",
+        "replace": "- PORT=3000\n      - POSTGRES_PASSWORD=different_secret"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DB_PASSWORD=app_secret_123"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "POSTGRES_PASSWORD=different_secret"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "connection_denied",
+      "HD-02"
+    ],
+    "rationale": "Both passwords exist but differ — app uses DB_PASSWORD, Postgres uses POSTGRES_PASSWORD — auth will fail"
+  },
+  {
+    "id": "hd-schema-012",
+    "description": "HD-03: Table in \"restricted\" schema but config has no search_path setting",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE users (",
+        "replace": "CREATE SCHEMA restricted;\nCREATE TABLE restricted.users ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE SCHEMA restricted"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "search_path"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "database",
+      "schema_restriction",
+      "HD-03"
+    ],
+    "rationale": "Table in restricted schema but config has no search_path — queries to \"users\" will fail"
+  },
+  {
+    "id": "hd-schema-013",
+    "description": "HD-03: Server queries \"users\" but init.sql creates in \"app_private\" schema",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE users (",
+        "replace": "CREATE SCHEMA app_private;\nCREATE TABLE app_private.users ("
+      },
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// SELECT * FROM users WHERE id = $1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "app_private.users"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "FROM users"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "schema_restriction",
+      "HD-03"
+    ],
+    "rationale": "init.sql creates in app_private, server queries unqualified \"users\" — schema resolution will fail at runtime but both content patterns exist"
+  },
+  {
+    "id": "hd-schema-014",
+    "description": "HD-03: GRANT on public schema tables but audit_log in \"audit\" schema",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "CREATE SCHEMA audit;\nCREATE TABLE audit.audit_log (\n    id SERIAL PRIMARY KEY,\n    action TEXT NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\nGRANT SELECT ON ALL TABLES IN SCHEMA public TO app_user;\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT SELECT ON ALL TABLES IN SCHEMA public"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "audit.audit_log"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "schema_restriction",
+      "HD-03"
+    ],
+    "rationale": "GRANT covers public schema but audit_log is in audit schema — grant does not apply"
+  },
+  {
+    "id": "hd-schema-015",
+    "description": "HD-03: .env sets search_path=public but queries reference custom schema tables",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nDB_SEARCH_PATH=public"
+      },
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE users (",
+        "replace": "CREATE SCHEMA custom;\nCREATE TABLE custom.users ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DB_SEARCH_PATH=public"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "custom.users"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "schema_restriction",
+      "HD-03"
+    ],
+    "rationale": "search_path is \"public\" but table is in \"custom\" — unqualified queries will not find it"
+  },
+  {
+    "id": "hd-schema-016",
+    "description": "HD-03 control: Table in public schema with GRANT ALL",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "GRANT ALL ON ALL TABLES IN SCHEMA public TO app_user;\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT ALL ON ALL TABLES IN SCHEMA public"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE users"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "database",
+      "schema_restriction",
+      "HD-03",
+      "control"
+    ],
+    "rationale": "Tables in public schema with GRANT ALL — no schema restriction"
+  },
+  {
+    "id": "ac-bolster-200",
+    "description": "access-db: Admin route in server.js, no admin role in config.json",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/admin') { res.writeHead(200); res.end('admin panel'); return; }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "admin"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "Admin route in server.js, no admin role in config.json"
+  },
+  {
+    "id": "ac-bolster-201",
+    "description": "access-db: Auth token check in server.js, no token in .env",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "function checkToken(req) { return req.headers['x-token'] === process.env.API_TOKEN; }\nconst server = http.createServer((req, res) => {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "API_TOKEN"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "Auth token check in server.js, no token in .env"
+  },
+  {
+    "id": "ac-bolster-202",
+    "description": "access-db: Rate limit function added, no limit in config.json",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const rateLimits = new Map();\nconst server = http.createServer((req, res) => {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "rateLimit"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "Rate limit function added, no limit in config.json"
+  },
+  {
+    "id": "ac-bolster-203",
+    "description": "access-db: Session table in init.sql, no session config in .env",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SESSION_SECRET"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "Session table in init.sql, no session config in .env"
+  },
+  {
+    "id": "ac-bolster-204",
+    "description": "access-db: CORS header added, no CORS config in .env",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Access-Control-Allow-Origin', 'https://example.com');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "CORS_ORIGIN"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "CORS header added, no CORS config in .env"
+  },
+  {
+    "id": "ac-bolster-205",
+    "description": "access-db: CSP header added, not in config.json",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Content-Security-Policy', \"default-src 'self'\");"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "Content-Security-Policy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "CSP header added, not in config.json"
+  },
+  {
+    "id": "ac-bolster-206",
+    "description": "access-db: Password hash in init.sql, no hash algo in config",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "bcrypt"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "Password hash in init.sql, no hash algo in config"
+  },
+  {
+    "id": "ac-bolster-207",
+    "description": "access-db: Control: server.js has /health, check it exists",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/health"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "db",
+      "control"
+    ],
+    "rationale": "Control: server.js has /health, check it exists"
+  },
+  {
+    "id": "ac-bolster-208",
+    "description": "access-db: Control: init.sql has sessions table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE sessions"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "db",
+      "control"
+    ],
+    "rationale": "Control: init.sql has sessions table"
+  },
+  {
+    "id": "ac-bolster-209",
+    "description": "access-db: Control: .env has SECRET_KEY",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SECRET_KEY"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "db",
+      "control"
+    ],
+    "rationale": "Control: .env has SECRET_KEY"
+  },
+  {
+    "id": "ac-bolster-210",
+    "description": "access-db: Dockerfile exposes port, check Dockerfile",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOSE"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "db",
+      "control"
+    ],
+    "rationale": "Dockerfile exposes port, check Dockerfile"
+  },
+  {
+    "id": "ac-bolster-211",
+    "description": "access-db: Compose has env_file, check compose",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "env_file"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "db",
+      "control"
+    ],
+    "rationale": "Compose has env_file, check compose"
+  },
+  {
+    "id": "ac-bolster-212",
+    "description": "access-db: User table has password_hash, server.js has no bcrypt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "bcrypt"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "User table has password_hash, server.js has no bcrypt"
+  },
+  {
+    "id": "ac-bolster-213",
+    "description": "access-db: Sessions table has expires_at, server.js has no expiry check",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "expires_at"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "db",
+      "cross_file_gap"
+    ],
+    "rationale": "Sessions table has expires_at, server.js has no expiry check"
+  }
+]

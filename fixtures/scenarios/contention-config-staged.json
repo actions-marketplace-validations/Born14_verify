@@ -1,0 +1,909 @@
+[
+  {
+    "id": "jg-env-001",
+    "description": "JG-01: Two edits both change DATABASE_URL in .env to different hosts",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo\"",
+        "replace": "DATABASE_URL=\"postgres://primary.internal:5432/demo\""
+      },
+      {
+        "file": ".env",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo\"",
+        "replace": "DATABASE_URL=\"postgres://replica.internal:5432/demo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "replica.internal"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "env_collision",
+      "JG-01"
+    ],
+    "rationale": "Both edits target DATABASE_URL — second search gone after first changes to primary.internal"
+  },
+  {
+    "id": "jg-env-002",
+    "description": "JG-01: Two edits both change NODE_ENV in .env to different modes",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=staging"
+      },
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "NODE_ENV=development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "env_collision",
+      "JG-01"
+    ],
+    "rationale": "Both edits change NODE_ENV — second search gone after first changes to staging"
+  },
+  {
+    "id": "jg-env-003",
+    "description": "JG-01: Two edits both rotate SECRET_KEY in .env.prod",
+    "edits": [
+      {
+        "file": ".env.prod",
+        "search": "SECRET_KEY=\"prod-secret-rotated-2026\"",
+        "replace": "SECRET_KEY=\"rotation-alpha-march-2026\""
+      },
+      {
+        "file": ".env.prod",
+        "search": "SECRET_KEY=\"prod-secret-rotated-2026\"",
+        "replace": "SECRET_KEY=\"rotation-beta-march-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "rotation-beta-march-2026"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "env_collision",
+      "JG-01"
+    ],
+    "rationale": "Both secret rotations target same key — second search gone after first rotation applies"
+  },
+  {
+    "id": "jg-env-004",
+    "description": "JG-01: Two edits both change DATABASE_URL in .env.staging",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo_staging\"",
+        "replace": "DATABASE_URL=\"postgres://staging-db:5432/demo_staging\""
+      },
+      {
+        "file": ".env.staging",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo_staging\"",
+        "replace": "DATABASE_URL=\"postgres://staging-replica:5432/demo_staging\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "staging-replica"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "env_collision",
+      "JG-01"
+    ],
+    "rationale": "Both edits target same staging DATABASE_URL — second search gone after first edit"
+  },
+  {
+    "id": "jg-env-005",
+    "description": "JG-01: Two edits both add LOG_LEVEL after DEBUG in .env with different values",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nLOG_LEVEL=info"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nLOG_LEVEL=debug"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "LOG_LEVEL=debug"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "env_collision",
+      "JG-01"
+    ],
+    "rationale": "Both edits append after DEBUG — second search gone after first adds LOG_LEVEL=info"
+  },
+  {
+    "id": "jg-env-006",
+    "description": "JG-01 control: Edit PORT and DEBUG in .env (different keys, no collision)",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=4000"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "config",
+      "env_collision",
+      "JG-01",
+      "control"
+    ],
+    "rationale": "Different keys in same file — no collision, both apply cleanly"
+  },
+  {
+    "id": "jg-merge-007",
+    "description": "JG-02: Two edits both change database host in config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"host\": \"localhost\"",
+        "replace": "\"host\": \"db-primary.internal\""
+      },
+      {
+        "file": "config.json",
+        "search": "\"host\": \"localhost\"",
+        "replace": "\"host\": \"db-replica.internal\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "db-replica.internal"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "merge_conflict",
+      "JG-02"
+    ],
+    "rationale": "Both edits change database host — second search gone after first changes to primary"
+  },
+  {
+    "id": "jg-merge-008",
+    "description": "JG-02: Two edits both change database name in config.prod.json",
+    "edits": [
+      {
+        "file": "config.prod.json",
+        "search": "\"name\": \"demo_prod\"",
+        "replace": "\"name\": \"demo_prod_v2\""
+      },
+      {
+        "file": "config.prod.json",
+        "search": "\"name\": \"demo_prod\"",
+        "replace": "\"name\": \"demo_production\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "demo_production"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "merge_conflict",
+      "JG-02"
+    ],
+    "rationale": "Both edits change prod database name — second search gone after first renames to v2"
+  },
+  {
+    "id": "jg-merge-009",
+    "description": "JG-02: Two edits both change app name in config.staging.json",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"Staging Alpha\""
+      },
+      {
+        "file": "config.staging.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"Staging Beta\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "Staging Beta"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "merge_conflict",
+      "JG-02"
+    ],
+    "rationale": "Both edits change staging app name — second search gone after first renames to Alpha"
+  },
+  {
+    "id": "jg-merge-010",
+    "description": "JG-02: Edit config.json port to 4000, predicate expects .env also has 4000 (cross-file merge)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 4000"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "merge_conflict",
+      "JG-02"
+    ],
+    "rationale": "Config port updated but .env still has PORT=3000 — cross-file merge conflict"
+  },
+  {
+    "id": "jg-merge-011",
+    "description": "JG-02: Edit config.prod.json db host, predicate expects .env.prod DATABASE_URL matches",
+    "edits": [
+      {
+        "file": "config.prod.json",
+        "search": "\"host\": \"db-primary.internal\"",
+        "replace": "\"host\": \"db-failover.internal\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "db-failover.internal"
+      },
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "db-failover.internal"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "merge_conflict",
+      "JG-02"
+    ],
+    "rationale": "Config host updated to failover but .env.prod still has db-primary — cross-env merge conflict"
+  },
+  {
+    "id": "jg-merge-012",
+    "description": "JG-02 control: Edit different features in config.json vs config.staging.json (no collision)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      },
+      {
+        "file": "config.staging.json",
+        "search": "\"betaSignup\": true",
+        "replace": "\"betaSignup\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"analytics\": true"
+      },
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"betaSignup\": false"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "config",
+      "merge_conflict",
+      "JG-02",
+      "control"
+    ],
+    "rationale": "Different files, different keys — no merge conflict"
+  },
+  {
+    "id": "jg-flag-013",
+    "description": "JG-03: Two edits both toggle darkMode in config.json (off→on vs off→deleted)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false"
+      },
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": true, \"darkModeV2\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"darkModeV2\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "feature_flag",
+      "JG-03"
+    ],
+    "rationale": "Both edits target darkMode line — second search gone after first toggles it off"
+  },
+  {
+    "id": "jg-flag-014",
+    "description": "JG-03: Two edits both change analytics flag in config.staging.json",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"analytics\": true",
+        "replace": "\"analytics\": false"
+      },
+      {
+        "file": "config.staging.json",
+        "search": "\"analytics\": true",
+        "replace": "\"analytics\": true, \"analyticsV2\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"analyticsV2\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "feature_flag",
+      "JG-03"
+    ],
+    "rationale": "Both edits target analytics flag — second search gone after first disables analytics"
+  },
+  {
+    "id": "jg-flag-015",
+    "description": "JG-03: Two edits both change betaSignup in config.staging.json",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"betaSignup\": true",
+        "replace": "\"betaSignup\": false"
+      },
+      {
+        "file": "config.staging.json",
+        "search": "\"betaSignup\": true",
+        "replace": "\"betaSignup\": true, \"betaWhitelist\": [\"admin\"]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"betaWhitelist\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "feature_flag",
+      "JG-03"
+    ],
+    "rationale": "Both edits target betaSignup — second search gone after first disables it"
+  },
+  {
+    "id": "jg-flag-016",
+    "description": "JG-03: Toggle darkMode off in config.json, predicate expects DEBUG=true in .env (dependent flags)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"darkMode\": false"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "feature_flag",
+      "JG-03"
+    ],
+    "rationale": "darkMode toggled but dependent DEBUG flag in .env still false — cross-file flag inconsistency"
+  },
+  {
+    "id": "jg-flag-017",
+    "description": "JG-03: Toggle betaSignup in config.prod.json (off→on), predicate expects staging also toggled",
+    "edits": [
+      {
+        "file": "config.prod.json",
+        "search": "\"betaSignup\": false",
+        "replace": "\"betaSignup\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "\"betaSignup\": true"
+      },
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"betaSignup\": false"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "feature_flag",
+      "JG-03"
+    ],
+    "rationale": "Prod betaSignup enabled but staging is still true, not false — predicate expects false in staging"
+  },
+  {
+    "id": "jg-flag-018",
+    "description": "JG-03 control: Toggle analytics in config.json and DEBUG in .env (no collision)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"analytics\": true"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "config",
+      "feature_flag",
+      "JG-03",
+      "control"
+    ],
+    "rationale": "Independent flags in different files — no collision, both toggle cleanly"
+  },
+  {
+    "id": "co-bolster-200",
+    "description": "contention-config: Two edits to server.js, second overwrites first",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'First' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'First' }",
+        "replace": "{ id: 1, name: 'Second' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "First"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Two edits to server.js, second overwrites first"
+  },
+  {
+    "id": "co-bolster-201",
+    "description": "contention-config: Edit server.js and config.json with conflicting ports",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "server.listen(port",
+        "replace": "server.listen(8080"
+      },
+      {
+        "file": "config.json",
+        "search": "\"port\": 5432",
+        "replace": "\"port\": 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Edit server.js and config.json with conflicting ports"
+  },
+  {
+    "id": "co-bolster-202",
+    "description": "contention-config: Edit .env and compose with different ports",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5000"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "\"3000:3000\"",
+        "replace": "\"6000:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "6000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Edit .env and compose with different ports"
+  },
+  {
+    "id": "co-bolster-203",
+    "description": "contention-config: Two migrations on same table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "m1",
+          "sql": "ALTER TABLE users ADD COLUMN bio TEXT;"
+        },
+        {
+          "name": "m2",
+          "sql": "ALTER TABLE users DROP COLUMN bio;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Two migrations on same table"
+  },
+  {
+    "id": "co-bolster-204",
+    "description": "contention-config: Edit init.sql and server.js with mismatched column names",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email_address VARCHAR(255) NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email_address"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Edit init.sql and server.js with mismatched column names"
+  },
+  {
+    "id": "co-bolster-205",
+    "description": "contention-config: Compose restart policy conflicts with Dockerfile CMD",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "restart: unless-stopped",
+        "replace": "restart: \"no\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "restart"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+  },
+  {
+    "id": "co-bolster-206",
+    "description": "contention-config: Edit both health endpoint and healthcheck with different paths",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/healthz'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/healthz"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Edit both health endpoint and healthcheck with different paths"
+  },
+  {
+    "id": "co-bolster-207",
+    "description": "contention-config: Config.json and .env disagree on debug",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"debug\": true"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "\"debug\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "config",
+      "contention_gap"
+    ],
+    "rationale": "Config.json and .env disagree on debug"
+  },
+  {
+    "id": "co-bolster-208",
+    "description": "contention-config: Control: single edit, consistent check",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: single edit, consistent check"
+  },
+  {
+    "id": "co-bolster-209",
+    "description": "contention-config: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4444"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "4444"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "co-bolster-210",
+    "description": "contention-config: Control: edit config.json, check config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"maxRetries\": 3",
+        "replace": "\"maxRetries\": 5"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"maxRetries\": 5"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: edit config.json, check config.json"
+  },
+  {
+    "id": "co-bolster-211",
+    "description": "contention-config: Two edits to different routes, check both present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'One' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 2, name: 'Beta' }",
+        "replace": "{ id: 2, name: 'Two' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "One"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "config",
+      "control"
+    ],
+    "rationale": "Two edits to different routes, check both present"
+  }
+]

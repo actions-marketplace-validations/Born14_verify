@@ -1,0 +1,756 @@
+[
+  {
+    "id": "tv-schema-001",
+    "description": "TV-01: Migration adds bio column, predicate checks pre-migration init.sql hash (stale snapshot)",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    bio TEXT,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "init.sql",
+        "hash": "73a4590975666dbef9cb2addda027aa5a5b73df540d74d5c7a606abc886e5e6b"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_schema",
+      "TV-01"
+    ],
+    "rationale": "Schema changed by migration — pre-migration hash is stale evidence"
+  },
+  {
+    "id": "tv-schema-002",
+    "description": "TV-01: Migration adds tags table, predicate checks pre-migration init.sql hash",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings",
+        "replace": "CREATE TABLE tags (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(50) NOT NULL\n);\n\nCREATE TABLE settings"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "init.sql",
+        "hash": "73a4590975666dbef9cb2addda027aa5a5b73df540d74d5c7a606abc886e5e6b"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_schema",
+      "TV-01"
+    ],
+    "rationale": "New table added — schema snapshot taken before migration is stale"
+  },
+  {
+    "id": "tv-schema-003",
+    "description": "TV-01: Migration adds index on posts.user_id, predicate checks init.sql content for old index set",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nCREATE INDEX idx_posts_user ON posts(user_id);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "init.sql",
+        "hash": "73a4590975666dbef9cb2addda027aa5a5b73df540d74d5c7a606abc886e5e6b"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_schema",
+      "TV-01"
+    ],
+    "rationale": "Index added — hash of schema before migration is stale"
+  },
+  {
+    "id": "tv-schema-004",
+    "description": "TV-01: Migration renames is_active to active, predicate checks for is_active content",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "is_active BOOLEAN DEFAULT true,",
+        "replace": "active BOOLEAN DEFAULT true,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "is_active"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_schema",
+      "TV-01"
+    ],
+    "rationale": "Column renamed — predicate checking old name finds stale evidence"
+  },
+  {
+    "id": "tv-schema-005",
+    "description": "TV-01 control: No migration, init.sql hash matches current state",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "init.sql",
+        "hash": "73a4590975666dbef9cb2addda027aa5a5b73df540d74d5c7a606abc886e5e6b"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_schema",
+      "TV-01",
+      "control"
+    ],
+    "rationale": "No migration applied — hash should match current state"
+  },
+  {
+    "id": "tv-config-006",
+    "description": "TV-02: .env PORT changed to 4000, predicate checks pre-change .env hash (stale read)",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": ".env",
+        "hash": "81e7a8eeeef74a6abc309a644c0b575091b0c45bccdb6ee5a2891e4a6bb68d5b"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_config",
+      "TV-02"
+    ],
+    "rationale": "Env changed — config read taken before change is stale"
+  },
+  {
+    "id": "tv-config-007",
+    "description": "TV-02: .env NODE_ENV changed to development, predicate checks for \"production\"",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "NODE_ENV=production"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_config",
+      "TV-02"
+    ],
+    "rationale": "NODE_ENV changed but predicate still checks old value — stale config observation"
+  },
+  {
+    "id": "tv-config-008",
+    "description": "TV-02: config.json db name changed to app_db, predicate checks for \"demo\"",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"demo\"",
+        "replace": "\"name\": \"app_db\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"name\": \"demo\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_config",
+      "TV-02"
+    ],
+    "rationale": "DB name changed — observation of old name is stale evidence"
+  },
+  {
+    "id": "tv-config-009",
+    "description": "TV-02: config.json analytics enabled, predicate checks for analytics:false",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"analytics\": false"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_config",
+      "TV-02"
+    ],
+    "rationale": "Feature flag toggled — predicate checking old state is stale"
+  },
+  {
+    "id": "tv-config-010",
+    "description": "TV-02: .env SECRET_KEY rotated, predicate checks old SECRET_KEY pattern",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"rotated-2026-q2\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "not-very-secret"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_config",
+      "TV-02"
+    ],
+    "rationale": "Secret rotated — old secret pattern should not be found"
+  },
+  {
+    "id": "tv-config-011",
+    "description": "TV-02 control: .env PORT changed, predicate checks for new value",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=9999"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=9999"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_config",
+      "TV-02",
+      "control"
+    ],
+    "rationale": "Predicate checks for new value — observation is fresh"
+  },
+  {
+    "id": "tv-hash-012",
+    "description": "TV-03: Edit adds console.log to server.js, predicate checks pre-edit hash (stale)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\nconsole.log(\"Server starting...\");"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "server.js",
+        "hash": "161cdb8a247f69a0620545d4df14243f6027a78a4a5663588940dffc6ff50218"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_hash",
+      "TV-03"
+    ],
+    "rationale": "Edit modifies server.js — pre-edit hash is stale evidence"
+  },
+  {
+    "id": "tv-hash-013",
+    "description": "TV-03: Edit changes config.json app name, predicate checks pre-edit hash",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"Updated App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "config.json",
+        "hash": "2937cf6d9bd7155b92003b846dbfb4f68bc530603f3df347ada174d7f09d6a95"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_hash",
+      "TV-03"
+    ],
+    "rationale": "Config name changed — file hash observation is stale"
+  },
+  {
+    "id": "tv-hash-014",
+    "description": "TV-03: Edit changes Dockerfile base image, predicate checks pre-edit hash",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM node:22-alpine"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "Dockerfile",
+        "hash": "422074a8f6ff7a696b3f6ac22b0fe6c092663f95e507f98ed0060b089bb70a90"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_hash",
+      "TV-03"
+    ],
+    "rationale": "Dockerfile changed — hash taken before edit is stale"
+  },
+  {
+    "id": "tv-hash-015",
+    "description": "TV-03: Edit both .env and config.json, predicate checks only config.json old hash",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5000"
+      },
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "config.json",
+        "hash": "2937cf6d9bd7155b92003b846dbfb4f68bc530603f3df347ada174d7f09d6a95"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_hash",
+      "TV-03"
+    ],
+    "rationale": "Multi-file edit — config.json hash from before both edits is stale"
+  },
+  {
+    "id": "tv-hash-016",
+    "description": "TV-03 control: No edit, server.js hash matches current",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_unchanged",
+        "file": "server.js",
+        "hash": "161cdb8a247f69a0620545d4df14243f6027a78a4a5663588940dffc6ff50218"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "verify",
+      "stale_hash",
+      "TV-03",
+      "control"
+    ],
+    "rationale": "No edit — hash is fresh evidence"
+  },
+  {
+    "id": "te-bolster-200",
+    "description": "temporal-verify: Edit server.js health, config.json has stale health config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'up', version: '2.1' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "version"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Edit server.js health, config.json has stale health config"
+  },
+  {
+    "id": "te-bolster-201",
+    "description": "temporal-verify: Edit .env SECRET_KEY, server.js still uses old reference",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"rotated-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "rotated-2026"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference"
+  },
+  {
+    "id": "te-bolster-202",
+    "description": "temporal-verify: Upgrade Dockerfile node version, .env unchanged",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:18-slim",
+        "replace": "FROM node:20-slim"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "NODE_VERSION"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Upgrade Dockerfile node version, .env unchanged"
+  },
+  {
+    "id": "te-bolster-203",
+    "description": "temporal-verify: Change compose port mapping, server.js listen unchanged",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "\"3000:3000\"",
+        "replace": "\"9090:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Change compose port mapping, server.js listen unchanged"
+  },
+  {
+    "id": "te-bolster-204",
+    "description": "temporal-verify: Add column via migration, server.js has no query for it",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "nickname"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE users ADD COLUMN nickname VARCHAR(50);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Add column via migration, server.js has no query for it"
+  },
+  {
+    "id": "te-bolster-205",
+    "description": "temporal-verify: Edit init.sql table, config.json has stale DB config",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "view_count INTEGER DEFAULT 0,",
+        "replace": "view_count INTEGER DEFAULT 0,\n    published_at TIMESTAMP,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "published_at"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Edit init.sql table, config.json has stale DB config"
+  },
+  {
+    "id": "te-bolster-206",
+    "description": "temporal-verify: Compose env_file changed, .env filename unchanged",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "env_file: .env",
+        "replace": "env_file: .env.production"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": ".env.production"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Compose env_file changed, .env filename unchanged"
+  },
+  {
+    "id": "te-bolster-207",
+    "description": "temporal-verify: Add CORS header, config.json has no CORS config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Access-Control-Allow-Origin', '*');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "CORS"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Add CORS header, config.json has no CORS config"
+  },
+  {
+    "id": "te-bolster-208",
+    "description": "temporal-verify: Control: edit server.js, verify change",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Delta' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Delta"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "verify",
+      "control"
+    ],
+    "rationale": "Control: edit server.js, verify change"
+  },
+  {
+    "id": "te-bolster-209",
+    "description": "temporal-verify: Control: edit .env, verify change",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=6666"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "6666"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "verify",
+      "control"
+    ],
+    "rationale": "Control: edit .env, verify change"
+  },
+  {
+    "id": "te-bolster-210",
+    "description": "temporal-verify: Control: Dockerfile has EXPOSE",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOSE"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "verify",
+      "control"
+    ],
+    "rationale": "Control: Dockerfile has EXPOSE"
+  },
+  {
+    "id": "te-bolster-211",
+    "description": "temporal-verify: Control: compose has healthcheck",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "healthcheck"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "verify",
+      "control"
+    ],
+    "rationale": "Control: compose has healthcheck"
+  },
+  {
+    "id": "te-bolster-212",
+    "description": "temporal-verify: Change healthcheck interval, server.js has no interval awareness",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "interval: 5s",
+        "replace": "interval: 30s"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "interval"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Change healthcheck interval, server.js has no interval awareness"
+  },
+  {
+    "id": "te-bolster-213",
+    "description": "temporal-verify: Add NOT NULL constraint, server.js has no validation",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "NOT NULL"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_constraint",
+          "sql": "ALTER TABLE posts ALTER COLUMN title SET NOT NULL;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "verify",
+      "temporal_gap"
+    ],
+    "rationale": "Add NOT NULL constraint, server.js has no validation"
+  }
+]

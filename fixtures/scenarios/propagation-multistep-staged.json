@@ -1,0 +1,761 @@
+[
+  {
+    "id": "pm-api-001",
+    "description": "PM-01: API /api/items renames field \"name\" to \"title\", homepage still references old field",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, title: 'Alpha' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Item Alpha"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "api_consumer",
+      "PM-01"
+    ],
+    "rationale": "HTML still renders \"Item Alpha\" from hardcoded list — API field rename doesnt break static HTML (consumer unaffected)"
+  },
+  {
+    "id": "pm-api-002",
+    "description": "PM-01: API renamed from /api/items to /api/products, homepage nav still links to /api/items",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/api/items'",
+        "replace": "req.url === '/api/products'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "href=\"/api/products\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "api_consumer",
+      "PM-01"
+    ],
+    "rationale": "API route renamed but homepage nav link still references /api/items — intra-file cascade gap"
+  },
+  {
+    "id": "pm-api-003",
+    "description": "PM-01: API response adds \"category\" field to items, config.json has no category setting",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Alpha', category: 'tools' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "category"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "api_consumer",
+      "PM-01"
+    ],
+    "rationale": "API schema expanded but config has no awareness of new field — API→config cascade gap"
+  },
+  {
+    "id": "pm-api-004",
+    "description": "PM-01: Health endpoint changes status field to \"healthy\", Dockerfile still checks for \"ok\"",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy', uptime: 100 }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "healthy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "api_consumer",
+      "PM-01"
+    ],
+    "rationale": "Health response schema changed but Dockerfile CMD still expects old format — API→infra gap"
+  },
+  {
+    "id": "pm-api-005",
+    "description": "PM-01: API adds third item \"Gamma\", homepage hardcoded list still has only Alpha and Beta",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 2, name: 'Beta' },",
+        "replace": "{ id: 2, name: 'Beta' },\n      { id: 3, name: 'Gamma' },"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Item Gamma"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "api_consumer",
+      "PM-01"
+    ],
+    "rationale": "API returns Gamma but homepage HTML list is hardcoded — API→UI cascade gap"
+  },
+  {
+    "id": "pm-api-006",
+    "description": "PM-01 control: Add Gamma to API, check server.js for Gamma in API response",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 2, name: 'Beta' },",
+        "replace": "{ id: 2, name: 'Beta' },\n      { id: 3, name: 'Gamma' },"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "'Gamma'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "api_consumer",
+      "PM-01",
+      "control"
+    ],
+    "rationale": "Same-file check — Gamma is in the API response code"
+  },
+  {
+    "id": "pm-dbconfig-007",
+    "description": "PM-02: Add category_id FK to posts, config.json has no categories feature flag",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "view_count INTEGER DEFAULT 0,",
+        "replace": "view_count INTEGER DEFAULT 0,\n    category_id INTEGER REFERENCES settings(key),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "categories"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "db_config",
+      "PM-02"
+    ],
+    "rationale": "Schema adds FK relationship but config has no awareness of categories feature — DB→config gap"
+  },
+  {
+    "id": "pm-dbconfig-008",
+    "description": "PM-02: Rename users to accounts in init.sql, .env DATABASE_URL unchanged",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE users",
+        "replace": "CREATE TABLE accounts"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "accounts"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "db_config",
+      "PM-02"
+    ],
+    "rationale": "Table renamed but app code still uses \"users\" — DB migration→app propagation gap"
+  },
+  {
+    "id": "pm-dbconfig-009",
+    "description": "PM-02: init.sql adds performance index, docker-compose.test.yml DB setup unchanged",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nCREATE INDEX idx_users_active ON users(is_active) WHERE is_active = true;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.test.yml",
+        "pattern": "idx_users_active"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "db_config",
+      "PM-02"
+    ],
+    "rationale": "Schema adds partial index but test compose has no awareness — DB→test config gap"
+  },
+  {
+    "id": "pm-dbconfig-010",
+    "description": "PM-02: settings.value changed from JSONB to TEXT, config.json still implies JSON structure",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "value JSONB NOT NULL,",
+        "replace": "value TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "TEXT"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "db_config",
+      "PM-02"
+    ],
+    "rationale": "Column type changed from JSONB to TEXT but config implies JSON values — type migration gap"
+  },
+  {
+    "id": "pm-dbconfig-011",
+    "description": "PM-02 control: Rename users to accounts, check init.sql for accounts",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE users",
+        "replace": "CREATE TABLE accounts"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE accounts"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "db_config",
+      "PM-02",
+      "control"
+    ],
+    "rationale": "Same-file check — table rename is present"
+  },
+  {
+    "id": "pm-envdep-012",
+    "description": "PM-03: .env PORT changed to 4000, .env.prod still has PORT=3000",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "PORT=4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "env_dependent",
+      "PM-03"
+    ],
+    "rationale": "Dev port changed but prod env not updated — cross-environment propagation gap"
+  },
+  {
+    "id": "pm-envdep-013",
+    "description": "PM-03: config.json db host changed to \"db-cluster\", config.staging.json still has localhost",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"host\": \"localhost\"",
+        "replace": "\"host\": \"db-cluster\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"host\": \"db-cluster\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "env_dependent",
+      "PM-03"
+    ],
+    "rationale": "Dev DB host migrated but staging config still points to localhost — env cascade gap"
+  },
+  {
+    "id": "pm-envdep-014",
+    "description": "PM-03: .env.staging DATABASE_URL changed, docker-compose.test.yml still has old URL",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo_staging\"",
+        "replace": "DATABASE_URL=\"postgres://staging-db:5432/demo_staging\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.test.yml",
+        "pattern": "staging-db"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "env_dependent",
+      "PM-03"
+    ],
+    "rationale": "Staging DB URL changed but test compose still has old connection — env→test cascade gap"
+  },
+  {
+    "id": "pm-envdep-015",
+    "description": "PM-03: config.prod.json adds new feature, config.json base has no matching field",
+    "edits": [
+      {
+        "file": "config.prod.json",
+        "search": "\"betaSignup\": false",
+        "replace": "\"betaSignup\": false,\n    \"rateLimit\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "rateLimit"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "env_dependent",
+      "PM-03"
+    ],
+    "rationale": "Prod config adds feature but base config has no awareness — prod→base propagation gap"
+  },
+  {
+    "id": "pm-envdep-016",
+    "description": "PM-03: .env NODE_ENV changed to test, .env.staging has NODE_ENV=staging (expected different)",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=test"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "NODE_ENV=test"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "env_dependent",
+      "PM-03",
+      "control"
+    ],
+    "rationale": "Same-file check — env var is present (staging has different NODE_ENV by design)"
+  },
+  {
+    "id": "pr-bolster-200",
+    "description": "propagation-multistep: Add column to init.sql, server.js unaware",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    phone VARCHAR(20),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "phone"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Add column to init.sql, server.js unaware"
+  },
+  {
+    "id": "pr-bolster-201",
+    "description": "propagation-multistep: Change .env port, compose not updated",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "4000:"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Change .env port, compose not updated"
+  },
+  {
+    "id": "pr-bolster-202",
+    "description": "propagation-multistep: Change config.json feature flag, server.js not updated",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false, \"newFeature\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "newFeature"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Change config.json feature flag, server.js not updated"
+  },
+  {
+    "id": "pr-bolster-203",
+    "description": "propagation-multistep: Rename column in init.sql, server.js uses old name",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "password_hash TEXT NOT NULL,",
+        "replace": "password_digest TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "password_digest"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Rename column in init.sql, server.js uses old name"
+  },
+  {
+    "id": "pr-bolster-204",
+    "description": "propagation-multistep: Add env var to .env, Dockerfile has no matching ENV",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nAPI_VERSION=v2"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "API_VERSION"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Add env var to .env, Dockerfile has no matching ENV"
+  },
+  {
+    "id": "pr-bolster-205",
+    "description": "propagation-multistep: Change Dockerfile node version, compose image tag unchanged",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:18-slim",
+        "replace": "FROM node:20-slim"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "node:20"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Change Dockerfile node version, compose image tag unchanged"
+  },
+  {
+    "id": "pr-bolster-206",
+    "description": "propagation-multistep: Add migration column, config.json has no reference",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "avatar"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE users ADD COLUMN avatar TEXT;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Add migration column, config.json has no reference"
+  },
+  {
+    "id": "pr-bolster-207",
+    "description": "propagation-multistep: Change health response, Dockerfile healthcheck unchanged",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'ready' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "status: 'ok'"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Change health response, Dockerfile healthcheck unchanged"
+  },
+  {
+    "id": "pr-bolster-208",
+    "description": "propagation-multistep: Control: edit server.js, check server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Control: edit server.js, check server.js"
+  },
+  {
+    "id": "pr-bolster-209",
+    "description": "propagation-multistep: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "pr-bolster-210",
+    "description": "propagation-multistep: Control: init.sql has users table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE users"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Control: init.sql has users table"
+  },
+  {
+    "id": "pr-bolster-211",
+    "description": "propagation-multistep: Add table to init.sql, server.js has no API for it",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE sessions",
+        "replace": "CREATE TABLE tags (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(50)\n);\n\nCREATE TABLE sessions"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "tags"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Add table to init.sql, server.js has no API for it"
+  },
+  {
+    "id": "pr-bolster-212",
+    "description": "propagation-multistep: Change compose service name, Dockerfile unchanged",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "  app:",
+        "replace": "  webserver:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "webserver"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "multistep",
+      "propagation_gap"
+    ],
+    "rationale": "Change compose service name, Dockerfile unchanged"
+  },
+  {
+    "id": "pr-bolster-213",
+    "description": "propagation-multistep: Control: compose has app service",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "app:"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Control: compose has app service"
+  }
+]

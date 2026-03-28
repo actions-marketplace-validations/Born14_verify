@@ -1,0 +1,761 @@
+[
+  {
+    "id": "pd-column-001",
+    "description": "PD-01: Add bio TEXT to users table, server.js has no bio reference",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    bio TEXT,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "bio"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "column_gap",
+      "PD-01"
+    ],
+    "rationale": "Column added to schema but app code never selects or displays it — schema→query gap"
+  },
+  {
+    "id": "pd-column-002",
+    "description": "PD-01: Add avatar_url TEXT to users table, server.js has no avatar reference",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "is_active BOOLEAN DEFAULT true,",
+        "replace": "is_active BOOLEAN DEFAULT true,\n    avatar_url TEXT,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "avatar"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "column_gap",
+      "PD-01"
+    ],
+    "rationale": "Avatar column added but API response has no avatar field — DDL→API propagation gap"
+  },
+  {
+    "id": "pd-column-003",
+    "description": "PD-01: Add category VARCHAR to posts, server.js has no category reference",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "view_count INTEGER DEFAULT 0,",
+        "replace": "view_count INTEGER DEFAULT 0,\n    category VARCHAR(50) DEFAULT 'general',"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "category"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "column_gap",
+      "PD-01"
+    ],
+    "rationale": "Category column in schema but no API or HTML displays it — schema→response gap"
+  },
+  {
+    "id": "pd-column-004",
+    "description": "PD-01: Add phone VARCHAR to users, config.json has no phone field reference",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    phone VARCHAR(20),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "phone"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "column_gap",
+      "PD-01"
+    ],
+    "rationale": "Phone column in DB but config has no phone-related setting — schema→config gap"
+  },
+  {
+    "id": "pd-column-005",
+    "description": "PD-01: Add tags table to init.sql, server.js has no /api/tags endpoint",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings",
+        "replace": "CREATE TABLE tags (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(50) NOT NULL UNIQUE\n);\n\nCREATE TABLE settings"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/api/tags"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "column_gap",
+      "PD-01"
+    ],
+    "rationale": "New table created in schema but no API endpoint serves it — schema→route gap"
+  },
+  {
+    "id": "pd-column-006",
+    "description": "PD-01 control: Add bio column, check init.sql for bio",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    bio TEXT,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio TEXT"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "db",
+      "column_gap",
+      "PD-01",
+      "control"
+    ],
+    "rationale": "Same-file check — column is present in schema"
+  },
+  {
+    "id": "pd-constraint-007",
+    "description": "PD-02: posts.body made NOT NULL, server.js has no body validation logic",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "body TEXT,",
+        "replace": "body TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "body"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "constraint_gap",
+      "PD-02"
+    ],
+    "rationale": "DB constraint added but app has no validation — constraint→validation propagation gap"
+  },
+  {
+    "id": "pd-constraint-008",
+    "description": "PD-02: posts.title made UNIQUE, server.js has no duplicate title check",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "title VARCHAR(200) NOT NULL,",
+        "replace": "title VARCHAR(200) NOT NULL UNIQUE,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "UNIQUE"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "constraint_gap",
+      "PD-02"
+    ],
+    "rationale": "Unique constraint on title but app has no duplicate detection — DB→app validation gap"
+  },
+  {
+    "id": "pd-constraint-009",
+    "description": "PD-02: CHECK(view_count >= 0) added, server.js has no negative check",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "view_count INTEGER DEFAULT 0,",
+        "replace": "view_count INTEGER DEFAULT 0 CHECK(view_count >= 0),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "view_count"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "constraint_gap",
+      "PD-02"
+    ],
+    "rationale": "CHECK constraint in DB but app never validates range — constraint→code propagation gap"
+  },
+  {
+    "id": "pd-constraint-010",
+    "description": "PD-02: Email CHECK constraint added, server.js has no email format validation",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL CHECK(email LIKE '%@%.%'),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "constraint_gap",
+      "PD-02"
+    ],
+    "rationale": "Email format constraint in DB but app has no email validation — dual-layer gap"
+  },
+  {
+    "id": "pd-constraint-011",
+    "description": "PD-02 control: Add NOT NULL to body, check init.sql for NOT NULL",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "body TEXT,",
+        "replace": "body TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "body TEXT NOT NULL"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "db",
+      "constraint_gap",
+      "PD-02",
+      "control"
+    ],
+    "rationale": "Same-file check — constraint is present in schema"
+  },
+  {
+    "id": "pd-index-012",
+    "description": "PD-03: Index on posts.user_id added, server.js has no user_id query",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nCREATE INDEX idx_posts_user ON posts(user_id);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "user_id"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "index_gap",
+      "PD-03"
+    ],
+    "rationale": "Index created for user_id lookups but app has no user-filtered query — index→query gap"
+  },
+  {
+    "id": "pd-index-013",
+    "description": "PD-03: Index on users.email added, server.js has no email lookup route",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_token ON sessions(token);",
+        "replace": "CREATE INDEX idx_sessions_token ON sessions(token);\nCREATE INDEX idx_users_email ON users(email);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "index_gap",
+      "PD-03"
+    ],
+    "rationale": "Email index created but no app route queries by email — index optimization unexploited"
+  },
+  {
+    "id": "pd-index-014",
+    "description": "PD-03: Composite index on posts(user_id, published), config.json has no optimization flag",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nCREATE INDEX idx_posts_user_published ON posts(user_id, published);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "optimization"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "index_gap",
+      "PD-03"
+    ],
+    "rationale": "Composite index added but config has no optimization awareness — schema→config gap"
+  },
+  {
+    "id": "pd-index-015",
+    "description": "PD-03: Index on settings.key added, server.js has no /api/settings route",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nCREATE INDEX idx_settings_key ON settings(key);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "settings"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "index_gap",
+      "PD-03"
+    ],
+    "rationale": "Settings index created but no API endpoint uses settings table — index→route gap"
+  },
+  {
+    "id": "pd-index-016",
+    "description": "PD-03 control: Add index on users.email, check init.sql for it",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_token ON sessions(token);",
+        "replace": "CREATE INDEX idx_sessions_token ON sessions(token);\nCREATE INDEX idx_users_email ON users(email);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "idx_users_email"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "db",
+      "index_gap",
+      "PD-03",
+      "control"
+    ],
+    "rationale": "Same-file check — index definition is present in schema"
+  },
+  {
+    "id": "pr-bolster-200",
+    "description": "propagation-db: Add column to init.sql, server.js unaware",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    phone VARCHAR(20),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "phone"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Add column to init.sql, server.js unaware"
+  },
+  {
+    "id": "pr-bolster-201",
+    "description": "propagation-db: Change .env port, compose not updated",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "4000:"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Change .env port, compose not updated"
+  },
+  {
+    "id": "pr-bolster-202",
+    "description": "propagation-db: Change config.json feature flag, server.js not updated",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false, \"newFeature\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "newFeature"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Change config.json feature flag, server.js not updated"
+  },
+  {
+    "id": "pr-bolster-203",
+    "description": "propagation-db: Rename column in init.sql, server.js uses old name",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "password_hash TEXT NOT NULL,",
+        "replace": "password_digest TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "password_digest"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Rename column in init.sql, server.js uses old name"
+  },
+  {
+    "id": "pr-bolster-204",
+    "description": "propagation-db: Add env var to .env, Dockerfile has no matching ENV",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nAPI_VERSION=v2"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "API_VERSION"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Add env var to .env, Dockerfile has no matching ENV"
+  },
+  {
+    "id": "pr-bolster-205",
+    "description": "propagation-db: Change Dockerfile node version, compose image tag unchanged",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:18-slim",
+        "replace": "FROM node:20-slim"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "node:20"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Change Dockerfile node version, compose image tag unchanged"
+  },
+  {
+    "id": "pr-bolster-206",
+    "description": "propagation-db: Add migration column, config.json has no reference",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "avatar"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE users ADD COLUMN avatar TEXT;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Add migration column, config.json has no reference"
+  },
+  {
+    "id": "pr-bolster-207",
+    "description": "propagation-db: Change health response, Dockerfile healthcheck unchanged",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'ready' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "status: 'ok'"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Change health response, Dockerfile healthcheck unchanged"
+  },
+  {
+    "id": "pr-bolster-208",
+    "description": "propagation-db: Control: edit server.js, check server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "db",
+      "control"
+    ],
+    "rationale": "Control: edit server.js, check server.js"
+  },
+  {
+    "id": "pr-bolster-209",
+    "description": "propagation-db: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "db",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "pr-bolster-210",
+    "description": "propagation-db: Control: init.sql has users table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE users"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "db",
+      "control"
+    ],
+    "rationale": "Control: init.sql has users table"
+  },
+  {
+    "id": "pr-bolster-211",
+    "description": "propagation-db: Add table to init.sql, server.js has no API for it",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE sessions",
+        "replace": "CREATE TABLE tags (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(50)\n);\n\nCREATE TABLE sessions"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "tags"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Add table to init.sql, server.js has no API for it"
+  },
+  {
+    "id": "pr-bolster-212",
+    "description": "propagation-db: Change compose service name, Dockerfile unchanged",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "  app:",
+        "replace": "  webserver:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "webserver"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "db",
+      "propagation_gap"
+    ],
+    "rationale": "Change compose service name, Dockerfile unchanged"
+  },
+  {
+    "id": "pr-bolster-213",
+    "description": "propagation-db: Control: compose has app service",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "app:"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "db",
+      "control"
+    ],
+    "rationale": "Control: compose has app service"
+  }
+]

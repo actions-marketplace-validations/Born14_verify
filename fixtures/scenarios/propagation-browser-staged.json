@@ -418,5 +418,365 @@
       "control"
     ],
     "rationale": "Same-surface edit and check — no propagation needed, should pass"
+  },
+  {
+    "id": "pb-bolster-100",
+    "description": "PB-bolster: server.js port changed, config.json unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "server.js port changed, config.json unaware"
+  },
+  {
+    "id": "pb-bolster-101",
+    "description": "PB-bolster: config.json port changed, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "config.json port changed, server.js unaware"
+  },
+  {
+    "id": "pb-bolster-102",
+    "description": "PB-bolster: .env port changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": ".env port changed, Dockerfile unaware"
+  },
+  {
+    "id": "pb-bolster-103",
+    "description": "PB-bolster: Dockerfile EXPOSE changed, .env unaware",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+  },
+  {
+    "id": "pb-bolster-104",
+    "description": "PB-bolster: health response changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "healthy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "health response changed, Dockerfile unaware"
+  },
+  {
+    "id": "pb-bolster-105",
+    "description": "PB-bolster: app name changed in config, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"New App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "New App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "app name changed in config, server.js unaware"
+  },
+  {
+    "id": "pb-bolster-106",
+    "description": "PB-bolster: NODE_ENV changed, server.js unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "NODE_ENV changed, server.js unaware"
+  },
+  {
+    "id": "pb-bolster-107",
+    "description": "PB-bolster: SECRET_KEY changed, config.json unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-secret-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "new-secret"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "SECRET_KEY changed, config.json unaware"
+  },
+  {
+    "id": "pb-bolster-108",
+    "description": "PB-bolster: control: server.js port changed, verify in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js port changed, verify in server.js"
+  },
+  {
+    "id": "pb-bolster-109",
+    "description": "PB-bolster: control: config.json port changed, config gate reads it",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "app.port",
+        "expected": "5000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster",
+      "control"
+    ],
+    "rationale": "control: config.json port changed, config gate reads it"
+  },
+  {
+    "id": "pb-bolster-110",
+    "description": "PB-bolster: control: .env PORT changed, config gate reads it",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster",
+      "control"
+    ],
+    "rationale": "control: .env PORT changed, config gate reads it"
+  },
+  {
+    "id": "pb-bolster-111",
+    "description": "PB-bolster: control: server.js still exists after edit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// modified"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js still exists after edit"
+  },
+  {
+    "id": "pb-bolster-112",
+    "description": "PB-bolster: fabricated: package.json does not exist",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "package.json"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster"
+    ],
+    "rationale": "fabricated: package.json does not exist"
+  },
+  {
+    "id": "pb-bolster-113",
+    "description": "PB-bolster: control: server.js exists without edits",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js exists without edits"
+  },
+  {
+    "id": "pb-bolster-114",
+    "description": "PB-bolster: control: server.js has createServer",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "browser",
+      "pb-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js has createServer"
   }
 ]

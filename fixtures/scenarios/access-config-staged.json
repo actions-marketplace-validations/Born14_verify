@@ -1,0 +1,835 @@
+[
+  {
+    "id": "hg-perm-001",
+    "description": "HG-01: .env edited, Dockerfile USER node, .env owned by root (chmod 600)",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-rotated-key\""
+      },
+      {
+        "file": "Dockerfile",
+        "search": "CMD [\"node\", \"server.js\"]",
+        "replace": "USER node\nCMD [\"node\", \"server.js\"]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SECRET_KEY=\"new-rotated-key\""
+      },
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "USER node"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "env_permissions",
+      "HG-01"
+    ],
+    "rationale": ".env edited but container runs as node user — if .env is root-owned, app cannot read it"
+  },
+  {
+    "id": "hg-perm-002",
+    "description": "HG-01: .env.prod edited, compose mounts config as read-only",
+    "edits": [
+      {
+        "file": ".env.prod",
+        "search": "SECRET_KEY=\"prod-secret-rotated-2026\"",
+        "replace": "SECRET_KEY=\"freshly-rotated-2027\""
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "retries: 3",
+        "replace": "retries: 3\n    volumes:\n      - ./.env.prod:/app/.env:ro"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "SECRET_KEY=\"freshly-rotated-2027\""
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": ".env.prod:/app/.env:ro"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "env_permissions",
+      "HG-01"
+    ],
+    "rationale": ".env.prod mounted as :ro — app can read but cannot write/update secrets at runtime"
+  },
+  {
+    "id": "hg-perm-003",
+    "description": "HG-01: Edit .env but compose env_file points to /run/secrets/.env (Docker secret)",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "environment:\n      - PORT=3000",
+        "replace": "env_file:\n      - /run/secrets/.env\n    environment:\n      - PORT=3000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=true"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "/run/secrets/.env"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "env_permissions",
+      "HG-01"
+    ],
+    "rationale": "Local .env edited but compose reads from /run/secrets/.env — edit has no effect on running app"
+  },
+  {
+    "id": "hg-perm-004",
+    "description": "HG-01: Edit both .env.staging and .env.prod, prod needs vault access",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "SECRET_KEY=\"staging-secret-key\"",
+        "replace": "SECRET_KEY=\"staging-new-key\""
+      },
+      {
+        "file": ".env.prod",
+        "search": "SECRET_KEY=\"prod-secret-rotated-2026\"",
+        "replace": "SECRET_KEY=\"prod-needs-vault\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "SECRET_KEY=\"staging-new-key\""
+      },
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "SECRET_KEY=\"prod-needs-vault\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "env_permissions",
+      "HG-01"
+    ],
+    "rationale": "Staging .env is app-writable but prod .env should be vault-managed — permission mismatch"
+  },
+  {
+    "id": "hg-perm-005",
+    "description": "HG-01 control: Edit .env, no permission restriction",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "env_permissions",
+      "HG-01",
+      "control"
+    ],
+    "rationale": ".env is app-owned and writable — no permission issue"
+  },
+  {
+    "id": "hg-secret-006",
+    "description": "HG-02: config.json references vault path, .env has no VAULT_TOKEN",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"Demo App\",\n    \"secretsBackend\": \"vault\",\n    \"vaultPath\": \"secret/data/demo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "vaultPath"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "VAULT_TOKEN"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "missing_credentials",
+      "HG-02"
+    ],
+    "rationale": "Config points to vault but VAULT_TOKEN not in .env — secrets cannot be fetched"
+  },
+  {
+    "id": "hg-secret-007",
+    "description": "HG-02: .env sets SSM_PARAM_PATH but no AWS_ACCESS_KEY_ID present",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nSSM_PARAM_PATH=/prod/demo/secrets\nSECRET_BACKEND=aws-ssm"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SSM_PARAM_PATH"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "AWS_ACCESS_KEY_ID"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "missing_credentials",
+      "HG-02"
+    ],
+    "rationale": "SSM parameter path set but no AWS credentials — parameter store inaccessible"
+  },
+  {
+    "id": "hg-secret-008",
+    "description": "HG-02: config.json uses GCP Secret Manager, no GOOGLE_APPLICATION_CREDENTIALS in .env",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": false,\n    \"secretProvider\": \"gcp-secret-manager\",\n    \"gcpProject\": \"my-project\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "gcp-secret-manager"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "GOOGLE_APPLICATION_CREDENTIALS"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "missing_credentials",
+      "HG-02"
+    ],
+    "rationale": "GCP Secret Manager referenced but no service account credentials in environment"
+  },
+  {
+    "id": "hg-secret-009",
+    "description": "HG-02: compose uses Docker secrets, predicate checks secret file exists",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "services:\n  app:",
+        "replace": "secrets:\n  db_password:\n    external: true\nservices:\n  app:\n    secrets:\n      - db_password"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "db_password"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "external: true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "missing_credentials",
+      "HG-02"
+    ],
+    "rationale": "Docker external secrets require Swarm mode — compose up fails without swarm init"
+  },
+  {
+    "id": "hg-secret-010",
+    "description": "HG-02 control: All secrets inline in .env (no external provider)",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"inline-secret-value\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SECRET_KEY=\"inline-secret-value\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "missing_credentials",
+      "HG-02",
+      "control"
+    ],
+    "rationale": "Secret is inline — no external provider needed, edit succeeds"
+  },
+  {
+    "id": "hg-env-011",
+    "description": "HG-03: Edit staging DB URL, predicate checks prod DB URL (different host)",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"name\": \"demo_staging\"",
+        "replace": "\"name\": \"demo_staging_v2\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "demo_staging_v2"
+      },
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "demo_staging_v2"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "env_mismatch",
+      "HG-03"
+    ],
+    "rationale": "Staging config updated but prod config has different DB name — cross-env assumption fails"
+  },
+  {
+    "id": "hg-env-012",
+    "description": "HG-03: Staging DEBUG flipped, predicate expects same in prod .env",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "DEBUG=true",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "DEBUG=false"
+      },
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "DEBUG=false"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "env_mismatch",
+      "HG-03"
+    ],
+    "rationale": "Both happen to have DEBUG=false but for different reasons — staging is editable, prod is policy"
+  },
+  {
+    "id": "hg-env-013",
+    "description": "HG-03: Enable betaSignup in staging, predicate checks it in prod (locked to false)",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"betaSignup\": true",
+        "replace": "\"betaSignup\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"betaSignup\": false"
+      },
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "\"betaSignup\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "env_mismatch",
+      "HG-03"
+    ],
+    "rationale": "Staging betaSignup changed but prod has it locked to false — cannot match across envs"
+  },
+  {
+    "id": "hg-env-014",
+    "description": "HG-03: Change staging port, predicate checks prod port (fixed at 3000)",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "PORT=4000"
+      },
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "PORT=4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "env_mismatch",
+      "HG-03"
+    ],
+    "rationale": "Staging port changed to 4000 but prod port is fixed at 3000 by load balancer policy"
+  },
+  {
+    "id": "hg-env-015",
+    "description": "HG-03 control: Edit and check both in staging config (same env)",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"analytics\": true",
+        "replace": "\"analytics\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"analytics\": false"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "env_mismatch",
+      "HG-03",
+      "control"
+    ],
+    "rationale": "Edit and predicate both target staging config — same environment, no mismatch"
+  },
+  {
+    "id": "hg-bolster-100",
+    "description": "HG-bolster: server.js port changed, config.json unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "server.js port changed, config.json unaware"
+  },
+  {
+    "id": "hg-bolster-101",
+    "description": "HG-bolster: config.json port changed, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "config.json port changed, server.js unaware"
+  },
+  {
+    "id": "hg-bolster-102",
+    "description": "HG-bolster: .env port changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": ".env port changed, Dockerfile unaware"
+  },
+  {
+    "id": "hg-bolster-103",
+    "description": "HG-bolster: Dockerfile EXPOSE changed, .env unaware",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+  },
+  {
+    "id": "hg-bolster-104",
+    "description": "HG-bolster: health response changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "healthy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "health response changed, Dockerfile unaware"
+  },
+  {
+    "id": "hg-bolster-105",
+    "description": "HG-bolster: app name changed in config, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"New App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "New App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "app name changed in config, server.js unaware"
+  },
+  {
+    "id": "hg-bolster-106",
+    "description": "HG-bolster: NODE_ENV changed, server.js unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "NODE_ENV changed, server.js unaware"
+  },
+  {
+    "id": "hg-bolster-107",
+    "description": "HG-bolster: SECRET_KEY changed, config.json unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-secret-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "new-secret"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "SECRET_KEY changed, config.json unaware"
+  },
+  {
+    "id": "hg-bolster-108",
+    "description": "HG-bolster: control: server.js port changed, verify in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js port changed, verify in server.js"
+  },
+  {
+    "id": "hg-bolster-109",
+    "description": "HG-bolster: control: config.json port changed, config gate reads it",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "app.port",
+        "expected": "5000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster",
+      "control"
+    ],
+    "rationale": "control: config.json port changed, config gate reads it"
+  },
+  {
+    "id": "hg-bolster-110",
+    "description": "HG-bolster: control: .env PORT changed, config gate reads it",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster",
+      "control"
+    ],
+    "rationale": "control: .env PORT changed, config gate reads it"
+  },
+  {
+    "id": "hg-bolster-111",
+    "description": "HG-bolster: control: server.js still exists after edit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// modified"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js still exists after edit"
+  },
+  {
+    "id": "hg-bolster-112",
+    "description": "HG-bolster: fabricated: package.json does not exist",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "package.json"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster"
+    ],
+    "rationale": "fabricated: package.json does not exist"
+  },
+  {
+    "id": "hg-bolster-113",
+    "description": "HG-bolster: control: server.js exists without edits",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js exists without edits"
+  },
+  {
+    "id": "hg-bolster-114",
+    "description": "HG-bolster: control: server.js has createServer",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "config",
+      "hg-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js has createServer"
+  }
+]

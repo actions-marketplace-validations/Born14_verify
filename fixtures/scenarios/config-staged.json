@@ -406,5 +406,157 @@
       "multi"
     ],
     "rationale": "Second predicate fails, entire gate fails"
+  },
+  {
+    "id": "c-bolster-200",
+    "description": "Cross-file: server.js port reference vs config.json",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "3000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": "server.js references 3000 but config.json has no such reference"
+  },
+  {
+    "id": "c-bolster-201",
+    "description": "Cross-file: server.js server config vs .env",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": "server.js references http.createServer but .env has no such reference"
+  },
+  {
+    "id": "c-bolster-202",
+    "description": "Cross-file: server.js API→DB reference vs init.sql",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "api/items"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": "server.js references api/items but init.sql has no such reference"
+  },
+  {
+    "id": "c-bolster-203",
+    "description": "Cross-file: server.js listen→expose vs Dockerfile",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "listen"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": "server.js references listen but Dockerfile has no such reference"
+  },
+  {
+    "id": "c-bolster-204",
+    "description": "Cross-file: server.js health endpoint vs docker-compose.yml",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "health"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": "server.js references health but docker-compose.yml has no such reference"
+  },
+  {
+    "id": "c-bolster-205",
+    "description": "Cross-file: config.json DB config sync vs .env",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "database"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": "config.json references database but .env has no such reference"
+  },
+  {
+    "id": "c-bolster-206",
+    "description": "Cross-file: config.json config→compose port vs docker-compose.yml",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "port"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": "config.json references port but docker-compose.yml has no such reference"
+  },
+  {
+    "id": "c-bolster-207",
+    "description": "Cross-file: .env env→dockerfile vs Dockerfile",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "NODE_ENV"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "config",
+      "general",
+      "cross_file"
+    ],
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
   }
 ]

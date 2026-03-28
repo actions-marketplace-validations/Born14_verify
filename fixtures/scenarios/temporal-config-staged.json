@@ -1,0 +1,763 @@
+[
+  {
+    "id": "tc-secret-001",
+    "description": "TC-01: SECRET_KEY rotated in .env, .env.prod still has old production key",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"fresh-key-2026-q2\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "fresh-key-2026-q2"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "secret_expired",
+      "TC-01"
+    ],
+    "rationale": "Secret rotated in dev .env but production env still has old key — expired between read and deploy"
+  },
+  {
+    "id": "tc-secret-002",
+    "description": "TC-01: SECRET_KEY rotated in .env.prod, base .env still has old \"not-very-secret\"",
+    "edits": [
+      {
+        "file": ".env.prod",
+        "search": "SECRET_KEY=\"prod-secret-rotated-2026\"",
+        "replace": "SECRET_KEY=\"prod-new-rotation-q2\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "prod-new-rotation"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "secret_expired",
+      "TC-01"
+    ],
+    "rationale": "Production secret rotated but base .env not updated — credential drift across environments"
+  },
+  {
+    "id": "tc-secret-003",
+    "description": "TC-01: SECRET_KEY rotated in staging, production env still has different key",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "SECRET_KEY=\"staging-secret-key\"",
+        "replace": "SECRET_KEY=\"staging-rotated-q2\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "staging-rotated"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "secret_expired",
+      "TC-01"
+    ],
+    "rationale": "Staging secret rotated but production has no awareness — cross-env temporal gap"
+  },
+  {
+    "id": "tc-secret-004",
+    "description": "TC-01: DATABASE_URL changed in .env, .env.staging still has old localhost URL",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo\"",
+        "replace": "DATABASE_URL=\"postgres://new-primary:5432/demo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "new-primary"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "secret_expired",
+      "TC-01"
+    ],
+    "rationale": "DB URL migrated in dev but staging env still points to old host — credential expiry pattern"
+  },
+  {
+    "id": "tc-secret-005",
+    "description": "TC-01 control: SECRET_KEY rotated in .env, check .env for new value",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"freshly-rotated\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "freshly-rotated"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "config",
+      "secret_expired",
+      "TC-01",
+      "control"
+    ],
+    "rationale": "Same-file rotation and check — secret is fresh"
+  },
+  {
+    "id": "tc-ttl-006",
+    "description": "TC-02: config.json db host changed to \"db-new\", config.prod.json still has \"db-primary.internal\"",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"host\": \"localhost\"",
+        "replace": "\"host\": \"db-new\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "\"host\": \"db-new\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "config_ttl",
+      "TC-02"
+    ],
+    "rationale": "Dev config updated but prod config still points to old host — TTL expired on config sync"
+  },
+  {
+    "id": "tc-ttl-007",
+    "description": "TC-02: config.prod.json db name changed, config.staging.json still has old staging name",
+    "edits": [
+      {
+        "file": "config.prod.json",
+        "search": "\"name\": \"demo_prod\"",
+        "replace": "\"name\": \"demo_v2\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"name\": \"demo_v2\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "config_ttl",
+      "TC-02"
+    ],
+    "rationale": "Prod db name changed but staging config not updated — cross-env config TTL expired"
+  },
+  {
+    "id": "tc-ttl-008",
+    "description": "TC-02: config.json port changed to 4000, config.staging.json still has 3000",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"port\": 4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "config_ttl",
+      "TC-02"
+    ],
+    "rationale": "Base config port changed but staging config still has old value"
+  },
+  {
+    "id": "tc-ttl-009",
+    "description": "TC-02: .env.prod DATABASE_URL changed, .env.staging still has old URL",
+    "edits": [
+      {
+        "file": ".env.prod",
+        "search": "DATABASE_URL=\"postgres://db-primary.internal:5432/demo_prod\"",
+        "replace": "DATABASE_URL=\"postgres://db-v2.internal:5432/demo_prod\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "db-v2.internal"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "config_ttl",
+      "TC-02"
+    ],
+    "rationale": "Prod DB URL migrated but staging env not updated — config TTL expired across envs"
+  },
+  {
+    "id": "tc-ttl-010",
+    "description": "TC-02 control: Change config.json db name, check config.json for new value",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"demo\"",
+        "replace": "\"name\": \"demo_updated\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"name\": \"demo_updated\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "config",
+      "config_ttl",
+      "TC-02",
+      "control"
+    ],
+    "rationale": "Same-file change and check — config is fresh"
+  },
+  {
+    "id": "tc-flag-011",
+    "description": "TC-03: analytics enabled in config.json, config.prod.json still has analytics:false",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "\"analytics\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "flag_toggle",
+      "TC-03"
+    ],
+    "rationale": "Analytics flag toggled in dev but prod config not updated — flag drift between environments"
+  },
+  {
+    "id": "tc-flag-012",
+    "description": "TC-03: darkMode disabled in config.json, config.staging.json still has darkMode:true",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.staging.json",
+        "pattern": "\"darkMode\": false"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "flag_toggle",
+      "TC-03"
+    ],
+    "rationale": "Dark mode disabled in dev but staging still has it enabled — flag toggle not propagated"
+  },
+  {
+    "id": "tc-flag-013",
+    "description": "TC-03: betaSignup enabled in config.prod.json, config.json has no betaSignup field",
+    "edits": [
+      {
+        "file": "config.prod.json",
+        "search": "\"betaSignup\": false",
+        "replace": "\"betaSignup\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "betaSignup"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "flag_toggle",
+      "TC-03"
+    ],
+    "rationale": "Beta signup enabled in prod but base config has no awareness of the flag"
+  },
+  {
+    "id": "tc-flag-014",
+    "description": "TC-03: DEBUG toggled to true in .env, config.json has no debug setting",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"debug\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "flag_toggle",
+      "TC-03"
+    ],
+    "rationale": "Debug flag toggled in .env but config.json has no corresponding field — flag toggle gap"
+  },
+  {
+    "id": "tc-flag-015",
+    "description": "TC-03: betaSignup disabled in config.staging.json, .env.staging has no BETA_SIGNUP var",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"betaSignup\": true",
+        "replace": "\"betaSignup\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "BETA_SIGNUP"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "flag_toggle",
+      "TC-03"
+    ],
+    "rationale": "Config flag toggled but env var for runtime override not present — flag→env gap"
+  },
+  {
+    "id": "tc-flag-016",
+    "description": "TC-03 control: Toggle analytics in config.json, check config.json for new value",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"analytics\": true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "config",
+      "flag_toggle",
+      "TC-03",
+      "control"
+    ],
+    "rationale": "Same-file toggle and check — should pass"
+  },
+  {
+    "id": "te-bolster-200",
+    "description": "temporal-config: Edit server.js health, config.json has stale health config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'up', version: '2.1' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "version"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Edit server.js health, config.json has stale health config"
+  },
+  {
+    "id": "te-bolster-201",
+    "description": "temporal-config: Edit .env SECRET_KEY, server.js still uses old reference",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"rotated-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "rotated-2026"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference"
+  },
+  {
+    "id": "te-bolster-202",
+    "description": "temporal-config: Upgrade Dockerfile node version, .env unchanged",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:18-slim",
+        "replace": "FROM node:20-slim"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "NODE_VERSION"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Upgrade Dockerfile node version, .env unchanged"
+  },
+  {
+    "id": "te-bolster-203",
+    "description": "temporal-config: Change compose port mapping, server.js listen unchanged",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "\"3000:3000\"",
+        "replace": "\"9090:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Change compose port mapping, server.js listen unchanged"
+  },
+  {
+    "id": "te-bolster-204",
+    "description": "temporal-config: Add column via migration, server.js has no query for it",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "nickname"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE users ADD COLUMN nickname VARCHAR(50);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Add column via migration, server.js has no query for it"
+  },
+  {
+    "id": "te-bolster-205",
+    "description": "temporal-config: Edit init.sql table, config.json has stale DB config",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "view_count INTEGER DEFAULT 0,",
+        "replace": "view_count INTEGER DEFAULT 0,\n    published_at TIMESTAMP,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "published_at"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Edit init.sql table, config.json has stale DB config"
+  },
+  {
+    "id": "te-bolster-206",
+    "description": "temporal-config: Compose env_file changed, .env filename unchanged",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "env_file: .env",
+        "replace": "env_file: .env.production"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": ".env.production"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Compose env_file changed, .env filename unchanged"
+  },
+  {
+    "id": "te-bolster-207",
+    "description": "temporal-config: Add CORS header, config.json has no CORS config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Access-Control-Allow-Origin', '*');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "CORS"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Add CORS header, config.json has no CORS config"
+  },
+  {
+    "id": "te-bolster-208",
+    "description": "temporal-config: Control: edit server.js, verify change",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Delta' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Delta"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: edit server.js, verify change"
+  },
+  {
+    "id": "te-bolster-209",
+    "description": "temporal-config: Control: edit .env, verify change",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=6666"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "6666"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: edit .env, verify change"
+  },
+  {
+    "id": "te-bolster-210",
+    "description": "temporal-config: Control: Dockerfile has EXPOSE",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOSE"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: Dockerfile has EXPOSE"
+  },
+  {
+    "id": "te-bolster-211",
+    "description": "temporal-config: Control: compose has healthcheck",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "healthcheck"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: compose has healthcheck"
+  },
+  {
+    "id": "te-bolster-212",
+    "description": "temporal-config: Change healthcheck interval, server.js has no interval awareness",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "interval: 5s",
+        "replace": "interval: 30s"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "interval"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Change healthcheck interval, server.js has no interval awareness"
+  },
+  {
+    "id": "te-bolster-213",
+    "description": "temporal-config: Add NOT NULL constraint, server.js has no validation",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "NOT NULL"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_constraint",
+          "sql": "ALTER TABLE posts ALTER COLUMN title SET NOT NULL;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "config",
+      "temporal_gap"
+    ],
+    "rationale": "Add NOT NULL constraint, server.js has no validation"
+  }
+]

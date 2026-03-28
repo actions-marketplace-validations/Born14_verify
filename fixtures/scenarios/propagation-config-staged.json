@@ -1,0 +1,769 @@
+[
+  {
+    "id": "pe-cached-001",
+    "description": "PE-01: .env PORT changed to 8080, config.json still has port 3000",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "cached_process",
+      "PE-01"
+    ],
+    "rationale": "Env var changed but config.json (which app may read at startup) still has old port — cached process"
+  },
+  {
+    "id": "pe-cached-002",
+    "description": "PE-01: .env DATABASE_URL points to new-db, config.json host still localhost",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DATABASE_URL=\"postgres://localhost:5432/demo\"",
+        "replace": "DATABASE_URL=\"postgres://new-db:5432/demo\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"host\": \"new-db\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "cached_process",
+      "PE-01"
+    ],
+    "rationale": "Database URL changed in .env but config.json host is stale — env→config propagation gap"
+  },
+  {
+    "id": "pe-cached-003",
+    "description": "PE-01: .env NODE_ENV changed to development, server.js has no development-specific code",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "cached_process",
+      "PE-01"
+    ],
+    "rationale": "NODE_ENV changed but server.js has no env-dependent behavior — config→process gap"
+  },
+  {
+    "id": "pe-cached-004",
+    "description": "PE-01: .env SECRET_KEY rotated, docker-compose env section has no SECRET_KEY",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"fresh-secret-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "SECRET_KEY"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "cached_process",
+      "PE-01"
+    ],
+    "rationale": "Secret rotated in .env but compose doesnt forward it to container — env→deploy cache gap"
+  },
+  {
+    "id": "pe-cached-005",
+    "description": "PE-01: .env DEBUG changed to true, server.js never reads process.env.DEBUG",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "process.env.DEBUG"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "cached_process",
+      "PE-01"
+    ],
+    "rationale": "Debug flag toggled but process code never reads it — env var→runtime propagation gap"
+  },
+  {
+    "id": "pe-cached-006",
+    "description": "PE-01 control: .env PORT changed, check .env for new value",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "config",
+      "cached_process",
+      "PE-01",
+      "control"
+    ],
+    "rationale": "Same-file check — env var is present"
+  },
+  {
+    "id": "pe-source-007",
+    "description": "PE-02: config.json port changed to 5000, .env still has PORT=3000",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "wrong_source",
+      "PE-02"
+    ],
+    "rationale": "Config port changed but app reads PORT from .env — wrong config source updated"
+  },
+  {
+    "id": "pe-source-008",
+    "description": "PE-02: config.json db name changed to app_v2, .env DATABASE_URL still has /demo",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"demo\"",
+        "replace": "\"name\": \"app_v2\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "/app_v2"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "wrong_source",
+      "PE-02"
+    ],
+    "rationale": "DB name changed in config.json but .env DATABASE_URL still has old name — source mismatch"
+  },
+  {
+    "id": "pe-source-009",
+    "description": "PE-02: config.json db host changed to db-cluster, .env.prod still has db-primary.internal",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"host\": \"localhost\"",
+        "replace": "\"host\": \"db-cluster\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "db-cluster"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "wrong_source",
+      "PE-02"
+    ],
+    "rationale": "Config host changed but prod .env DATABASE_URL still points to old host — cross-source gap"
+  },
+  {
+    "id": "pe-source-010",
+    "description": "PE-02: config.json app name changed to \"My Service\", server.js title still \"Demo App\"",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"My Service\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "My Service"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "wrong_source",
+      "PE-02"
+    ],
+    "rationale": "Config name changed but server.js reads title from hardcoded HTML — config→code source mismatch"
+  },
+  {
+    "id": "pe-source-011",
+    "description": "PE-02: config.staging.json host changed, .env.staging DATABASE_URL still has localhost",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"host\": \"localhost\"",
+        "replace": "\"host\": \"staging-db\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.staging",
+        "pattern": "staging-db"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "wrong_source",
+      "PE-02"
+    ],
+    "rationale": "Staging config host changed but staging .env still has localhost — parallel config source gap"
+  },
+  {
+    "id": "pe-source-012",
+    "description": "PE-02 control: config.json port changed, check config.json for new value",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 6000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 6000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "config",
+      "wrong_source",
+      "PE-02",
+      "control"
+    ],
+    "rationale": "Same-file check — value is present"
+  },
+  {
+    "id": "pe-behavior-013",
+    "description": "PE-03: analytics enabled in config.json, server.js has no analytics tracking",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "analytics"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "flag_behavior",
+      "PE-03"
+    ],
+    "rationale": "Analytics flag toggled but server has no analytics implementation — flag→behavior propagation gap"
+  },
+  {
+    "id": "pe-behavior-014",
+    "description": "PE-03: darkMode disabled in config.json, server.js has no dark-mode conditional CSS",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "darkMode"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "flag_behavior",
+      "PE-03"
+    ],
+    "rationale": "Dark mode flag toggled but server.js has no CSS conditional for it — flag without behavior"
+  },
+  {
+    "id": "pe-behavior-015",
+    "description": "PE-03: betaSignup enabled in staging config, server.js has no /signup route",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"betaSignup\": true",
+        "replace": "\"betaSignup\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "signup"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "flag_behavior",
+      "PE-03"
+    ],
+    "rationale": "Beta signup flag exists but server has no signup functionality — flag→route gap"
+  },
+  {
+    "id": "pe-behavior-016",
+    "description": "PE-03: config.json db port changed to 5433, server.js reads PORT from env not config",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 5432",
+        "replace": "\"port\": 5433"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5433"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "flag_behavior",
+      "PE-03"
+    ],
+    "rationale": "Config db port changed but server reads port from env only — config→process propagation gap"
+  },
+  {
+    "id": "pe-behavior-017",
+    "description": "PE-03: DEBUG enabled in .env.staging, docker-compose.test.yml has no DEBUG variable",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "DEBUG=true",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.test.yml",
+        "pattern": "DEBUG"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "flag_behavior",
+      "PE-03"
+    ],
+    "rationale": "Debug flag toggled but test compose has no DEBUG env — flag doesnt propagate to test runtime"
+  },
+  {
+    "id": "pe-behavior-018",
+    "description": "PE-03 control: analytics enabled in config.json, check config.json for new value",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"analytics\": true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "config",
+      "flag_behavior",
+      "PE-03",
+      "control"
+    ],
+    "rationale": "Same-file check — flag value is present"
+  },
+  {
+    "id": "pr-bolster-200",
+    "description": "propagation-config: Add column to init.sql, server.js unaware",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email VARCHAR(255) NOT NULL,\n    phone VARCHAR(20),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "phone"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Add column to init.sql, server.js unaware"
+  },
+  {
+    "id": "pr-bolster-201",
+    "description": "propagation-config: Change .env port, compose not updated",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "4000:"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Change .env port, compose not updated"
+  },
+  {
+    "id": "pr-bolster-202",
+    "description": "propagation-config: Change config.json feature flag, server.js not updated",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false, \"newFeature\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "newFeature"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Change config.json feature flag, server.js not updated"
+  },
+  {
+    "id": "pr-bolster-203",
+    "description": "propagation-config: Rename column in init.sql, server.js uses old name",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "password_hash TEXT NOT NULL,",
+        "replace": "password_digest TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "password_digest"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Rename column in init.sql, server.js uses old name"
+  },
+  {
+    "id": "pr-bolster-204",
+    "description": "propagation-config: Add env var to .env, Dockerfile has no matching ENV",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false\nAPI_VERSION=v2"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "API_VERSION"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Add env var to .env, Dockerfile has no matching ENV"
+  },
+  {
+    "id": "pr-bolster-205",
+    "description": "propagation-config: Change Dockerfile node version, compose image tag unchanged",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:18-slim",
+        "replace": "FROM node:20-slim"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "node:20"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Change Dockerfile node version, compose image tag unchanged"
+  },
+  {
+    "id": "pr-bolster-206",
+    "description": "propagation-config: Add migration column, config.json has no reference",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "avatar"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE users ADD COLUMN avatar TEXT;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Add migration column, config.json has no reference"
+  },
+  {
+    "id": "pr-bolster-207",
+    "description": "propagation-config: Change health response, Dockerfile healthcheck unchanged",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'ready' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "status: 'ok'"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Change health response, Dockerfile healthcheck unchanged"
+  },
+  {
+    "id": "pr-bolster-208",
+    "description": "propagation-config: Control: edit server.js, check server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: edit server.js, check server.js"
+  },
+  {
+    "id": "pr-bolster-209",
+    "description": "propagation-config: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "pr-bolster-210",
+    "description": "propagation-config: Control: init.sql has users table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE users"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "propagation",
+      "config",
+      "control"
+    ],
+    "rationale": "Control: init.sql has users table"
+  },
+  {
+    "id": "pr-bolster-211",
+    "description": "propagation-config: Add table to init.sql, server.js has no API for it",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE sessions",
+        "replace": "CREATE TABLE tags (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(50)\n);\n\nCREATE TABLE sessions"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "tags"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "propagation",
+      "config",
+      "propagation_gap"
+    ],
+    "rationale": "Add table to init.sql, server.js has no API for it"
+  }
+]

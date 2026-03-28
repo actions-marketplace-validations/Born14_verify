@@ -122,5 +122,492 @@
       "all_pass"
     ],
     "rationale": "Edit changes port, content predicate finds new value, filesystem confirms file exists"
+  },
+  {
+    "id": "tri-bolster-100",
+    "description": "single filesystem_exists pass: server.js",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "filesystem_exists"
+    ],
+    "rationale": "Single filesystem_exists predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-101",
+    "description": "single filesystem_exists fail: nonexistent.js",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "nonexistent.js"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "filesystem_exists"
+    ],
+    "rationale": "Single filesystem_exists predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-102",
+    "description": "single content pass: server.js",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "content"
+    ],
+    "rationale": "Single content predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-103",
+    "description": "single content fail: server.js",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "NONEXISTENT_PATTERN_XYZ"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "content"
+    ],
+    "rationale": "Single content predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-104",
+    "description": "single content pass: config.json",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 3000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "content"
+    ],
+    "rationale": "Single content predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-105",
+    "description": "single content fail: config.json",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"nonexistent_key\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "content"
+    ],
+    "rationale": "Single content predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-106",
+    "description": "single config pass: PORT",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "3000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "config"
+    ],
+    "rationale": "Single config predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-107",
+    "description": "single config fail: PORT",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "9999"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "config"
+    ],
+    "rationale": "Single config predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-108",
+    "description": "single config pass: NODE_ENV",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "NODE_ENV",
+        "expected": "production"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "config"
+    ],
+    "rationale": "Single config predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-109",
+    "description": "single config fail: NODE_ENV",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "NODE_ENV",
+        "expected": "staging"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "config"
+    ],
+    "rationale": "Single config predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-110",
+    "description": "single filesystem_exists pass: Dockerfile",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "Dockerfile"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "filesystem_exists"
+    ],
+    "rationale": "Single filesystem_exists predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-111",
+    "description": "single filesystem_exists fail: Makefile",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "Makefile"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "filesystem_exists"
+    ],
+    "rationale": "Single filesystem_exists predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-112",
+    "description": "single content pass: .env",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SECRET_KEY"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "content"
+    ],
+    "rationale": "Single content predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-113",
+    "description": "single content fail: .env",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "STRIPE_API_KEY"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "content"
+    ],
+    "rationale": "Single content predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-114",
+    "description": "single config pass: SECRET_KEY",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "SECRET_KEY",
+        "expected": "not-very-secret"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "single_pass",
+      "config"
+    ],
+    "rationale": "Single config predicate passes — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-115",
+    "description": "single config fail: REDIS_URL",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "REDIS_URL",
+        "expected": "redis://localhost"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "single_fail",
+      "config"
+    ],
+    "rationale": "Single config predicate fails — triangulation with 1 authority"
+  },
+  {
+    "id": "tri-bolster-116",
+    "description": "dual: filesystem_exists(✓) + content(✓)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "dual",
+      "both_pass"
+    ],
+    "rationale": "Two authorities: pass + pass"
+  },
+  {
+    "id": "tri-bolster-117",
+    "description": "dual: filesystem_exists(✓) + content(✗)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "NONEXISTENT_PATTERN_XYZ"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "dual",
+      "mixed_or_fail"
+    ],
+    "rationale": "Two authorities: pass + fail"
+  },
+  {
+    "id": "tri-bolster-118",
+    "description": "dual: filesystem_exists(✗) + content(✗)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "nonexistent.js"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "NONEXISTENT_PATTERN_XYZ"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "dual",
+      "mixed_or_fail"
+    ],
+    "rationale": "Two authorities: fail + fail"
+  },
+  {
+    "id": "tri-bolster-119",
+    "description": "dual: content(✓) + config(✓)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 3000"
+      },
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "3000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "dual",
+      "both_pass"
+    ],
+    "rationale": "Two authorities: pass + pass"
+  },
+  {
+    "id": "tri-bolster-120",
+    "description": "dual: content(✗) + config(✗)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"nonexistent_key\""
+      },
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "9999"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "dual",
+      "mixed_or_fail"
+    ],
+    "rationale": "Two authorities: fail + fail"
+  },
+  {
+    "id": "tri-bolster-121",
+    "description": "dual: content(✓) + config(✗)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 3000"
+      },
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "9999"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "dual",
+      "mixed_or_fail"
+    ],
+    "rationale": "Two authorities: pass + fail"
+  },
+  {
+    "id": "tri-bolster-122",
+    "description": "dual: filesystem_exists(✓) + config(✓)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      },
+      {
+        "type": "config",
+        "key": "NODE_ENV",
+        "expected": "production"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "triangulation",
+      "dual",
+      "both_pass"
+    ],
+    "rationale": "Two authorities: pass + pass"
+  },
+  {
+    "id": "tri-bolster-123",
+    "description": "dual: filesystem_exists(✗) + config(✗)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "nonexistent.js"
+      },
+      {
+        "type": "config",
+        "key": "NODE_ENV",
+        "expected": "staging"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "triangulation",
+      "dual",
+      "mixed_or_fail"
+    ],
+    "rationale": "Two authorities: fail + fail"
   }
 ]

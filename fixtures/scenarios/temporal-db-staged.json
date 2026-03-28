@@ -403,5 +403,468 @@
       "pure"
     ],
     "rationale": "Schema constraint added but config has no awareness — temporal gap between layers"
+  },
+  {
+    "id": "td-bolster-100",
+    "description": "TD-04: Add index on users.email, server.js has no indexed query",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "idx_users_email"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_index",
+          "sql": "CREATE INDEX idx_users_email ON users(email);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "index_gap",
+      "TD-04"
+    ],
+    "rationale": "Database index/constraint added but application code unaware"
+  },
+  {
+    "id": "td-bolster-101",
+    "description": "TD-04: Add index on posts.user_id, config.json has no index config",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "idx_posts_user"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_index",
+          "sql": "CREATE INDEX idx_posts_user ON posts(user_id);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "index_gap",
+      "TD-04"
+    ],
+    "rationale": "Database index/constraint added but application code unaware"
+  },
+  {
+    "id": "td-bolster-102",
+    "description": "TD-04: Add unique constraint on sessions.token, .env has no constraint reference",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "uniq_token"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_index",
+          "sql": "ALTER TABLE sessions ADD CONSTRAINT uniq_token UNIQUE(token);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "index_gap",
+      "TD-04"
+    ],
+    "rationale": "Database index/constraint added but application code unaware"
+  },
+  {
+    "id": "td-bolster-103",
+    "description": "TD-04: Control: add index, verify in init.sql content",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "idx_posts_title"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_index",
+          "sql": "CREATE INDEX idx_posts_title ON posts(title);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "index_gap",
+      "TD-04"
+    ],
+    "rationale": "Database index/constraint added but application code unaware"
+  },
+  {
+    "id": "td-bolster-104",
+    "description": "TD-05: Change view_count from INTEGER to BIGINT, server.js unchanged",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "BIGINT"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "alter_type",
+          "sql": "ALTER TABLE posts ALTER COLUMN view_count TYPE BIGINT;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "type_change",
+      "TD-05"
+    ],
+    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+  },
+  {
+    "id": "td-bolster-105",
+    "description": "TD-05: Change username from VARCHAR(100) to TEXT, init.sql has old type",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "username TEXT"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "alter_type",
+          "sql": "ALTER TABLE users ALTER COLUMN username TYPE TEXT;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "type_change",
+      "TD-05"
+    ],
+    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+  },
+  {
+    "id": "td-bolster-106",
+    "description": "TD-05: Add NOT NULL to posts.title, server.js has no validation",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "NOT NULL"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "alter_type",
+          "sql": "ALTER TABLE posts ALTER COLUMN title SET NOT NULL;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "type_change",
+      "TD-05"
+    ],
+    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+  },
+  {
+    "id": "td-bolster-107",
+    "description": "TD-05: Add DEFAULT to users.created_at, config.json unaware",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "DEFAULT"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "alter_type",
+          "sql": "ALTER TABLE users ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "type_change",
+      "TD-05"
+    ],
+    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+  },
+  {
+    "id": "td-bolster-108",
+    "description": "TD-05: Control: migration adds column, check init.sql for table name",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE users"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "alter_type",
+          "sql": "ALTER TABLE users ADD COLUMN phone VARCHAR(20);"
+        }
+      ]
+    },
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "database",
+      "type_change",
+      "TD-05",
+      "control"
+    ],
+    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+  },
+  {
+    "id": "td-bolster-109",
+    "description": "TD-06: Two migrations: add column then index, check column exists",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "bio"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE users ADD COLUMN bio TEXT;"
+        },
+        {
+          "name": "add_idx",
+          "sql": "CREATE INDEX idx_bio ON users(bio);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "multi_migration",
+      "TD-06"
+    ],
+    "rationale": "Multiple migrations applied but application layer not updated"
+  },
+  {
+    "id": "td-bolster-110",
+    "description": "TD-06: Two migrations: create table then populate, check server.js",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "tags"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "create",
+          "sql": "CREATE TABLE tags (id SERIAL PRIMARY KEY, name VARCHAR(50));"
+        },
+        {
+          "name": "seed",
+          "sql": "INSERT INTO tags (name) VALUES ('important');"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "multi_migration",
+      "TD-06"
+    ],
+    "rationale": "Multiple migrations applied but application layer not updated"
+  },
+  {
+    "id": "td-bolster-111",
+    "description": "TD-06: Control: two migrations, check init.sql still has users",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE users"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "m1",
+          "sql": "ALTER TABLE users ADD COLUMN avatar TEXT;"
+        },
+        {
+          "name": "m2",
+          "sql": "ALTER TABLE posts ADD COLUMN slug TEXT;"
+        }
+      ]
+    },
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "database",
+      "multi_migration",
+      "TD-06",
+      "control"
+    ],
+    "rationale": "Multiple migrations applied but application layer not updated"
+  },
+  {
+    "id": "td-bolster-112",
+    "description": "TD-07: Add FK from posts.author_id → users.id, server.js has no join logic",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "fk_author"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_fk",
+          "sql": "ALTER TABLE posts ADD CONSTRAINT fk_author FOREIGN KEY (user_id) REFERENCES users(id);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "foreign_key",
+      "TD-07"
+    ],
+    "rationale": "Foreign key/constraint added but application code has no awareness"
+  },
+  {
+    "id": "td-bolster-113",
+    "description": "TD-07: Add cascade delete FK, config.json unaware of cascade",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "CASCADE"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_fk",
+          "sql": "ALTER TABLE sessions ADD CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "foreign_key",
+      "TD-07"
+    ],
+    "rationale": "Foreign key/constraint added but application code has no awareness"
+  },
+  {
+    "id": "td-bolster-114",
+    "description": "TD-07: Add check constraint on view_count, server.js has no validation",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "chk_views"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_fk",
+          "sql": "ALTER TABLE posts ADD CONSTRAINT chk_views CHECK (view_count >= 0);"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "database",
+      "foreign_key",
+      "TD-07"
+    ],
+    "rationale": "Foreign key/constraint added but application code has no awareness"
+  },
+  {
+    "id": "td-bolster-115",
+    "description": "TD-07: Control: add FK, verify init.sql still has both tables",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE posts"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_fk",
+          "sql": "ALTER TABLE posts ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);"
+        }
+      ]
+    },
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "database",
+      "foreign_key",
+      "TD-07",
+      "control"
+    ],
+    "rationale": "Foreign key/constraint added but application code has no awareness"
   }
 ]

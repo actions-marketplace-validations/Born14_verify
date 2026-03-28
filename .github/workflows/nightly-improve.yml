@@ -27,6 +27,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 env:
   BUN_VERSION: '1.2.2'

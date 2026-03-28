@@ -1,0 +1,854 @@
+[
+  {
+    "id": "hm-rw-001",
+    "description": "HM-01: Step 1 reads /api/items (public), step 2 POSTs new item requiring auth header",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items') {",
+        "replace": "if (req.url === '/api/items' && req.method === 'POST') {\n    if (!req.headers.authorization) { res.writeHead(401); res.end('Unauthorized'); return; }\n    res.writeHead(201, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ id: 3, name: 'Gamma' }));\n    return;\n  }\n  if (req.url === '/api/items') {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/api/items",
+        "expect": {
+          "status": 200
+        }
+      },
+      {
+        "type": "http",
+        "method": "POST",
+        "path": "/api/items",
+        "expect": {
+          "status": 201
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "auth_escalation",
+      "HM-01"
+    ],
+    "rationale": "GET is public but POST requires Authorization header — step 2 fails with 401"
+  },
+  {
+    "id": "hm-rw-002",
+    "description": "HM-01: Step 1 reads config.json, step 2 writes config.prod.json (prod file, restricted)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      },
+      {
+        "file": "config.prod.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"analytics\": true"
+      },
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "\"analytics\": true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "auth_escalation",
+      "HM-01"
+    ],
+    "rationale": "Both edits succeed at file level but config.prod.json should be deployment-gated — implicit privilege escalation"
+  },
+  {
+    "id": "hm-rw-003",
+    "description": "HM-01: Step 1 reads .env (dev), step 2 overwrites .env.prod (production secrets)",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      },
+      {
+        "file": ".env.prod",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=true"
+      },
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "DEBUG=true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "auth_escalation",
+      "HM-01"
+    ],
+    "rationale": "Dev .env is writable but .env.prod contains production secrets — should require elevated access"
+  },
+  {
+    "id": "hm-rw-004",
+    "description": "HM-01: Step 1 GETs /health (public), step 2 attempts POST /health (no handler)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end(JSON.stringify({ status: 'ok' }));",
+        "replace": "res.end(JSON.stringify({ status: 'ok', version: '2.0' }));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      },
+      {
+        "type": "http",
+        "method": "POST",
+        "path": "/health",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "auth_escalation",
+      "HM-01"
+    ],
+    "rationale": "GET /health succeeds but POST /health has no handler — 404 or method not allowed"
+  },
+  {
+    "id": "hm-rw-005",
+    "description": "HM-01 control: Read and write both target server.js (same privilege)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\nconst APP_NAME = 'demo';"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "require('http')"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "APP_NAME = 'demo'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "auth_escalation",
+      "HM-01",
+      "control"
+    ],
+    "rationale": "Both predicates check the same writable file — no privilege escalation"
+  },
+  {
+    "id": "hm-sql-006",
+    "description": "HM-02: Step 1 queries users table, step 2 adds column requiring ALTER privilege",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "ALTER TABLE users ADD COLUMN phone VARCHAR(20);\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "db",
+        "table": "users",
+        "assertion": "table_exists"
+      },
+      {
+        "type": "db",
+        "table": "users",
+        "column": "phone",
+        "assertion": "column_exists"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "admin_required",
+      "HM-02"
+    ],
+    "rationale": "SELECT on users works with read role but ALTER TABLE requires admin — column never created"
+  },
+  {
+    "id": "hm-sql-007",
+    "description": "HM-02: Step 1 queries sessions, step 2 drops index requiring admin privilege",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nDROP INDEX idx_sessions_token;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "db",
+        "table": "sessions",
+        "assertion": "table_exists"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "DROP INDEX idx_sessions_token"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "admin_required",
+      "HM-02"
+    ],
+    "rationale": "Table query works but DROP INDEX requires schema-change privilege — index survives"
+  },
+  {
+    "id": "hm-sql-008",
+    "description": "HM-02: Step 1 reads posts table, step 2 creates new table requiring DDL",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "CREATE TABLE audit_log (\n    id SERIAL PRIMARY KEY,\n    action TEXT NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "db",
+        "table": "posts",
+        "assertion": "table_exists"
+      },
+      {
+        "type": "db",
+        "table": "audit_log",
+        "assertion": "table_exists"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "admin_required",
+      "HM-02"
+    ],
+    "rationale": "Reading posts is fine but CREATE TABLE requires DDL privilege — audit_log never created"
+  },
+  {
+    "id": "hm-sql-009",
+    "description": "HM-02: Step 1 reads settings, step 2 adds GRANT requiring superuser",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE TABLE settings (",
+        "replace": "GRANT ALL ON ALL TABLES IN SCHEMA public TO app_user;\n\nCREATE TABLE settings ("
+      }
+    ],
+    "predicates": [
+      {
+        "type": "db",
+        "table": "settings",
+        "assertion": "table_exists"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "GRANT ALL ON ALL TABLES"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "admin_required",
+      "HM-02"
+    ],
+    "rationale": "GRANT requires superuser — settings table readable but privilege escalation blocked"
+  },
+  {
+    "id": "hm-sql-010",
+    "description": "HM-02 control: Both steps query existing tables (no DDL needed)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "db",
+        "table": "users",
+        "assertion": "table_exists"
+      },
+      {
+        "type": "db",
+        "table": "posts",
+        "assertion": "table_exists"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "admin_required",
+      "HM-02",
+      "control"
+    ],
+    "rationale": "Both steps are read-only queries — no privilege escalation needed"
+  },
+  {
+    "id": "hm-sudo-011",
+    "description": "HM-03: Edit changes port to 80 (privileged), predicate expects service on port 80",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 80;"
+      },
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 80"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "PORT || 80"
+      },
+      {
+        "type": "http",
+        "path": "/",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "sudo_required",
+      "HM-03"
+    ],
+    "rationale": "Code deploys fine but binding to port 80 requires root — container fails to start"
+  },
+  {
+    "id": "hm-sudo-012",
+    "description": "HM-03: docker-compose binds host /var/log, requires root for host path access",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "retries: 3",
+        "replace": "retries: 3\n    volumes:\n      - /var/log/app:/app/logs"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "/var/log/app:/app/logs"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "build: ."
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "sudo_required",
+      "HM-03"
+    ],
+    "rationale": "Compose file edited but /var/log/app mount requires root on host — runtime access denied"
+  },
+  {
+    "id": "hm-sudo-013",
+    "description": "HM-03: Config change succeeds, predicate expects systemd service restart",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 4000"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "healthcheck"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "sudo_required",
+      "HM-03"
+    ],
+    "rationale": "Config edit succeeds but applying it requires service restart with elevated privileges"
+  },
+  {
+    "id": "hm-sudo-014",
+    "description": "HM-03: docker-compose adds custom network, requires Docker daemon access",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "services:\n  app:",
+        "replace": "networks:\n  custom:\n    driver: bridge\n    ipam:\n      config:\n        - subnet: 172.28.0.0/16\nservices:\n  app:\n    networks:\n      - custom"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "subnet: 172.28.0.0/16"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "driver: bridge"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "sudo_required",
+      "HM-03"
+    ],
+    "rationale": "Compose file valid but creating custom Docker network with IPAM requires daemon root"
+  },
+  {
+    "id": "hm-sudo-015",
+    "description": "HM-03 control: Edit and verify both within app-user permissions",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// deploy marker"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "// deploy marker"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 3000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "sudo_required",
+      "HM-03",
+      "control"
+    ],
+    "rationale": "Both steps operate within app-user permissions — no sudo needed"
+  },
+  {
+    "id": "hm-bolster-100",
+    "description": "HM-bolster: server.js port changed, config.json unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "server.js port changed, config.json unaware"
+  },
+  {
+    "id": "hm-bolster-101",
+    "description": "HM-bolster: config.json port changed, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "config.json port changed, server.js unaware"
+  },
+  {
+    "id": "hm-bolster-102",
+    "description": "HM-bolster: .env port changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": ".env port changed, Dockerfile unaware"
+  },
+  {
+    "id": "hm-bolster-103",
+    "description": "HM-bolster: Dockerfile EXPOSE changed, .env unaware",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+  },
+  {
+    "id": "hm-bolster-104",
+    "description": "HM-bolster: health response changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "healthy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "health response changed, Dockerfile unaware"
+  },
+  {
+    "id": "hm-bolster-105",
+    "description": "HM-bolster: app name changed in config, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"New App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "New App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "app name changed in config, server.js unaware"
+  },
+  {
+    "id": "hm-bolster-106",
+    "description": "HM-bolster: NODE_ENV changed, server.js unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "NODE_ENV changed, server.js unaware"
+  },
+  {
+    "id": "hm-bolster-107",
+    "description": "HM-bolster: SECRET_KEY changed, config.json unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-secret-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "new-secret"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "SECRET_KEY changed, config.json unaware"
+  },
+  {
+    "id": "hm-bolster-108",
+    "description": "HM-bolster: control: server.js port changed, verify in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js port changed, verify in server.js"
+  },
+  {
+    "id": "hm-bolster-109",
+    "description": "HM-bolster: control: config.json port changed, config gate reads it",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "app.port",
+        "expected": "5000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster",
+      "control"
+    ],
+    "rationale": "control: config.json port changed, config gate reads it"
+  },
+  {
+    "id": "hm-bolster-110",
+    "description": "HM-bolster: control: .env PORT changed, config gate reads it",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster",
+      "control"
+    ],
+    "rationale": "control: .env PORT changed, config gate reads it"
+  },
+  {
+    "id": "hm-bolster-111",
+    "description": "HM-bolster: control: server.js still exists after edit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// modified"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js still exists after edit"
+  },
+  {
+    "id": "hm-bolster-112",
+    "description": "HM-bolster: fabricated: package.json does not exist",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "package.json"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster"
+    ],
+    "rationale": "fabricated: package.json does not exist"
+  },
+  {
+    "id": "hm-bolster-113",
+    "description": "HM-bolster: control: server.js exists without edits",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js exists without edits"
+  },
+  {
+    "id": "hm-bolster-114",
+    "description": "HM-bolster: control: server.js has createServer",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "multistep",
+      "hm-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js has createServer"
+  }
+]

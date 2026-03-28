@@ -1,0 +1,919 @@
+[
+  {
+    "id": "jm-deploy-001",
+    "description": "JM-01: Deploy A changes config.json port AND .env port, deploy B also changes .env port",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 4000"
+      },
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4000"
+      },
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 4000"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "config_deploy",
+      "JM-01"
+    ],
+    "rationale": "Deploy A step 2 changes .env to 4000, deploy B tries same line — search \"PORT=3000\" gone"
+  },
+  {
+    "id": "jm-deploy-002",
+    "description": "JM-01: Deploy A enables darkMode, deploy B disables darkMode in same config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": false"
+      },
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"darkMode\": true, \"theme\": \"auto\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"theme\": \"auto\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "config_deploy",
+      "JM-01"
+    ],
+    "rationale": "Deploy A turns off darkMode, deploy B search for darkMode:true gone — interleaving conflict"
+  },
+  {
+    "id": "jm-deploy-003",
+    "description": "JM-01: Two deploys both update SECRET_KEY in .env with different rotation values",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"rotation-alpha-2026\""
+      },
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"rotation-beta-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "rotation-beta-2026"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "config_deploy",
+      "JM-01"
+    ],
+    "rationale": "Both deploys rotate same secret — second search gone after first applies alpha rotation"
+  },
+  {
+    "id": "jm-deploy-004",
+    "description": "JM-01: Two deploys both update Dockerfile base image to different versions",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM node:22-alpine"
+      },
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM node:21-slim"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "FROM node:21-slim"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "config_deploy",
+      "JM-01"
+    ],
+    "rationale": "Both deploys update base image — second search \"node:20-alpine\" gone after first edit"
+  },
+  {
+    "id": "jm-deploy-005",
+    "description": "JM-01: Two deploys both change host port mapping in docker-compose.yml",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "\"${VERIFY_HOST_PORT:-3000}:3000\"",
+        "replace": "\"${VERIFY_HOST_PORT:-4000}:3000\""
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "\"${VERIFY_HOST_PORT:-3000}:3000\"",
+        "replace": "\"${VERIFY_HOST_PORT:-5000}:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "VERIFY_HOST_PORT:-5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "config_deploy",
+      "JM-01"
+    ],
+    "rationale": "Both deploys change host port — second search gone after first changes to 4000"
+  },
+  {
+    "id": "jm-deploy-006",
+    "description": "JM-01 control: Deploy A updates config.json features, deploy B updates .env debug (no conflict)",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"analytics\": false",
+        "replace": "\"analytics\": true"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=true"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"analytics\": true"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=true"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "multistep",
+      "config_deploy",
+      "JM-01",
+      "control"
+    ],
+    "rationale": "Deploys touch different files — no interleaving conflict"
+  },
+  {
+    "id": "jm-migrate-007",
+    "description": "JM-02: Two migrations both add column to users table after is_active line",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    is_active BOOLEAN DEFAULT true,",
+        "replace": "    is_active BOOLEAN DEFAULT true,\n    last_login TIMESTAMP,"
+      },
+      {
+        "file": "init.sql",
+        "search": "    is_active BOOLEAN DEFAULT true,",
+        "replace": "    is_active BOOLEAN DEFAULT true,\n    avatar_url TEXT,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "avatar_url TEXT"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "migration_conflict",
+      "JM-02"
+    ],
+    "rationale": "Both migrations insert after is_active — second search gone after first adds last_login"
+  },
+  {
+    "id": "jm-migrate-008",
+    "description": "JM-02: Two migrations both change sessions.token column definition",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    token TEXT NOT NULL UNIQUE,",
+        "replace": "    token VARCHAR(512) NOT NULL UNIQUE,"
+      },
+      {
+        "file": "init.sql",
+        "search": "    token TEXT NOT NULL UNIQUE,",
+        "replace": "    token TEXT NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "    token TEXT NOT NULL,"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "migration_conflict",
+      "JM-02"
+    ],
+    "rationale": "Both migrations change token column — second search gone after first changes to VARCHAR"
+  },
+  {
+    "id": "jm-migrate-009",
+    "description": "JM-02: Two migrations both add index after existing sessions indexes",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nCREATE INDEX idx_sessions_user ON sessions(user_id);"
+      },
+      {
+        "file": "init.sql",
+        "search": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);",
+        "replace": "CREATE INDEX idx_sessions_expires ON sessions(expires_at);\nCREATE INDEX idx_sessions_created ON sessions(created_at);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "idx_sessions_created"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "migration_conflict",
+      "JM-02"
+    ],
+    "rationale": "Both migrations insert after expires index — second search gone after first adds user index"
+  },
+  {
+    "id": "jm-migrate-010",
+    "description": "JM-02: Two migrations both change posts.published column default",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    published BOOLEAN DEFAULT false,",
+        "replace": "    published BOOLEAN DEFAULT true,"
+      },
+      {
+        "file": "init.sql",
+        "search": "    published BOOLEAN DEFAULT false,",
+        "replace": "    published BOOLEAN NOT NULL DEFAULT false,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "published BOOLEAN NOT NULL DEFAULT false"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "migration_conflict",
+      "JM-02"
+    ],
+    "rationale": "Both migrations modify published column — second search gone after first changes default"
+  },
+  {
+    "id": "jm-migrate-011",
+    "description": "JM-02: Two migrations both modify settings table value column",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    value JSONB NOT NULL,",
+        "replace": "    value JSONB NOT NULL DEFAULT '{}'::jsonb,"
+      },
+      {
+        "file": "init.sql",
+        "search": "    value JSONB NOT NULL,",
+        "replace": "    value JSONB NOT NULL CHECK (value IS NOT NULL),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CHECK (value IS NOT NULL)"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "migration_conflict",
+      "JM-02"
+    ],
+    "rationale": "Both migrations modify value column — second search gone after first adds default"
+  },
+  {
+    "id": "jm-migrate-012",
+    "description": "JM-02 control: Migration A adds users column, migration B adds posts column (no conflict)",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "    is_active BOOLEAN DEFAULT true,",
+        "replace": "    is_active BOOLEAN DEFAULT true,\n    bio TEXT,"
+      },
+      {
+        "file": "init.sql",
+        "search": "    view_count INTEGER DEFAULT 0,",
+        "replace": "    view_count INTEGER DEFAULT 0,\n    category VARCHAR(50),"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio TEXT"
+      },
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "category VARCHAR(50)"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "multistep",
+      "migration_conflict",
+      "JM-02",
+      "control"
+    ],
+    "rationale": "Different tables — no migration conflict, both additions apply cleanly"
+  },
+  {
+    "id": "jm-build-013",
+    "description": "JM-03: Two builds both change WORKDIR in Dockerfile to different directories",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "WORKDIR /app",
+        "replace": "WORKDIR /opt/app"
+      },
+      {
+        "file": "Dockerfile",
+        "search": "WORKDIR /app",
+        "replace": "WORKDIR /srv/demo"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "WORKDIR /srv/demo"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "build_conflict",
+      "JM-03"
+    ],
+    "rationale": "Both builds change WORKDIR — second search gone after first changes to /opt/app"
+  },
+  {
+    "id": "jm-build-014",
+    "description": "JM-03: Two builds both change COPY instruction to different source files",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY dist/ ."
+      },
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY build/ ."
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "COPY build/ ."
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "build_conflict",
+      "JM-03"
+    ],
+    "rationale": "Both builds change COPY source — second search gone after first changes to dist/"
+  },
+  {
+    "id": "jm-build-015",
+    "description": "JM-03: Two builds both change HEALTHCHECK command in Dockerfile",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "HEALTHCHECK --interval=5s --timeout=3s CMD wget -q -O- http://localhost:3000/health || exit 1",
+        "replace": "HEALTHCHECK --interval=10s --timeout=5s CMD curl -f http://localhost:3000/health || exit 1"
+      },
+      {
+        "file": "Dockerfile",
+        "search": "HEALTHCHECK --interval=5s --timeout=3s CMD wget -q -O- http://localhost:3000/health || exit 1",
+        "replace": "HEALTHCHECK --interval=30s --timeout=10s CMD wget -q -O- http://localhost:3000/ready || exit 1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "interval=30s"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "build_conflict",
+      "JM-03"
+    ],
+    "rationale": "Both builds change HEALTHCHECK — second search gone after first changes to curl"
+  },
+  {
+    "id": "jm-build-016",
+    "description": "JM-03: Two builds both change build context in docker-compose.yml",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "    build: .",
+        "replace": "    build:\n      context: .\n      dockerfile: Dockerfile.prod"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "    build: .",
+        "replace": "    build:\n      context: ./src\n      dockerfile: Dockerfile"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "context: ./src"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "build_conflict",
+      "JM-03"
+    ],
+    "rationale": "Both builds change build context — second search gone after first restructures to multi-line"
+  },
+  {
+    "id": "jm-build-017",
+    "description": "JM-03: Two builds both change EXPOSE port in Dockerfile",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 4000"
+      },
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOSE 8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "build_conflict",
+      "JM-03"
+    ],
+    "rationale": "Both builds change EXPOSE — second search gone after first changes to 4000"
+  },
+  {
+    "id": "jm-build-018",
+    "description": "JM-03 control: Build A changes Dockerfile CMD, build B changes compose env (no conflict)",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "CMD [\"node\", \"server.js\"]",
+        "replace": "CMD [\"node\", \"app.js\"]"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "- PORT=3000",
+        "replace": "- PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "CMD [\"node\", \"app.js\"]"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "PORT=4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "multistep",
+      "build_conflict",
+      "JM-03",
+      "control"
+    ],
+    "rationale": "Different files — no build output conflict, both apply cleanly"
+  },
+  {
+    "id": "co-bolster-200",
+    "description": "contention-multistep: Two edits to server.js, second overwrites first",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'First' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'First' }",
+        "replace": "{ id: 1, name: 'Second' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "First"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Two edits to server.js, second overwrites first"
+  },
+  {
+    "id": "co-bolster-201",
+    "description": "contention-multistep: Edit server.js and config.json with conflicting ports",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "server.listen(port",
+        "replace": "server.listen(8080"
+      },
+      {
+        "file": "config.json",
+        "search": "\"port\": 5432",
+        "replace": "\"port\": 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Edit server.js and config.json with conflicting ports"
+  },
+  {
+    "id": "co-bolster-202",
+    "description": "contention-multistep: Edit .env and compose with different ports",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5000"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "\"3000:3000\"",
+        "replace": "\"6000:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "6000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Edit .env and compose with different ports"
+  },
+  {
+    "id": "co-bolster-203",
+    "description": "contention-multistep: Two migrations on same table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "m1",
+          "sql": "ALTER TABLE users ADD COLUMN bio TEXT;"
+        },
+        {
+          "name": "m2",
+          "sql": "ALTER TABLE users DROP COLUMN bio;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Two migrations on same table"
+  },
+  {
+    "id": "co-bolster-204",
+    "description": "contention-multistep: Edit init.sql and server.js with mismatched column names",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email_address VARCHAR(255) NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email_address"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Edit init.sql and server.js with mismatched column names"
+  },
+  {
+    "id": "co-bolster-205",
+    "description": "contention-multistep: Compose restart policy conflicts with Dockerfile CMD",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "restart: unless-stopped",
+        "replace": "restart: \"no\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "restart"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+  },
+  {
+    "id": "co-bolster-206",
+    "description": "contention-multistep: Edit both health endpoint and healthcheck with different paths",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/healthz'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/healthz"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Edit both health endpoint and healthcheck with different paths"
+  },
+  {
+    "id": "co-bolster-207",
+    "description": "contention-multistep: Config.json and .env disagree on debug",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"debug\": true"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "\"debug\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "multistep",
+      "contention_gap"
+    ],
+    "rationale": "Config.json and .env disagree on debug"
+  },
+  {
+    "id": "co-bolster-208",
+    "description": "contention-multistep: Control: single edit, consistent check",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Control: single edit, consistent check"
+  },
+  {
+    "id": "co-bolster-209",
+    "description": "contention-multistep: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4444"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "4444"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "co-bolster-210",
+    "description": "contention-multistep: Control: edit config.json, check config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"maxRetries\": 3",
+        "replace": "\"maxRetries\": 5"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"maxRetries\": 5"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Control: edit config.json, check config.json"
+  },
+  {
+    "id": "co-bolster-211",
+    "description": "contention-multistep: Two edits to different routes, check both present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'One' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 2, name: 'Beta' }",
+        "replace": "{ id: 2, name: 'Two' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "One"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "multistep",
+      "control"
+    ],
+    "rationale": "Two edits to different routes, check both present"
+  }
+]

@@ -1,0 +1,912 @@
+[
+  {
+    "id": "jb-css-001",
+    "description": "JB-01: Two edits both change h1 color in homepage CSS to different values",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e; font-size: 2rem; }",
+        "replace": "h1 { color: #ff0000; font-size: 2rem; }"
+      },
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e; font-size: 2rem; }",
+        "replace": "h1 { color: #00ff00; font-size: 2rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "h1",
+        "property": "color",
+        "expected": "#00ff00"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "css_conflict",
+      "JB-01"
+    ],
+    "rationale": "Both edits target same h1 color — second search string gone after first changes to red"
+  },
+  {
+    "id": "jb-css-002",
+    "description": "JB-01: Two edits both change body background in homepage CSS",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }",
+        "replace": "body { font-family: sans-serif; margin: 2rem; background: #1a1a2e; color: #333; }"
+      },
+      {
+        "file": "server.js",
+        "search": "body { font-family: sans-serif; margin: 2rem; background: #ffffff; color: #333; }",
+        "replace": "body { font-family: sans-serif; margin: 2rem; background: #f0f0f0; color: #333; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "body",
+        "property": "background",
+        "expected": "#f0f0f0"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "css_conflict",
+      "JB-01"
+    ],
+    "rationale": "Both edits target same body background — second search gone after first changes to navy"
+  },
+  {
+    "id": "jb-css-003",
+    "description": "JB-01: Two edits both change .hero background color on about page",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".hero { background: #3498db; color: white; padding: 2rem; border-radius: 8px; }",
+        "replace": ".hero { background: #e74c3c; color: white; padding: 2rem; border-radius: 8px; }"
+      },
+      {
+        "file": "server.js",
+        "search": ".hero { background: #3498db; color: white; padding: 2rem; border-radius: 8px; }",
+        "replace": ".hero { background: #2ecc71; color: white; padding: 2rem; border-radius: 8px; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": ".hero",
+        "property": "background",
+        "expected": "#2ecc71"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "css_conflict",
+      "JB-01"
+    ],
+    "rationale": "Both edits change .hero background — second search gone after first applies red background"
+  },
+  {
+    "id": "jb-css-004",
+    "description": "JB-01: Two edits both change a.nav-link color in homepage CSS",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "a.nav-link { color: #0066cc; text-decoration: none; margin-right: 1rem; }",
+        "replace": "a.nav-link { color: #e74c3c; text-decoration: none; margin-right: 1rem; }"
+      },
+      {
+        "file": "server.js",
+        "search": "a.nav-link { color: #0066cc; text-decoration: none; margin-right: 1rem; }",
+        "replace": "a.nav-link { color: #9b59b6; text-decoration: none; margin-right: 1rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "a.nav-link",
+        "property": "color",
+        "expected": "#9b59b6"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "css_conflict",
+      "JB-01"
+    ],
+    "rationale": "Both edits target same nav-link color — second search gone after first changes to red"
+  },
+  {
+    "id": "jb-css-005",
+    "description": "JB-01: Two edits both change .badge background on about page",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": ".badge { display: inline-block; background: #e74c3c; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; }",
+        "replace": ".badge { display: inline-block; background: #3498db; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; }"
+      },
+      {
+        "file": "server.js",
+        "search": ".badge { display: inline-block; background: #e74c3c; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; }",
+        "replace": ".badge { display: inline-block; background: #f39c12; color: black; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": ".badge",
+        "property": "background",
+        "expected": "#f39c12"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "css_conflict",
+      "JB-01"
+    ],
+    "rationale": "Both edits change .badge background — second search gone after first changes to blue"
+  },
+  {
+    "id": "jb-css-006",
+    "description": "JB-01 control: Two edits change different CSS selectors (h1 and footer)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "h1 { color: #1a1a2e; font-size: 2rem; }",
+        "replace": "h1 { color: #e74c3c; font-size: 2rem; }"
+      },
+      {
+        "file": "server.js",
+        "search": "footer { margin-top: 2rem; color: #999; font-size: 0.8rem; }",
+        "replace": "footer { margin-top: 2rem; color: #333; font-size: 0.8rem; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": "h1",
+        "property": "color",
+        "expected": "#e74c3c"
+      },
+      {
+        "type": "css",
+        "selector": "footer",
+        "property": "color",
+        "expected": "#333"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "browser",
+      "css_conflict",
+      "JB-01",
+      "control"
+    ],
+    "rationale": "Different selectors — no CSS conflict, both edits apply cleanly"
+  },
+  {
+    "id": "jb-store-007",
+    "description": "JB-02: Two edits both add script setting localStorage theme to different values",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>localStorage.setItem(\"theme\", \"dark\");</script>\n  <footer>Powered by Node.js</footer>"
+      },
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>localStorage.setItem(\"theme\", \"light\");</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "localStorage.setItem(\"theme\", \"light\")"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "localstorage_collision",
+      "JB-02"
+    ],
+    "rationale": "Both edits insert before same footer — second search gone after first adds dark theme script"
+  },
+  {
+    "id": "jb-store-008",
+    "description": "JB-02: Two edits both add script that sets document.title to different values",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<title>Demo App</title>\n  <meta name=\"description\"",
+        "replace": "<title>Demo App</title>\n  <script>document.title = \"Feature A\";</script>\n  <meta name=\"description\""
+      },
+      {
+        "file": "server.js",
+        "search": "<title>Demo App</title>\n  <meta name=\"description\"",
+        "replace": "<title>Demo App</title>\n  <script>document.title = \"Feature B\";</script>\n  <meta name=\"description\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "document.title = \"Feature B\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "localstorage_collision",
+      "JB-02"
+    ],
+    "rationale": "Both edits insert after title tag — second search gone after first adds Feature A script"
+  },
+  {
+    "id": "jb-store-009",
+    "description": "JB-02: Two edits add script setting same cookie name with different values",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "</body>\n</html>`);",
+        "replace": "<script>document.cookie = \"prefs=compact; path=/\";</script>\n</body>\n</html>`);"
+      },
+      {
+        "file": "server.js",
+        "search": "</body>\n</html>`);",
+        "replace": "<script>document.cookie = \"prefs=expanded; path=/\";</script>\n</body>\n</html>`);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "prefs=expanded"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "localstorage_collision",
+      "JB-02"
+    ],
+    "rationale": "Both edits insert before </body> in homepage — second search gone after first adds compact cookie"
+  },
+  {
+    "id": "jb-store-010",
+    "description": "JB-02: Two edits both set sessionStorage \"user_role\" at about page footer",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<script>sessionStorage.setItem(\"user_role\", \"admin\");</script>\n  <footer>About page footer</footer>"
+      },
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<script>sessionStorage.setItem(\"user_role\", \"viewer\");</script>\n  <footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "sessionStorage.setItem(\"user_role\", \"viewer\")"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "localstorage_collision",
+      "JB-02"
+    ],
+    "rationale": "Both edits insert before about footer — second search gone after first sets admin role"
+  },
+  {
+    "id": "jb-store-011",
+    "description": "JB-02 control: Two edits add different localStorage keys (no collision)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>localStorage.setItem(\"sidebar\", \"collapsed\");</script>\n  <footer>Powered by Node.js</footer>"
+      },
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<script>localStorage.setItem(\"language\", \"en\");</script>\n  <footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "localStorage.setItem(\"sidebar\", \"collapsed\")"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "localStorage.setItem(\"language\", \"en\")"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "browser",
+      "localstorage_collision",
+      "JB-02",
+      "control"
+    ],
+    "rationale": "Different keys in different page footers — no storage collision"
+  },
+  {
+    "id": "jb-dom-012",
+    "description": "JB-03: Two edits both change homepage h1 text to different values",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<h1>Demo App</h1>",
+        "replace": "<h1>Alpha Dashboard</h1>"
+      },
+      {
+        "file": "server.js",
+        "search": "<h1>Demo App</h1>",
+        "replace": "<h1>Beta Portal</h1>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "h1",
+        "expected": "Beta Portal"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "dom_mutation",
+      "JB-03"
+    ],
+    "rationale": "Both edits target same h1 — second search gone after first renames to Alpha Dashboard"
+  },
+  {
+    "id": "jb-dom-013",
+    "description": "JB-03: Two edits both restructure homepage nav with different links",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<a class=\"nav-link\" href=\"/\">Home</a>\n    <a class=\"nav-link\" href=\"/api/items\">API</a>",
+        "replace": "<a class=\"nav-link\" href=\"/\">Dashboard</a>\n    <a class=\"nav-link\" href=\"/settings\">Settings</a>"
+      },
+      {
+        "file": "server.js",
+        "search": "<a class=\"nav-link\" href=\"/\">Home</a>\n    <a class=\"nav-link\" href=\"/api/items\">API</a>",
+        "replace": "<a class=\"nav-link\" href=\"/\">Home</a>\n    <a class=\"nav-link\" href=\"/api/items\">API</a>\n    <a class=\"nav-link\" href=\"/admin\">Admin</a>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "href=\"/admin\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "dom_mutation",
+      "JB-03"
+    ],
+    "rationale": "Both edits target same nav links — second search gone after first restructures nav"
+  },
+  {
+    "id": "jb-dom-014",
+    "description": "JB-03: Two edits both change the .subtitle paragraph text",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<p class=\"subtitle\">A minimal app for testing @sovereign-labs/verify</p>",
+        "replace": "<p class=\"subtitle\">Real-time monitoring dashboard</p>"
+      },
+      {
+        "file": "server.js",
+        "search": "<p class=\"subtitle\">A minimal app for testing @sovereign-labs/verify</p>",
+        "replace": "<p class=\"subtitle\">Production deployment manager</p>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": ".subtitle",
+        "expected": "Production deployment manager"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "dom_mutation",
+      "JB-03"
+    ],
+    "rationale": "Both edits target same subtitle — second search gone after first changes text"
+  },
+  {
+    "id": "jb-dom-015",
+    "description": "JB-03: Two edits both change .hero-title text on about page",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<span class=\"hero-title\">About This App</span>",
+        "replace": "<span class=\"hero-title\">Our Mission</span>"
+      },
+      {
+        "file": "server.js",
+        "search": "<span class=\"hero-title\">About This App</span>",
+        "replace": "<span class=\"hero-title\">Company Overview</span>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": ".hero-title",
+        "expected": "Company Overview"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "dom_mutation",
+      "JB-03"
+    ],
+    "rationale": "Both edits target same .hero-title — second search gone after first changes to Our Mission"
+  },
+  {
+    "id": "jb-dom-016",
+    "description": "JB-03: Two edits both change Contact Form h1 on form page",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<h1>Contact Form</h1>",
+        "replace": "<h1>Get In Touch</h1>"
+      },
+      {
+        "file": "server.js",
+        "search": "<h1>Contact Form</h1>",
+        "replace": "<h1>Support Request</h1>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "h1",
+        "expected": "Support Request"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "dom_mutation",
+      "JB-03"
+    ],
+    "rationale": "Both edits target same form h1 — second search gone after first renames it"
+  },
+  {
+    "id": "jb-dom-017",
+    "description": "JB-03 control: Edit homepage h1 AND about page hero-title (no collision)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<h1>Demo App</h1>",
+        "replace": "<h1>My App</h1>"
+      },
+      {
+        "file": "server.js",
+        "search": "<span class=\"hero-title\">About This App</span>",
+        "replace": "<span class=\"hero-title\">About Us</span>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "<h1>My App</h1>"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "About Us</span>"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "browser",
+      "dom_mutation",
+      "JB-03",
+      "control"
+    ],
+    "rationale": "Different elements on different pages — no DOM mutation collision"
+  },
+  {
+    "id": "co-bolster-200",
+    "description": "contention-browser: Two edits to server.js, second overwrites first",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'First' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'First' }",
+        "replace": "{ id: 1, name: 'Second' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "First"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Two edits to server.js, second overwrites first"
+  },
+  {
+    "id": "co-bolster-201",
+    "description": "contention-browser: Edit server.js and config.json with conflicting ports",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "server.listen(port",
+        "replace": "server.listen(8080"
+      },
+      {
+        "file": "config.json",
+        "search": "\"port\": 5432",
+        "replace": "\"port\": 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Edit server.js and config.json with conflicting ports"
+  },
+  {
+    "id": "co-bolster-202",
+    "description": "contention-browser: Edit .env and compose with different ports",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5000"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "\"3000:3000\"",
+        "replace": "\"6000:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "6000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Edit .env and compose with different ports"
+  },
+  {
+    "id": "co-bolster-203",
+    "description": "contention-browser: Two migrations on same table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "m1",
+          "sql": "ALTER TABLE users ADD COLUMN bio TEXT;"
+        },
+        {
+          "name": "m2",
+          "sql": "ALTER TABLE users DROP COLUMN bio;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Two migrations on same table"
+  },
+  {
+    "id": "co-bolster-204",
+    "description": "contention-browser: Edit init.sql and server.js with mismatched column names",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email_address VARCHAR(255) NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email_address"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Edit init.sql and server.js with mismatched column names"
+  },
+  {
+    "id": "co-bolster-205",
+    "description": "contention-browser: Compose restart policy conflicts with Dockerfile CMD",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "restart: unless-stopped",
+        "replace": "restart: \"no\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "restart"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+  },
+  {
+    "id": "co-bolster-206",
+    "description": "contention-browser: Edit both health endpoint and healthcheck with different paths",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/healthz'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/healthz"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Edit both health endpoint and healthcheck with different paths"
+  },
+  {
+    "id": "co-bolster-207",
+    "description": "contention-browser: Config.json and .env disagree on debug",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"debug\": true"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "\"debug\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Config.json and .env disagree on debug"
+  },
+  {
+    "id": "co-bolster-208",
+    "description": "contention-browser: Control: single edit, consistent check",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "browser",
+      "control"
+    ],
+    "rationale": "Control: single edit, consistent check"
+  },
+  {
+    "id": "co-bolster-209",
+    "description": "contention-browser: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4444"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "4444"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "browser",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "co-bolster-210",
+    "description": "contention-browser: Control: edit config.json, check config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"maxRetries\": 3",
+        "replace": "\"maxRetries\": 5"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"maxRetries\": 5"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "browser",
+      "control"
+    ],
+    "rationale": "Control: edit config.json, check config.json"
+  },
+  {
+    "id": "co-bolster-211",
+    "description": "contention-browser: Two edits to different routes, check both present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'One' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 2, name: 'Beta' }",
+        "replace": "{ id: 2, name: 'Two' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "One"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "browser",
+      "control"
+    ],
+    "rationale": "Two edits to different routes, check both present"
+  },
+  {
+    "id": "co-bolster-212",
+    "description": "contention-browser: Migration adds column that server.js doesnt reference",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "metadata"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE posts ADD COLUMN metadata JSONB;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "browser",
+      "contention_gap"
+    ],
+    "rationale": "Migration adds column that server.js doesnt reference"
+  }
+]

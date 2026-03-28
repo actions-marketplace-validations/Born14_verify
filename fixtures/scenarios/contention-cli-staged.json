@@ -1,0 +1,890 @@
+[
+  {
+    "id": "jc-port-001",
+    "description": "JC-01: Add worker service on port 3000 — same as app service",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "      retries: 3",
+        "replace": "      retries: 3\n\n  worker:\n    build: .\n    ports:\n      - \"3000:3000\"\n    environment:\n      - PORT=3000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "worker:"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "\"3000:3000\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "port_conflict",
+      "JC-01"
+    ],
+    "rationale": "Edit applies and content matches — but creates runtime port conflict (two services on 3000)"
+  },
+  {
+    "id": "jc-port-002",
+    "description": "JC-01: Edit .env PORT to 5432 — collides with database port in config.json",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5432"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=5432"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 5432"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "port_conflict",
+      "JC-01"
+    ],
+    "rationale": "App port set to 5432 which is also the database port — port contention across services"
+  },
+  {
+    "id": "jc-port-003",
+    "description": "JC-01: Edit server.js default port to 5432, config.json already declares DB on 5432",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 5432;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "|| 5432"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"port\": 5432"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "port_conflict",
+      "JC-01"
+    ],
+    "rationale": "Server defaults to 5432 which is the DB port — structural port collision detectable"
+  },
+  {
+    "id": "jc-port-004",
+    "description": "JC-01: Dockerfile EXPOSE 8080 but docker-compose still maps 3000",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOSE 8080"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "PORT=8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "port_conflict",
+      "JC-01"
+    ],
+    "rationale": "Dockerfile exposes 8080 but docker-compose env still PORT=3000 — port mismatch contention"
+  },
+  {
+    "id": "jc-port-005",
+    "description": "JC-01: Edit adds explicit port mapping that conflicts with variable mapping",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "      - \"${VERIFY_HOST_PORT:-3000}:3000\"",
+        "replace": "      - \"${VERIFY_HOST_PORT:-3000}:3000\"\n      - \"3000:8080\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "\"3000:8080\""
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": ":-3000}:3000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "port_conflict",
+      "JC-01"
+    ],
+    "rationale": "Two mappings using host port 3000 — Docker will fail at runtime with port conflict"
+  },
+  {
+    "id": "jc-port-006",
+    "description": "JC-01 control: Add worker service on different port — no conflict",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "      retries: 3",
+        "replace": "      retries: 3\n\n  worker:\n    build: .\n    ports:\n      - \"4000:4000\"\n    environment:\n      - PORT=4000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "\"4000:4000\""
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "PORT=4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "port_conflict",
+      "JC-01",
+      "control"
+    ],
+    "rationale": "Worker on 4000, app on 3000 — different ports, no contention"
+  },
+  {
+    "id": "jc-pid-007",
+    "description": "JC-02: Edit adds pidFile config, predicate expects both pidFile AND clean startup",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"features\": {",
+        "replace": "\"pidFile\": \"/tmp/demo-app.pid\",\n  \"features\": {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"pidFile\": \"/tmp/demo-app.pid\""
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "pidFile"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "stale_pid",
+      "JC-02"
+    ],
+    "rationale": "Config declares pidFile but server.js has no PID management code — stale PID would block startup"
+  },
+  {
+    "id": "jc-pid-008",
+    "description": "JC-02: Config declares lockDir, predicate expects LOCK_DIR in .env",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"features\": {",
+        "replace": "\"lockDir\": \"/var/lock/demo\",\n  \"features\": {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"lockDir\": \"/var/lock/demo\""
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "LOCK_DIR"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "stale_pid",
+      "JC-02"
+    ],
+    "rationale": "Config references lockDir but .env has no LOCK_DIR — process lock contention at startup"
+  },
+  {
+    "id": "jc-pid-009",
+    "description": "JC-02: Edit adds restart policy to compose, predicate expects SIGTERM handling in server.js",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "    healthcheck:",
+        "replace": "    restart: always\n    healthcheck:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "restart: always"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "SIGTERM"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "stale_pid",
+      "JC-02"
+    ],
+    "rationale": "Restart policy added but server.js has no signal handler — zombie process on restart"
+  },
+  {
+    "id": "jc-pid-010",
+    "description": "JC-02: Edit adds stop_grace_period but no stop_signal — default SIGTERM assumed",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "    healthcheck:",
+        "replace": "    stop_grace_period: 5s\n    healthcheck:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "stop_grace_period: 5s"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "stop_signal:"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "stale_pid",
+      "JC-02"
+    ],
+    "rationale": "Grace period set but no explicit stop_signal — process may not respond to default signal"
+  },
+  {
+    "id": "jc-pid-011",
+    "description": "JC-02 control: Edit adds graceful shutdown config, check only config",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"features\": {",
+        "replace": "\"gracefulShutdownMs\": 5000,\n  \"features\": {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"gracefulShutdownMs\": 5000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "stale_pid",
+      "JC-02",
+      "control"
+    ],
+    "rationale": "Single file edit, same file check — no PID/lock contention"
+  },
+  {
+    "id": "jc-name-012",
+    "description": "JC-03: Edit adds container_name \"demo-app\" to app service, then adds worker with same name",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "  app:\n    build: .",
+        "replace": "  app:\n    container_name: demo-app\n    build: ."
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "      retries: 3",
+        "replace": "      retries: 3\n\n  worker:\n    container_name: demo-app\n    image: node:20-alpine\n    command: node worker.js"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "container_name: demo-app"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "worker:"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "container_name",
+      "JC-03"
+    ],
+    "rationale": "Two services with same container_name — Docker will fail with name conflict at runtime"
+  },
+  {
+    "id": "jc-name-013",
+    "description": "JC-03: Edit adds hostname \"db\" to app service — collides with standard DB service name",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "  app:\n    build: .",
+        "replace": "  app:\n    hostname: db\n    build: ."
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "hostname: db"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.test.yml",
+        "pattern": "db:"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "container_name",
+      "JC-03"
+    ],
+    "rationale": "App hostname \"db\" collides with db service in test compose — DNS resolution contention"
+  },
+  {
+    "id": "jc-name-014",
+    "description": "JC-03: Edit adds network alias \"app\" on a new worker service — same as existing service name",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "      retries: 3",
+        "replace": "      retries: 3\n\n  worker:\n    image: node:20-alpine\n    networks:\n      default:\n        aliases:\n          - app"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "aliases:"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "- app"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "container_name",
+      "JC-03"
+    ],
+    "rationale": "Worker network alias \"app\" conflicts with app service name — Docker DNS contention"
+  },
+  {
+    "id": "jc-name-015",
+    "description": "JC-03: Edit adds multi-stage build with duplicate stage name \"builder\"",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "FROM node:20-alpine",
+        "replace": "FROM node:20-alpine AS builder\nRUN echo \"stage 1\"\n\nFROM node:20-alpine AS builder"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "AS builder"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "container_name",
+      "JC-03"
+    ],
+    "rationale": "Two Dockerfile stages named \"builder\" — later stage overwrites first, creating ambiguity"
+  },
+  {
+    "id": "jc-name-016",
+    "description": "JC-03: Edit adds named volume \"app\" — same as service name",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "      retries: 3",
+        "replace": "      retries: 3\n    volumes:\n      - app:/data\n\nvolumes:\n  app:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "volumes:"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "app:/data"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "container_name",
+      "JC-03"
+    ],
+    "rationale": "Volume named \"app\" same as service name — namespace contention in Docker"
+  },
+  {
+    "id": "jc-name-017",
+    "description": "JC-03 control: Two services with unique container names",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "  app:\n    build: .",
+        "replace": "  app:\n    container_name: demo-web\n    build: ."
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "      retries: 3",
+        "replace": "      retries: 3\n\n  worker:\n    container_name: demo-worker\n    image: node:20-alpine\n    command: node worker.js"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "container_name: demo-web"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "container_name: demo-worker"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "container_name",
+      "JC-03",
+      "control"
+    ],
+    "rationale": "Unique container names — no naming contention"
+  },
+  {
+    "id": "co-bolster-200",
+    "description": "contention-cli: Two edits to server.js, second overwrites first",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'First' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'First' }",
+        "replace": "{ id: 1, name: 'Second' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "First"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Two edits to server.js, second overwrites first"
+  },
+  {
+    "id": "co-bolster-201",
+    "description": "contention-cli: Edit server.js and config.json with conflicting ports",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "server.listen(port",
+        "replace": "server.listen(8080"
+      },
+      {
+        "file": "config.json",
+        "search": "\"port\": 5432",
+        "replace": "\"port\": 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Edit server.js and config.json with conflicting ports"
+  },
+  {
+    "id": "co-bolster-202",
+    "description": "contention-cli: Edit .env and compose with different ports",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5000"
+      },
+      {
+        "file": "docker-compose.yml",
+        "search": "\"3000:3000\"",
+        "replace": "\"6000:3000\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "6000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Edit .env and compose with different ports"
+  },
+  {
+    "id": "co-bolster-203",
+    "description": "contention-cli: Two migrations on same table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "bio"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "m1",
+          "sql": "ALTER TABLE users ADD COLUMN bio TEXT;"
+        },
+        {
+          "name": "m2",
+          "sql": "ALTER TABLE users DROP COLUMN bio;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Two migrations on same table"
+  },
+  {
+    "id": "co-bolster-204",
+    "description": "contention-cli: Edit init.sql and server.js with mismatched column names",
+    "edits": [
+      {
+        "file": "init.sql",
+        "search": "email VARCHAR(255) NOT NULL,",
+        "replace": "email_address VARCHAR(255) NOT NULL,"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "email_address"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Edit init.sql and server.js with mismatched column names"
+  },
+  {
+    "id": "co-bolster-205",
+    "description": "contention-cli: Compose restart policy conflicts with Dockerfile CMD",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "restart: unless-stopped",
+        "replace": "restart: \"no\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "restart"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+  },
+  {
+    "id": "co-bolster-206",
+    "description": "contention-cli: Edit both health endpoint and healthcheck with different paths",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/healthz'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/healthz"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Edit both health endpoint and healthcheck with different paths"
+  },
+  {
+    "id": "co-bolster-207",
+    "description": "contention-cli: Config.json and .env disagree on debug",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"darkMode\": true",
+        "replace": "\"debug\": true"
+      },
+      {
+        "file": ".env",
+        "search": "DEBUG=false",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "\"debug\": true"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Config.json and .env disagree on debug"
+  },
+  {
+    "id": "co-bolster-208",
+    "description": "contention-cli: Control: single edit, consistent check",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Gamma' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Gamma"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "control"
+    ],
+    "rationale": "Control: single edit, consistent check"
+  },
+  {
+    "id": "co-bolster-209",
+    "description": "contention-cli: Control: edit .env, check .env",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=4444"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "4444"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "control"
+    ],
+    "rationale": "Control: edit .env, check .env"
+  },
+  {
+    "id": "co-bolster-210",
+    "description": "contention-cli: Control: edit config.json, check config.json",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"maxRetries\": 3",
+        "replace": "\"maxRetries\": 5"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"maxRetries\": 5"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "control"
+    ],
+    "rationale": "Control: edit config.json, check config.json"
+  },
+  {
+    "id": "co-bolster-211",
+    "description": "contention-cli: Two edits to different routes, check both present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'One' }"
+      },
+      {
+        "file": "server.js",
+        "search": "{ id: 2, name: 'Beta' }",
+        "replace": "{ id: 2, name: 'Two' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "One"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "contention",
+      "cli",
+      "control"
+    ],
+    "rationale": "Two edits to different routes, check both present"
+  },
+  {
+    "id": "co-bolster-212",
+    "description": "contention-cli: Migration adds column that server.js doesnt reference",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "metadata"
+      }
+    ],
+    "config": {
+      "migrations": [
+        {
+          "name": "add_col",
+          "sql": "ALTER TABLE posts ADD COLUMN metadata JSONB;"
+        }
+      ]
+    },
+    "expectedSuccess": false,
+    "tags": [
+      "contention",
+      "cli",
+      "contention_gap"
+    ],
+    "rationale": "Migration adds column that server.js doesnt reference"
+  }
+]

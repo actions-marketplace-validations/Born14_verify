@@ -1,0 +1,764 @@
+[
+  {
+    "id": "hb-csp-001",
+    "description": "HB-01: Server adds CSP header blocking inline scripts, edit adds onclick handler",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'text/html' });",
+        "replace": "res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Security-Policy': \"script-src 'none'\" });"
+      },
+      {
+        "file": "server.js",
+        "search": "<button class=\"primary\">Go</button>",
+        "replace": "<button class=\"primary\" onclick=\"alert('clicked')\">Go</button>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "onclick=\"alert"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "csp_blocked",
+      "HB-01"
+    ],
+    "rationale": "Edit adds onclick but CSP script-src none blocks all inline scripts — content exists but behaviour is dead"
+  },
+  {
+    "id": "hb-csp-002",
+    "description": "HB-01: CSP nonce policy set, edit adds <script> without nonce",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'text/html' });",
+        "replace": "res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Security-Policy': \"script-src 'nonce-abc123'\" });"
+      },
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>document.title = \"Dynamic\";</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "document.title = \"Dynamic\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "csp_blocked",
+      "HB-01"
+    ],
+    "rationale": "Script tag exists in source but CSP requires nonce — browser will refuse to execute it"
+  },
+  {
+    "id": "hb-csp-003",
+    "description": "HB-01: CSP blocks unsafe-eval, edit uses eval for dynamic styling",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>eval(\"document.body.style.background = 'red'\")</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "eval("
+      },
+      {
+        "type": "css",
+        "selector": "body",
+        "property": "background",
+        "expected": "red"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "csp_blocked",
+      "HB-01"
+    ],
+    "rationale": "Edit uses eval() for styling but default CSP blocks unsafe-eval — background never changes"
+  },
+  {
+    "id": "hb-csp-004",
+    "description": "HB-01: CSP style-src self blocks inline style, edit adds new <style> block",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'text/html' });",
+        "replace": "res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Security-Policy': \"style-src 'self'\" });"
+      },
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<style>.injected { color: red; }</style>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "css",
+        "selector": ".injected",
+        "property": "color",
+        "expected": "red"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "csp_blocked",
+      "HB-01"
+    ],
+    "rationale": "Inline <style> added but CSP style-src self blocks inline styles — rule never applies"
+  },
+  {
+    "id": "hb-csp-005",
+    "description": "HB-01: CSP img-src self set, edit adds external image URL",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'text/html' });",
+        "replace": "res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Security-Policy': \"img-src 'self'\" });"
+      },
+      {
+        "file": "server.js",
+        "search": "<img class=\"logo\" src=\"/logo.png\" alt=\"Demo Logo\" />",
+        "replace": "<img class=\"logo\" src=\"https://cdn.external.com/logo.png\" alt=\"Demo Logo\" />"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "img.logo",
+        "attribute": "src",
+        "expected": "https://cdn.external.com/logo.png"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "csp_blocked",
+      "HB-01"
+    ],
+    "rationale": "HTML attribute present but CSP img-src self blocks external URL — image will not load"
+  },
+  {
+    "id": "hb-csp-006",
+    "description": "HB-01 control: No CSP header, inline script added normally",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>console.log(\"hello\")</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "console.log(\"hello\")"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "csp_blocked",
+      "HB-01",
+      "control"
+    ],
+    "rationale": "No CSP restriction — inline script is present and would execute normally"
+  },
+  {
+    "id": "hb-cors-007",
+    "description": "HB-02: Server sets Access-Control-Allow-Origin: same-origin, edit fetches external API",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'application/json' });",
+        "replace": "res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://myapp.example.com' });"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "Access-Control-Allow-Origin"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "cors_rejected",
+      "HB-02"
+    ],
+    "rationale": "CORS header set to specific origin — other origins cannot access the API response"
+  },
+  {
+    "id": "hb-cors-008",
+    "description": "HB-02: Edit adds client-side fetch to external service, no CORS proxy configured",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>fetch(\"https://api.thirdparty.com/data\").then(r => r.json()).then(d => document.getElementById(\"details\").textContent = d.value)</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "#details",
+        "expected": "exists"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "cors_rejected",
+      "HB-02"
+    ],
+    "rationale": "Fetch to third-party API will be CORS-blocked — #details content unchanged from default"
+  },
+  {
+    "id": "hb-cors-009",
+    "description": "HB-02: API endpoint has no CORS headers, edit sends cross-origin POST from client",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>fetch(\"/api/items\", {method:\"POST\",headers:{\"Content-Type\":\"application/json\"},body:JSON.stringify({name:\"New\"})}).catch(e => console.error(e))</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "fetch(\"/api/items\""
+      },
+      {
+        "type": "http",
+        "method": "POST",
+        "path": "/api/items",
+        "expect": {
+          "status": 200
+        }
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cors_rejected",
+      "HB-02"
+    ],
+    "rationale": "Client-side POST without proper CORS preflight handling — browser blocks the request"
+  },
+  {
+    "id": "hb-cors-010",
+    "description": "HB-02: CORS set to * but fetch uses credentials:include (browser rejects wildcard+credentials)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(200, { 'Content-Type': 'application/json' });",
+        "replace": "res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });"
+      },
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>fetch(\"/api/items\",{credentials:\"include\"}).then(r=>r.json())</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "credentials:\"include\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "cors_rejected",
+      "HB-02"
+    ],
+    "rationale": "CORS wildcard * with credentials:include is explicitly forbidden by the spec — browser rejects"
+  },
+  {
+    "id": "hb-cors-011",
+    "description": "HB-02 control: Same-origin fetch to /api/items (no CORS issue)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<script>fetch(\"/api/items\").then(r=>r.json()).then(d=>console.log(d))</script>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "fetch(\"/api/items\")"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "cors_rejected",
+      "HB-02",
+      "control"
+    ],
+    "rationale": "Same-origin fetch — no CORS restriction, request succeeds"
+  },
+  {
+    "id": "hb-sandbox-012",
+    "description": "HB-03: iframe sandbox without allow-forms, edit embeds form page",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<iframe sandbox=\"\" src=\"/form\" width=\"100%\" height=\"400\"></iframe>\n  <footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "html",
+        "selector": "iframe",
+        "attribute": "src",
+        "expected": "/form"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "iframe_sandbox",
+      "HB-03"
+    ],
+    "rationale": "iframe sandbox=\"\" blocks all capabilities — form inside cannot be submitted"
+  },
+  {
+    "id": "hb-sandbox-013",
+    "description": "HB-03: iframe sandbox without allow-scripts, predicate expects script behaviour",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<iframe sandbox=\"\" src=\"/edge-cases\" width=\"100%\" height=\"300\"></iframe>\n  <footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "sandbox=\"\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "iframe_sandbox",
+      "HB-03"
+    ],
+    "rationale": "iframe sandbox=\"\" prevents script execution inside the embedded page"
+  },
+  {
+    "id": "hb-sandbox-014",
+    "description": "HB-03: iframe sandbox blocks navigation, embedded page has links",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<iframe sandbox=\"allow-scripts\" src=\"/\" width=\"100%\" height=\"300\"></iframe>\n  <footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "sandbox=\"allow-scripts\""
+      },
+      {
+        "type": "html",
+        "selector": "iframe",
+        "expected": "exists"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "iframe_sandbox",
+      "HB-03"
+    ],
+    "rationale": "sandbox allows scripts but not navigation — nav-links inside iframe cannot escape to parent"
+  },
+  {
+    "id": "hb-sandbox-015",
+    "description": "HB-03: iframe sandbox without allow-same-origin, embedded content cannot access cookies",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>Powered by Node.js</footer>",
+        "replace": "<iframe sandbox=\"allow-scripts\" src=\"/api/items\" width=\"100%\" height=\"200\"></iframe>\n  <footer>Powered by Node.js</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "sandbox=\"allow-scripts\" src=\"/api/items\""
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "iframe_sandbox",
+      "HB-03"
+    ],
+    "rationale": "Without allow-same-origin the iframe is treated as cross-origin — no cookie or localStorage access"
+  },
+  {
+    "id": "hb-sandbox-016",
+    "description": "HB-03 control: iframe with allow-scripts allow-forms allow-same-origin (full permissions)",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "<footer>About page footer</footer>",
+        "replace": "<iframe sandbox=\"allow-scripts allow-forms allow-same-origin\" src=\"/form\" width=\"100%\" height=\"400\"></iframe>\n  <footer>About page footer</footer>"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "allow-scripts allow-forms allow-same-origin"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "iframe_sandbox",
+      "HB-03",
+      "control"
+    ],
+    "rationale": "Full sandbox permissions — form submission, scripts, and cookies all work"
+  },
+  {
+    "id": "ac-bolster-200",
+    "description": "access-browser: Admin route in server.js, no admin role in config.json",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/admin') { res.writeHead(200); res.end('admin panel'); return; }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "admin"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "Admin route in server.js, no admin role in config.json"
+  },
+  {
+    "id": "ac-bolster-201",
+    "description": "access-browser: Auth token check in server.js, no token in .env",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "function checkToken(req) { return req.headers['x-token'] === process.env.API_TOKEN; }\nconst server = http.createServer((req, res) => {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "API_TOKEN"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "Auth token check in server.js, no token in .env"
+  },
+  {
+    "id": "ac-bolster-202",
+    "description": "access-browser: Rate limit function added, no limit in config.json",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const rateLimits = new Map();\nconst server = http.createServer((req, res) => {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "rateLimit"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "Rate limit function added, no limit in config.json"
+  },
+  {
+    "id": "ac-bolster-203",
+    "description": "access-browser: Session table in init.sql, no session config in .env",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SESSION_SECRET"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "Session table in init.sql, no session config in .env"
+  },
+  {
+    "id": "ac-bolster-204",
+    "description": "access-browser: CORS header added, no CORS config in .env",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Access-Control-Allow-Origin', 'https://example.com');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "CORS_ORIGIN"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "CORS header added, no CORS config in .env"
+  },
+  {
+    "id": "ac-bolster-205",
+    "description": "access-browser: CSP header added, not in config.json",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Content-Security-Policy', \"default-src 'self'\");"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "Content-Security-Policy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "CSP header added, not in config.json"
+  },
+  {
+    "id": "ac-bolster-206",
+    "description": "access-browser: Password hash in init.sql, no hash algo in config",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "bcrypt"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "Password hash in init.sql, no hash algo in config"
+  },
+  {
+    "id": "ac-bolster-207",
+    "description": "access-browser: Control: server.js has /health, check it exists",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/health"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "control"
+    ],
+    "rationale": "Control: server.js has /health, check it exists"
+  },
+  {
+    "id": "ac-bolster-208",
+    "description": "access-browser: Control: init.sql has sessions table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE sessions"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "control"
+    ],
+    "rationale": "Control: init.sql has sessions table"
+  },
+  {
+    "id": "ac-bolster-209",
+    "description": "access-browser: Control: .env has SECRET_KEY",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "SECRET_KEY"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "control"
+    ],
+    "rationale": "Control: .env has SECRET_KEY"
+  },
+  {
+    "id": "ac-bolster-210",
+    "description": "access-browser: Dockerfile exposes port, check Dockerfile",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "EXPOSE"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "control"
+    ],
+    "rationale": "Dockerfile exposes port, check Dockerfile"
+  },
+  {
+    "id": "ac-bolster-211",
+    "description": "access-browser: Compose has env_file, check compose",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "env_file"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "access",
+      "browser",
+      "control"
+    ],
+    "rationale": "Compose has env_file, check compose"
+  },
+  {
+    "id": "ac-bolster-212",
+    "description": "access-browser: User table has password_hash, server.js has no bcrypt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "bcrypt"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "User table has password_hash, server.js has no bcrypt"
+  },
+  {
+    "id": "ac-bolster-213",
+    "description": "access-browser: Sessions table has expires_at, server.js has no expiry check",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "expires_at"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "access",
+      "browser",
+      "cross_file_gap"
+    ],
+    "rationale": "Sessions table has expires_at, server.js has no expiry check"
+  }
+]

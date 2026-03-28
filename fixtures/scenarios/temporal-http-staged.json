@@ -452,5 +452,427 @@
       "pure"
     ],
     "rationale": "Content-Type changed in server.js but Dockerfile has no reference to it"
+  },
+  {
+    "id": "th-bolster-100",
+    "description": "TH-03: Edit /health response, cache might serve old response",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy', version: '2.0' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "status: 'ok'"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "stale_response",
+      "TH-03"
+    ],
+    "rationale": "HTTP response edited but stale cache might serve old data"
+  },
+  {
+    "id": "th-bolster-101",
+    "description": "TH-03: Edit API items data, stale cache returns old items",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ id: 1, name: 'Alpha' }",
+        "replace": "{ id: 1, name: 'Omega' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "'Alpha'"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "stale_response",
+      "TH-03"
+    ],
+    "rationale": "HTTP response edited but stale cache might serve old data"
+  },
+  {
+    "id": "th-bolster-102",
+    "description": "TH-03: Edit echo response format, old format cached",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ echo: body, timestamp: Date.now() }",
+        "replace": "{ reflected: body, ts: Date.now() }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "{ echo: body"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "stale_response",
+      "TH-03"
+    ],
+    "rationale": "HTTP response edited but stale cache might serve old data"
+  },
+  {
+    "id": "th-bolster-103",
+    "description": "TH-03: Control: edit health, verify new value present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'ready' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "'ready'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "http",
+      "stale_response",
+      "TH-03",
+      "control"
+    ],
+    "rationale": "HTTP response edited but stale cache might serve old data"
+  },
+  {
+    "id": "th-bolster-104",
+    "description": "TH-04: Add /api/users route, .env has no reference",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/api/users') {\n    res.writeHead(200, {'Content-Type':'application/json'});\n    res.end('[]');\n    return;\n  }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "/api/users"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "route_config_gap",
+      "TH-04"
+    ],
+    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+  },
+  {
+    "id": "th-bolster-105",
+    "description": "TH-04: Add /metrics route, config.json has no metrics key",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/metrics') {\n    res.writeHead(200);\n    res.end('requests_total 42');\n    return;\n  }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "metrics"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "route_config_gap",
+      "TH-04"
+    ],
+    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+  },
+  {
+    "id": "th-bolster-106",
+    "description": "TH-04: Add /status route, Dockerfile healthcheck still checks /health",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/status') {\n    res.writeHead(200);\n    res.end('up');\n    return;\n  }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/status"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "route_config_gap",
+      "TH-04"
+    ],
+    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+  },
+  {
+    "id": "th-bolster-107",
+    "description": "TH-04: Control: add route, verify it in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/api/v2') {\n    res.writeHead(200);\n    res.end('v2');\n    return;\n  }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/api/v2"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "http",
+      "route_config_gap",
+      "TH-04",
+      "control"
+    ],
+    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+  },
+  {
+    "id": "th-bolster-108",
+    "description": "TH-05: Change Content-Type from json to text, check for json reference",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "'Content-Type': 'application/json'",
+        "replace": "'Content-Type': 'text/plain'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "'Content-Type': 'application/json'"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "http",
+      "header_desync",
+      "TH-05",
+      "control"
+    ],
+    "rationale": "HTTP header changed but downstream config not updated"
+  },
+  {
+    "id": "th-bolster-109",
+    "description": "TH-05: Add CORS header, .env has no CORS config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('Access-Control-Allow-Origin', '*');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "CORS"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "header_desync",
+      "TH-05"
+    ],
+    "rationale": "HTTP header changed but downstream config not updated"
+  },
+  {
+    "id": "th-bolster-110",
+    "description": "TH-05: Add X-Request-ID header, config.json has no request ID config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('X-Request-ID', Date.now().toString());"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "request_id"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "header_desync",
+      "TH-05"
+    ],
+    "rationale": "HTTP header changed but downstream config not updated"
+  },
+  {
+    "id": "th-bolster-111",
+    "description": "TH-05: Control: add header, verify in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  res.setHeader('X-Powered-By', 'Sovereign');"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "X-Powered-By"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "http",
+      "header_desync",
+      "TH-05",
+      "control"
+    ],
+    "rationale": "HTTP header changed but downstream config not updated"
+  },
+  {
+    "id": "th-bolster-112",
+    "description": "TH-06: Add 404 handler, config.json has no error config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.writeHead(404);",
+        "replace": "res.writeHead(404, {'Content-Type':'application/json'});"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "404"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "error_handling",
+      "TH-06"
+    ],
+    "rationale": "HTTP error handling changed but config/compose not updated"
+  },
+  {
+    "id": "th-bolster-113",
+    "description": "TH-06: Add rate limiting header, .env has no rate limit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "let reqCount = 0;\nconst server = http.createServer((req, res) => {\n  reqCount++;\n  if (reqCount > 1000) { res.writeHead(429); res.end('rate limited'); return; }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "RATE_LIMIT"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "temporal",
+      "http",
+      "error_handling",
+      "TH-06"
+    ],
+    "rationale": "HTTP error handling changed but config/compose not updated"
+  },
+  {
+    "id": "th-bolster-114",
+    "description": "TH-06: Add timeout to server, compose has no timeout config",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "server.listen(port",
+        "replace": "server.timeout = 30000;\nserver.listen(port"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "timeout"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "http",
+      "error_handling",
+      "TH-06",
+      "control"
+    ],
+    "rationale": "HTTP error handling changed but config/compose not updated"
+  },
+  {
+    "id": "th-bolster-115",
+    "description": "TH-06: Control: add graceful shutdown, verify present",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "server.listen(port",
+        "replace": "process.on('SIGTERM', () => server.close());\nserver.listen(port"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "SIGTERM"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "temporal",
+      "http",
+      "error_handling",
+      "TH-06",
+      "control"
+    ],
+    "rationale": "HTTP error handling changed but config/compose not updated"
   }
 ]

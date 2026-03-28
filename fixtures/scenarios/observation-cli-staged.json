@@ -1,0 +1,762 @@
+[
+  {
+    "id": "fc-overhead-001",
+    "description": "FC-01: docker-compose.yml healthcheck runs every 5s, each probe adds network/CPU overhead",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "interval: 5s"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "interval"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "probe_overhead",
+      "FC-01"
+    ],
+    "rationale": "Assumed: healthcheck is free. Actual: 5s interval means 12 HTTP requests/minute of overhead. server.js has no interval awareness."
+  },
+  {
+    "id": "fc-overhead-002",
+    "description": "FC-01: Add memory limit to docker-compose.yml, diagnostic probes consume memory within the limit",
+    "edits": [
+      {
+        "file": "docker-compose.yml",
+        "search": "    healthcheck:",
+        "replace": "    deploy:\n      resources:\n        limits:\n          memory: 128M\n    healthcheck:"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "128M"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "memory"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "probe_overhead",
+      "FC-01"
+    ],
+    "rationale": "Assumed: probes are lightweight. Actual: 128M limit means each `docker stats` query consumes part of the budget. config.json has no memory awareness."
+  },
+  {
+    "id": "fc-overhead-003",
+    "description": "FC-01: docker-compose.yml healthcheck retries 3x on failure, tripling probe overhead",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "retries: 3"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "retries"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "probe_overhead",
+      "FC-01"
+    ],
+    "rationale": "Assumed: retry count is neutral. Actual: 3 retries × 5s interval = potential 15 probes/minute under failure. .env has no retry config."
+  },
+  {
+    "id": "fc-overhead-004",
+    "description": "FC-01: docker-compose.yml healthcheck timeout=3s, probe holds connection during timeout window",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "timeout: 3s"
+      },
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "timeout"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "probe_overhead",
+      "FC-01"
+    ],
+    "rationale": "Assumed: timeout just limits wait time. Actual: 3s timeout holds a TCP connection — under load, probes overlap with app traffic. Dockerfile timeout is different."
+  },
+  {
+    "id": "fc-overhead-005",
+    "description": "FC-01 control: docker-compose.yml has healthcheck, predicate checks docker-compose.yml",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "healthcheck:"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "probe_overhead",
+      "FC-01",
+      "control"
+    ],
+    "rationale": "Static file check — reading docker-compose.yml doesn't run any probes."
+  },
+  {
+    "id": "fc-logs-006",
+    "description": "FC-02: Add request logging to server.js, each /health probe adds a log line",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "const server = http.createServer((req, res) => {\n  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "console.log"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "LOG_LEVEL"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "log_inflation",
+      "FC-02"
+    ],
+    "rationale": "Assumed: health probes are silent. Actual: request logging means 12 log lines/minute from healthchecks alone. .env has no LOG_LEVEL."
+  },
+  {
+    "id": "fc-logs-007",
+    "description": "FC-02: Dockerfile HEALTHCHECK wget /health, each check creates an access log entry on the server",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "wget"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "log"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "log_inflation",
+      "FC-02"
+    ],
+    "rationale": "Assumed: HEALTHCHECK is transparent. Actual: wget creates HTTP request → server access log. config.json has no log config."
+  },
+  {
+    "id": "fc-logs-008",
+    "description": "FC-02: Expand /health to return detailed status, each probe generates larger log payload",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "res.end(JSON.stringify({ status: 'ok' }));",
+        "replace": "res.end(JSON.stringify({ status: 'ok', uptime: process.uptime(), memory: process.memoryUsage(), pid: process.pid }));"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "process.uptime()"
+      },
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "HEALTH_VERBOSE"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "log_inflation",
+      "FC-02"
+    ],
+    "rationale": "Assumed: verbose health is just more data. Actual: each 5s probe now returns ~200 bytes instead of ~15. Log volume grows 13x. No env toggle."
+  },
+  {
+    "id": "fc-logs-009",
+    "description": "FC-02: Add error count to /health that resets on read, observation clears the measurement",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const server = http.createServer((req, res) => {",
+        "replace": "let errorCount = 0;\nconst server = http.createServer((req, res) => {"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "errorCount"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "errorCount"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "log_inflation",
+      "FC-02"
+    ],
+    "rationale": "Assumed: error counting is stateless. Actual: reading error count resets it (read-and-clear pattern). Observation destroys the data. config.json unaware."
+  },
+  {
+    "id": "fc-logs-010",
+    "description": "FC-02 control: Dockerfile HEALTHCHECK exists, predicate checks Dockerfile",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "HEALTHCHECK"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "log_inflation",
+      "FC-02",
+      "control"
+    ],
+    "rationale": "Static file check — reading Dockerfile doesn't execute the healthcheck."
+  },
+  {
+    "id": "fc-disk-011",
+    "description": "FC-03: Add /health/disk route that writes temp file to measure I/O, observation consumes disk",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/health/disk') {\n    // Write temp file to test disk I/O speed\n    require('fs').writeFileSync('/tmp/disk-check', 'probe-' + Date.now());\n    res.writeHead(200);\n    res.end('disk ok');\n    return;\n  }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/health/disk"
+      },
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/health/disk"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "disk_consumption",
+      "FC-03"
+    ],
+    "rationale": "Assumed: disk probe is read-only. Actual: writes /tmp/disk-check on every call. Observation creates artifacts. Dockerfile unaware."
+  },
+  {
+    "id": "fc-disk-012",
+    "description": "FC-03: Add debug dump route that writes process state, each call grows /tmp",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/debug/dump') {\n    const dump = JSON.stringify(process.memoryUsage());\n    require('fs').appendFileSync('/tmp/debug-dumps.log', dump + '\\n');\n    res.writeHead(200);\n    res.end(dump);\n    return;\n  }\n\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/debug/dump"
+      },
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "debug"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "disk_consumption",
+      "FC-03"
+    ],
+    "rationale": "Assumed: debug endpoint is lightweight. Actual: appends to debug-dumps.log on every call — unbounded growth. config.json has no debug config."
+  },
+  {
+    "id": "fc-disk-013",
+    "description": "FC-03: docker-compose.yml has no log rotation config, healthcheck output grows container logs",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "logging"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "disk_consumption",
+      "FC-03"
+    ],
+    "rationale": "Assumed: healthcheck output is discarded. Actual: no logging config means default json-file driver — all output goes to disk. No rotation."
+  },
+  {
+    "id": "fc-disk-014",
+    "description": "FC-03: HEALTHCHECK writes to /tmp — each probe creates a file even if disk is full",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "HEALTHCHECK --interval=5s --timeout=3s CMD wget -q -O- http://localhost:3000/health || exit 1",
+        "replace": "HEALTHCHECK --interval=5s --timeout=3s CMD wget -q -O /tmp/healthcheck-result http://localhost:3000/health || exit 1"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/tmp/healthcheck-result"
+      },
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "healthcheck-result"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "disk_consumption",
+      "FC-03"
+    ],
+    "rationale": "Assumed: wget -O /tmp is harmless. Actual: creates file on every 5s interval. On full disk, the probe itself fails. server.js unaware."
+  },
+  {
+    "id": "fc-disk-015",
+    "description": "FC-03 control: Original Dockerfile HEALTHCHECK uses wget -O- (stdout only, no disk write)",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "wget -q -O-"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "disk_consumption",
+      "FC-03",
+      "control"
+    ],
+    "rationale": "wget -O- sends output to stdout, not disk. Observation doesn't consume disk (modulo docker log driver)."
+  },
+  {
+    "id": "fc-bolster-100",
+    "description": "FC-bolster: server.js port changed, config.json unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "server.js port changed, config.json unaware"
+  },
+  {
+    "id": "fc-bolster-101",
+    "description": "FC-bolster: config.json port changed, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5000"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "config.json port changed, server.js unaware"
+  },
+  {
+    "id": "fc-bolster-102",
+    "description": "FC-bolster: .env port changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": ".env port changed, Dockerfile unaware"
+  },
+  {
+    "id": "fc-bolster-103",
+    "description": "FC-bolster: Dockerfile EXPOSE changed, .env unaware",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "EXPOSE 3000",
+        "replace": "EXPOSE 9090"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "9090"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+  },
+  {
+    "id": "fc-bolster-104",
+    "description": "FC-bolster: health response changed, Dockerfile unaware",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "{ status: 'ok' }",
+        "replace": "{ status: 'healthy' }"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "healthy"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "health response changed, Dockerfile unaware"
+  },
+  {
+    "id": "fc-bolster-105",
+    "description": "FC-bolster: app name changed in config, server.js unaware",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"New App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "New App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "app name changed in config, server.js unaware"
+  },
+  {
+    "id": "fc-bolster-106",
+    "description": "FC-bolster: NODE_ENV changed, server.js unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "NODE_ENV=production",
+        "replace": "NODE_ENV=development"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "development"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "NODE_ENV changed, server.js unaware"
+  },
+  {
+    "id": "fc-bolster-107",
+    "description": "FC-bolster: SECRET_KEY changed, config.json unaware",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-secret-2026\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "new-secret"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "SECRET_KEY changed, config.json unaware"
+  },
+  {
+    "id": "fc-bolster-108",
+    "description": "FC-bolster: control: server.js port changed, verify in server.js",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 4000;"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "4000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js port changed, verify in server.js"
+  },
+  {
+    "id": "fc-bolster-109",
+    "description": "FC-bolster: control: config.json port changed, config gate reads it",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 5000"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "app.port",
+        "expected": "5000"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster",
+      "control"
+    ],
+    "rationale": "control: config.json port changed, config gate reads it"
+  },
+  {
+    "id": "fc-bolster-110",
+    "description": "FC-bolster: control: .env PORT changed, config gate reads it",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=7777"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "config",
+        "key": "PORT",
+        "expected": "7777"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster",
+      "control"
+    ],
+    "rationale": "control: .env PORT changed, config gate reads it"
+  },
+  {
+    "id": "fc-bolster-111",
+    "description": "FC-bolster: control: server.js still exists after edit",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "const PORT = process.env.PORT || 3000;",
+        "replace": "const PORT = process.env.PORT || 3000;\n// modified"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js still exists after edit"
+  },
+  {
+    "id": "fc-bolster-112",
+    "description": "FC-bolster: fabricated: package.json does not exist",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "package.json"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster"
+    ],
+    "rationale": "fabricated: package.json does not exist"
+  },
+  {
+    "id": "fc-bolster-113",
+    "description": "FC-bolster: control: server.js exists without edits",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "filesystem_exists",
+        "file": "server.js"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js exists without edits"
+  },
+  {
+    "id": "fc-bolster-114",
+    "description": "FC-bolster: control: server.js has createServer",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "http.createServer"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "observation",
+      "cli",
+      "fc-bolster",
+      "control"
+    ],
+    "rationale": "control: server.js has createServer"
+  }
+]

@@ -1,0 +1,682 @@
+[
+  {
+    "id": "sf-dir-001",
+    "description": "SF-01: Edit config.json app name, predicate checks config.prod.json for new name",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"Staging App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.prod.json",
+        "pattern": "Staging App"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_directory",
+      "SF-01"
+    ],
+    "rationale": "Assumed: config.json edit affects prod config. Actual: config.prod.json is a separate file — agent edited the wrong environment."
+  },
+  {
+    "id": "sf-dir-002",
+    "description": "SF-01: Edit .env SECRET_KEY, predicate checks .env.prod for new value",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "SECRET_KEY=\"not-very-secret\"",
+        "replace": "SECRET_KEY=\"new-rotated-key\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "new-rotated-key"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_directory",
+      "SF-01"
+    ],
+    "rationale": "Assumed: .env secret rotation propagates to .env.prod. Actual: .env.prod has its own SECRET_KEY — wrong environment file."
+  },
+  {
+    "id": "sf-dir-003",
+    "description": "SF-01: Edit .env.staging DEBUG=false, predicate checks .env for the change",
+    "edits": [
+      {
+        "file": ".env.staging",
+        "search": "DEBUG=true",
+        "replace": "DEBUG=false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DEBUG=false"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_directory",
+      "SF-01"
+    ],
+    "rationale": "Coincidental pass — .env already has DEBUG=false. Shows how wrong-file checks can produce false confidence."
+  },
+  {
+    "id": "sf-dir-004",
+    "description": "SF-01: Enable betaSignup in config.staging.json, predicate checks config.json",
+    "edits": [
+      {
+        "file": "config.staging.json",
+        "search": "\"betaSignup\": true",
+        "replace": "\"betaSignup\": false"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "betaSignup"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_directory",
+      "SF-01"
+    ],
+    "rationale": "Assumed: staging feature flag exists in base config. Actual: config.json has no betaSignup field at all."
+  },
+  {
+    "id": "sf-dir-005",
+    "description": "SF-01: Disable analytics in config.prod.json, predicate checks config.staging.json for false",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "file": "config.staging.json",
+        "key": "features.analytics",
+        "expected": "false"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_directory",
+      "SF-01"
+    ],
+    "rationale": "Assumed: prod analytics=false reflected in staging. Actual: config.staging.json has analytics=true."
+  },
+  {
+    "id": "sf-dir-006",
+    "description": "SF-01 control: Edit config.json app name, predicate checks config.json confirms",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"name\": \"Demo App\"",
+        "replace": "\"name\": \"My App\""
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "My App"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_directory",
+      "SF-01",
+      "control"
+    ],
+    "rationale": "Same-environment check — edit and predicate target the same file. No path mismatch."
+  },
+  {
+    "id": "sf-moved-007",
+    "description": "SF-02: Agent moves health route to /status in server.js, predicate checks Dockerfile HEALTHCHECK for /status",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/status'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/status"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "file_moved",
+      "SF-02"
+    ],
+    "rationale": "Assumed: Dockerfile healthcheck follows route rename. Actual: Dockerfile still has /health — cross-file path mismatch."
+  },
+  {
+    "id": "sf-moved-008",
+    "description": "SF-02: Change port to 8080 in config.json, predicate checks .env for PORT=8080",
+    "edits": [
+      {
+        "file": "config.json",
+        "search": "\"port\": 3000",
+        "replace": "\"port\": 8080"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "PORT=8080"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "file_moved",
+      "SF-02"
+    ],
+    "rationale": "Assumed: config.json port change propagates to .env. Actual: .env still has PORT=3000 — config authority split across files."
+  },
+  {
+    "id": "sf-moved-009",
+    "description": "SF-02: Change Dockerfile CMD to app.js, predicate checks docker-compose.yml for app.js",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "CMD [\"node\", \"server.js\"]",
+        "replace": "CMD [\"node\", \"app.js\"]"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "app.js"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "file_moved",
+      "SF-02"
+    ],
+    "rationale": "Assumed: Dockerfile entrypoint visible in docker-compose.yml. Actual: compose delegates to Dockerfile build — no explicit reference."
+  },
+  {
+    "id": "sf-moved-010",
+    "description": "SF-02: Change Dockerfile COPY to src/server.js, predicate checks server.js for /app/src",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY src/server.js ./src/"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/app/src"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "file_moved",
+      "SF-02"
+    ],
+    "rationale": "Assumed: Dockerfile COPY path reflected in server.js. Actual: server.js has no awareness of its own container path."
+  },
+  {
+    "id": "sf-moved-011",
+    "description": "SF-02 control: Edit Dockerfile COPY path, predicate checks Dockerfile confirms",
+    "edits": [
+      {
+        "file": "Dockerfile",
+        "search": "COPY server.js .",
+        "replace": "COPY server.js /opt/app/"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/opt/app/"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "file_moved",
+      "SF-02",
+      "control"
+    ],
+    "rationale": "Same-file check — edit and predicate on same file. No path confusion."
+  },
+  {
+    "id": "sf-ref-012",
+    "description": "SF-03: docker-compose.yml sets PORT=3000, agent checks config.prod.json for port 3000",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "config",
+        "file": "config.prod.json",
+        "key": "app.port",
+        "expected": "3001"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_reference",
+      "SF-03"
+    ],
+    "rationale": "Assumed: prod config port matches compose env. Actual: config.prod.json has port 3000, not 3001 — but the reference chain is fragile."
+  },
+  {
+    "id": "sf-ref-013",
+    "description": "SF-03: .env has DATABASE_URL with localhost, predicate checks .env.prod expects localhost",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env.prod",
+        "pattern": "localhost"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_reference",
+      "SF-03"
+    ],
+    "rationale": "Assumed: .env DB host applies to prod. Actual: .env.prod uses db-primary.internal — environment reference mismatch."
+  },
+  {
+    "id": "sf-ref-014",
+    "description": "SF-03: Rename /health to /ready in server.js, Dockerfile HEALTHCHECK still says /health",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/ready'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/ready"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_reference",
+      "SF-03"
+    ],
+    "rationale": "Assumed: Dockerfile healthcheck tracks route rename. Actual: Dockerfile is a separate file with stale /health reference."
+  },
+  {
+    "id": "sf-ref-015",
+    "description": "SF-03: Rename /health to /ready in server.js, docker-compose.yml healthcheck still says /health",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "req.url === '/health'",
+        "replace": "req.url === '/ready'"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "/ready"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_reference",
+      "SF-03"
+    ],
+    "rationale": "Assumed: docker-compose healthcheck follows route rename. Actual: compose YAML has separate /health reference."
+  },
+  {
+    "id": "sf-ref-016",
+    "description": "SF-03 control: Dockerfile and docker-compose.yml both reference /health consistently",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "/health"
+      },
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "/health"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state_assumption",
+      "filesystem",
+      "wrong_reference",
+      "SF-03",
+      "control"
+    ],
+    "rationale": "Both infrastructure files reference the same health path — no reference mismatch."
+  },
+  {
+    "id": "st-bolster-200",
+    "description": "state-fs: Assume server.js has /api/users route — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/api/users"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume server.js has /api/users route — it doesnt"
+  },
+  {
+    "id": "st-bolster-201",
+    "description": "state-fs: Assume config.json has redis section — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "redis"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume config.json has redis section — it doesnt"
+  },
+  {
+    "id": "st-bolster-202",
+    "description": "state-fs: Assume .env has REDIS_URL — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "REDIS_URL"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume .env has REDIS_URL — it doesnt"
+  },
+  {
+    "id": "st-bolster-203",
+    "description": "state-fs: Assume init.sql has products table — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE products"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume init.sql has products table — it doesnt"
+  },
+  {
+    "id": "st-bolster-204",
+    "description": "state-fs: Assume Dockerfile has multi-stage build — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "FROM.*AS"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume Dockerfile has multi-stage build — it doesnt"
+  },
+  {
+    "id": "st-bolster-205",
+    "description": "state-fs: Assume compose has redis service — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "redis:"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume compose has redis service — it doesnt"
+  },
+  {
+    "id": "st-bolster-206",
+    "description": "state-fs: Assume server.js uses express — it uses http",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "require.*express"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume server.js uses express — it uses http"
+  },
+  {
+    "id": "st-bolster-207",
+    "description": "state-fs: Assume config.json has logging config — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "\"logging\""
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Assume config.json has logging config — it doesnt"
+  },
+  {
+    "id": "st-bolster-208",
+    "description": "state-fs: Edit adds /api/users, predicate checks wrong file",
+    "edits": [
+      {
+        "file": "server.js",
+        "search": "if (req.url === '/api/items')",
+        "replace": "if (req.url === '/api/users') { res.writeHead(200); res.end('[]'); return; }\n  if (req.url === '/api/items')"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "/api/users"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Edit adds /api/users, predicate checks wrong file"
+  },
+  {
+    "id": "st-bolster-209",
+    "description": "state-fs: Edit .env port, check wrong file",
+    "edits": [
+      {
+        "file": ".env",
+        "search": "PORT=3000",
+        "replace": "PORT=5555"
+      }
+    ],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "5555"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "fs",
+      "state_assumption"
+    ],
+    "rationale": "Edit .env port, check wrong file"
+  },
+  {
+    "id": "st-bolster-210",
+    "description": "state-fs: Control: server.js has /health",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/health"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state",
+      "fs",
+      "control"
+    ],
+    "rationale": "Control: server.js has /health"
+  },
+  {
+    "id": "st-bolster-211",
+    "description": "state-fs: Control: init.sql has users table",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE users"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state",
+      "fs",
+      "control"
+    ],
+    "rationale": "Control: init.sql has users table"
+  },
+  {
+    "id": "st-bolster-212",
+    "description": "state-fs: Control: compose has healthcheck",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "healthcheck"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state",
+      "fs",
+      "control"
+    ],
+    "rationale": "Control: compose has healthcheck"
+  },
+  {
+    "id": "st-bolster-213",
+    "description": "state-fs: Control: .env has DATABASE_URL",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "DATABASE_URL"
+      }
+    ],
+    "expectedSuccess": true,
+    "tags": [
+      "state",
+      "fs",
+      "control"
+    ],
+    "rationale": "Control: .env has DATABASE_URL"
+  }
+]

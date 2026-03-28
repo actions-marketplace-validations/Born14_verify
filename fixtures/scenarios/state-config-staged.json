@@ -554,5 +554,138 @@
       "control"
     ],
     "rationale": "Same-file edit + check — no cross-source assumption, no precedence ambiguity."
+  },
+  {
+    "id": "st-bolster-200",
+    "description": "state-config: Assume server.js has /api/users route — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "/api/users"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "config",
+      "state_assumption"
+    ],
+    "rationale": "Assume server.js has /api/users route — it doesnt"
+  },
+  {
+    "id": "st-bolster-201",
+    "description": "state-config: Assume config.json has redis section — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "config.json",
+        "pattern": "redis"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "config",
+      "state_assumption"
+    ],
+    "rationale": "Assume config.json has redis section — it doesnt"
+  },
+  {
+    "id": "st-bolster-202",
+    "description": "state-config: Assume .env has REDIS_URL — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": ".env",
+        "pattern": "REDIS_URL"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "config",
+      "state_assumption"
+    ],
+    "rationale": "Assume .env has REDIS_URL — it doesnt"
+  },
+  {
+    "id": "st-bolster-203",
+    "description": "state-config: Assume init.sql has products table — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "init.sql",
+        "pattern": "CREATE TABLE products"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "config",
+      "state_assumption"
+    ],
+    "rationale": "Assume init.sql has products table — it doesnt"
+  },
+  {
+    "id": "st-bolster-204",
+    "description": "state-config: Assume Dockerfile has multi-stage build — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "Dockerfile",
+        "pattern": "FROM.*AS"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "config",
+      "state_assumption"
+    ],
+    "rationale": "Assume Dockerfile has multi-stage build — it doesnt"
+  },
+  {
+    "id": "st-bolster-205",
+    "description": "state-config: Assume compose has redis service — it doesnt",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "docker-compose.yml",
+        "pattern": "redis:"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "config",
+      "state_assumption"
+    ],
+    "rationale": "Assume compose has redis service — it doesnt"
+  },
+  {
+    "id": "st-bolster-206",
+    "description": "state-config: Assume server.js uses express — it uses http",
+    "edits": [],
+    "predicates": [
+      {
+        "type": "content",
+        "file": "server.js",
+        "pattern": "require.*express"
+      }
+    ],
+    "expectedSuccess": false,
+    "tags": [
+      "state",
+      "config",
+      "state_assumption"
+    ],
+    "rationale": "Assume server.js uses express — it uses http"
   }
 ]

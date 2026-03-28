@@ -669,14 +669,20 @@ async function runScenario(scenario: VerifyScenario, config: RunConfig, mockServ
     } else {
       // Log scenario start for CI hang diagnosis (helps identify which scenario freezes)
       const isPure = !scenario.requiresDocker && !scenario.requiresHttpMock && !scenario.requiresPlaywright && !scenario.requiresLiveHttp && !scenario.steps;
-      const pureTimeout = 120_000; // Pure scenarios: 120s on CI (tmpdir I/O is 60x slower than local SSD)
+      // Skip extremely large edits in CI — 1MB .env scenario takes 18min on GitHub Actions
+      const maxEditSize = Math.max(0, ...(scenario.edits || []).map((e: any) => (e.search?.length ?? 0) + (e.replace?.length ?? 0)));
+      if (process.env.CI && maxEditSize > 500_000) {
+        result = new Error(`Skipped in CI: edit size ${(maxEditSize / 1024).toFixed(0)}KB exceeds 500KB limit`);
+      } else {
+        const pureTimeout = maxEditSize > 100_000 ? 300_000 : 120_000; // 5min for large edits, 2min otherwise
 
-      result = await Promise.race([
-        verify(scenario.edits, scenario.predicates, mergedConfig),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error(`Scenario timeout (${isPure ? '60s pure' : '10 min'})`)), isPure ? pureTimeout : MAX_SCENARIO_TIMEOUT)
-        ),
-      ]);
+        result = await Promise.race([
+          verify(scenario.edits, scenario.predicates, mergedConfig),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error(`Scenario timeout (${isPure ? `${pureTimeout/1000}s pure` : '10 min'})`)), isPure ? pureTimeout : MAX_SCENARIO_TIMEOUT)
+          ),
+        ]);
+      }
     }
 
     const storeAfter = new ConstraintStore(stateDir);

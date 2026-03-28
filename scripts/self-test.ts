@@ -35,6 +35,7 @@ function parseArgs(args: string[]): ParsedArgs {
   let failOnBug = false;
 
   let ledgerPath: string | undefined;
+  let scenarioIds: string[] | undefined;
 
   let improve = false;
   let llm: ImproveConfig['llm'] = 'none';
@@ -53,6 +54,8 @@ function parseArgs(args: string[]): ParsedArgs {
     } else if (arg.startsWith('--families=')) {
       const raw = arg.slice('--families='.length);
       families = raw.split(',').map(f => f.trim().toUpperCase() as ScenarioFamily);
+    } else if (arg.startsWith('--scenario-ids=')) {
+      scenarioIds = arg.slice('--scenario-ids='.length).split(',').filter(Boolean);
     } else if (arg.startsWith('--docker=')) {
       dockerEnabled = arg.slice('--docker='.length) === 'true';
     } else if (arg === '--fail-on-bug') {
@@ -118,7 +121,7 @@ function parseArgs(args: string[]): ParsedArgs {
     dockerEnabled = true;
   }
 
-  const runConfig: RunConfig = { appDir, families, dockerEnabled, failOnBug, ledgerPath };
+  const runConfig: RunConfig = { appDir, families, dockerEnabled, failOnBug, ledgerPath, scenarioIds };
   const improveConfig: ImproveConfig | null = improve
     ? { llm, apiKey, ollamaModel, ollamaHost, maxCandidates, maxLines, dryRun }
     : null;

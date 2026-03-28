@@ -191,6 +191,8 @@ export interface RunConfig {
   liveTier?: LiveTier;
   /** Include WPT harvested scenarios (7K+, adds ~15-20min). Opt-in via --wpt flag. */
   includeWPT?: boolean;
+  /** Run only scenarios with these IDs (for subprocess validation — skip scenario generation overhead). */
+  scenarioIds?: string[];
 }
 
 // =============================================================================

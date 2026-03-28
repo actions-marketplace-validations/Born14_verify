@@ -284,6 +284,13 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
     console.log(`  + ${external.length} fault-derived scenarios from ${isCustomApp ? config.appDir : 'custom-scenarios.json'}`);
   }
 
+  // Scenario ID filtering — for subprocess validation (run only specific scenarios)
+  if (config.scenarioIds && config.scenarioIds.length > 0) {
+    const idSet = new Set(config.scenarioIds);
+    scenarios = scenarios.filter(s => idSet.has(s.id));
+    console.log(`  Filtered to ${scenarios.length} scenarios by ID (${config.scenarioIds.length} requested)`);
+  }
+
   // Filter by Docker availability (legacy flag — overridden by tier system)
   if (config.dockerEnabled === false && tier === 'pure') {
     scenarios = scenarios.filter(s => !s.requiresDocker);

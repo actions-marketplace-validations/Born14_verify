@@ -384,19 +384,29 @@ async function collectBaseline(runConfig: RunConfig): Promise<LedgerEntry[]> {
   const baselineConfig: RunConfig = { ...runConfig, ledgerPath };
   const { exitCode } = await runSelfTest(baselineConfig);
 
-  try {
-    const content = readFileSync(ledgerPath, 'utf-8');
-    const entries: LedgerEntry[] = [];
-    for (const line of content.split('\n')) {
-      if (!line.trim()) continue;
-      try { entries.push(JSON.parse(line)); } catch { /* skip */ }
-    }
-    // Clean up temp ledger
-    try { rmSync(ledgerPath); } catch { /* */ }
-    return entries;
-  } catch {
-    return [];
+  if (!existsSync(ledgerPath)) {
+    throw new Error(`Baseline ledger not created at ${ledgerPath} (self-test exit code: ${exitCode})`);
   }
+
+  const content = readFileSync(ledgerPath, 'utf-8');
+  const entries: LedgerEntry[] = [];
+  let malformed = 0;
+  for (const line of content.split('\n')) {
+    if (!line.trim()) continue;
+    try { entries.push(JSON.parse(line)); } catch { malformed++; }
+  }
+
+  if (entries.length === 0) {
+    throw new Error(`Baseline ledger is empty (${malformed} malformed lines, exit code: ${exitCode})`);
+  }
+
+  if (malformed > 0) {
+    console.log(`        ⚠ ${malformed} malformed ledger lines skipped`);
+  }
+
+  // Clean up temp ledger
+  try { rmSync(ledgerPath); } catch { /* */ }
+  return entries;
 }
 
 function makeEntry(

@@ -126,15 +126,17 @@ jobs:
           set -o pipefail  # Capture timeout's exit code, not tee's
           # 50 min hard kill (leaving 10 min buffer for CI job timeout)
           # The runner also has an internal batch watchdog that exits with code 99 on hang
-          timeout --signal=KILL 3000 bun run src/cli.ts self-test --ledger-path=data/nightly-baseline.jsonl 2>&1 | tee baseline-output.txt
+          timeout --signal=KILL 3000 bun run src/cli.ts self-test 2>&1 | tee baseline-output.txt
           EXIT_CODE=$?
           if [ $EXIT_CODE -eq 137 ]; then
             echo "::warning::Baseline self-test was killed by timeout (50 min hard limit)"
           elif [ $EXIT_CODE -eq 99 ]; then
             echo "::warning::Baseline self-test batch watchdog fired — likely hung scenario"
           fi
-          FAILING=$(grep -c '"clean":false' data/nightly-baseline.jsonl 2>/dev/null || echo "0")
-          TOTAL=$(wc -l < data/nightly-baseline.jsonl 2>/dev/null || echo "0")
+          # self-test writes ledger to data/self-test-ledger.jsonl (hardcoded default)
+          LEDGER=data/self-test-ledger.jsonl
+          FAILING=$(grep -c '"clean":false' "$LEDGER" 2>/dev/null || echo "0")
+          TOTAL=$(wc -l < "$LEDGER" 2>/dev/null || echo "0")
           echo "failing=$FAILING" >> $GITHUB_OUTPUT
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "::notice::Baseline: $FAILING failing out of $TOTAL scenarios (exit=$EXIT_CODE)"
@@ -143,7 +145,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: baseline-ledger
-          path: data/nightly-baseline.jsonl
+          path: data/self-test-ledger.jsonl
           retention-days: 30
 
   # ─────────────────────────────────────────────────────────────

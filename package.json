@@ -25,7 +25,13 @@
     "test:integration": "bun test tests/integration/ --timeout 120000",
     "self-test": "bun run src/cli.ts self-test",
     "self-test:live": "bun run src/cli.ts self-test --live",
-    "self-test:full": "bun run src/cli.ts self-test --full"
+    "self-test:full": "bun run src/cli.ts self-test --full",
+    "improve": "bun run src/cli.ts improve",
+    "supply:fuzz": "bun run scripts/supply/fuzz.ts",
+    "supply:harvest": "bun run scripts/supply/harvest.ts",
+    "supply:receipts": "bun run scripts/supply/scrape-receipts.ts",
+    "supply:all": "bun run scripts/supply/fuzz.ts && bun run scripts/supply/harvest.ts && bun run scripts/supply/scrape-receipts.ts",
+    "nightly": "bun run scripts/supply/fuzz.ts --max-variants=50 && bun run scripts/supply/harvest.ts && bun run src/cli.ts self-test && bun run src/cli.ts improve --llm=gemini"
   },
   "files": [
     "src/",

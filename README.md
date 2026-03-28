@@ -8,7 +8,7 @@ Verification gate for AI agent actions. Every edit gets a fair trial before it t
 
 In v0.1.1, HTTP predicates with different `bodyContains` values produced identical fingerprints — K5 couldn't tell them apart. A human caught it by reading the code.
 
-Now 8,271 automated scenarios across 21 staged files catch it — 346 tests with 21,320 assertions, 0 failures:
+Now 10,667 automated scenarios across 70 staged files catch it — 346 tests with 21,322 assertions, 0 failures:
 
 ```bash
 npx @sovereign-labs/verify self-test
@@ -224,7 +224,7 @@ Add to your agent's MCP config:
 
 ## Self-Test Harness
 
-8,271 scenarios across 21 staged files exercise the verification pipeline's invariants. 952 per-gate scenarios cover 20 domains (a11y, axe-a11y, config, content, db, f9, filesystem, g5, html, http, infrastructure, json-schema, k5, message, performance, secrets, security, serialization, triangulation), plus 28 universal integration scenarios and 7,291 WPT-derived corpus scenarios. 22 harvest scripts in `scripts/harvest/` generate deterministic scenarios from real fixture data. 346 unit tests with 21,320 assertions, 0 failures.
+10,667 scenarios across 70 staged files exercise the verification pipeline's invariants. 2,584 non-WPT per-gate scenarios cover 20 domains (a11y, axe-a11y, config, content, db, f9, filesystem, g5, html, http, infrastructure, json-schema, k5, message, performance, secrets, security, serialization, triangulation) plus 48 parity-grid cross-cutting files, 28 universal integration scenarios, and 7,291 WPT-derived corpus scenarios. All non-WPT fixture files have 30+ scenarios minimum depth. 73 harvest/bolster scripts in `scripts/harvest/` generate deterministic scenarios from real fixture data. 346 unit tests with 21,322 assertions, 0 failures.
 
 The harness includes 14 filesystem, 29 CSS (value normalization + shorthand), 8 content pattern, 10 F9 syntax gate, 8 fingerprinting/K5, 10 attribution error, 43 HTTP gate (mock server + Docker), 28 cross-predicate interaction (including 6 product compositions and 3 temporal compositions), 14 communication/message gate (including topic trust enforcement and epoch-based evidence staleness), 18 DB schema grounding (type aliases, fabricated references, case sensitivity), 18 infrastructure (The Alexei Gate — Terraform/Pulumi/CloudFormation state file verification), 8 serialization (JSON schema validation), 6 configuration (.env + JSON config parsing), 11 security (XSS, injection, CSP, CORS, eval, prototype pollution, path traversal, deserialization, open redirect, rate limiting), 11 accessibility (heading hierarchy, landmarks, ARIA, alt text, form labels, link text, lang attr, autoplay, skip nav), 11 performance (bundle size, image optimization, lazy loading, unminified assets, render blocking, DOM depth, cache headers, duplicate deps), 15 convergence loop (govern() with shape tracking, constraint propagation, convergence detection), 28 universal full-pipeline integration, and 9 HTML predicate failure classes tracked by the [failure taxonomy](FAILURE-TAXONOMY.md). A decomposition engine (`decomposeFailure()`) maps observations to taxonomy shape IDs — 349 shape rules across 24 domains (including drift, identity, and scope boundary), pure functions, zero LLM, with diagnostics (`computeDecompositionDiagnostics()`), composition operators (product ×, temporal ⊗), and round-trip decomposition verification. Run them to prove your install works, or use `--fail-on-bug` in CI.
 
@@ -262,7 +262,98 @@ npx @sovereign-labs/verify self-test --fail-on-bug
 | **V** | 14 | Vision + triangulation (3-authority verdict) | No |
 | **UV** | 28 | Universal full-pipeline integration (color normalization, multi-predicate, F9 rejection, HTML predicates) | No |
 
-8,271 total scenarios: 952 per-gate staged + 28 universal + 7,291 WPT corpus. 738 pure scenarios + 45 live Docker scenarios = 783 in the self-test runner. Tiered: pure (738, ~20s), live (783 with Docker, ~5min), full (793 with Playwright, ~10min). 376 failure classes covered across 603 known failure shapes (63% atomic coverage). Decomposition engine maps observations to taxonomy shape IDs — 349 shape rules across 24 domains (48 CSS, 31 HTML, 18 HTTP, 14 content, 12 DB, 12 infrastructure, 12 serialization, 12 security, 11 configuration, 11 accessibility, 10 performance, 10 interaction, 52 cross-cutting, 8 attribution, 12 filesystem, 4 drift, 3 identity, 3 scope boundary, 3 vision, 7 invariant, 6 temporal, 6 observer, 6 concurrency, 5 staging, 1 message), with Phase 2 hardening: minimal basis enforcement, deterministic sort, decomposition scoring, claim-type driven decomposition, temporal mode integration, and composition operators (product ×, temporal ⊗) with round-trip verification. DB grounding validates predicates against init.sql schema with type alias normalization (serial→integer, varchar(N)→varchar, bool→boolean). Infrastructure grounding validates predicates against Terraform/Pulumi/CloudFormation state files (resource existence, attribute values, manifest drift). Quality surface gates (serialization, config, security, a11y, performance) perform pure static analysis — no Docker, no network. 346 unit tests, 21,320 assertions. Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
+10,667 total scenarios: 9,875 staged (2,584 non-WPT + 7,291 WPT) + 792 generated at runtime. 70 staged fixture files, all non-WPT at 30+ minimum depth. 738 pure scenarios + 45 live Docker scenarios = 783 in the self-test runner. Tiered: pure (738, ~20s), live (783 with Docker, ~5min), full (793 with Playwright, ~10min). 376 failure classes covered across 603 known failure shapes (63% atomic coverage). Decomposition engine maps observations to taxonomy shape IDs — 349 shape rules across 24 domains (48 CSS, 31 HTML, 18 HTTP, 14 content, 12 DB, 12 infrastructure, 12 serialization, 12 security, 11 configuration, 11 accessibility, 10 performance, 10 interaction, 52 cross-cutting, 8 attribution, 12 filesystem, 4 drift, 3 identity, 3 scope boundary, 3 vision, 7 invariant, 6 temporal, 6 observer, 6 concurrency, 5 staging, 1 message), with Phase 2 hardening: minimal basis enforcement, deterministic sort, decomposition scoring, claim-type driven decomposition, temporal mode integration, and composition operators (product ×, temporal ⊗) with round-trip verification. DB grounding validates predicates against init.sql schema with type alias normalization (serial→integer, varchar(N)→varchar, bool→boolean). Infrastructure grounding validates predicates against Terraform/Pulumi/CloudFormation state files (resource existence, attribute values, manifest drift). Quality surface gates (serialization, config, security, a11y, performance) perform pure static analysis — no Docker, no network. 346 unit tests, 21,322 assertions. Plus external fault-derived scenarios from `.verify/custom-scenarios.json` when testing against a real app. The harness is deterministic — no LLM calls, no network, no flakiness.
+
+## Nightly Improve Loop
+
+The improve loop is verify's compound learning system. It runs the self-test, diagnoses failures, generates fix candidates, validates against holdout scenarios, and either auto-merges improvements or files an issue. The scenario supply chain feeds it automatically.
+
+### Pipeline
+
+```
+Supply (fuzz + harvest + receipts) → Baseline (self-test) → Improve (diagnose + fix) → Validate (holdout) → PR or Issue
+```
+
+### Scenario Supply Chain
+
+Three automatic fuel sources generate new scenarios without manual authoring:
+
+```bash
+# Fixture fuzzer — mutate existing scenarios into adversarial variants
+# 6 mutation classes: pred_flip, edit_corrupt, pred_drift, type_swap, boundary, compound
+bun run supply:fuzz
+
+# External corpus harvester — CSS edge cases, HTTP patterns, DB schema checks
+# Pluggable: add harvesters for new domains in scripts/supply/harvest.ts
+bun run supply:harvest
+
+# Receipt scraper — extract failed submissions from MCP proxy receipts
+# Reads .governance/receipts.jsonl, converts failures to regression scenarios
+bun run supply:receipts
+
+# All sources at once
+bun run supply:all
+```
+
+### Running Locally
+
+```bash
+# Full nightly pipeline: supply → self-test → improve
+bun run nightly
+
+# Improve only (skip supply chain)
+bun run improve -- --llm=gemini --api-key=$GEMINI_API_KEY
+
+# Dry run (triage + diagnose, no apply)
+bun run improve -- --llm=gemini --dry-run
+
+# No-LLM triage (mechanical only, zero tokens)
+bun run improve -- --llm=none
+```
+
+### GitHub Action (CI)
+
+The nightly workflow runs at 3 AM UTC. On success, it creates a PR with the improvements. On failure, it files an issue with the diagnostic report.
+
+```yaml
+# .github/workflows/nightly-improve.yml
+# Triggers: schedule (3 AM UTC) or manual dispatch
+# Requires: GEMINI_API_KEY or ANTHROPIC_API_KEY secret
+```
+
+Manual trigger with custom options:
+- `supply_sources`: comma-separated (fuzz, harvest, receipts)
+- `llm_provider`: gemini, claude, anthropic, none
+- `families`: scenario families to test (A-Z)
+- `dry_run`: triage only, no apply
+
+### Improve Verdicts
+
+| Verdict | Meaning |
+|---------|---------|
+| `accepted` | Fix passed holdout validation, ready to merge |
+| `rejected_regression` | Best candidate caused regressions |
+| `rejected_overfitting` | Holdout check failed (overfit to dirty set) |
+| `rejected_no_fix` | No candidate improved anything |
+| `skipped_all_clean` | No violations to fix |
+| `skipped_no_llm` | Needs LLM but no provider configured |
+
+### Adding Custom Harvesters
+
+Add a harvester function to `scripts/supply/harvest.ts`:
+
+```typescript
+// In HARVESTERS registry:
+const HARVESTERS: Record<string, Harvester> = {
+  css: harvestCSSEdgeCases,
+  http: harvestHTTPEdgeCases,
+  db: harvestDBPatterns,
+  // Add yours:
+  openapi: harvestOpenAPIBreakingChanges,
+};
+```
+
+Each harvester receives `(inputDir, maxScenarios)` and returns `{ source, scenarios, metadata }`.
 
 ## Gates
 

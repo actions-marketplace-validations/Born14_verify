@@ -367,6 +367,46 @@ Generate 4 scenarios testing shape {shape.id}.
 Return as a JSON array.
 ```
 
+#### Phase 3 Validation Rules (Critical — reject garbage strictly)
+
+Every generated scenario MUST pass ALL of these checks or be rejected:
+
+```typescript
+// 1. Search string exists in demo-app file
+for (const edit of scenario.edits) {
+  const fileContent = readFileSync(join(demoDir, edit.file), 'utf-8');
+  if (fileContent.indexOf(edit.search) === -1) → REJECT
+  // No exceptions. indexOf === -1 means the LLM hallucinated the search string.
+}
+
+// 2. Predicate type is valid
+const VALID_TYPES = ['css', 'html', 'content', 'db', 'http', 'http_sequence',
+  'filesystem_exists', 'filesystem_absent', 'filesystem_unchanged', 'filesystem_count',
+  'infra_resource', 'infra_attribute', 'infra_manifest', 'serialization',
+  'config', 'security', 'a11y', 'performance', 'message', 'hallucination'];
+for (const pred of scenario.predicates) {
+  if (!VALID_TYPES.includes(pred.type)) → REJECT
+}
+
+// 3. Required fields present
+if (!scenario.id || !scenario.description || !scenario.rationale) → REJECT
+if (!Array.isArray(scenario.edits) || !Array.isArray(scenario.predicates)) → REJECT
+if (typeof scenario.expectedSuccess !== 'boolean') → REJECT
+if (!Array.isArray(scenario.tags) || !scenario.tags.some(t => /^[A-Z]+-\d+/.test(t))) → REJECT
+
+// 4. Dedup — fingerprint by edit+predicate hash
+const hash = sha256(JSON.stringify({ edits: scenario.edits, predicates: scenario.predicates }));
+if (existingHashes.has(hash)) → REJECT
+
+// 5. Dry-run — apply edit to temp copy, call verify(), must not throw
+const tmpDir = copyDemoApp();
+applyEdits(tmpDir, scenario.edits);
+try { await verify(scenario.edits, scenario.predicates, { appDir: tmpDir }); }
+catch (e) { → REJECT (verify crashed, scenario is malformed) }
+```
+
+**Why this matters:** When we wrote 594 scenarios via background agents earlier, some had subtly wrong search strings that wouldn't match the demo-app. A human catches these in review. The curriculum agent's Phase 3 must catch them programmatically — no exceptions.
+
 #### What It Does NOT Do
 - Does NOT modify gate code (that's improve's job)
 - Does NOT run the improve loop (separate concern)

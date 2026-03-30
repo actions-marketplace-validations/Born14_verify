@@ -80,7 +80,7 @@ describe('govern()', () => {
     expect(result.abortedByApproval).toBe(false);
     expect(result.receipt.goal).toBe('Change nav link color to red');
     expect(result.receipt.gatesFailed).toHaveLength(0);
-    expect(result.receipt.attestation).toContain('VERIFY PASSED');
+    expect(result.receipt.attestation).toContain('VERIFIED');
   });
 
   test('convergence: fails once, uses narrowing to fix on attempt 2', async () => {
@@ -163,7 +163,7 @@ describe('govern()', () => {
     expect(result.attempts).toBeGreaterThanOrEqual(2);
     expect(result.attempts).toBeLessThanOrEqual(3);
     expect(result.history.every(r => !r.success)).toBe(true);
-    expect(result.receipt.attestation).toContain('VERIFY FAILED');
+    expect(result.receipt.attestation).toContain('NOT VERIFIED');
   });
 
   test('K5 learning: failure seeds constraint, narrowing visible to agent', async () => {

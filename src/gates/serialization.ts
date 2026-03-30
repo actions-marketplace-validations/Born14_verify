@@ -45,7 +45,7 @@ function compareValues(
     return checkSubset(actual, expected);
   }
 
-  return { passed: false, detail: `unknown comparison mode: ${mode}` };
+  return { passed: false, detail: `Unknown comparison mode "${mode}". Use: exact, structural, or subset.` };
 }
 
 /**

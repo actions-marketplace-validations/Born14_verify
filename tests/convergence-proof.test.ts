@@ -104,7 +104,7 @@ describe('Phase 1: Information Monotonicity', () => {
     expect(r.success).toBe(false);
     expect(r.narrowing).toBeDefined();
     expect(r.narrowing!.resolutionHint).toContain('search string');
-    expect(r.attestation).toContain('VERIFY FAILED');
+    expect(r.attestation).toContain('NOT VERIFIED');
     expect(r.gates[0].gate).toBe('F9');
     expect(r.gates[0].passed).toBe(false);
   });
@@ -220,7 +220,7 @@ describe('Phase 2: Convergence — Smart Agent vs Naive Agent', () => {
 
     // The smart agent converges
     expect(attempt2.success).toBe(true);
-    expect(attempt2.attestation).toContain('VERIFY PASSED');
+    expect(attempt2.attestation).toContain('VERIFIED');
   });
 
   test('2.3 — Constraint override allows explicit risk acknowledgment', async () => {
@@ -416,7 +416,7 @@ describe('Phase 5: Full Pipeline (Docker required)', () => {
     }
 
     // Attestation is well-formed
-    expect(r.attestation).toContain('VERIFY PASSED');
+    expect(r.attestation).toContain('VERIFIED');
     expect(r.attestation).toContain('F9✓');
 
     restoreApp();
@@ -652,7 +652,7 @@ describe('Phase 7: Full Convergence Cycle (Docker required)', () => {
 
     // This should succeed — the edit and predicate agree
     expect(a2.success).toBe(true);
-    expect(a2.attestation).toContain('VERIFY PASSED');
+    expect(a2.attestation).toContain('VERIFIED');
 
     // Verify the full gate sequence fired
     const a2Gates = a2.gates.map(g => `${g.gate}:${g.passed ? 'pass' : 'fail'}`);
@@ -763,7 +763,7 @@ describe('Phase 7: Full Convergence Cycle (Docker required)', () => {
 
     // Step 2 succeeds — the agent converged
     expect(step2.success).toBe(true);
-    expect(step2.attestation).toContain('VERIFY PASSED');
+    expect(step2.attestation).toContain('VERIFIED');
 
     // All gates including invariants fired and passed
     const gateNames = step2.gates.map(g => g.gate);

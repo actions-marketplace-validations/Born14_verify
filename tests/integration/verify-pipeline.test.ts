@@ -28,7 +28,7 @@ describe('verify() pipeline', () => {
 
     expect(result.success).toBe(false);
     expect(result.gates.find(g => g.gate === 'F9')?.passed).toBe(false);
-    expect(result.attestation).toContain('VERIFY FAILED');
+    expect(result.attestation).toContain('NOT VERIFIED');
     expect(result.narrowing?.resolutionHint).toContain('search string');
 
     rmSync(appDir, { recursive: true, force: true });
@@ -120,7 +120,7 @@ describe('verify() pipeline', () => {
     );
 
     if (result.success) {
-      expect(result.attestation).toContain('VERIFY PASSED');
+      expect(result.attestation).toContain('VERIFIED');
       expect(result.attestation).toContain('Rename the app');
     }
     // Even if not fully passing, timing should exist
@@ -253,7 +253,7 @@ describe('verify() pipeline', () => {
     );
 
     if (result.success) {
-      expect(result.attestation).toContain('VERIFY PASSED');
+      expect(result.attestation).toContain('VERIFIED');
     }
     expect(result.timing.perGate).toBeTruthy();
     expect(Object.keys(result.timing.perGate!).length).toBeGreaterThan(0);

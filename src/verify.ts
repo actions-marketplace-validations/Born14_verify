@@ -5,8 +5,8 @@
  * Submit edits + predicates. Get back a verdict.
  * Every edit gets a fair trial before it touches your users.
  *
- * Gate sequence (24 gates):
- *   Grounding → F9 (syntax) → K5 (constraints) → G5 (containment) →
+ * Gate sequence (25 gates):
+ *   Grounding → F9 (syntax) → K5 (constraints) → G5 (containment) → Hallucination →
  *   Access → Temporal → Propagation → State → Capacity → Contention →
  *   Filesystem → Infrastructure → Serialization → Config → Security → A11y → Performance →
  *   [Staging (Docker) → Browser (Playwright) → HTTP (fetch) →
@@ -28,6 +28,7 @@ import { ConstraintStore, extractSignature, classifyChangeType, classifyActionCl
 import { runSyntaxGate, applyEdits } from './gates/syntax.js';
 import { runConstraintGate } from './gates/constraints.js';
 import { runContainmentGate } from './gates/containment.js';
+import { runHallucinationGate } from './gates/hallucination.js';
 import { runStagingGate } from './gates/staging.js';
 import { runBrowserGate, type BrowserGateResult } from './gates/browser.js';
 import { runHttpGate } from './gates/http.js';
@@ -212,6 +213,26 @@ export async function verify(
       const containmentResult = runContainmentGate(ctx);
       gates.push(containmentResult);
       // Advisory — always passes, but result is included
+    }
+
+    // =========================================================================
+    // HALLUCINATION: Deterministic Claim Verification
+    // =========================================================================
+    {
+      const hasHalPreds = groundedPredicates.some(p => p.type === 'hallucination');
+      if (hasHalPreds) {
+        log('[hallucination] Checking agent claims against ground truth...');
+        const halResult = runHallucinationGate(ctx);
+        gates.push(halResult);
+
+        if (!halResult.passed) {
+          log(`[hallucination] FAILED: ${halResult.detail}`);
+          return buildResult({
+            gates, config, store, sessionId, totalStart, logs,
+            failedGate: 'hallucination' as any, error: halResult.detail, edits, predicates: groundedPredicates,
+          });
+        }
+      }
     }
 
     // =========================================================================
@@ -879,54 +900,68 @@ function buildResult(opts: BuildResultOpts): VerifyResult {
   };
 }
 
+/** Human-friendly gate names for attestation strings */
+const GATE_LABELS: Record<string, string> = {
+  grounding: 'grounding', F9: 'syntax', K5: 'constraints', G5: 'containment',
+  staging: 'staging', browser: 'browser', http: 'http', invariants: 'health-checks',
+  vision: 'vision', triangulation: 'cross-check', infrastructure: 'infrastructure',
+  serialization: 'data', config: 'config', security: 'security', a11y: 'accessibility',
+  performance: 'performance', filesystem: 'filesystem', access: 'access', capacity: 'capacity',
+  contention: 'concurrency', state: 'state', temporal: 'timing', propagation: 'propagation',
+  observation: 'observation', goal: 'goal', content: 'content', hallucination: 'hallucination',
+};
+
 function buildAttestation(gates: GateResult[], success: boolean, goal?: string, failedGate?: string): string {
-  const gateStr = gates.map(g => `${g.gate}${g.passed ? '✓' : '✗'}`).join(' ');
+  const gateStr = gates.map(g => `${GATE_LABELS[g.gate] ?? g.gate}${g.passed ? '✓' : '✗'}`).join(' ');
+  const durationMs = gates.reduce((sum, g) => sum + g.durationMs, 0);
 
   if (success) {
     return [
-      `VERIFY PASSED${goal ? `: ${goal}` : ''}`,
-      `Gates: ${gateStr}`,
-      `Duration: ${gates.reduce((sum, g) => sum + g.durationMs, 0)}ms`,
+      `VERIFIED${goal ? `: ${goal}` : ''}`,
+      `Checks: ${gateStr}`,
+      `Duration: ${durationMs}ms`,
     ].join('\n');
   }
 
   const failed = gates.find(g => !g.passed);
+  const gateName = GATE_LABELS[failedGate ?? failed?.gate ?? ''] ?? failedGate ?? failed?.gate ?? 'unknown';
   return [
-    `VERIFY FAILED${goal ? `: ${goal}` : ''}`,
-    `Gates: ${gateStr}`,
-    `Failed at: ${failedGate ?? failed?.gate ?? 'unknown'}`,
-    `Reason: ${failed?.detail ?? 'unknown'}`,
-    `Duration: ${gates.reduce((sum, g) => sum + g.durationMs, 0)}ms`,
+    `NOT VERIFIED${goal ? `: ${goal}` : ''}`,
+    `Checks: ${gateStr}`,
+    `Stopped at: ${gateName}`,
+    `Problem: ${failed?.detail ?? 'unknown'}`,
+    `Duration: ${durationMs}ms`,
   ].join('\n');
 }
 
 function buildResolutionHint(gate: string, error: string, violation?: any): string {
   if (gate === 'F9') {
-    if (error.includes('not found')) return 'The search string does not exist in the file. Read the file first and use an exact match.';
-    if (error.includes('ambiguous')) return 'The search string matches multiple locations. Include more surrounding context to make it unique.';
-    return 'Fix the syntax errors in your edits.';
+    if (error.includes('not found')) return 'The search string doesn\'t exist in the file. Read the file first and copy an exact substring.';
+    if (error.includes('ambiguous')) return 'The search string matches multiple places. Add more surrounding lines to make it unique.';
+    return 'The edits have syntax errors. Check brackets, quotes, and semicolons.';
   }
   if (gate === 'K5') {
     if (violation?.banType === 'predicate_fingerprint') {
-      return 'This predicate combination failed before. Change the expected value or predicate type.';
+      return 'This exact approach already failed. Try a different CSS selector, expected value, or predicate type.';
     }
     if (violation?.banType === 'radius_limit') {
-      return `Too many files changed. Reduce to ${violation.reason?.match(/\d+/)?.[0] ?? 'fewer'} files.`;
+      return `Too many files changed. Keep the edit to ${violation.reason?.match(/\d+/)?.[0] ?? 'fewer'} files or less.`;
     }
-    return 'This approach was tried before and failed. Try a different strategy.';
+    return 'This strategy was tried before and failed. Try a fundamentally different approach.';
   }
-  if (gate === 'staging') return 'The container failed to build or start. Check the Docker configuration and dependencies.';
-  if (gate === 'browser') return 'The CSS/HTML validation failed against the rendered page. Check computed styles.';
-  if (gate === 'http') return 'HTTP endpoint validation failed. Check the API response.';
-  if (gate === 'invariants') return 'System health checks failed after applying edits. The change may have broken something.';
-  if (gate === 'filesystem') return 'Filesystem state does not match expectations after edits. Check file paths, existence, and content.';
-  if (gate === 'infrastructure') return 'Infrastructure state does not match expectations. Check resource existence, attributes, and manifest drift.';
-  if (gate === 'serialization') return 'JSON data does not match expected schema or structure. Check the file content, comparison mode, and expected values.';
-  if (gate === 'config') return 'Configuration key/value does not match expectations. Check the config source (.env, JSON, YAML) and key path.';
-  if (gate === 'security') return 'Security scan detected issues (or expected issues were not found). Review the specific security check findings.';
-  if (gate === 'a11y') return 'Accessibility check found issues (or expected issues were not found). Review alt text, headings, landmarks, aria labels.';
-  if (gate === 'performance') return 'Performance check failed threshold. Review bundle size, image optimization, lazy loading, or connection count.';
-  return 'Verification failed. Review the gate details.';
+  if (gate === 'staging') return 'The app failed to build or start. Check Dockerfile, dependencies, and startup code.';
+  if (gate === 'browser') return 'The page doesn\'t look right after the edit. Check CSS computed styles in a browser.';
+  if (gate === 'http') return 'The API endpoint returned an unexpected response. Check status codes and response body.';
+  if (gate === 'invariants') return 'The edit broke something else. Health checks failed after applying the change.';
+  if (gate === 'filesystem') return 'A file is missing, has wrong content, or wasn\'t created. Check paths and filenames.';
+  if (gate === 'infrastructure') return 'Infrastructure doesn\'t match expectations. Check that resources exist and have the right attributes.';
+  if (gate === 'serialization') return 'The JSON data doesn\'t match the expected shape. Check keys, types, and values.';
+  if (gate === 'config') return 'A config value is wrong or missing. Check .env files, JSON configs, and key names.';
+  if (gate === 'security') return 'Security issue detected. Check for XSS, SQL injection, hardcoded secrets, or missing auth.';
+  if (gate === 'a11y') return 'Accessibility issue found. Check alt text, form labels, heading order, and ARIA attributes.';
+  if (gate === 'performance') return 'Performance is below threshold. Check bundle size, image sizes, and connection count.';
+  if (gate === 'hallucination') return 'That claim isn\'t true. Check the actual database schema, routes, CSS, or file contents.';
+  return 'Verification failed. Check the details above for what went wrong.';
 }
 
 function gateToSource(gate: string): 'syntax' | 'staging' | 'evidence' | 'invariant' {
@@ -941,7 +976,8 @@ function gateToSource(gate: string): 'syntax' | 'staging' | 'evidence' | 'invari
     case 'config':
     case 'security':
     case 'a11y':
-    case 'performance': return 'evidence';
+    case 'performance':
+    case 'hallucination': return 'evidence';
     case 'invariants': return 'invariant';
     default: return 'staging';
   }

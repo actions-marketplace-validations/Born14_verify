@@ -16719,7 +16719,7 @@ function generateFamilyL(appDir: string): VerifyScenario[] {
 
   // ---------------------------------------------------------------------------
   // GOV-14: Receipt attestation content
-  // Proves receipt attestation contains VERIFY PASSED/FAILED
+  // Proves receipt attestation contains VERIFIED/NOT VERIFIED
   // ---------------------------------------------------------------------------
   scenarios.push({
     id: nextId('L', 'GOV_14_receiptAttestation'),
@@ -16740,7 +16740,7 @@ function generateFamilyL(appDir: string): VerifyScenario[] {
           const govResult = result._governResult;
           if (!govResult) return { passed: false, violation: 'No _governResult', severity: 'bug' as const };
           const att = govResult.receipt.attestation;
-          if (!att.includes('VERIFY PASSED') && !att.includes('VERIFY FAILED') && !att.includes('GOVERN')) {
+          if (!att.includes('VERIFIED') && !att.includes('NOT VERIFIED') && !att.includes('GOVERN')) {
             return { passed: false, violation: `Attestation missing expected text: "${att.substring(0, 80)}"`, severity: 'unexpected' as const };
           }
           return { passed: true, severity: 'info' as const };

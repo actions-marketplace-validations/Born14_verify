@@ -50,7 +50,7 @@ export function runConstraintGate(
     return {
       gate: 'K5',
       passed: false,
-      detail: `CONSTRAINT VIOLATION [${violation.banType}]: ${violation.reason}`,
+      detail: `This approach already failed: ${violation.reason}`,
       durationMs: Date.now() - start,
       violation,
       constraintCount: store.getConstraintCount(),

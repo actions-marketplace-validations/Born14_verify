@@ -1,53 +1,41 @@
 # @sovereign-labs/verify
 
-Verification gate for AI agent actions. Every edit gets a fair trial before it touches your users.
+**Check AI agent work before it ships.** Your agent proposes edits. Verify checks them — syntax, security, accessibility, performance, and 22 more gates. If the edits are wrong, you find out before your users do.
 
-**For any agent** — coding agents, file system agents, or your own. The gates are universal. Only the predicates change.
-
-## It found its own bug
-
-In v0.1.1, HTTP predicates with different `bodyContains` values produced identical fingerprints — K5 couldn't tell them apart. A human caught it by reading the code.
-
-Now 12,775 automated scenarios across 107 staged files catch it — 354 tests with 21,342 assertions, 0 failures:
-
-```bash
-npx @sovereign-labs/verify self-test
-
-#   0 bugs | 738 scenarios | 0 unexpected | A: clean, ..., L: clean, ..., P: clean, B: clean
-#   Failure Class Coverage: 376/376 clean
-#   ALL CLEAN — No invariant violations detected.
-
-npx @sovereign-labs/verify self-test --live
-
-#   Skipped 63 Docker scenarios (Docker not available)  # or runs them if Docker is present
-#   0 bugs | 783 scenarios | ...
-```
-
-The test that catches the v0.1.1 bug is scenario A10. It will never regress again.
+Works with any agent. Coding agents, file system agents, infrastructure agents, or your own.
 
 ## What it does
 
-Your agent proposes edits. `verify()` checks them:
+```typescript
+import { verify } from '@sovereign-labs/verify';
 
+const result = await verify(edits, predicates, { appDir: './my-app' });
+// result.success → true/false
+// result.attestation → human-readable summary
+// result.narrowing → what to try next (on failure)
 ```
-Grounding → F9 (syntax) → K5 (constraints) → G5 (containment) →
-Filesystem (post-edit state) → Infrastructure (state files) →
-Serialization → Config → Security → A11y → Performance →
-Staging (Docker) → Browser (Playwright) → HTTP (fetch) →
-Invariants (health) → Vision (screenshot) → Triangulation (3-authority verdict)
-```
 
-On **success**: returns proof that the edits work.
-On **failure**: returns what went wrong + what to try next.
-On **repeat failure**: K5 learns from mistakes, so attempt N+1 has a smaller, smarter search space.
+Your agent says "change the color to red." Verify checks:
 
-## Beyond Code
+1. **Can the edit be applied?** Does the search string exist in the file?
+2. **Is the edit safe?** No XSS, no SQL injection, no leaked secrets, no broken accessibility.
+3. **Did the edit work?** CSS selector has the right value. HTTP endpoint returns 200. Database column exists.
+4. **Did the edit break anything else?** Health checks pass. File integrity holds. Config is consistent.
 
-The gates are domain-agnostic. K5 fingerprints any predicate type. G5 attributes any mutation. Narrowing guides any agent. Only the predicates are domain-specific.
+26 checks run in sequence. First failure stops the pipeline and tells you exactly what went wrong.
 
-Today verify gates code edits. But the same pipeline works for file system agents (move, rename, organize), communication agents (message the right channel), document agents (don't overwrite the wrong cells), and infrastructure agents (don't delete the production database).
+On **failure**: returns the problem + what to try next.
+On **repeat failure**: learns from mistakes — attempt N+1 won't repeat attempt N's error.
 
-**Built today:** Code predicates (css, html, content, http, db) + Filesystem predicates (exists, absent, unchanged, count) + Infrastructure predicates (resource existence, attribute values, manifest drift — The Alexei Gate) + Quality surface predicates (serialization, config, security, a11y, performance) + Communication predicates (destination, forbidden content, claims with evidence, negation detection, topic trust enforcement, epoch-based evidence staleness, review bundles for human surfaces).
+## Beyond code edits
+
+The checks are domain-agnostic. Today it verifies code edits, but the same pipeline works for:
+- **File system agents** — move, rename, organize files
+- **Infrastructure agents** — don't delete the production database
+- **Communication agents** — message the right channel, no forbidden content
+- **Document agents** — don't overwrite the wrong cells
+
+**Built-in checks:** CSS, HTML, content patterns, HTTP endpoints, database schema, file existence, infrastructure state, JSON structure, config values, security scans, accessibility, performance budgets, hallucination detection, and more.
 
 ## Install
 

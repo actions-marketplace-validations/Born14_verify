@@ -175,11 +175,12 @@ function deserializeWPTLeaf(leaf: any, appDir: string): VerifyScenario | null {
 function deserialize(s: SerializedScenario, appDir: string): VerifyScenario {
   const invariants = buildInvariants(s);
 
-  // When scenario explicitly says requiresDocker: false, disable staging/browser/http
-  // gates to prevent Docker staging from interfering on machines where Docker is available
-  const gates = s.gates ?? (s.requiresDocker === false
-    ? { staging: false, browser: false, http: false }
-    : undefined);
+  // Staging/browser/http gates only run when scenario explicitly opts in with requiresDocker: true.
+  // Without this, Docker-available machines (Lenovo) attempt staging on every scenario,
+  // and edits that break the app cause 1,236 false staging failures.
+  const gates = s.gates ?? (s.requiresDocker === true
+    ? undefined  // all gates enabled
+    : { staging: false, browser: false, http: false });
 
   return {
     id: s.id,

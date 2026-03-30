@@ -30,7 +30,8 @@
       "write_write_conflict",
       "CO-02"
     ],
-    "rationale": "Read-modify-write on config.json without file lock — concurrent health checks overwrite each other changes (TOCTOU race)."
+    "rationale": "Read-modify-write on config.json without file lock — concurrent health checks overwrite each other changes (TOCTOU race).",
+    "intent": "false_positive"
   },
   {
     "id": "co-002",
@@ -57,7 +58,8 @@
       "write_write_conflict",
       "CO-02"
     ],
-    "rationale": "Read-then-write to log file — two concurrent POSTs read same content, both append, one overwrites the other."
+    "rationale": "Read-then-write to log file — two concurrent POSTs read same content, both append, one overwrites the other.",
+    "intent": "false_positive"
   },
   {
     "id": "co-003",
@@ -94,7 +96,8 @@
       "CO-02",
       "control"
     ],
-    "rationale": "Atomic write via tmp+rename — concurrent writers produce complete files, no partial writes."
+    "rationale": "Atomic write via tmp+rename — concurrent writers produce complete files, no partial writes.",
+    "intent": "false_negative"
   },
   {
     "id": "co-004",
@@ -121,7 +124,8 @@
       "read_write_race",
       "CO-03"
     ],
-    "rationale": "Shared mutable counter without atomic increment — concurrent requests read stale value, counter under-counts."
+    "rationale": "Shared mutable counter without atomic increment — concurrent requests read stale value, counter under-counts.",
+    "intent": "false_positive"
   },
   {
     "id": "co-005",
@@ -154,7 +158,8 @@
       "read_write_race",
       "CO-03"
     ],
-    "rationale": "Spread operator copies object properties non-atomically — if another request mutates _settings during copy, result contains mix of old and new values."
+    "rationale": "Spread operator copies object properties non-atomically — if another request mutates _settings during copy, result contains mix of old and new values.",
+    "intent": "false_positive"
   },
   {
     "id": "co-006",
@@ -191,7 +196,8 @@
       "CO-03",
       "control"
     ],
-    "rationale": "Frozen snapshot is immutable — concurrent writes create new snapshots, readers always get consistent state."
+    "rationale": "Frozen snapshot is immutable — concurrent writes create new snapshots, readers always get consistent state.",
+    "intent": "false_negative"
   },
   {
     "id": "co-007",
@@ -218,7 +224,8 @@
       "lock_contention",
       "CO-04"
     ],
-    "rationale": "Advisory lock(1) held for entire request — all concurrent /api/items requests queue behind one lock, timeout under load."
+    "rationale": "Advisory lock(1) held for entire request — all concurrent /api/items requests queue behind one lock, timeout under load.",
+    "intent": "false_positive"
   },
   {
     "id": "co-008",
@@ -245,7 +252,8 @@
       "lock_contention",
       "CO-04"
     ],
-    "rationale": "Spin lock in single-threaded Node.js blocks the event loop entirely — no other request can proceed, infinite hang."
+    "rationale": "Spin lock in single-threaded Node.js blocks the event loop entirely — no other request can proceed, infinite hang.",
+    "intent": "false_positive"
   },
   {
     "id": "co-009",
@@ -281,7 +289,8 @@
       "CO-04",
       "control"
     ],
-    "rationale": "pg_try_advisory_lock is non-blocking — returns false instead of waiting, no contention timeout."
+    "rationale": "pg_try_advisory_lock is non-blocking — returns false instead of waiting, no contention timeout.",
+    "intent": "false_negative"
   },
   {
     "id": "co-010",
@@ -308,7 +317,8 @@
       "deadlock",
       "CO-05"
     ],
-    "rationale": "If echo endpoint locks posts-then-users while items locks users-then-posts, concurrent requests deadlock — classic resource ordering violation."
+    "rationale": "If echo endpoint locks posts-then-users while items locks users-then-posts, concurrent requests deadlock — classic resource ordering violation.",
+    "intent": "false_positive"
   },
   {
     "id": "co-011",
@@ -341,7 +351,8 @@
       "deadlock",
       "CO-05"
     ],
-    "rationale": "Self-referencing FK without deferred constraint — concurrent inserts of parent/child pairs can deadlock on FK validation."
+    "rationale": "Self-referencing FK without deferred constraint — concurrent inserts of parent/child pairs can deadlock on FK validation.",
+    "intent": "false_positive"
   },
   {
     "id": "co-012",
@@ -375,7 +386,8 @@
       "CO-05",
       "control"
     ],
-    "rationale": "Consistent alphabetical lock ordering with SHARE MODE — no circular wait possible."
+    "rationale": "Consistent alphabetical lock ordering with SHARE MODE — no circular wait possible.",
+    "intent": "false_negative"
   },
   {
     "id": "co-013",
@@ -402,7 +414,8 @@
       "lost_update",
       "CO-06"
     ],
-    "rationale": "App-side increment (SELECT then UPDATE with literal value) — two concurrent reads get same count, both write count+1, one increment lost."
+    "rationale": "App-side increment (SELECT then UPDATE with literal value) — two concurrent reads get same count, both write count+1, one increment lost.",
+    "intent": "false_positive"
   },
   {
     "id": "co-014",
@@ -435,7 +448,8 @@
       "lost_update",
       "CO-06"
     ],
-    "rationale": "UPDATE without WHERE updated_at = $old_timestamp — concurrent updates silently overwrite each other, last writer wins with no conflict detection."
+    "rationale": "UPDATE without WHERE updated_at = $old_timestamp — concurrent updates silently overwrite each other, last writer wins with no conflict detection.",
+    "intent": "false_positive"
   },
   {
     "id": "co-015",
@@ -469,7 +483,8 @@
       "CO-06",
       "control"
     ],
-    "rationale": "SQL-level atomic increment — database handles concurrency, no lost updates regardless of concurrent request count."
+    "rationale": "SQL-level atomic increment — database handles concurrency, no lost updates regardless of concurrent request count.",
+    "intent": "false_negative"
   },
   {
     "id": "co-016",
@@ -502,7 +517,8 @@
       "double_submit",
       "CO-07"
     ],
-    "rationale": "No idempotency key on POST — network retry or user double-click creates duplicate posts with identical content."
+    "rationale": "No idempotency key on POST — network retry or user double-click creates duplicate posts with identical content.",
+    "intent": "false_positive"
   },
   {
     "id": "co-017",
@@ -529,7 +545,8 @@
       "double_submit",
       "CO-07"
     ],
-    "rationale": "No CSRF token and no idempotency key — replayed form submission charges customer twice."
+    "rationale": "No CSRF token and no idempotency key — replayed form submission charges customer twice.",
+    "intent": "false_positive"
   },
   {
     "id": "co-018",
@@ -569,7 +586,8 @@
       "CO-07",
       "control"
     ],
-    "rationale": "Requires idempotency key header — duplicate submissions with same key return cached result instead of creating duplicate."
+    "rationale": "Requires idempotency key header — duplicate submissions with same key return cached result instead of creating duplicate.",
+    "intent": "false_negative"
   },
   {
     "id": "co-019",
@@ -602,7 +620,8 @@
       "concurrent_migration",
       "CO-08"
     ],
-    "rationale": "No advisory lock on migration — two daemon instances apply same DDL concurrently, risking partial schema state or constraint errors."
+    "rationale": "No advisory lock on migration — two daemon instances apply same DDL concurrently, risking partial schema state or constraint errors.",
+    "intent": "false_positive"
   },
   {
     "id": "co-020",
@@ -635,7 +654,8 @@
       "concurrent_migration",
       "CO-08"
     ],
-    "rationale": "CREATE INDEX without CONCURRENTLY acquires SHARE lock — all INSERTs/UPDATEs to posts table block during index build."
+    "rationale": "CREATE INDEX without CONCURRENTLY acquires SHARE lock — all INSERTs/UPDATEs to posts table block during index build.",
+    "intent": "false_positive"
   },
   {
     "id": "co-021",
@@ -669,7 +689,8 @@
       "CO-08",
       "control"
     ],
-    "rationale": "Advisory lock prevents concurrent execution, CONCURRENTLY prevents write blocking — safe concurrent migration."
+    "rationale": "Advisory lock prevents concurrent execution, CONCURRENTLY prevents write blocking — safe concurrent migration.",
+    "intent": "false_negative"
   },
   {
     "id": "co-022",
@@ -696,7 +717,8 @@
       "session_corruption",
       "CO-10"
     ],
-    "rationale": "Shared mutable session map — concurrent requests for same user read/modify session cart object, producing inconsistent item lists."
+    "rationale": "Shared mutable session map — concurrent requests for same user read/modify session cart object, producing inconsistent item lists.",
+    "intent": "false_positive"
   },
   {
     "id": "co-023",
@@ -735,7 +757,8 @@
       "session_corruption",
       "CO-10"
     ],
-    "rationale": "Removed UNIQUE on token — token rotation during concurrent request means two requests authenticate with different tokens for same session, one gets rejected."
+    "rationale": "Removed UNIQUE on token — token rotation during concurrent request means two requests authenticate with different tokens for same session, one gets rejected.",
+    "intent": "false_positive"
   },
   {
     "id": "co-024",
@@ -772,7 +795,8 @@
       "CO-10",
       "control"
     ],
-    "rationale": "Single atomic UPDATE with WHERE clause — concurrent requests extend same session without corruption."
+    "rationale": "Single atomic UPDATE with WHERE clause — concurrent requests extend same session without corruption.",
+    "intent": "false_negative"
   },
   {
     "id": "co-025",
@@ -805,7 +829,8 @@
       "event_ordering",
       "CO-11"
     ],
-    "rationale": "Events use SERIAL id and TIMESTAMP — concurrent inserts can produce id=5 at t=100ms and id=4 at t=101ms. Consumers sorting by id or timestamp get wrong order."
+    "rationale": "Events use SERIAL id and TIMESTAMP — concurrent inserts can produce id=5 at t=100ms and id=4 at t=101ms. Consumers sorting by id or timestamp get wrong order.",
+    "intent": "false_positive"
   },
   {
     "id": "co-026",
@@ -838,7 +863,8 @@
       "event_ordering",
       "CO-11"
     ],
-    "rationale": "Concurrent webhook delivery reorders events — consumer processes \"updated\" before \"created\", applying update to non-existent entity."
+    "rationale": "Concurrent webhook delivery reorders events — consumer processes \"updated\" before \"created\", applying update to non-existent entity.",
+    "intent": "false_positive"
   },
   {
     "id": "co-027",
@@ -876,6 +902,7 @@
       "CO-11",
       "control"
     ],
-    "rationale": "Events carry monotonic sequence number, consumer sorts by seq before processing — correct ordering guaranteed."
+    "rationale": "Events carry monotonic sequence number, consumer sorts by seq before processing — correct ordering guaranteed.",
+    "intent": "false_negative"
   }
 ]

@@ -23,7 +23,8 @@
       "env_count",
       "IG-01"
     ],
-    "rationale": "500 env vars — nears shell environment size limit, docker compose parsing slows down"
+    "rationale": "500 env vars — nears shell environment size limit, docker compose parsing slows down",
+    "intent": "false_negative"
   },
   {
     "id": "ig-envcount-002",
@@ -49,7 +50,8 @@
       "env_count",
       "IG-01"
     ],
-    "rationale": "200 vars with ~100-char names — total environment block exceeds typical limits"
+    "rationale": "200 vars with ~100-char names — total environment block exceeds typical limits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-envcount-003",
@@ -80,7 +82,8 @@
       "env_count",
       "IG-01"
     ],
-    "rationale": "100 compose environment entries — YAML parsing and container start overhead"
+    "rationale": "100 compose environment entries — YAML parsing and container start overhead",
+    "intent": "false_negative"
   },
   {
     "id": "ig-envcount-004",
@@ -116,7 +119,8 @@
       "env_count",
       "IG-01"
     ],
-    "rationale": "300 combined env vars — if both loaded, cumulative environment exceeds practical limits"
+    "rationale": "300 combined env vars — if both loaded, cumulative environment exceeds practical limits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-envcount-005",
@@ -142,7 +146,8 @@
       "IG-01",
       "control"
     ],
-    "rationale": "Standard .env with 6 variables — well within all limits"
+    "rationale": "Standard .env with 6 variables — well within all limits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-cfgsize-006",
@@ -173,7 +178,8 @@
       "config_size",
       "IG-02"
     ],
-    "rationale": "1000 flags x ~250 bytes each = ~250KB config — JSON parse time and memory increases"
+    "rationale": "1000 flags x ~250 bytes each = ~250KB config — JSON parse time and memory increases",
+    "intent": "false_negative"
   },
   {
     "id": "ig-cfgsize-007",
@@ -199,7 +205,8 @@
       "config_size",
       "IG-02"
     ],
-    "rationale": "100-level nesting — some JSON parsers hit recursion limits"
+    "rationale": "100-level nesting — some JSON parsers hit recursion limits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-cfgsize-008",
@@ -230,7 +237,8 @@
       "config_size",
       "IG-02"
     ],
-    "rationale": "500 connection pool entries — config file enormous, deployment tool may reject"
+    "rationale": "500 connection pool entries — config file enormous, deployment tool may reject",
+    "intent": "false_negative"
   },
   {
     "id": "ig-cfgsize-009",
@@ -261,7 +269,8 @@
       "config_size",
       "IG-02"
     ],
-    "rationale": "200 labels with long values — YAML parsing and Docker API label limits"
+    "rationale": "200 labels with long values — YAML parsing and Docker API label limits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-cfgsize-010",
@@ -282,7 +291,8 @@
       "IG-02",
       "control"
     ],
-    "rationale": "Standard config — small JSON, no parser issues"
+    "rationale": "Standard config — small JSON, no parser issues",
+    "intent": "false_negative"
   },
   {
     "id": "ig-valsize-011",
@@ -308,7 +318,8 @@
       "value_size",
       "IG-03"
     ],
-    "rationale": "1MB env var value — exceeds practical limits for shell environment, exec may fail"
+    "rationale": "1MB env var value — exceeds practical limits for shell environment, exec may fail",
+    "intent": "false_negative"
   },
   {
     "id": "ig-valsize-012",
@@ -334,7 +345,8 @@
       "value_size",
       "IG-03"
     ],
-    "rationale": "500 URL params x 50 chars each = ~30KB URL — exceeds URL parser and driver limits"
+    "rationale": "500 URL params x 50 chars each = ~30KB URL — exceeds URL parser and driver limits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-valsize-013",
@@ -365,7 +377,8 @@
       "value_size",
       "IG-03"
     ],
-    "rationale": "~4KB PEM as single-line env var — some .env parsers cannot handle multi-KB lines"
+    "rationale": "~4KB PEM as single-line env var — some .env parsers cannot handle multi-KB lines",
+    "intent": "false_negative"
   },
   {
     "id": "ig-valsize-014",
@@ -396,7 +409,8 @@
       "value_size",
       "IG-03"
     ],
-    "rationale": "50KB JSON embedded in compose env var — YAML parser and Docker exec env limit"
+    "rationale": "50KB JSON embedded in compose env var — YAML parser and Docker exec env limit",
+    "intent": "false_negative"
   },
   {
     "id": "ig-valsize-015",
@@ -423,7 +437,8 @@
       "IG-03",
       "control"
     ],
-    "rationale": "Short secret value — well within all env var size limits"
+    "rationale": "Short secret value — well within all env var size limits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-bolster-100",
@@ -448,7 +463,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-101",
@@ -473,7 +489,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-102",
@@ -498,7 +515,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-103",
@@ -523,7 +541,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-104",
@@ -548,7 +567,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-105",
@@ -573,7 +593,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-106",
@@ -598,7 +619,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-107",
@@ -623,7 +645,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-108",
@@ -649,7 +672,8 @@
       "ig-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "ig-bolster-109",
@@ -675,7 +699,8 @@
       "ig-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "ig-bolster-110",
@@ -701,7 +726,8 @@
       "ig-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "ig-bolster-111",
@@ -726,7 +752,8 @@
       "ig-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "ig-bolster-112",
@@ -744,7 +771,8 @@
       "config",
       "ig-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "ig-bolster-113",
@@ -763,7 +791,8 @@
       "ig-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "ig-bolster-114",
@@ -783,6 +812,7 @@
       "ig-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

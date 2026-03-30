@@ -14,7 +14,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": "server.js is a real file in demo-app, should pass exists check"
+    "rationale": "server.js is a real file in demo-app, should pass exists check",
+    "intent": "false_negative"
   },
   {
     "id": "fs-002",
@@ -31,7 +32,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": "Dockerfile is a real file in demo-app, should pass exists check"
+    "rationale": "Dockerfile is a real file in demo-app, should pass exists check",
+    "intent": "false_negative"
   },
   {
     "id": "fs-003",
@@ -48,7 +50,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": "config.json is a real file in demo-app, should pass exists check"
+    "rationale": "config.json is a real file in demo-app, should pass exists check",
+    "intent": "false_negative"
   },
   {
     "id": "fs-004",
@@ -65,7 +68,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": "init.sql is a real file in demo-app, should pass exists check"
+    "rationale": "init.sql is a real file in demo-app, should pass exists check",
+    "intent": "false_negative"
   },
   {
     "id": "fs-005",
@@ -82,7 +86,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": ".env is a real file in demo-app, should pass exists check"
+    "rationale": ".env is a real file in demo-app, should pass exists check",
+    "intent": "false_negative"
   },
   {
     "id": "fs-006",
@@ -99,7 +104,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": "docker-compose.yml is a real file in demo-app, should pass exists check"
+    "rationale": "docker-compose.yml is a real file in demo-app, should pass exists check",
+    "intent": "false_negative"
   },
   {
     "id": "fs-007",
@@ -122,7 +128,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": "server.js is edited (no-op replacement) and still exists"
+    "rationale": "server.js is edited (no-op replacement) and still exists",
+    "intent": "false_negative"
   },
   {
     "id": "fs-008",
@@ -139,7 +146,8 @@
       "filesystem",
       "exists"
     ],
-    "rationale": "File in subdirectory should be found"
+    "rationale": "File in subdirectory should be found",
+    "intent": "false_negative"
   },
   {
     "id": "fs-009",
@@ -156,7 +164,8 @@
       "filesystem",
       "exists_fail"
     ],
-    "rationale": "File does not exist, exists check should fail"
+    "rationale": "File does not exist, exists check should fail",
+    "intent": "false_positive"
   },
   {
     "id": "fs-010",
@@ -173,7 +182,8 @@
       "filesystem",
       "exists_fail"
     ],
-    "rationale": "Neither directory nor file exists"
+    "rationale": "Neither directory nor file exists",
+    "intent": "false_positive"
   },
   {
     "id": "fs-011",
@@ -190,7 +200,8 @@
       "filesystem",
       "absent_fail"
     ],
-    "rationale": "init.sql exists in demo-app, so absent check should fail"
+    "rationale": "init.sql exists in demo-app, so absent check should fail",
+    "intent": "false_positive"
   },
   {
     "id": "fs-012",
@@ -207,7 +218,8 @@
       "filesystem",
       "absent_fail"
     ],
-    "rationale": "Dockerfile exists in demo-app, so absent check should fail"
+    "rationale": "Dockerfile exists in demo-app, so absent check should fail",
+    "intent": "false_positive"
   },
   {
     "id": "fs-013",
@@ -224,7 +236,8 @@
       "filesystem",
       "absent_fail"
     ],
-    "rationale": "server.js exists, so absent check should fail"
+    "rationale": "server.js exists, so absent check should fail",
+    "intent": "false_positive"
   },
   {
     "id": "fs-014",
@@ -241,7 +254,8 @@
       "filesystem",
       "absent_fail"
     ],
-    "rationale": "config.json exists, so absent check should fail"
+    "rationale": "config.json exists, so absent check should fail",
+    "intent": "false_positive"
   },
   {
     "id": "fs-015",
@@ -259,7 +273,8 @@
       "filesystem",
       "unchanged"
     ],
-    "rationale": "No edits means config.json hash should match the pre-computed hash"
+    "rationale": "No edits means config.json hash should match the pre-computed hash",
+    "intent": "false_negative"
   },
   {
     "id": "fs-016",
@@ -277,7 +292,8 @@
       "filesystem",
       "unchanged"
     ],
-    "rationale": "No edits means init.sql hash should match the pre-computed hash"
+    "rationale": "No edits means init.sql hash should match the pre-computed hash",
+    "intent": "false_negative"
   },
   {
     "id": "fs-017",
@@ -295,7 +311,8 @@
       "filesystem",
       "unchanged"
     ],
-    "rationale": "No edits means .env hash should match the pre-computed hash"
+    "rationale": "No edits means .env hash should match the pre-computed hash",
+    "intent": "false_negative"
   },
   {
     "id": "fs-018",
@@ -319,7 +336,8 @@
       "filesystem",
       "unchanged_fail"
     ],
-    "rationale": "Edit changes config.json, so hash no longer matches"
+    "rationale": "Edit changes config.json, so hash no longer matches",
+    "intent": "false_positive"
   },
   {
     "id": "fs-019",
@@ -337,7 +355,8 @@
       "filesystem",
       "unchanged_fail"
     ],
-    "rationale": "Hash is fabricated, should not match"
+    "rationale": "Hash is fabricated, should not match",
+    "intent": "false_positive"
   },
   {
     "id": "fs-020",
@@ -355,7 +374,8 @@
       "filesystem",
       "count"
     ],
-    "rationale": "test-data directory has exactly 9 files"
+    "rationale": "test-data directory has exactly 9 files",
+    "intent": "false_negative"
   },
   {
     "id": "fs-021",
@@ -379,7 +399,8 @@
       "filesystem",
       "count"
     ],
-    "rationale": "Editing an existing file in test-data does not change the count"
+    "rationale": "Editing an existing file in test-data does not change the count",
+    "intent": "false_negative"
   },
   {
     "id": "fs-022",
@@ -397,7 +418,8 @@
       "filesystem",
       "count_fail"
     ],
-    "rationale": "Count 999 does not match actual test-data entry count"
+    "rationale": "Count 999 does not match actual test-data entry count",
+    "intent": "false_positive"
   },
   {
     "id": "fs-023",
@@ -415,7 +437,8 @@
       "filesystem",
       "count_fail"
     ],
-    "rationale": "Directory does not exist, count check should fail"
+    "rationale": "Directory does not exist, count check should fail",
+    "intent": "false_positive"
   },
   {
     "id": "fs-024",
@@ -441,7 +464,8 @@
       "filesystem",
       "multi"
     ],
-    "rationale": "All three filesystem predicates reference real files — should pass together"
+    "rationale": "All three filesystem predicates reference real files — should pass together",
+    "intent": "false_negative"
   },
   {
     "id": "fs-025",
@@ -462,7 +486,8 @@
       "filesystem",
       "multi"
     ],
-    "rationale": "Second predicate fails, entire gate should fail"
+    "rationale": "Second predicate fails, entire gate should fail",
+    "intent": "false_positive"
   },
   {
     "id": "f-bolster-200",
@@ -481,7 +506,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "f-bolster-201",
@@ -500,7 +526,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "f-bolster-202",
@@ -519,7 +546,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "f-bolster-203",
@@ -538,7 +566,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "f-bolster-204",
@@ -557,6 +586,7 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   }
 ]

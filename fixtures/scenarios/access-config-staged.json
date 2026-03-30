@@ -33,7 +33,8 @@
       "env_permissions",
       "HG-01"
     ],
-    "rationale": ".env edited but container runs as node user — if .env is root-owned, app cannot read it"
+    "rationale": ".env edited but container runs as node user — if .env is root-owned, app cannot read it",
+    "intent": "false_negative"
   },
   {
     "id": "hg-perm-002",
@@ -69,7 +70,8 @@
       "env_permissions",
       "HG-01"
     ],
-    "rationale": ".env.prod mounted as :ro — app can read but cannot write/update secrets at runtime"
+    "rationale": ".env.prod mounted as :ro — app can read but cannot write/update secrets at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "hg-perm-003",
@@ -105,7 +107,8 @@
       "env_permissions",
       "HG-01"
     ],
-    "rationale": "Local .env edited but compose reads from /run/secrets/.env — edit has no effect on running app"
+    "rationale": "Local .env edited but compose reads from /run/secrets/.env — edit has no effect on running app",
+    "intent": "false_negative"
   },
   {
     "id": "hg-perm-004",
@@ -141,7 +144,8 @@
       "env_permissions",
       "HG-01"
     ],
-    "rationale": "Staging .env is app-writable but prod .env should be vault-managed — permission mismatch"
+    "rationale": "Staging .env is app-writable but prod .env should be vault-managed — permission mismatch",
+    "intent": "false_negative"
   },
   {
     "id": "hg-perm-005",
@@ -168,7 +172,8 @@
       "HG-01",
       "control"
     ],
-    "rationale": ".env is app-owned and writable — no permission issue"
+    "rationale": ".env is app-owned and writable — no permission issue",
+    "intent": "false_negative"
   },
   {
     "id": "hg-secret-006",
@@ -199,7 +204,8 @@
       "missing_credentials",
       "HG-02"
     ],
-    "rationale": "Config points to vault but VAULT_TOKEN not in .env — secrets cannot be fetched"
+    "rationale": "Config points to vault but VAULT_TOKEN not in .env — secrets cannot be fetched",
+    "intent": "false_positive"
   },
   {
     "id": "hg-secret-007",
@@ -230,7 +236,8 @@
       "missing_credentials",
       "HG-02"
     ],
-    "rationale": "SSM parameter path set but no AWS credentials — parameter store inaccessible"
+    "rationale": "SSM parameter path set but no AWS credentials — parameter store inaccessible",
+    "intent": "false_positive"
   },
   {
     "id": "hg-secret-008",
@@ -261,7 +268,8 @@
       "missing_credentials",
       "HG-02"
     ],
-    "rationale": "GCP Secret Manager referenced but no service account credentials in environment"
+    "rationale": "GCP Secret Manager referenced but no service account credentials in environment",
+    "intent": "false_positive"
   },
   {
     "id": "hg-secret-009",
@@ -292,7 +300,8 @@
       "missing_credentials",
       "HG-02"
     ],
-    "rationale": "Docker external secrets require Swarm mode — compose up fails without swarm init"
+    "rationale": "Docker external secrets require Swarm mode — compose up fails without swarm init",
+    "intent": "false_negative"
   },
   {
     "id": "hg-secret-010",
@@ -319,7 +328,8 @@
       "HG-02",
       "control"
     ],
-    "rationale": "Secret is inline — no external provider needed, edit succeeds"
+    "rationale": "Secret is inline — no external provider needed, edit succeeds",
+    "intent": "false_negative"
   },
   {
     "id": "hg-env-011",
@@ -350,7 +360,8 @@
       "env_mismatch",
       "HG-03"
     ],
-    "rationale": "Staging config updated but prod config has different DB name — cross-env assumption fails"
+    "rationale": "Staging config updated but prod config has different DB name — cross-env assumption fails",
+    "intent": "false_positive"
   },
   {
     "id": "hg-env-012",
@@ -381,7 +392,8 @@
       "env_mismatch",
       "HG-03"
     ],
-    "rationale": "Both happen to have DEBUG=false but for different reasons — staging is editable, prod is policy"
+    "rationale": "Both happen to have DEBUG=false but for different reasons — staging is editable, prod is policy",
+    "intent": "false_negative"
   },
   {
     "id": "hg-env-013",
@@ -412,7 +424,8 @@
       "env_mismatch",
       "HG-03"
     ],
-    "rationale": "Staging betaSignup changed but prod has it locked to false — cannot match across envs"
+    "rationale": "Staging betaSignup changed but prod has it locked to false — cannot match across envs",
+    "intent": "false_positive"
   },
   {
     "id": "hg-env-014",
@@ -443,7 +456,8 @@
       "env_mismatch",
       "HG-03"
     ],
-    "rationale": "Staging port changed to 4000 but prod port is fixed at 3000 by load balancer policy"
+    "rationale": "Staging port changed to 4000 but prod port is fixed at 3000 by load balancer policy",
+    "intent": "false_positive"
   },
   {
     "id": "hg-env-015",
@@ -470,7 +484,8 @@
       "HG-03",
       "control"
     ],
-    "rationale": "Edit and predicate both target staging config — same environment, no mismatch"
+    "rationale": "Edit and predicate both target staging config — same environment, no mismatch",
+    "intent": "false_negative"
   },
   {
     "id": "hg-bolster-100",
@@ -495,7 +510,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-101",
@@ -520,7 +536,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-102",
@@ -545,7 +562,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-103",
@@ -570,7 +588,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-104",
@@ -595,7 +614,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-105",
@@ -620,7 +640,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-106",
@@ -645,7 +666,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-107",
@@ -670,7 +692,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-108",
@@ -696,7 +719,8 @@
       "hg-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "hg-bolster-109",
@@ -722,7 +746,8 @@
       "hg-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "hg-bolster-110",
@@ -748,7 +773,8 @@
       "hg-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "hg-bolster-111",
@@ -773,7 +799,8 @@
       "hg-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "hg-bolster-112",
@@ -791,7 +818,8 @@
       "config",
       "hg-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "hg-bolster-113",
@@ -810,7 +838,8 @@
       "hg-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "hg-bolster-114",
@@ -830,6 +859,7 @@
       "hg-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

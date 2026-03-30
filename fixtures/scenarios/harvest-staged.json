@@ -23,7 +23,8 @@
       "whitespace",
       "should_fail"
     ],
-    "rationale": "Trailing whitespace in search string prevents match — edit fails to apply"
+    "rationale": "Trailing whitespace in search string prevents match — edit fails to apply",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-leading-whitespace",
@@ -49,7 +50,8 @@
       "whitespace",
       "should_fail"
     ],
-    "rationale": "Wrong indentation in search string prevents match"
+    "rationale": "Wrong indentation in search string prevents match",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-tab-vs-space",
@@ -75,7 +77,8 @@
       "whitespace",
       "should_fail"
     ],
-    "rationale": "Tab/space mismatch prevents edit application"
+    "rationale": "Tab/space mismatch prevents edit application",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-crlf-vs-lf",
@@ -101,7 +104,8 @@
       "encoding",
       "should_fail"
     ],
-    "rationale": "CRLF vs LF line ending mismatch prevents match"
+    "rationale": "CRLF vs LF line ending mismatch prevents match",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-truncated-search",
@@ -127,7 +131,8 @@
       "partial",
       "should_fail"
     ],
-    "rationale": "Truncated search matches but replacement corrupts the line"
+    "rationale": "Truncated search matches but replacement corrupts the line",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-missing-context-line",
@@ -153,7 +158,8 @@
       "partial",
       "should_fail"
     ],
-    "rationale": "Search spans two lines but skips the PORT line between them — no match"
+    "rationale": "Search spans two lines but skips the PORT line between them — no match",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-already-applied",
@@ -179,7 +185,8 @@
       "stale",
       "should_fail"
     ],
-    "rationale": "Source has PORT=3000 not PORT=8080 — prior edit assumed, search fails"
+    "rationale": "Source has PORT=3000 not PORT=8080 — prior edit assumed, search fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-wrong-file",
@@ -205,7 +212,8 @@
       "stale",
       "should_fail"
     ],
-    "rationale": "JavaScript code does not exist in JSON config file"
+    "rationale": "JavaScript code does not exist in JSON config file",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-duplicate-match",
@@ -231,7 +239,8 @@
       "ambiguous",
       "should_fail"
     ],
-    "rationale": "res.end( appears many times in server.js — ambiguous match should fail F9"
+    "rationale": "res.end( appears many times in server.js — ambiguous match should fail F9",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-unescaped-regex",
@@ -257,7 +266,8 @@
       "special_chars",
       "should_pass"
     ],
-    "rationale": "Search string is exact match (not regex), should find the literal string"
+    "rationale": "Search string is exact match (not regex), should find the literal string",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-edit-unicode-in-search",
@@ -283,7 +293,8 @@
       "special_chars",
       "should_fail"
     ],
-    "rationale": "Unicode arrow not in source comments — search fails"
+    "rationale": "Unicode arrow not in source comments — search fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-null-byte",
@@ -309,7 +320,8 @@
       "special_chars",
       "should_fail"
     ],
-    "rationale": "Null byte in search string prevents match"
+    "rationale": "Null byte in search string prevents match",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-nonexistent-file",
@@ -335,7 +347,8 @@
       "missing",
       "should_fail"
     ],
-    "rationale": "routes/api.js does not exist in demo-app — edit cannot apply"
+    "rationale": "routes/api.js does not exist in demo-app — edit cannot apply",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-empty-search",
@@ -361,7 +374,8 @@
       "malformed",
       "should_fail"
     ],
-    "rationale": "Empty search string — malformed edit"
+    "rationale": "Empty search string — malformed edit",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-search-equals-replace",
@@ -387,7 +401,8 @@
       "malformed",
       "should_pass"
     ],
-    "rationale": "Noop edit — content already matches, should pass"
+    "rationale": "Noop edit — content already matches, should pass",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-edit-conflicting-edits",
@@ -413,7 +428,8 @@
       "ordering",
       "should_pass"
     ],
-    "rationale": "Single edit on unique line should succeed"
+    "rationale": "Single edit on unique line should succeed",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-edit-overlapping-search",
@@ -439,7 +455,8 @@
       "ordering",
       "should_fail"
     ],
-    "rationale": "PORT appears many times — ambiguous match"
+    "rationale": "PORT appears many times — ambiguous match",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-bom-marker",
@@ -465,7 +482,8 @@
       "encoding",
       "should_fail"
     ],
-    "rationale": "BOM marker in search string prevents match against clean source"
+    "rationale": "BOM marker in search string prevents match against clean source",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-edit-multiline-valid",
@@ -491,7 +509,8 @@
       "valid",
       "should_pass"
     ],
-    "rationale": "Exact multi-line match in items array — should succeed"
+    "rationale": "Exact multi-line match in items array — should succeed",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-edit-add-new-route",
@@ -517,7 +536,8 @@
       "valid",
       "should_pass"
     ],
-    "rationale": "Anchor string is unique, new route inserted before health endpoint"
+    "rationale": "Anchor string is unique, new route inserted before health endpoint",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-build-nonexistent-image",
@@ -543,7 +563,8 @@
       "base_image",
       "should_fail"
     ],
-    "rationale": "Base image does not exist in registry — docker build fails at FROM"
+    "rationale": "Base image does not exist in registry — docker build fails at FROM",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-empty-from",
@@ -569,7 +590,8 @@
       "base_image",
       "should_fail"
     ],
-    "rationale": "Empty FROM directive — Dockerfile parse error"
+    "rationale": "Empty FROM directive — Dockerfile parse error",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-scratch-no-binary",
@@ -595,7 +617,8 @@
       "base_image",
       "should_fail"
     ],
-    "rationale": "scratch has no node binary — CMD [\"node\", \"server.js\"] will fail"
+    "rationale": "scratch has no node binary — CMD [\"node\", \"server.js\"] will fail",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-copy-nonexistent",
@@ -621,7 +644,8 @@
       "copy",
       "should_fail"
     ],
-    "rationale": "app.js does not exist in build context — COPY fails"
+    "rationale": "app.js does not exist in build context — COPY fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-copy-directory-as-file",
@@ -647,7 +671,8 @@
       "copy",
       "should_fail"
     ],
-    "rationale": "Cannot COPY directory onto a file path"
+    "rationale": "Cannot COPY directory onto a file path",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-copy-outside-context",
@@ -673,7 +698,8 @@
       "copy",
       "should_fail"
     ],
-    "rationale": "Cannot COPY from outside Docker build context"
+    "rationale": "Cannot COPY from outside Docker build context",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-invalid-instruction",
@@ -699,7 +725,8 @@
       "syntax",
       "should_fail"
     ],
-    "rationale": "EXPOS is not a valid Dockerfile instruction"
+    "rationale": "EXPOS is not a valid Dockerfile instruction",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-run-syntax-error",
@@ -725,7 +752,8 @@
       "syntax",
       "should_fail"
     ],
-    "rationale": "Shell syntax error in RUN — build fails"
+    "rationale": "Shell syntax error in RUN — build fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-healthcheck-wrong-port",
@@ -751,7 +779,8 @@
       "healthcheck",
       "should_fail"
     ],
-    "rationale": "App listens on 3000 but healthcheck probes 9999 — health fails"
+    "rationale": "App listens on 3000 but healthcheck probes 9999 — health fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-healthcheck-wrong-path",
@@ -777,7 +806,8 @@
       "healthcheck",
       "should_fail"
     ],
-    "rationale": "No /nonexistent endpoint — healthcheck fails"
+    "rationale": "No /nonexistent endpoint — healthcheck fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-expose-wrong-port",
@@ -803,7 +833,8 @@
       "port",
       "should_pass"
     ],
-    "rationale": "EXPOSE is documentation only — app still works on 3000, EXPOSE mismatch is cosmetic"
+    "rationale": "EXPOSE is documentation only — app still works on 3000, EXPOSE mismatch is cosmetic",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-build-cmd-wrong-file",
@@ -829,7 +860,8 @@
       "entrypoint",
       "should_fail"
     ],
-    "rationale": "app.js does not exist — container starts but crashes immediately"
+    "rationale": "app.js does not exist — container starts but crashes immediately",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-cmd-wrong-runtime",
@@ -855,7 +887,8 @@
       "entrypoint",
       "should_fail"
     ],
-    "rationale": "python3 not installed in node:alpine — container crashes"
+    "rationale": "python3 not installed in node:alpine — container crashes",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-cmd-shell-form",
@@ -881,7 +914,8 @@
       "entrypoint",
       "should_pass"
     ],
-    "rationale": "Shell form CMD works — different signal behavior but app runs"
+    "rationale": "Shell form CMD works — different signal behavior but app runs",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-build-compose-wrong-build-context",
@@ -907,7 +941,8 @@
       "compose",
       "should_fail"
     ],
-    "rationale": "Build context directory does not exist — compose build fails"
+    "rationale": "Build context directory does not exist — compose build fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-compose-invalid-yaml",
@@ -933,7 +968,8 @@
       "compose",
       "should_fail"
     ],
-    "rationale": "Duplicate key \"app\" in YAML — compose parse error"
+    "rationale": "Duplicate key \"app\" in YAML — compose parse error",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-compose-port-conflict",
@@ -959,7 +995,8 @@
       "compose",
       "should_fail"
     ],
-    "rationale": "Port 80 may be in use or require privileges — bind failure"
+    "rationale": "Port 80 may be in use or require privileges — bind failure",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-multistage-missing-stage",
@@ -985,7 +1022,8 @@
       "multistage",
       "should_fail"
     ],
-    "rationale": "No \"builder\" stage defined — COPY --from fails"
+    "rationale": "No \"builder\" stage defined — COPY --from fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-missing-package-json",
@@ -1011,7 +1049,8 @@
       "dependency",
       "should_fail"
     ],
-    "rationale": "No package.json in build context — npm install fails"
+    "rationale": "No package.json in build context — npm install fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-build-valid-add-label",
@@ -1037,7 +1076,8 @@
       "valid",
       "should_pass"
     ],
-    "rationale": "LABEL is valid metadata — does not affect build"
+    "rationale": "LABEL is valid metadata — does not affect build",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-build-valid-add-env",
@@ -1063,7 +1103,8 @@
       "valid",
       "should_pass"
     ],
-    "rationale": "Valid ENV directive — sets environment variable"
+    "rationale": "Valid ENV directive — sets environment variable",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-health-health-removed",
@@ -1092,7 +1133,8 @@
       "endpoint",
       "should_fail"
     ],
-    "rationale": "Health endpoint renamed — /health returns 404 now"
+    "rationale": "Health endpoint renamed — /health returns 404 now",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-health-wrong-status",
@@ -1121,7 +1163,8 @@
       "endpoint",
       "should_fail"
     ],
-    "rationale": "Health endpoint returns 500 — healthcheck fails"
+    "rationale": "Health endpoint returns 500 — healthcheck fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-health-empty-response",
@@ -1151,7 +1194,8 @@
       "endpoint",
       "should_fail"
     ],
-    "rationale": "Health returns 200 but empty body — bodyContains check fails"
+    "rationale": "Health returns 200 but empty body — bodyContains check fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-health-json-not-text",
@@ -1181,7 +1225,8 @@
       "endpoint",
       "should_fail"
     ],
-    "rationale": "Health returns JSON not \"OK\" — bodyContains \"OK\" fails"
+    "rationale": "Health returns JSON not \"OK\" — bodyContains \"OK\" fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-startup-exception",
@@ -1210,7 +1255,8 @@
       "crash",
       "should_fail"
     ],
-    "rationale": "Uncaught exception on health check — process crashes or returns 500"
+    "rationale": "Uncaught exception on health check — process crashes or returns 500",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-infinite-loop",
@@ -1239,7 +1285,8 @@
       "crash",
       "should_fail"
     ],
-    "rationale": "Infinite loop — health request times out"
+    "rationale": "Infinite loop — health request times out",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-listen-wrong-port",
@@ -1268,7 +1315,8 @@
       "port",
       "should_fail"
     ],
-    "rationale": "App listens on 9999 but compose maps 3000 — connection refused"
+    "rationale": "App listens on 9999 but compose maps 3000 — connection refused",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-db-dependency-check",
@@ -1297,7 +1345,8 @@
       "dependency",
       "should_fail"
     ],
-    "rationale": "Health depends on DB module that does not exist — require fails"
+    "rationale": "Health depends on DB module that does not exist — require fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-compose-short-timeout",
@@ -1323,7 +1372,8 @@
       "config",
       "should_fail"
     ],
-    "rationale": "1ms timeout — no HTTP request can complete in time"
+    "rationale": "1ms timeout — no HTTP request can complete in time",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-compose-wrong-healthcheck-cmd",
@@ -1349,7 +1399,8 @@
       "config",
       "should_fail"
     ],
-    "rationale": "node:alpine has wget not curl — healthcheck command fails"
+    "rationale": "node:alpine has wget not curl — healthcheck command fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-compose-retries-zero",
@@ -1375,7 +1426,8 @@
       "config",
       "should_fail"
     ],
-    "rationale": "Zero retries — first failure marks container as unhealthy permanently"
+    "rationale": "Zero retries — first failure marks container as unhealthy permanently",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-health-ok-but-api-broken",
@@ -1404,7 +1456,8 @@
       "partial",
       "should_fail"
     ],
-    "rationale": "Health passes but /api/items renamed to /api/broken — API predicate fails"
+    "rationale": "Health passes but /api/items renamed to /api/broken — API predicate fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-health-ok-homepage-broken",
@@ -1430,7 +1483,8 @@
       "partial",
       "should_fail"
     ],
-    "rationale": "Health fine, homepage h1 emptied — HTML content predicate fails"
+    "rationale": "Health fine, homepage h1 emptied — HTML content predicate fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-health-valid-health-json",
@@ -1460,7 +1514,8 @@
       "valid",
       "should_pass"
     ],
-    "rationale": "JSON health response contains \"ok\" — bodyContains check passes"
+    "rationale": "JSON health response contains \"ok\" — bodyContains check passes",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-health-valid-add-readiness",
@@ -1486,7 +1541,8 @@
       "valid",
       "should_pass"
     ],
-    "rationale": "New endpoint added at unique anchor point — does not break health"
+    "rationale": "New endpoint added at unique anchor point — does not break health",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-cascade-css-specificity-override",
@@ -1513,7 +1569,8 @@
       "css_cascade",
       "should_fail"
     ],
-    "rationale": "body * { color: red } overrides .nav-link color — cascade changes unrelated elements"
+    "rationale": "body * { color: red } overrides .nav-link color — cascade changes unrelated elements",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-css-shorthand-clobber",
@@ -1540,7 +1597,8 @@
       "css_cascade",
       "should_fail"
     ],
-    "rationale": "border: none after border-top resets border-top — shorthand clobbers longhand"
+    "rationale": "border: none after border-top resets border-top — shorthand clobbers longhand",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-css-import-order",
@@ -1567,7 +1625,8 @@
       "css_cascade",
       "should_fail"
     ],
-    "rationale": "New style block adds conflicting .nav-link color — last declaration wins, original overrides"
+    "rationale": "New style block adds conflicting .nav-link color — last declaration wins, original overrides",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-route-shadow",
@@ -1597,7 +1656,8 @@
       "route",
       "should_fail"
     ],
-    "rationale": "First matching handler returns \"SHADOW\" — original homepage never reached"
+    "rationale": "First matching handler returns \"SHADOW\" — original homepage never reached",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-catch-all-shadow",
@@ -1627,7 +1687,8 @@
       "route",
       "should_fail"
     ],
-    "rationale": "Catch-all intercepts ALL requests including /health"
+    "rationale": "Catch-all intercepts ALL requests including /health",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-items-array-cleared",
@@ -1657,7 +1718,8 @@
       "shared_state",
       "should_fail"
     ],
-    "rationale": "Items data removed — /api/items returns empty or errors"
+    "rationale": "Items data removed — /api/items returns empty or errors",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-constant-rename-breaks-reference",
@@ -1683,7 +1745,8 @@
       "shared_state",
       "should_fail"
     ],
-    "rationale": "PORT renamed to SERVER_PORT but server.listen(PORT) still references old name — crash"
+    "rationale": "PORT renamed to SERVER_PORT but server.listen(PORT) still references old name — crash",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-unclosed-tag-breaks-page",
@@ -1709,7 +1772,8 @@
       "html_structure",
       "should_fail"
     ],
-    "rationale": "Unclosed <div> may swallow the nav element depending on parser behavior"
+    "rationale": "Unclosed <div> may swallow the nav element depending on parser behavior",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-style-tag-unclosed",
@@ -1735,7 +1799,8 @@
       "html_structure",
       "should_fail"
     ],
-    "rationale": "Unclosed <style> — browser treats rest of HTML as CSS, page content invisible"
+    "rationale": "Unclosed <style> — browser treats rest of HTML as CSS, page content invisible",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-homepage-edit-breaks-about",
@@ -1765,7 +1830,8 @@
       "cross_route",
       "should_pass"
     ],
-    "rationale": "display:none is CSS — HTTP response still contains About text, bodyContains passes"
+    "rationale": "display:none is CSS — HTTP response still contains About text, bodyContains passes",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-cascade-require-removed",
@@ -1794,7 +1860,8 @@
       "dependency_chain",
       "should_fail"
     ],
-    "rationale": "http module not imported — http.createServer throws ReferenceError, app crashes"
+    "rationale": "http module not imported — http.createServer throws ReferenceError, app crashes",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-config-invalid-json",
@@ -1820,7 +1887,8 @@
       "config",
       "should_fail"
     ],
-    "rationale": "Trailing comma makes JSON invalid — any JSON.parse fails"
+    "rationale": "Trailing comma makes JSON invalid — any JSON.parse fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-init-sql-syntax-error",
@@ -1846,7 +1914,8 @@
       "config",
       "should_fail"
     ],
-    "rationale": "SQL syntax error — database initialization fails"
+    "rationale": "SQL syntax error — database initialization fails",
+    "intent": "false_positive"
   },
   {
     "id": "harvest-cascade-dockerfile-port-vs-server",
@@ -1882,7 +1951,8 @@
       "multi_file",
       "should_pass"
     ],
-    "rationale": "EXPOSE is cosmetic, PORT still 3000 — app works but documentation misleading"
+    "rationale": "EXPOSE is cosmetic, PORT still 3000 — app works but documentation misleading",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-cascade-compose-env-vs-server",
@@ -1908,7 +1978,8 @@
       "multi_file",
       "should_pass"
     ],
-    "rationale": "Server reads process.env.PORT — compose change takes effect at runtime"
+    "rationale": "Server reads process.env.PORT — compose change takes effect at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "harvest-cascade-valid-add-route-and-test",
@@ -1944,6 +2015,7 @@
       "valid",
       "should_pass"
     ],
-    "rationale": "New route at unique anchor + valid JSON addition — both files valid"
+    "rationale": "New route at unique anchor + valid JSON addition — both files valid",
+    "intent": "false_negative"
   }
 ]

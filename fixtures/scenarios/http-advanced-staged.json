@@ -20,7 +20,8 @@
       "request_headers",
       "P-13"
     ],
-    "rationale": "Status-only predicate, no body claim to ground — passes"
+    "rationale": "Status-only predicate, no body claim to ground — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-002",
@@ -50,7 +51,8 @@
       "request_headers",
       "P-13"
     ],
-    "rationale": "Edit adds \"auth\" key to response body — grounding finds it in replace content"
+    "rationale": "Edit adds \"auth\" key to response body — grounding finds it in replace content",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-003",
@@ -75,7 +77,8 @@
       "request_headers",
       "P-13"
     ],
-    "rationale": "Source has no header-echo logic; \"Bearer secret-token\" is fabricated"
+    "rationale": "Source has no header-echo logic; \"Bearer secret-token\" is fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-004",
@@ -105,7 +108,8 @@
       "cookie_handling",
       "P-14"
     ],
-    "rationale": "Set-Cookie in header; body still contains \"ok\" — passes"
+    "rationale": "Set-Cookie in header; body still contains \"ok\" — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-005",
@@ -144,7 +148,8 @@
       "cookie_handling",
       "P-14"
     ],
-    "rationale": "Step 2 expects cookie-dependent body; \"session_cookie_value\" not in source"
+    "rationale": "Step 2 expects cookie-dependent body; \"session_cookie_value\" not in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-006",
@@ -174,7 +179,8 @@
       "cookie_handling",
       "P-14"
     ],
-    "rationale": "Edit embeds cookie string in body — grounding finds it"
+    "rationale": "Edit embeds cookie string in body — grounding finds it",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-007",
@@ -213,7 +219,8 @@
       "step_dependency_leakage",
       "P-31"
     ],
-    "rationale": "\"planted_data\" only exists in step 1 POST body; items endpoint never returns it"
+    "rationale": "\"planted_data\" only exists in step 1 POST body; items endpoint never returns it",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-008",
@@ -249,7 +256,8 @@
       "step_dependency_leakage",
       "P-31"
     ],
-    "rationale": "Both steps check content independently available in source — no leakage"
+    "rationale": "Both steps check content independently available in source — no leakage",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-009",
@@ -295,7 +303,8 @@
       "step_dependency_leakage",
       "P-31"
     ],
-    "rationale": "Items endpoint is static; \"create_item\" never appears — leaked assumption from step 1"
+    "rationale": "Items endpoint is static; \"create_item\" never appears — leaked assumption from step 1",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-010",
@@ -334,7 +343,8 @@
       "variable_collision",
       "P-32"
     ],
-    "rationale": "Template variable in POST body; GET checks static content — no collision"
+    "rationale": "Template variable in POST body; GET checks static content — no collision",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-011",
@@ -369,7 +379,8 @@
       "variable_collision",
       "P-32"
     ],
-    "rationale": "Counter value 5 is runtime-dependent; literal \"5\" not deterministically in source"
+    "rationale": "Counter value 5 is runtime-dependent; literal \"5\" not deterministically in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-012",
@@ -404,7 +415,8 @@
       "variable_collision",
       "P-32"
     ],
-    "rationale": "\"hits\" key appears in edit replace content — structural match"
+    "rationale": "\"hits\" key appears in edit replace content — structural match",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-013",
@@ -429,7 +441,8 @@
       "auth_state_leakage",
       "P-33"
     ],
-    "rationale": "\"admin_dashboard_content\" not in source — assumes prior auth leaked in"
+    "rationale": "\"admin_dashboard_content\" not in source — assumes prior auth leaked in",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-014",
@@ -459,7 +472,8 @@
       "auth_state_leakage",
       "P-33"
     ],
-    "rationale": "Edit adds \"authenticated\" key to response — grounding finds it"
+    "rationale": "Edit adds \"authenticated\" key to response — grounding finds it",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-015",
@@ -503,7 +517,8 @@
       "auth_state_leakage",
       "P-33"
     ],
-    "rationale": "Source computes auth dynamically; literal \"authed\":true not in source string"
+    "rationale": "Source computes auth dynamically; literal \"authed\":true not in source string",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-016",
@@ -526,7 +541,8 @@
       "method_override",
       "P-34"
     ],
-    "rationale": "Standard POST works — method override not relevant for status-only check"
+    "rationale": "Standard POST works — method override not relevant for status-only check",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-017",
@@ -551,7 +567,8 @@
       "method_override",
       "P-34"
     ],
-    "rationale": "No DELETE handler exists; \"deleted_successfully\" is fabricated"
+    "rationale": "No DELETE handler exists; \"deleted_successfully\" is fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-018",
@@ -581,7 +598,8 @@
       "method_override",
       "P-34"
     ],
-    "rationale": "Override function defined but health endpoint unaffected — passes"
+    "rationale": "Override function defined but health endpoint unaffected — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-019",
@@ -605,7 +623,8 @@
       "repeated_query_keys",
       "P-36"
     ],
-    "rationale": "Items endpoint returns Alpha regardless of query params — passes"
+    "rationale": "Items endpoint returns Alpha regardless of query params — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-020",
@@ -630,7 +649,8 @@
       "repeated_query_keys",
       "P-36"
     ],
-    "rationale": "No query param filtering logic; \"filtered_result\" is fabricated"
+    "rationale": "No query param filtering logic; \"filtered_result\" is fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-021",
@@ -660,7 +680,8 @@
       "repeated_query_keys",
       "P-36"
     ],
-    "rationale": "Edit parses repeated params; response still contains Alpha"
+    "rationale": "Edit parses repeated params; response still contains Alpha",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-022",
@@ -687,7 +708,8 @@
       "multipart_formdata",
       "P-37"
     ],
-    "rationale": "Echo endpoint always includes \"echo\" key — passes"
+    "rationale": "Echo endpoint always includes \"echo\" key — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-023",
@@ -712,7 +734,8 @@
       "multipart_formdata",
       "P-37"
     ],
-    "rationale": "Source echoes raw body; \"uploaded_file_12345.pdf\" is fabricated"
+    "rationale": "Source echoes raw body; \"uploaded_file_12345.pdf\" is fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-024",
@@ -745,7 +768,8 @@
       "multipart_formdata",
       "P-37"
     ],
-    "rationale": "Edit adds \"filename\" key to response body — grounding finds it"
+    "rationale": "Edit adds \"filename\" key to response body — grounding finds it",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-025",
@@ -768,7 +792,8 @@
       "head_options",
       "P-38"
     ],
-    "rationale": "Status-only check; HEAD has no body but grounding only checks source for bodyContains"
+    "rationale": "Status-only check; HEAD has no body but grounding only checks source for bodyContains",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-026",
@@ -791,7 +816,8 @@
       "head_options",
       "P-38"
     ],
-    "rationale": "Status-only check on OPTIONS — passes grounding"
+    "rationale": "Status-only check on OPTIONS — passes grounding",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-027",
@@ -815,7 +841,8 @@
       "head_options",
       "P-38"
     ],
-    "rationale": "Grounding finds \"ok\" in source; HEAD body semantics not enforced at pure tier"
+    "rationale": "Grounding finds \"ok\" in source; HEAD body semantics not enforced at pure tier",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-028",
@@ -845,7 +872,8 @@
       "head_options",
       "P-38"
     ],
-    "rationale": "OPTIONS handler added; GET health still works — passes"
+    "rationale": "OPTIONS handler added; GET health still works — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-029",
@@ -870,7 +898,8 @@
       "cors_headers",
       "P-17"
     ],
-    "rationale": "CORS is a response header not body content; string not in source body output"
+    "rationale": "CORS is a response header not body content; string not in source body output",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-030",
@@ -900,7 +929,8 @@
       "cors_headers",
       "P-17"
     ],
-    "rationale": "CORS header added but body unchanged — \"Alpha\" still grounded"
+    "rationale": "CORS header added but body unchanged — \"Alpha\" still grounded",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-031",
@@ -923,7 +953,8 @@
       "cors_headers",
       "P-17"
     ],
-    "rationale": "Status code assertions pass grounding — validated at runtime tier only"
+    "rationale": "Status code assertions pass grounding — validated at runtime tier only",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-032",
@@ -953,7 +984,8 @@
       "tls_cert",
       "P-18"
     ],
-    "rationale": "Env vars added but server.js logic unchanged — HTTP health passes"
+    "rationale": "Env vars added but server.js logic unchanged — HTTP health passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-033",
@@ -978,7 +1010,8 @@
       "tls_cert",
       "P-18"
     ],
-    "rationale": "No TLS error handling in source; \"CERT_UNTRUSTED\" is fabricated"
+    "rationale": "No TLS error handling in source; \"CERT_UNTRUSTED\" is fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-034",
@@ -1008,7 +1041,8 @@
       "tls_cert",
       "P-18"
     ],
-    "rationale": "HTTPS_REDIRECT constant defined but no redirect logic — health passes"
+    "rationale": "HTTPS_REDIRECT constant defined but no redirect logic — health passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-035",
@@ -1032,7 +1066,8 @@
       "chunked_streaming",
       "P-19"
     ],
-    "rationale": "Standard response with \"Alpha\" in source — passes"
+    "rationale": "Standard response with \"Alpha\" in source — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-036",
@@ -1057,7 +1092,8 @@
       "chunked_streaming",
       "P-19"
     ],
-    "rationale": "Transfer-Encoding is a wire header; not in source response body"
+    "rationale": "Transfer-Encoding is a wire header; not in source response body",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-037",
@@ -1087,7 +1123,8 @@
       "chunked_streaming",
       "P-19"
     ],
-    "rationale": "Edit writes \"chunk\" in response body — grounding finds it"
+    "rationale": "Edit writes \"chunk\" in response body — grounding finds it",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-038",
@@ -1110,7 +1147,8 @@
       "rate_limiting",
       "P-20"
     ],
-    "rationale": "Status-only assertion passes grounding — runtime would detect mismatch"
+    "rationale": "Status-only assertion passes grounding — runtime would detect mismatch",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-039",
@@ -1135,7 +1173,8 @@
       "rate_limiting",
       "P-20"
     ],
-    "rationale": "\"rate limit exceeded\" not in source — fabricated response"
+    "rationale": "\"rate limit exceeded\" not in source — fabricated response",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-040",
@@ -1165,7 +1204,8 @@
       "rate_limiting",
       "P-20"
     ],
-    "rationale": "Edit adds 429 route with expected body content — grounding matches"
+    "rationale": "Edit adds 429 route with expected body content — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-041",
@@ -1195,7 +1235,8 @@
       "dns_resolution",
       "P-39"
     ],
-    "rationale": "Config change does not affect health response — passes"
+    "rationale": "Config change does not affect health response — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-042",
@@ -1220,7 +1261,8 @@
       "dns_resolution",
       "P-39"
     ],
-    "rationale": "DNS resolution result is runtime; \"resolved_to_10.0.0.1\" not in source"
+    "rationale": "DNS resolution result is runtime; \"resolved_to_10.0.0.1\" not in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-043",
@@ -1250,7 +1292,8 @@
       "dns_resolution",
       "P-39"
     ],
-    "rationale": "Edit adds \"dns\" key to response body — grounding finds it"
+    "rationale": "Edit adds \"dns\" key to response body — grounding finds it",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-044",
@@ -1274,7 +1317,8 @@
       "port_binding_race",
       "P-40"
     ],
-    "rationale": "Standard port binding — no race in pure grounding"
+    "rationale": "Standard port binding — no race in pure grounding",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-045",
@@ -1299,7 +1343,8 @@
       "port_binding_race",
       "P-40"
     ],
-    "rationale": "Connection errors are runtime; \"ECONNREFUSED\" not in source response"
+    "rationale": "Connection errors are runtime; \"ECONNREFUSED\" not in source response",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-046",
@@ -1329,7 +1374,8 @@
       "port_binding_race",
       "P-40"
     ],
-    "rationale": "Admin port constant defined; primary health endpoint unaffected"
+    "rationale": "Admin port constant defined; primary health endpoint unaffected",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-047",
@@ -1353,7 +1399,8 @@
       "retry_false_success",
       "P-41"
     ],
-    "rationale": "\"Alpha\" in source — passes; retry behavior is runtime concern"
+    "rationale": "\"Alpha\" in source — passes; retry behavior is runtime concern",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-048",
@@ -1378,7 +1425,8 @@
       "retry_false_success",
       "P-41"
     ],
-    "rationale": "\"recovered_stale_cache\" not in source — fabricated retry artifact"
+    "rationale": "\"recovered_stale_cache\" not in source — fabricated retry artifact",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-049",
@@ -1408,7 +1456,8 @@
       "retry_false_success",
       "P-41"
     ],
-    "rationale": "Edit contains \"retry\" in the 200-path response body — grounding matches source"
+    "rationale": "Edit contains \"retry\" in the 200-path response body — grounding matches source",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-050",
@@ -1433,7 +1482,8 @@
       "proxy_alters_response",
       "P-42"
     ],
-    "rationale": "No proxy configured; \"X-Proxy-Injected\" not in source body"
+    "rationale": "No proxy configured; \"X-Proxy-Injected\" not in source body",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-051",
@@ -1457,7 +1507,8 @@
       "proxy_alters_response",
       "P-42"
     ],
-    "rationale": "Source content present; proxy irrelevant at pure tier"
+    "rationale": "Source content present; proxy irrelevant at pure tier",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-052",
@@ -1487,7 +1538,8 @@
       "proxy_alters_response",
       "P-42"
     ],
-    "rationale": "Edit adds \"clientIp\" key to response — grounding matches"
+    "rationale": "Edit adds \"clientIp\" key to response — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-053",
@@ -1512,7 +1564,8 @@
       "http_version_mismatch",
       "P-43"
     ],
-    "rationale": "HTTP/1.1 server has no push promise; string not in source"
+    "rationale": "HTTP/1.1 server has no push promise; string not in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-054",
@@ -1536,7 +1589,8 @@
       "http_version_mismatch",
       "P-43"
     ],
-    "rationale": "Standard HTTP/1.1 JSON response — passes grounding"
+    "rationale": "Standard HTTP/1.1 JSON response — passes grounding",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-055",
@@ -1566,7 +1620,8 @@
       "http_version_mismatch",
       "P-43"
     ],
-    "rationale": "Comment about http2 has no effect on behavior"
+    "rationale": "Comment about http2 has no effect on behavior",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-056",
@@ -1590,7 +1645,8 @@
       "localized_content",
       "P-44"
     ],
-    "rationale": "\"Demo App\" in homepage source — passes"
+    "rationale": "\"Demo App\" in homepage source — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-057",
@@ -1615,7 +1671,8 @@
       "localized_content",
       "P-44"
     ],
-    "rationale": "No i18n in source; \"Aplicación Demo\" is fabricated"
+    "rationale": "No i18n in source; \"Aplicación Demo\" is fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-058",
@@ -1645,7 +1702,8 @@
       "localized_content",
       "P-44"
     ],
-    "rationale": "Edit adds \"greeting\" key to response — grounding matches"
+    "rationale": "Edit adds \"greeting\" key to response — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-059",
@@ -1672,7 +1730,8 @@
       "csrf_protection",
       "P-45"
     ],
-    "rationale": "No CSRF protection in source; echo works normally"
+    "rationale": "No CSRF protection in source; echo works normally",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-060",
@@ -1697,7 +1756,8 @@
       "csrf_protection",
       "P-45"
     ],
-    "rationale": "No CSRF logic in source; \"CSRF token mismatch\" is fabricated"
+    "rationale": "No CSRF logic in source; \"CSRF token mismatch\" is fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-061",
@@ -1730,7 +1790,8 @@
       "csrf_protection",
       "P-45"
     ],
-    "rationale": "Edit adds CSRF check; \"CSRF token invalid\" in replace content — grounding matches"
+    "rationale": "Edit adds CSRF check; \"CSRF token invalid\" in replace content — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-062",
@@ -1753,7 +1814,8 @@
       "etag_304",
       "P-46"
     ],
-    "rationale": "Status-only assertion passes grounding — runtime would detect mismatch"
+    "rationale": "Status-only assertion passes grounding — runtime would detect mismatch",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-063",
@@ -1778,7 +1840,8 @@
       "etag_304",
       "P-46"
     ],
-    "rationale": "\"not_modified_body\" not in source — fabricated"
+    "rationale": "\"not_modified_body\" not in source — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-064",
@@ -1808,7 +1871,8 @@
       "etag_304",
       "P-46"
     ],
-    "rationale": "ETag header added; response body unchanged — passes"
+    "rationale": "ETag header added; response body unchanged — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-065",
@@ -1835,7 +1899,8 @@
       "truncated_stream",
       "P-47"
     ],
-    "rationale": "Both Alpha and Beta in source — passes"
+    "rationale": "Both Alpha and Beta in source — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-066",
@@ -1860,7 +1925,8 @@
       "truncated_stream",
       "P-47"
     ],
-    "rationale": "Truncation marker not in source — fabricated artifact"
+    "rationale": "Truncation marker not in source — fabricated artifact",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-067",
@@ -1893,7 +1959,8 @@
       "truncated_stream",
       "P-47"
     ],
-    "rationale": "Edit removes Beta from response; \"Beta\" no longer in replace content"
+    "rationale": "Edit removes Beta from response; \"Beta\" no longer in replace content",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-068",
@@ -1918,7 +1985,8 @@
       "sse_stream",
       "P-48"
     ],
-    "rationale": "Items endpoint is JSON not SSE; event format not in source"
+    "rationale": "Items endpoint is JSON not SSE; event format not in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-069",
@@ -1942,7 +2010,8 @@
       "sse_stream",
       "P-48"
     ],
-    "rationale": "ContentType assertions pass grounding — runtime would detect mismatch"
+    "rationale": "ContentType assertions pass grounding — runtime would detect mismatch",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-070",
@@ -1972,7 +2041,8 @@
       "sse_stream",
       "P-48"
     ],
-    "rationale": "Edit adds SSE endpoint with \"ping\" event data — grounding matches"
+    "rationale": "Edit adds SSE endpoint with \"ping\" event data — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-071",
@@ -1995,7 +2065,8 @@
       "websocket_upgrade",
       "P-49"
     ],
-    "rationale": "Status-only assertion passes grounding — /ws 404 at runtime"
+    "rationale": "Status-only assertion passes grounding — /ws 404 at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-072",
@@ -2020,7 +2091,8 @@
       "websocket_upgrade",
       "P-49"
     ],
-    "rationale": "No /ws route; \"Upgrade: websocket\" not in source body output"
+    "rationale": "No /ws route; \"Upgrade: websocket\" not in source body output",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-073",
@@ -2050,7 +2122,8 @@
       "websocket_upgrade",
       "P-49"
     ],
-    "rationale": "Edit adds WS route with \"Upgrade Required\" body — grounding matches"
+    "rationale": "Edit adds WS route with \"Upgrade Required\" body — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-074",
@@ -2074,7 +2147,8 @@
       "content_encoding_mismatch",
       "P-50"
     ],
-    "rationale": "Plain JSON; \"Alpha\" in source — passes"
+    "rationale": "Plain JSON; \"Alpha\" in source — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-075",
@@ -2099,7 +2173,8 @@
       "content_encoding_mismatch",
       "P-50"
     ],
-    "rationale": "No gzip encoding; base64 artifact not in source"
+    "rationale": "No gzip encoding; base64 artifact not in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-076",
@@ -2129,7 +2204,8 @@
       "content_encoding_mismatch",
       "P-50"
     ],
-    "rationale": "\"compressed\" appears in payload string literal in replace content"
+    "rationale": "\"compressed\" appears in payload string literal in replace content",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-077",
@@ -2153,7 +2229,8 @@
       "ipv6_format",
       "P-51"
     ],
-    "rationale": "Standard path; IPv6 address format is runtime concern"
+    "rationale": "Standard path; IPv6 address format is runtime concern",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-078",
@@ -2183,7 +2260,8 @@
       "ipv6_format",
       "P-51"
     ],
-    "rationale": "Source binds to ::1; \"127.0.0.1\" not in response body source"
+    "rationale": "Source binds to ::1; \"127.0.0.1\" not in response body source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-079",
@@ -2213,7 +2291,8 @@
       "ipv6_format",
       "P-51"
     ],
-    "rationale": "Edit adds \"::1\" in response body — grounding matches"
+    "rationale": "Edit adds \"::1\" in response body — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-080",
@@ -2236,7 +2315,8 @@
       "informational_response",
       "P-52"
     ],
-    "rationale": "Status-only; grounding does not validate status codes"
+    "rationale": "Status-only; grounding does not validate status codes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-081",
@@ -2261,7 +2341,8 @@
       "informational_response",
       "P-52"
     ],
-    "rationale": "No Early Hints support; \"Link: </style.css>\" not in source"
+    "rationale": "No Early Hints support; \"Link: </style.css>\" not in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-082",
@@ -2294,7 +2375,8 @@
       "informational_response",
       "P-52"
     ],
-    "rationale": "100-continue is informational; final 200 with \"echo\" body still sent"
+    "rationale": "100-continue is informational; final 200 with \"echo\" body still sent",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-083",
@@ -2317,7 +2399,8 @@
       "range_request",
       "P-53"
     ],
-    "rationale": "Status-only; grounding passes — runtime would detect 200 vs 206"
+    "rationale": "Status-only; grounding passes — runtime would detect 200 vs 206",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-084",
@@ -2342,7 +2425,8 @@
       "range_request",
       "P-53"
     ],
-    "rationale": "No range request support; \"bytes 0-99/1000\" not in source"
+    "rationale": "No range request support; \"bytes 0-99/1000\" not in source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-085",
@@ -2372,7 +2456,8 @@
       "range_request",
       "P-53"
     ],
-    "rationale": "Edit adds download route; \"full-content\" in replace body — grounding matches"
+    "rationale": "Edit adds download route; \"full-content\" in replace body — grounding matches",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-086",
@@ -2397,7 +2482,8 @@
       "cdn_injection",
       "P-54"
     ],
-    "rationale": "No CDN configuration; cache header string not in source body"
+    "rationale": "No CDN configuration; cache header string not in source body",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-087",
@@ -2421,7 +2507,8 @@
       "cdn_injection",
       "P-54"
     ],
-    "rationale": "Source content present; CDN not relevant at pure tier"
+    "rationale": "Source content present; CDN not relevant at pure tier",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-088",
@@ -2451,7 +2538,8 @@
       "cdn_injection",
       "P-54"
     ],
-    "rationale": "CDN header in response headers; body still has \"ok\" — passes"
+    "rationale": "CDN header in response headers; body still has \"ok\" — passes",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-089",
@@ -2484,7 +2572,8 @@
       "cdn_injection",
       "P-54"
     ],
-    "rationale": "Edit puts proxy info in body — both terms found in replace content"
+    "rationale": "Edit puts proxy info in body — both terms found in replace content",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-090",
@@ -2524,7 +2613,8 @@
       "cross_cutting",
       "P-27"
     ],
-    "rationale": "Both steps use grounded content — all body terms present in source"
+    "rationale": "Both steps use grounded content — all body terms present in source",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-091",
@@ -2564,7 +2654,8 @@
       "cross_cutting",
       "P-27"
     ],
-    "rationale": "Echo has \"echo\" key; health has \"ok\" — both grounded"
+    "rationale": "Echo has \"echo\" key; health has \"ok\" — both grounded",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-092",
@@ -2608,7 +2699,8 @@
       "cross_cutting",
       "P-27"
     ],
-    "rationale": "\"secret_data\" not in source — step 2 body claim fabricated"
+    "rationale": "\"secret_data\" not in source — step 2 body claim fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-093",
@@ -2632,7 +2724,8 @@
       "regex_validation",
       "P-28"
     ],
-    "rationale": "Source contains status: ok matching the regex pattern"
+    "rationale": "Source contains status: ok matching the regex pattern",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-094",
@@ -2656,7 +2749,8 @@
       "regex_validation",
       "P-28"
     ],
-    "rationale": "Items source has name: Alpha matching regex"
+    "rationale": "Items source has name: Alpha matching regex",
+    "intent": "false_negative"
   },
   {
     "id": "http-adv-095",
@@ -2680,7 +2774,8 @@
       "regex_validation",
       "P-28"
     ],
-    "rationale": "Health has no timestamp field; regex cannot match source"
+    "rationale": "Health has no timestamp field; regex cannot match source",
+    "intent": "false_positive"
   },
   {
     "id": "http-adv-096",
@@ -2710,6 +2805,7 @@
       "regex_validation",
       "P-28"
     ],
-    "rationale": "Edit adds version \"1.2.3\"; regex pattern matches the literal"
+    "rationale": "Edit adds version \"1.2.3\"; regex pattern matches the literal",
+    "intent": "false_negative"
   }
 ]

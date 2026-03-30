@@ -20,7 +20,8 @@
       "serialization",
       "X-05"
     ],
-    "rationale": "Nested expect object must produce identical fingerprint after JSON.parse(JSON.stringify())"
+    "rationale": "Nested expect object must produce identical fingerprint after JSON.parse(JSON.stringify())",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x05-002",
@@ -47,7 +48,8 @@
       "dedup",
       "X-05"
     ],
-    "rationale": "Two predicates differing only by undefined vs absent field should deduplicate; different fingerprints means dedup fails"
+    "rationale": "Two predicates differing only by undefined vs absent field should deduplicate; different fingerprints means dedup fails",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x05-003",
@@ -70,7 +72,8 @@
       "field-order",
       "X-05"
     ],
-    "rationale": "Field ordering in predicate object (path before method) must not change the fingerprint vs canonical order"
+    "rationale": "Field ordering in predicate object (path before method) must not change the fingerprint vs canonical order",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x06-004",
@@ -96,7 +99,8 @@
       "unicode",
       "X-06"
     ],
-    "rationale": "CJK class name must produce stable fingerprint without encoding corruption"
+    "rationale": "CJK class name must produce stable fingerprint without encoding corruption",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x06-005",
@@ -122,7 +126,8 @@
       "emoji",
       "X-06"
     ],
-    "rationale": "Emoji in content pattern must not break fingerprint hashing or pattern matching"
+    "rationale": "Emoji in content pattern must not break fingerprint hashing or pattern matching",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x06-006",
@@ -149,7 +154,8 @@
       "diacritical",
       "X-06"
     ],
-    "rationale": "Accented characters in selectors must produce consistent fingerprints under NFC vs NFD normalization"
+    "rationale": "Accented characters in selectors must produce consistent fingerprints under NFC vs NFD normalization",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x22-007",
@@ -168,7 +174,8 @@
       "skip-vs-absent",
       "X-22"
     ],
-    "rationale": "When no CSS predicates exist, the CSS gate should be SKIPPED (not absent or pass). Gate result must reflect skip."
+    "rationale": "When no CSS predicates exist, the CSS gate should be SKIPPED (not absent or pass). Gate result must reflect skip.",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x22-008",
@@ -193,7 +200,8 @@
       "disabled-vs-pass",
       "X-22"
     ],
-    "rationale": "If DB validation is deferred (no live DB), it should be marked deferred, not silently passed"
+    "rationale": "If DB validation is deferred (no live DB), it should be marked deferred, not silently passed",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x22-009",
@@ -224,7 +232,8 @@
       "filtered-skip",
       "X-22"
     ],
-    "rationale": "When all CSS predicates are rejected by grounding, the CSS gate result should be skip (not pass)"
+    "rationale": "When all CSS predicates are rejected by grounding, the CSS gate result should be skip (not pass)",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x57-010",
@@ -249,7 +258,8 @@
       "side-effects",
       "X-57"
     ],
-    "rationale": "F9 validation must not mutate the edit content or file state that later gates (G5 containment) rely on"
+    "rationale": "F9 validation must not mutate the edit content or file state that later gates (G5 containment) rely on",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x57-011",
@@ -275,7 +285,8 @@
       "shared-cache",
       "X-57"
     ],
-    "rationale": "If grounding gate caches CSS parse results, verification must see post-edit state, not pre-edit cached state"
+    "rationale": "If grounding gate caches CSS parse results, verification must see post-edit state, not pre-edit cached state",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x57-012",
@@ -306,7 +317,8 @@
       "constraint-leak",
       "X-57"
     ],
-    "rationale": "If a gate seeds a K5 constraint mid-pipeline, later gates in the same run must not be affected by it"
+    "rationale": "If a gate seeds a K5 constraint mid-pipeline, later gates in the same run must not be affected by it",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x58-013",
@@ -332,7 +344,8 @@
       "idempotent",
       "X-58"
     ],
-    "rationale": "Running the CSS validation gate twice on the same content must produce the same result"
+    "rationale": "Running the CSS validation gate twice on the same content must produce the same result",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x58-014",
@@ -357,7 +370,8 @@
       "idempotent",
       "X-58"
     ],
-    "rationale": "Two consecutive reads of config.json during gate evaluation must return identical content"
+    "rationale": "Two consecutive reads of config.json during gate evaluation must return identical content",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x58-015",
@@ -381,7 +395,8 @@
       "non-deterministic",
       "X-58"
     ],
-    "rationale": "HTTP response may include timestamps; gate must match on stable content (Alpha), not volatile fields"
+    "rationale": "HTTP response may include timestamps; gate must match on stable content (Alpha), not volatile fields",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x59-016",
@@ -406,7 +421,8 @@
       "partial-failure",
       "X-59"
     ],
-    "rationale": "A passing content predicate must not overwrite or mask the failing CSS predicate result"
+    "rationale": "A passing content predicate must not overwrite or mask the failing CSS predicate result",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x59-017",
@@ -438,7 +454,8 @@
       "grounding",
       "X-59"
     ],
-    "rationale": "Grounding rejection of .ghost-class must persist even if the other predicates pass all later gates"
+    "rationale": "Grounding rejection of .ghost-class must persist even if the other predicates pass all later gates",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x59-018",
@@ -467,7 +484,8 @@
       "db-http",
       "X-59"
     ],
-    "rationale": "DB column does not exist (fail) but HTTP passes — DB failure must survive in final result"
+    "rationale": "DB column does not exist (fail) but HTTP passes — DB failure must survive in final result",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x60-019",
@@ -487,7 +505,8 @@
       "absent-gate",
       "X-60"
     ],
-    "rationale": "Absent DB gate must not be reported as passed in gate results — it should be absent or N/A"
+    "rationale": "Absent DB gate must not be reported as passed in gate results — it should be absent or N/A",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x60-020",
@@ -507,7 +526,8 @@
       "no-edits",
       "X-60"
     ],
-    "rationale": "When no edits are submitted, the F9 syntax gate is vacuously satisfied — should be marked skip, not pass"
+    "rationale": "When no edits are submitted, the F9 syntax gate is vacuously satisfied — should be marked skip, not pass",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x60-021",
@@ -534,7 +554,8 @@
       "browser",
       "X-60"
     ],
-    "rationale": "If browser gate is not available (no Playwright), its absence must not count as a pass in attestation"
+    "rationale": "If browser gate is not available (no Playwright), its absence must not count as a pass in attestation",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x28-022",
@@ -566,7 +587,8 @@
       "unexplained",
       "X-28"
     ],
-    "rationale": "config.json edit has no predicate justification — G5 should flag as unexplained"
+    "rationale": "config.json edit has no predicate justification — G5 should flag as unexplained",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x28-023",
@@ -614,7 +636,8 @@
       "full-attribution",
       "X-28"
     ],
-    "rationale": "All three edits have corresponding predicates — G5 should attribute all as direct"
+    "rationale": "All three edits have corresponding predicates — G5 should attribute all as direct",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x28-024",
@@ -645,7 +668,8 @@
       "env-unexplained",
       "X-28"
     ],
-    "rationale": ".env edit is unexplained by any predicate — config change without justification"
+    "rationale": ".env edit is unexplained by any predicate — config change without justification",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x29-025",
@@ -671,7 +695,8 @@
       "sql-attribution",
       "X-29"
     ],
-    "rationale": "SQL mutation adding display_name should be attributed directly to the DB predicate"
+    "rationale": "SQL mutation adding display_name should be attributed directly to the DB predicate",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x29-026",
@@ -698,7 +723,8 @@
       "unrelated-predicate",
       "X-29"
     ],
-    "rationale": "Edit to email constraint is unexplained by a predicate targeting username column"
+    "rationale": "Edit to email constraint is unexplained by a predicate targeting username column",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x29-027",
@@ -724,7 +750,8 @@
       "destructive",
       "X-29"
     ],
-    "rationale": "Commenting out a table creation is destructive SQL mutation with no predicate justification"
+    "rationale": "Commenting out a table creation is destructive SQL mutation with no predicate justification",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x35-028",
@@ -746,7 +773,8 @@
       "route-discovery",
       "X-35"
     ],
-    "rationale": "The /health route is statically visible in server.js — grounding must discover it"
+    "rationale": "The /health route is statically visible in server.js — grounding must discover it",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x35-029",
@@ -775,7 +803,8 @@
       "dynamic-path",
       "X-35"
     ],
-    "rationale": "Route path built via string concatenation is invisible to static route discovery"
+    "rationale": "Route path built via string concatenation is invisible to static route discovery",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x35-030",
@@ -804,7 +833,8 @@
       "commented-out",
       "X-35"
     ],
-    "rationale": "Commented-out route should not be discovered as valid by grounding"
+    "rationale": "Commented-out route should not be discovered as valid by grounding",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x36-031",
@@ -833,7 +863,8 @@
       "parameterized",
       "X-36"
     ],
-    "rationale": "Parameterized route /api/users/:id must be recognized when predicate uses concrete /api/users/1"
+    "rationale": "Parameterized route /api/users/:id must be recognized when predicate uses concrete /api/users/1",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x36-032",
@@ -862,7 +893,8 @@
       "wildcard",
       "X-36"
     ],
-    "rationale": "startsWith-based route matching creates an implicit wildcard that grounding may miss"
+    "rationale": "startsWith-based route matching creates an implicit wildcard that grounding may miss",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x36-033",
@@ -891,7 +923,8 @@
       "regex",
       "X-36"
     ],
-    "rationale": "Regex-based route is beyond static analysis — grounding under-approximates"
+    "rationale": "Regex-based route is beyond static analysis — grounding under-approximates",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x61-034",
@@ -918,7 +951,8 @@
       "stale-snapshot",
       "X-61"
     ],
-    "rationale": "Grounding runs against pre-edit files, so .new-section does not exist yet — rejected as fabricated"
+    "rationale": "Grounding runs against pre-edit files, so .new-section does not exist yet — rejected as fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x61-035",
@@ -945,7 +979,8 @@
       "removed-selector",
       "X-61"
     ],
-    "rationale": "Grounding passes (selector exists pre-edit) but verification fails (selector removed by edit)"
+    "rationale": "Grounding passes (selector exists pre-edit) but verification fails (selector removed by edit)",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x61-036",
@@ -972,7 +1007,8 @@
       "value-drift",
       "X-61"
     ],
-    "rationale": "Predicate expects pre-edit value; grounding passes but post-edit verification fails"
+    "rationale": "Predicate expects pre-edit value; grounding passes but post-edit verification fails",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x62-037",
@@ -993,7 +1029,8 @@
       "css-in-js",
       "X-62"
     ],
-    "rationale": ".fake-selector exists in a JS string literal on edge-cases page, not in a <style> block"
+    "rationale": ".fake-selector exists in a JS string literal on edge-cases page, not in a <style> block",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x62-038",
@@ -1014,7 +1051,8 @@
       "media-query",
       "X-62"
     ],
-    "rationale": ".responsive-only only exists inside @media (max-width:768px) — unreachable on desktop viewport"
+    "rationale": ".responsive-only only exists inside @media (max-width:768px) — unreachable on desktop viewport",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x62-039",
@@ -1040,7 +1078,8 @@
       "commented-html",
       "X-62"
     ],
-    "rationale": "HTML element inside a comment is not part of the DOM — grounding should not consider it reachable"
+    "rationale": "HTML element inside a comment is not part of the DOM — grounding should not consider it reachable",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x63-040",
@@ -1066,7 +1105,8 @@
       "js-classlist",
       "X-63"
     ],
-    "rationale": "JS-applied class is invisible to static HTML analysis — grounding cannot see runtime DOM modifications"
+    "rationale": "JS-applied class is invisible to static HTML analysis — grounding cannot see runtime DOM modifications",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x63-041",
@@ -1093,7 +1133,8 @@
       "external-css",
       "X-63"
     ],
-    "rationale": "Grounding only parses inline <style> blocks — external CSS files are not followed"
+    "rationale": "Grounding only parses inline <style> blocks — external CSS files are not followed",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x63-042",
@@ -1114,7 +1155,8 @@
       "template-conditional",
       "X-63"
     ],
-    "rationale": "Dynamic class status-active is computed from Date.now() — grounding cannot predict runtime value"
+    "rationale": "Dynamic class status-active is computed from Date.now() — grounding cannot predict runtime value",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x64-043",
@@ -1148,7 +1190,8 @@
       "config-server",
       "X-64"
     ],
-    "rationale": "Config port change does not affect server.js behavior in static analysis — cross-file composition invisible"
+    "rationale": "Config port change does not affect server.js behavior in static analysis — cross-file composition invisible",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x64-044",
@@ -1185,7 +1228,8 @@
       "sql-server",
       "X-64"
     ],
-    "rationale": "Schema change in init.sql and code referencing it in server.js are grounded independently"
+    "rationale": "Schema change in init.sql and code referencing it in server.js are grounded independently",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x64-045",
@@ -1216,7 +1260,8 @@
       "env-server",
       "X-64"
     ],
-    "rationale": ".env PORT and server.js process.env.PORT are semantically linked but grounded as separate files"
+    "rationale": ".env PORT and server.js process.env.PORT are semantically linked but grounded as separate files",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x65-046",
@@ -1245,7 +1290,8 @@
       "feature-flag",
       "X-65"
     ],
-    "rationale": "Route gated behind DEBUG env var — grounding cannot evaluate runtime environment conditions"
+    "rationale": "Route gated behind DEBUG env var — grounding cannot evaluate runtime environment conditions",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x65-047",
@@ -1274,7 +1320,8 @@
       "config-flag",
       "X-65"
     ],
-    "rationale": "Analytics route depends on features.analytics flag (false in config.json)"
+    "rationale": "Analytics route depends on features.analytics flag (false in config.json)",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x65-048",
@@ -1308,7 +1355,8 @@
       "node-env",
       "X-65"
     ],
-    "rationale": "NODE_ENV=production means /dev-tools is unreachable — env-dependent routing"
+    "rationale": "NODE_ENV=production means /dev-tools is unreachable — env-dependent routing",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x69-049",
@@ -1333,7 +1381,8 @@
       "unicode-grapheme",
       "X-69"
     ],
-    "rationale": "Em dash (U+2014) is 3 bytes in UTF-8 — search/replace must handle multi-byte boundaries correctly"
+    "rationale": "Em dash (U+2014) is 3 bytes in UTF-8 — search/replace must handle multi-byte boundaries correctly",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x69-050",
@@ -1359,7 +1408,8 @@
       "zwj",
       "X-69"
     ],
-    "rationale": "ZWJ character is invisible but changes byte count — search must not break on it"
+    "rationale": "ZWJ character is invisible but changes byte count — search must not break on it",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x69-051",
@@ -1385,7 +1435,8 @@
       "combining",
       "X-69"
     ],
-    "rationale": "Precomposed Á vs decomposed A + combining acute — search must handle both NFC/NFD forms"
+    "rationale": "Precomposed Á vs decomposed A + combining acute — search must handle both NFC/NFD forms",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x70-052",
@@ -1410,7 +1461,8 @@
       "toctou",
       "X-70"
     ],
-    "rationale": "If another process modifies config.json between read and apply, the edit may fail to match"
+    "rationale": "If another process modifies config.json between read and apply, the edit may fail to match",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x70-053",
@@ -1441,7 +1493,8 @@
       "sequential-edits",
       "X-70"
     ],
-    "rationale": "Second edit depends on first having been applied — tests edit ordering guarantees"
+    "rationale": "Second edit depends on first having been applied — tests edit ordering guarantees",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x70-054",
@@ -1467,7 +1520,8 @@
       "env-mutation",
       "X-70"
     ],
-    "rationale": "Secret rotation between read and apply could change the search target"
+    "rationale": "Secret rotation between read and apply could change the search target",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x71-055",
@@ -1493,7 +1547,8 @@
       "boilerplate",
       "X-71"
     ],
-    "rationale": "\"color: red;\" appears in multiple CSS rules — search hits first occurrence which may be boilerplate, not the intended target"
+    "rationale": "\"color: red;\" appears in multiple CSS rules — search hits first occurrence which may be boilerplate, not the intended target",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x71-056",
@@ -1519,7 +1574,8 @@
       "multi-match",
       "X-71"
     ],
-    "rationale": "\"padding: 0.5rem;\" appears in multiple CSS rules across routes — ambiguous target"
+    "rationale": "\"padding: 0.5rem;\" appears in multiple CSS rules across routes — ambiguous target",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x71-057",
@@ -1545,7 +1601,8 @@
       "unique-match",
       "X-71"
     ],
-    "rationale": "This search string is actually unique despite looking like a common pattern — uniqueness validation should pass"
+    "rationale": "This search string is actually unique despite looking like a common pattern — uniqueness validation should pass",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x72-058",
@@ -1572,7 +1629,8 @@
       "globally-harmful",
       "X-72"
     ],
-    "rationale": "!important fixes the immediate issue but makes future CSS changes unpredictable globally"
+    "rationale": "!important fixes the immediate issue but makes future CSS changes unpredictable globally",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x72-059",
@@ -1599,7 +1657,8 @@
       "inline-style",
       "X-72"
     ],
-    "rationale": "Inline style technically satisfies color=red but CSS gate checks <style> blocks, not inline attrs"
+    "rationale": "Inline style technically satisfies color=red but CSS gate checks <style> blocks, not inline attrs",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x72-060",
@@ -1626,7 +1685,8 @@
       "validation-removal",
       "X-72"
     ],
-    "rationale": "Removing required attribute fixes a hypothetical submission issue but removes input validation"
+    "rationale": "Removing required attribute fixes a hypothetical submission issue but removes input validation",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x73-061",
@@ -1652,7 +1712,8 @@
       "overfit-value",
       "X-73"
     ],
-    "rationale": "Hint suggests #ff6347 specifically when any warm color would address the failure class — overfitting"
+    "rationale": "Hint suggests #ff6347 specifically when any warm color would address the failure class — overfitting",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x73-062",
@@ -1679,7 +1740,8 @@
       "font-size",
       "X-73"
     ],
-    "rationale": "Hint overfits to 18px when the real issue is rem-to-px mismatch — different px value has same class of problem"
+    "rationale": "Hint overfits to 18px when the real issue is rem-to-px mismatch — different px value has same class of problem",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x73-063",
@@ -1703,7 +1765,8 @@
       "json-format",
       "X-73"
     ],
-    "rationale": "Hint matches exact JSON format \"id\":1 without space; response may have \"id\": 1 with space — overfitting to format"
+    "rationale": "Hint matches exact JSON format \"id\":1 without space; response may have \"id\": 1 with space — overfitting to format",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x74-064",
@@ -1730,7 +1793,8 @@
       "wrong-causal",
       "X-74"
     ],
-    "rationale": "A narrowing hint about CSS specificity is misleading when the selector does not exist pre-edit"
+    "rationale": "A narrowing hint about CSS specificity is misleading when the selector does not exist pre-edit",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x74-065",
@@ -1758,7 +1822,8 @@
       "db-type",
       "X-74"
     ],
-    "rationale": "If hint says \"wrong column type\" but column was just created, the causal explanation is inaccurate"
+    "rationale": "If hint says \"wrong column type\" but column was just created, the causal explanation is inaccurate",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x74-066",
@@ -1784,7 +1849,8 @@
       "missing-element",
       "X-74"
     ],
-    "rationale": "Hint about route handler is wrong — the real issue is .welcome-banner class was never added to HTML"
+    "rationale": "Hint about route handler is wrong — the real issue is .welcome-banner class was never added to HTML",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x75-067",
@@ -1816,7 +1882,8 @@
       "multi-failure",
       "X-75"
     ],
-    "rationale": "Content was removed (root cause) but narrowing might focus on CSS color (symptom)"
+    "rationale": "Content was removed (root cause) but narrowing might focus on CSS color (symptom)",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x75-068",
@@ -1854,7 +1921,8 @@
       "priority",
       "X-75"
     ],
-    "rationale": "All three predicates affected by removing h1 content — narrowing should target content, not CSS"
+    "rationale": "All three predicates affected by removing h1 content — narrowing should target content, not CSS",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x75-069",
@@ -1888,7 +1956,8 @@
       "db-root-cause",
       "X-75"
     ],
-    "rationale": "Settings table removal is root cause — HTTP failure is downstream but narrowing might pick HTTP"
+    "rationale": "Settings table removal is root cause — HTTP failure is downstream but narrowing might pick HTTP",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x49-070",
@@ -1914,7 +1983,8 @@
       "three-way-disagree",
       "X-49"
     ],
-    "rationale": "File shows 3rem (deterministic pass), browser may compute differently, vision unclear — no majority"
+    "rationale": "File shows 3rem (deterministic pass), browser may compute differently, vision unclear — no majority",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x49-071",
@@ -1945,7 +2015,8 @@
       "vision-outlier",
       "X-49"
     ],
-    "rationale": "Deterministic and browser agree, vision disagrees — vision is the outlier authority"
+    "rationale": "Deterministic and browser agree, vision disagrees — vision is the outlier authority",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x49-072",
@@ -1972,7 +2043,8 @@
       "different-reasons",
       "X-49"
     ],
-    "rationale": "Deterministic: transparent not #ff0000. Browser: computed differs. Vision: invisible. All fail with different evidence."
+    "rationale": "Deterministic: transparent not #ff0000. Browser: computed differs. Vision: invisible. All fail with different evidence.",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x76-073",
@@ -2000,7 +2072,8 @@
       "animation",
       "X-76"
     ],
-    "rationale": "Pulse animation changes opacity between 0.5 and 1.0 — screenshot timing determines captured value"
+    "rationale": "Pulse animation changes opacity between 0.5 and 1.0 — screenshot timing determines captured value",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x76-074",
@@ -2026,7 +2099,8 @@
       "async-content",
       "X-76"
     ],
-    "rationale": "Content loads after 2s delay — screenshot taken before settle window may miss it"
+    "rationale": "Content loads after 2s delay — screenshot taken before settle window may miss it",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x76-075",
@@ -2053,7 +2127,8 @@
       "transition",
       "X-76"
     ],
-    "rationale": "Transition on color means captured value depends on timing — mid-transition value is unpredictable"
+    "rationale": "Transition on color means captured value depends on timing — mid-transition value is unpredictable",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x77-076",
@@ -2075,7 +2150,8 @@
       "responsive",
       "X-77"
     ],
-    "rationale": ".responsive-only rule inside @media (max-width:768px) — desktop viewport will not apply it"
+    "rationale": ".responsive-only rule inside @media (max-width:768px) — desktop viewport will not apply it",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x77-077",
@@ -2102,7 +2178,8 @@
       "font-rendering",
       "X-77"
     ],
-    "rationale": "Headless browser may not have Helvetica Neue — computed font-family differs from declared"
+    "rationale": "Headless browser may not have Helvetica Neue — computed font-family differs from declared",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x77-078",
@@ -2129,7 +2206,8 @@
       "container-query",
       "X-77"
     ],
-    "rationale": "Container query depends on parent width at runtime — deterministic check of source cannot predict"
+    "rationale": "Container query depends on parent width at runtime — deterministic check of source cannot predict",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x78-079",
@@ -2157,7 +2235,8 @@
       "display-none",
       "X-78"
     ],
-    "rationale": "Element exists in DOM (HTML pass) and display:none (CSS pass) but vision sees nothing — false failure risk"
+    "rationale": "Element exists in DOM (HTML pass) and display:none (CSS pass) but vision sees nothing — false failure risk",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x78-080",
@@ -2178,7 +2257,8 @@
       "below-fold",
       "X-78"
     ],
-    "rationale": "Footer at bottom of long page may be cropped in screenshot — vision reports missing when it exists"
+    "rationale": "Footer at bottom of long page may be cropped in screenshot — vision reports missing when it exists",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x78-081",
@@ -2199,7 +2279,8 @@
       "overflow-clip",
       "X-78"
     ],
-    "rationale": "overflow:hidden clips content that extends beyond 200x100px box — vision may not see clipped text"
+    "rationale": "overflow:hidden clips content that extends beyond 200x100px box — vision may not see clipped text",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x79-082",
@@ -2234,7 +2315,8 @@
       "status-code",
       "X-79"
     ],
-    "rationale": "Page renders correctly (visual pass) but returns 503 — semantic failure masked by appearance"
+    "rationale": "Page renders correctly (visual pass) but returns 503 — semantic failure masked by appearance",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x79-083",
@@ -2266,7 +2348,8 @@
       "hidden-field",
       "X-79"
     ],
-    "rationale": "Hidden input exists and has empty value — visually invisible but semantically broken (missing CSRF)"
+    "rationale": "Hidden input exists and has empty value — visually invisible but semantically broken (missing CSRF)",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x79-084",
@@ -2293,7 +2376,8 @@
       "wrong-element",
       "X-79"
     ],
-    "rationale": "Visually identical (div renders same as p) but structural HTML predicate correctly fails — p.subtitle no longer exists"
+    "rationale": "Visually identical (div renders same as p) but structural HTML predicate correctly fails — p.subtitle no longer exists",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x80-085",
@@ -2320,7 +2404,8 @@
       "important-override",
       "X-80"
     ],
-    "rationale": "Source-level predicate finds #1a1a2e in first h1 rule, but browser renders white due to !important"
+    "rationale": "Source-level predicate finds #1a1a2e in first h1 rule, but browser renders white due to !important",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x80-086",
@@ -2351,7 +2436,8 @@
       "js-removal",
       "X-80"
     ],
-    "rationale": "Content exists in source (semantic pass) but JS removes it at runtime (visual failure)"
+    "rationale": "Content exists in source (semantic pass) but JS removes it at runtime (visual failure)",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x80-087",
@@ -2383,7 +2469,8 @@
       "zero-height",
       "X-80"
     ],
-    "rationale": "Content exists in file and element exists in DOM (semantic pass) but zero height makes it invisible (visual fail)"
+    "rationale": "Content exists in file and element exists in DOM (semantic pass) but zero height makes it invisible (visual fail)",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x81-088",
@@ -2410,7 +2497,8 @@
       "deterministic-bias",
       "X-81"
     ],
-    "rationale": "Duplicate body rules — deterministic must pick the cascade winner (#555), not first occurrence (#333)"
+    "rationale": "Duplicate body rules — deterministic must pick the cascade winner (#555), not first occurrence (#333)",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x81-089",
@@ -2437,7 +2525,8 @@
       "whitespace",
       "X-81"
     ],
-    "rationale": "Double space renders as single — deterministic fails (content mismatch), browser/vision pass (identical render)"
+    "rationale": "Double space renders as single — deterministic fails (content mismatch), browser/vision pass (identical render)",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x81-090",
@@ -2464,7 +2553,8 @@
       "absent-authority",
       "X-81"
     ],
-    "rationale": "If vision authority is absent (no screenshot) and weighted as 0.5, it incorrectly biases final verdict"
+    "rationale": "If vision authority is absent (no screenshot) and weighted as 0.5, it incorrectly biases final verdict",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x82-091",
@@ -2490,7 +2580,8 @@
       "attestation-detail",
       "X-82"
     ],
-    "rationale": "Attestation must identify that h1 color predicate failed, not just \"CSS gate failed\""
+    "rationale": "Attestation must identify that h1 color predicate failed, not just \"CSS gate failed\"",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x82-092",
@@ -2522,7 +2613,8 @@
       "multi-gate-fail",
       "X-82"
     ],
-    "rationale": "Both grounding (fabricated selector) and content (syntax error in code) fail — attestation must report both"
+    "rationale": "Both grounding (fabricated selector) and content (syntax error in code) fail — attestation must report both",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x82-093",
@@ -2543,7 +2635,8 @@
       "actual-vs-expected",
       "X-82"
     ],
-    "rationale": "Attestation should include \"actual: 2rem, expected: 3rem\" not just \"font-size failed\""
+    "rationale": "Attestation should include \"actual: 2rem, expected: 3rem\" not just \"font-size failed\"",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x83-094",
@@ -2569,7 +2662,8 @@
       "io-wait",
       "X-83"
     ],
-    "rationale": "Gate durationMs should measure validation logic only, not include file read latency or queue wait"
+    "rationale": "Gate durationMs should measure validation logic only, not include file read latency or queue wait",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x83-095",
@@ -2595,7 +2689,8 @@
       "double-count",
       "X-83"
     ],
-    "rationale": "If gates overlap, totalDurationMs should be wall-clock time, not sum of individual gate durations"
+    "rationale": "If gates overlap, totalDurationMs should be wall-clock time, not sum of individual gate durations",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x83-096",
@@ -2631,7 +2726,8 @@
       "edit-application",
       "X-83"
     ],
-    "rationale": "Multi-file edit application time should not be counted as part of F9 gate duration"
+    "rationale": "Multi-file edit application time should not be counted as part of F9 gate duration",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x84-097",
@@ -2657,7 +2753,8 @@
       "ordering",
       "X-84"
     ],
-    "rationale": "If two submissions complete simultaneously, receipt append order must match hash chain order"
+    "rationale": "If two submissions complete simultaneously, receipt append order must match hash chain order",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x84-098",
@@ -2678,7 +2775,8 @@
       "failure-interleave",
       "X-84"
     ],
-    "rationale": "Failed submission receipt must not break hash chain — previousHash must reference last appended receipt"
+    "rationale": "Failed submission receipt must not break hash chain — previousHash must reference last appended receipt",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x84-099",
@@ -2705,7 +2803,8 @@
       "rollback-append",
       "X-84"
     ],
-    "rationale": "Rollback generates a receipt after verification failure — must chain correctly after the failure receipt"
+    "rationale": "Rollback generates a receipt after verification failure — must chain correctly after the failure receipt",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x85-100",
@@ -2726,7 +2825,8 @@
       "grounding-fail",
       "X-85"
     ],
-    "rationale": "No checkpoint should exist when grounding rejects all predicates — gate failure prevents checkpoint"
+    "rationale": "No checkpoint should exist when grounding rejects all predicates — gate failure prevents checkpoint",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x85-101",
@@ -2752,7 +2852,8 @@
       "edit-fail",
       "X-85"
     ],
-    "rationale": "Edit application fails (search not found) — no checkpoint should be created for unapplied changes"
+    "rationale": "Edit application fails (search not found) — no checkpoint should be created for unapplied changes",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x85-102",
@@ -2779,7 +2880,8 @@
       "verification-fail",
       "X-85"
     ],
-    "rationale": "Verification fails (color is #999 not #ff0000) — checkpoint must not be created before rollback completes"
+    "rationale": "Verification fails (color is #999 not #ff0000) — checkpoint must not be created before rollback completes",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x86-103",
@@ -2805,7 +2907,8 @@
       "stale-at-verification",
       "X-86"
     ],
-    "rationale": "Predicate was valid when extracted (selector existed) but edit removed it — stale by verification time"
+    "rationale": "Predicate was valid when extracted (selector existed) but edit removed it — stale by verification time",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x86-104",
@@ -2834,7 +2937,8 @@
       "route-moved",
       "X-86"
     ],
-    "rationale": "Predicate targets /api/items but edit moved route to /api/v2/items — predicate is stale"
+    "rationale": "Predicate targets /api/items but edit moved route to /api/v2/items — predicate is stale",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x86-105",
@@ -2861,7 +2965,8 @@
       "html-removed",
       "X-86"
     ],
-    "rationale": "Element .subtitle existed at extraction time but edit replaced it with comment — stale predicate"
+    "rationale": "Element .subtitle existed at extraction time but edit replaced it with comment — stale predicate",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x87-106",
@@ -2887,7 +2992,8 @@
       "wrong-property",
       "X-87"
     ],
-    "rationale": "Color predicate passes (unchanged) but real change was font-size — vacuously correct but misaligned"
+    "rationale": "Color predicate passes (unchanged) but real change was font-size — vacuously correct but misaligned",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x87-107",
@@ -2912,7 +3018,8 @@
       "wrong-target",
       "X-87"
     ],
-    "rationale": "Predicate matches boilerplate \"const http\" which was never the change target — passes but describes nothing"
+    "rationale": "Predicate matches boilerplate \"const http\" which was never the change target — passes but describes nothing",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x87-108",
@@ -2938,7 +3045,8 @@
       "wrong-table",
       "X-87"
     ],
-    "rationale": "Predicate checks users.email (untouched) while edit adds posts.likes — correct but irrelevant"
+    "rationale": "Predicate checks users.email (untouched) while edit adds posts.likes — correct but irrelevant",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x88-109",
@@ -2958,7 +3066,8 @@
       "deferred-never-validated",
       "X-88"
     ],
-    "rationale": "DB predicate is deferred (no live DB) — if post-deploy validation is skipped, predicate is never checked"
+    "rationale": "DB predicate is deferred (no live DB) — if post-deploy validation is skipped, predicate is never checked",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x88-110",
@@ -2988,7 +3097,8 @@
       "http-advisory",
       "X-88"
     ],
-    "rationale": "HTTP predicate is advisory in staging and deferred to O.5b — if O.5b skipped, predicate never enforced"
+    "rationale": "HTTP predicate is advisory in staging and deferred to O.5b — if O.5b skipped, predicate never enforced",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x88-111",
@@ -3009,7 +3119,8 @@
       "no-validator",
       "X-88"
     ],
-    "rationale": "Security predicate type has no gate validator — deferred indefinitely and never actually validated"
+    "rationale": "Security predicate type has no gate validator — deferred indefinitely and never actually validated",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x89-112",
@@ -3030,7 +3141,8 @@
       "enrichment",
       "X-89"
     ],
-    "rationale": "If pipeline adds a path field, fingerprint changes from extraction to K5 check — constraint matching breaks"
+    "rationale": "If pipeline adds a path field, fingerprint changes from extraction to K5 check — constraint matching breaks",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x89-113",
@@ -3057,7 +3169,8 @@
       "current-value",
       "X-89"
     ],
-    "rationale": "Grounding adds currentValue=\"#1a1a2e\" — if fingerprint includes currentValue, it drifts from original"
+    "rationale": "Grounding adds currentValue=\"#1a1a2e\" — if fingerprint includes currentValue, it drifts from original",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x89-114",
@@ -3089,7 +3202,8 @@
       "id-reindex",
       "X-89"
     ],
-    "rationale": "After bounding removes .nonexistent-x89, remaining predicates get new IDs — K5 ban matching breaks if fingerprint uses ID"
+    "rationale": "After bounding removes .nonexistent-x89, remaining predicates get new IDs — K5 ban matching breaks if fingerprint uses ID",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x05-115",
@@ -3112,7 +3226,8 @@
       "numeric-coercion",
       "X-05"
     ],
-    "rationale": "Status 200 as number vs \"200\" as string may produce different fingerprints after round-trip"
+    "rationale": "Status 200 as number vs \"200\" as string may produce different fingerprints after round-trip",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x06-116",
@@ -3139,7 +3254,8 @@
       "rtl",
       "X-06"
     ],
-    "rationale": "RTL Arabic script in class names must not break fingerprint hashing or directional assumptions"
+    "rationale": "RTL Arabic script in class names must not break fingerprint hashing or directional assumptions",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x22-117",
@@ -3163,7 +3279,8 @@
       "no-validator",
       "X-22"
     ],
-    "rationale": "Performance predicate has no validator — is the gate absent, disabled, or skipped? Three states confused"
+    "rationale": "Performance predicate has no validator — is the gate absent, disabled, or skipped? Three states confused",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x57-118",
@@ -3190,7 +3307,8 @@
       "cascade",
       "X-57"
     ],
-    "rationale": "If edits are applied in non-deterministic order, the CSS cascade winner may differ from expectation"
+    "rationale": "If edits are applied in non-deterministic order, the CSS cascade winner may differ from expectation",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x59-119",
@@ -3225,7 +3343,8 @@
       "mixed-types",
       "X-59"
     ],
-    "rationale": "HTTP predicate on non-existent route fails while CSS+HTML pass — HTTP failure must survive in result"
+    "rationale": "HTTP predicate on non-existent route fails while CSS+HTML pass — HTTP failure must survive in result",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x28-120",
@@ -3272,7 +3391,8 @@
       "partial-attribution",
       "X-28"
     ],
-    "rationale": "server.js and config.json edits explained; init.sql and .env edits unexplained — G5 flags two"
+    "rationale": "server.js and config.json edits explained; init.sql and .env edits unexplained — G5 flags two",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x61-121",
@@ -3299,7 +3419,8 @@
       "new-property",
       "X-61"
     ],
-    "rationale": "text-shadow property did not exist pre-edit — grounding has no baseline, but verification should find it post-edit"
+    "rationale": "text-shadow property did not exist pre-edit — grounding has no baseline, but verification should find it post-edit",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x62-122",
@@ -3325,7 +3446,8 @@
       "noscript",
       "X-62"
     ],
-    "rationale": "Element inside <noscript> only renders with JS disabled — grounding may over-approximate its reachability"
+    "rationale": "Element inside <noscript> only renders with JS disabled — grounding may over-approximate its reachability",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x72-123",
@@ -3355,7 +3477,8 @@
       "hardcoded-data",
       "X-72"
     ],
-    "rationale": "Hardcoded JSON string fixes the test but prevents future dynamic data from ever being served"
+    "rationale": "Hardcoded JSON string fixes the test but prevents future dynamic data from ever being served",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x75-124",
@@ -3402,7 +3525,8 @@
       "ordering",
       "X-75"
     ],
-    "rationale": "display:none is the root cause affecting everything — narrowing should identify it, not the downstream HTML/HTTP failures"
+    "rationale": "display:none is the root cause affecting everything — narrowing should identify it, not the downstream HTML/HTTP failures",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x76-125",
@@ -3429,7 +3553,8 @@
       "font-loading",
       "X-76"
     ],
-    "rationale": "Custom font may not be loaded at screenshot time — FOUT means fallback font appears instead"
+    "rationale": "Custom font may not be loaded at screenshot time — FOUT means fallback font appears instead",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x82-126",
@@ -3461,7 +3586,8 @@
       "deferred-warning",
       "X-82"
     ],
-    "rationale": "CSS passes, DB is deferred — attestation should note the deferred DB predicate, not silently omit it"
+    "rationale": "CSS passes, DB is deferred — attestation should note the deferred DB predicate, not silently omit it",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x85-127",
@@ -3493,7 +3619,8 @@
       "partial-edit",
       "X-85"
     ],
-    "rationale": "First edit applied but second fails — no checkpoint should capture the partial/inconsistent state"
+    "rationale": "First edit applied but second fails — no checkpoint should capture the partial/inconsistent state",
+    "intent": "false_positive"
   },
   {
     "id": "xadv-x88-128",
@@ -3524,7 +3651,8 @@
       "all-deferred",
       "X-88"
     ],
-    "rationale": "When all predicates are deferred (no live DB), the entire verification is vacuous — passes with zero actual checks"
+    "rationale": "When all predicates are deferred (no live DB), the entire verification is vacuous — passes with zero actual checks",
+    "intent": "false_negative"
   },
   {
     "id": "xadv-x89-129",
@@ -3551,6 +3679,7 @@
       "hex-normalization",
       "X-89"
     ],
-    "rationale": "Source has #FF0000 (uppercase), predicate has #ff0000 (lowercase) — normalization during pipeline changes fingerprint"
+    "rationale": "Source has #FF0000 (uppercase), predicate has #ff0000 (lowercase) — normalization during pipeline changes fingerprint",
+    "intent": "false_negative"
   }
 ]

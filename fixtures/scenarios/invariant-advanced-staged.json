@@ -18,7 +18,8 @@
       "health-status",
       "INV-02"
     ],
-    "rationale": "Control: /health returns 200 in the demo-app. HTTP predicate matches."
+    "rationale": "Control: /health returns 200 in the demo-app. HTTP predicate matches.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv02-002",
@@ -46,7 +47,8 @@
       "INV-02"
     ],
     "rationale": "Edit changes health endpoint to return 503. HTTP predicate expects 200, gets 503.",
-    "expectedFailedGate": "verify"
+    "expectedFailedGate": "verify",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv02-003",
@@ -74,7 +76,8 @@
       "INV-02"
     ],
     "rationale": "Health endpoint returns 500 instead of 200. Invariant check detects server error.",
-    "expectedFailedGate": "verify"
+    "expectedFailedGate": "verify",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv03-004",
@@ -96,7 +99,8 @@
       "health-body",
       "INV-03"
     ],
-    "rationale": "Control: /health returns {\"status\":\"ok\"}. Body contains \"ok\"."
+    "rationale": "Control: /health returns {\"status\":\"ok\"}. Body contains \"ok\".",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv03-005",
@@ -125,7 +129,8 @@
       "INV-03"
     ],
     "rationale": "Health body now says \"maintenance\" instead of \"ok\". Body content predicate fails.",
-    "expectedFailedGate": "verify"
+    "expectedFailedGate": "verify",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv03-006",
@@ -154,7 +159,8 @@
       "INV-03"
     ],
     "rationale": "Health returns empty object {}. The \"status\" field is missing from the body.",
-    "expectedFailedGate": "verify"
+    "expectedFailedGate": "verify",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv05-007",
@@ -173,7 +179,8 @@
       "db-connectivity",
       "INV-05"
     ],
-    "rationale": "Control: init.sql defines the users table. DB predicate verifies table existence."
+    "rationale": "Control: init.sql defines the users table. DB predicate verifies table existence.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv05-008",
@@ -193,7 +200,8 @@
       "INV-05"
     ],
     "rationale": "No payments table in init.sql. DB predicate for table_exists fails.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv05-009",
@@ -219,7 +227,8 @@
       "INV-05"
     ],
     "rationale": "Settings table removed from init.sql. DB predicate for table_exists fails.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv06-010",
@@ -238,7 +247,8 @@
       "container-running",
       "INV-06"
     ],
-    "rationale": "Control: docker-compose.yml includes healthcheck config. Container monitoring is configured."
+    "rationale": "Control: docker-compose.yml includes healthcheck config. Container monitoring is configured.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv06-011",
@@ -264,7 +274,8 @@
       "INV-06"
     ],
     "rationale": "Dockerfile HEALTHCHECK directive removed. Container has no built-in health monitoring.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv06-012",
@@ -290,7 +301,8 @@
       "INV-06"
     ],
     "rationale": "Dockerfile CMD points to nonexistent.js. Container will fail to start.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv10-013",
@@ -315,7 +327,8 @@
       "disk-space",
       "INV-10"
     ],
-    "rationale": "Docker log rotation configured to prevent disk fill. Content predicate verifies limit."
+    "rationale": "Docker log rotation configured to prevent disk fill. Content predicate verifies limit.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv10-014",
@@ -335,7 +348,8 @@
       "INV-10"
     ],
     "rationale": "No log rotation in docker-compose.yml. No max-size limit, risk of disk fill.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv11-015",
@@ -360,7 +374,8 @@
       "memory-threshold",
       "INV-11"
     ],
-    "rationale": "Memory limit added to docker-compose. Content predicate verifies the limit is present."
+    "rationale": "Memory limit added to docker-compose. Content predicate verifies the limit is present.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv11-016",
@@ -380,7 +395,8 @@
       "INV-11"
     ],
     "rationale": "No memory limit in docker-compose.yml. Container can consume unlimited memory.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv11-017",
@@ -405,7 +421,8 @@
       "memory-threshold",
       "INV-11"
     ],
-    "rationale": "Memory limit of 64G is technically present but impractically high. Content predicate still matches."
+    "rationale": "Memory limit of 64G is technically present but impractically high. Content predicate still matches.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv12-018",
@@ -430,7 +447,8 @@
       "cpu-threshold",
       "INV-12"
     ],
-    "rationale": "CPU limit added. Content predicate verifies the CPU limit string."
+    "rationale": "CPU limit added. Content predicate verifies the CPU limit string.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv12-019",
@@ -450,7 +468,8 @@
       "INV-12"
     ],
     "rationale": "No CPU limit in docker-compose.yml. Container can consume all host CPU.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv13-020",
@@ -475,7 +494,8 @@
       "fd-limit",
       "INV-13"
     ],
-    "rationale": "ulimits for file descriptors configured. Content predicate verifies nofile setting."
+    "rationale": "ulimits for file descriptors configured. Content predicate verifies nofile setting.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv13-021",
@@ -495,7 +515,8 @@
       "INV-13"
     ],
     "rationale": "No ulimits in docker-compose.yml. Container uses OS default which may be too low.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv13-022",
@@ -520,7 +541,8 @@
       "fd-limit",
       "INV-13"
     ],
-    "rationale": "memlock ulimit configured (different from nofile). Content predicate matches."
+    "rationale": "memlock ulimit configured (different from nofile). Content predicate matches.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv14-023",
@@ -539,7 +561,8 @@
       "network",
       "INV-14"
     ],
-    "rationale": "Control: docker-compose.yml has port mapping. Container is network accessible."
+    "rationale": "Control: docker-compose.yml has port mapping. Container is network accessible.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv14-024",
@@ -565,7 +588,8 @@
       "INV-14"
     ],
     "rationale": "Port mapping removed from docker-compose. Container has no external network access.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "inv-inv14-025",
@@ -590,7 +614,8 @@
       "network",
       "INV-14"
     ],
-    "rationale": "Custom Docker network configured. Content predicate verifies network name exists."
+    "rationale": "Custom Docker network configured. Content predicate verifies network name exists.",
+    "intent": "false_negative"
   },
   {
     "id": "inv-inv14-026",
@@ -615,6 +640,7 @@
       "network",
       "INV-14"
     ],
-    "rationale": "Explicit DNS servers configured. Content predicate verifies DNS configuration exists."
+    "rationale": "Explicit DNS servers configured. Content predicate verifies DNS configuration exists.",
+    "intent": "false_negative"
   }
 ]

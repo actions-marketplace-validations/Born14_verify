@@ -24,7 +24,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "Classic reflected XSS via script tag"
+    "rationale": "Classic reflected XSS via script tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-002",
@@ -51,7 +52,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "Script tag with string argument alert"
+    "rationale": "Script tag with string argument alert",
+    "intent": "false_positive"
   },
   {
     "id": "xss-003",
@@ -78,7 +80,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "External script source inclusion"
+    "rationale": "External script source inclusion",
+    "intent": "false_positive"
   },
   {
     "id": "xss-004",
@@ -105,7 +108,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "Cookie exfiltration via Image src"
+    "rationale": "Cookie exfiltration via Image src",
+    "intent": "false_positive"
   },
   {
     "id": "xss-005",
@@ -132,7 +136,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "Eval-based XSS inside script tag"
+    "rationale": "Eval-based XSS inside script tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-006",
@@ -159,7 +164,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "Function constructor XSS"
+    "rationale": "Function constructor XSS",
+    "intent": "false_positive"
   },
   {
     "id": "xss-007",
@@ -179,7 +185,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "Unmodified server.js contains no XSS vectors"
+    "rationale": "Unmodified server.js contains no XSS vectors",
+    "intent": "false_negative"
   },
   {
     "id": "xss-008",
@@ -205,7 +212,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "Word \"script\" in variable name is not XSS"
+    "rationale": "Word \"script\" in variable name is not XSS",
+    "intent": "false_negative"
   },
   {
     "id": "xss-009",
@@ -226,7 +234,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "server.js has no reflected user input; predicate references nonexistent pattern"
+    "rationale": "server.js has no reflected user input; predicate references nonexistent pattern",
+    "intent": "false_positive"
   },
   {
     "id": "xss-010",
@@ -247,7 +256,8 @@
       "reflected_xss",
       "XSS-01"
     ],
-    "rationale": "No #xss-output element exists in any route"
+    "rationale": "No #xss-output element exists in any route",
+    "intent": "false_positive"
   },
   {
     "id": "xss-011",
@@ -274,7 +284,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Event handler onerror on img tag"
+    "rationale": "Event handler onerror on img tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-012",
@@ -301,7 +312,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Event handler onload on body tag"
+    "rationale": "Event handler onload on body tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-013",
@@ -328,7 +340,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Onfocus handler triggered via autofocus"
+    "rationale": "Onfocus handler triggered via autofocus",
+    "intent": "false_positive"
   },
   {
     "id": "xss-014",
@@ -355,7 +368,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Onmouseover event handler injection"
+    "rationale": "Onmouseover event handler injection",
+    "intent": "false_positive"
   },
   {
     "id": "xss-015",
@@ -382,7 +396,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Onclick event handler on button"
+    "rationale": "Onclick event handler on button",
+    "intent": "false_positive"
   },
   {
     "id": "xss-016",
@@ -409,7 +424,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Onfocus on select with autofocus trigger"
+    "rationale": "Onfocus on select with autofocus trigger",
+    "intent": "false_positive"
   },
   {
     "id": "xss-017",
@@ -436,7 +452,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Onfocus on textarea with autofocus trigger"
+    "rationale": "Onfocus on textarea with autofocus trigger",
+    "intent": "false_positive"
   },
   {
     "id": "xss-018",
@@ -463,7 +480,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Onstart event on marquee element"
+    "rationale": "Onstart event on marquee element",
+    "intent": "false_positive"
   },
   {
     "id": "xss-019",
@@ -490,7 +508,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Ontoggle on details element with open attribute"
+    "rationale": "Ontoggle on details element with open attribute",
+    "intent": "false_positive"
   },
   {
     "id": "xss-020",
@@ -516,7 +535,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Img tag with valid src and alt, no event handlers"
+    "rationale": "Img tag with valid src and alt, no event handlers",
+    "intent": "false_negative"
   },
   {
     "id": "xss-021",
@@ -542,7 +562,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Button with safe type attribute, no onclick"
+    "rationale": "Button with safe type attribute, no onclick",
+    "intent": "false_negative"
   },
   {
     "id": "xss-022",
@@ -563,7 +584,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "No onload event handler exists in server.js"
+    "rationale": "No onload event handler exists in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "xss-023",
@@ -590,7 +612,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Iframe with javascript: src"
+    "rationale": "Iframe with javascript: src",
+    "intent": "false_positive"
   },
   {
     "id": "xss-024",
@@ -617,7 +640,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Iframe with onload event handler"
+    "rationale": "Iframe with onload event handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-025",
@@ -644,7 +668,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Object tag with onerror handler"
+    "rationale": "Object tag with onerror handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-026",
@@ -671,7 +696,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Embed tag with javascript: protocol"
+    "rationale": "Embed tag with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-027",
@@ -698,7 +724,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Video tag with onerror handler"
+    "rationale": "Video tag with onerror handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-028",
@@ -725,7 +752,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Audio tag with onerror handler"
+    "rationale": "Audio tag with onerror handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-029",
@@ -752,7 +780,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Deprecated keygen element with onfocus"
+    "rationale": "Deprecated keygen element with onfocus",
+    "intent": "false_positive"
   },
   {
     "id": "xss-030",
@@ -779,7 +808,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Deprecated isindex with javascript: action"
+    "rationale": "Deprecated isindex with javascript: action",
+    "intent": "false_positive"
   },
   {
     "id": "xss-031",
@@ -805,7 +835,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Sandboxed iframe with no event handlers"
+    "rationale": "Sandboxed iframe with no event handlers",
+    "intent": "false_negative"
   },
   {
     "id": "xss-032",
@@ -831,7 +862,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "Video element with valid source and controls"
+    "rationale": "Video element with valid source and controls",
+    "intent": "false_negative"
   },
   {
     "id": "xss-033",
@@ -852,7 +884,8 @@
       "tag_injection",
       "XSS-03"
     ],
-    "rationale": "No iframe.malicious element exists in any route"
+    "rationale": "No iframe.malicious element exists in any route",
+    "intent": "false_positive"
   },
   {
     "id": "xss-034",
@@ -879,7 +912,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Anchor with javascript: protocol"
+    "rationale": "Anchor with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-035",
@@ -906,7 +940,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "javascript:void(0) with onclick handler"
+    "rationale": "javascript:void(0) with onclick handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-036",
@@ -933,7 +968,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Data URI containing script tag"
+    "rationale": "Data URI containing script tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-037",
@@ -960,7 +996,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Base64 data URI hiding script tag"
+    "rationale": "Base64 data URI hiding script tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-038",
@@ -987,7 +1024,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "VBScript protocol handler (IE-specific)"
+    "rationale": "VBScript protocol handler (IE-specific)",
+    "intent": "false_positive"
   },
   {
     "id": "xss-039",
@@ -1014,7 +1052,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Form action with javascript: protocol"
+    "rationale": "Form action with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-040",
@@ -1041,7 +1080,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Meta refresh redirect to javascript: URL"
+    "rationale": "Meta refresh redirect to javascript: URL",
+    "intent": "false_positive"
   },
   {
     "id": "xss-041",
@@ -1068,7 +1108,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Object data attribute with javascript: protocol"
+    "rationale": "Object data attribute with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-042",
@@ -1094,7 +1135,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Anchor with safe relative URL"
+    "rationale": "Anchor with safe relative URL",
+    "intent": "false_negative"
   },
   {
     "id": "xss-043",
@@ -1120,7 +1162,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Data URI for legitimate image data"
+    "rationale": "Data URI for legitimate image data",
+    "intent": "false_negative"
   },
   {
     "id": "xss-044",
@@ -1141,7 +1184,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "No javascript: hrefs exist in server.js nav links"
+    "rationale": "No javascript: hrefs exist in server.js nav links",
+    "intent": "false_positive"
   },
   {
     "id": "xss-045",
@@ -1168,7 +1212,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "HTML decimal entities spelling \"alert\""
+    "rationale": "HTML decimal entities spelling \"alert\"",
+    "intent": "false_positive"
   },
   {
     "id": "xss-046",
@@ -1195,7 +1240,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "HTML hex entities spelling \"alert\""
+    "rationale": "HTML hex entities spelling \"alert\"",
+    "intent": "false_positive"
   },
   {
     "id": "xss-047",
@@ -1222,7 +1268,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "HTML entities without trailing semicolons"
+    "rationale": "HTML entities without trailing semicolons",
+    "intent": "false_positive"
   },
   {
     "id": "xss-048",
@@ -1249,7 +1296,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "URL-encoded character in javascript: URI"
+    "rationale": "URL-encoded character in javascript: URI",
+    "intent": "false_positive"
   },
   {
     "id": "xss-049",
@@ -1276,7 +1324,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Double URL encoding to bypass single-decode filters"
+    "rationale": "Double URL encoding to bypass single-decode filters",
+    "intent": "false_positive"
   },
   {
     "id": "xss-050",
@@ -1303,7 +1352,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Unicode escape sequence for \"a\" in alert"
+    "rationale": "Unicode escape sequence for \"a\" in alert",
+    "intent": "false_positive"
   },
   {
     "id": "xss-051",
@@ -1330,7 +1380,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Every character of alert as Unicode escape"
+    "rationale": "Every character of alert as Unicode escape",
+    "intent": "false_positive"
   },
   {
     "id": "xss-052",
@@ -1357,7 +1408,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Full entity encoding of javascript: protocol"
+    "rationale": "Full entity encoding of javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-053",
@@ -1384,7 +1436,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "UTF-7 encoding to bypass UTF-8 filters"
+    "rationale": "UTF-7 encoding to bypass UTF-8 filters",
+    "intent": "false_positive"
   },
   {
     "id": "xss-054",
@@ -1411,7 +1464,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Zero-padded HTML entities spelling alert"
+    "rationale": "Zero-padded HTML entities spelling alert",
+    "intent": "false_positive"
   },
   {
     "id": "xss-055",
@@ -1438,7 +1492,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Tab character entity inside javascript: href"
+    "rationale": "Tab character entity inside javascript: href",
+    "intent": "false_positive"
   },
   {
     "id": "xss-056",
@@ -1465,7 +1520,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Percent-encoded colon in javascript: protocol"
+    "rationale": "Percent-encoded colon in javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-057",
@@ -1492,7 +1548,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Octal character escapes for alert"
+    "rationale": "Octal character escapes for alert",
+    "intent": "false_positive"
   },
   {
     "id": "xss-058",
@@ -1518,7 +1575,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "HTML entity for copyright symbol is safe"
+    "rationale": "HTML entity for copyright symbol is safe",
+    "intent": "false_negative"
   },
   {
     "id": "xss-059",
@@ -1544,7 +1602,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "URL encoding for space in query parameter"
+    "rationale": "URL encoding for space in query parameter",
+    "intent": "false_negative"
   },
   {
     "id": "xss-060",
@@ -1565,7 +1624,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "No HTML entity encoded strings exist in server.js"
+    "rationale": "No HTML entity encoded strings exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "xss-061",
@@ -1592,7 +1652,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Mixed case to bypass case-sensitive filters"
+    "rationale": "Mixed case to bypass case-sensitive filters",
+    "intent": "false_positive"
   },
   {
     "id": "xss-062",
@@ -1619,7 +1680,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "All uppercase SCRIPT tag"
+    "rationale": "All uppercase SCRIPT tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-063",
@@ -1646,7 +1708,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Null byte injection to break filter matching"
+    "rationale": "Null byte injection to break filter matching",
+    "intent": "false_positive"
   },
   {
     "id": "xss-064",
@@ -1673,7 +1736,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Nested script tags surviving single-pass strip"
+    "rationale": "Nested script tags surviving single-pass strip",
+    "intent": "false_positive"
   },
   {
     "id": "xss-065",
@@ -1700,7 +1764,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Comment insertion to break keyword matching"
+    "rationale": "Comment insertion to break keyword matching",
+    "intent": "false_positive"
   },
   {
     "id": "xss-066",
@@ -1727,7 +1792,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "HTML comment breaking script tag parsing"
+    "rationale": "HTML comment breaking script tag parsing",
+    "intent": "false_positive"
   },
   {
     "id": "xss-067",
@@ -1754,7 +1820,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Slash between tag name and attribute"
+    "rationale": "Slash between tag name and attribute",
+    "intent": "false_positive"
   },
   {
     "id": "xss-068",
@@ -1781,7 +1848,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Double angle bracket confusing parser"
+    "rationale": "Double angle bracket confusing parser",
+    "intent": "false_positive"
   },
   {
     "id": "xss-069",
@@ -1808,7 +1876,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Tagged template literal replacing parentheses"
+    "rationale": "Tagged template literal replacing parentheses",
+    "intent": "false_positive"
   },
   {
     "id": "xss-070",
@@ -1835,7 +1904,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Assign onerror then throw to trigger it"
+    "rationale": "Assign onerror then throw to trigger it",
+    "intent": "false_positive"
   },
   {
     "id": "xss-071",
@@ -1862,7 +1932,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Prototype chain to access Function constructor"
+    "rationale": "Prototype chain to access Function constructor",
+    "intent": "false_positive"
   },
   {
     "id": "xss-072",
@@ -1889,7 +1960,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Char code construction of alert(1) string"
+    "rationale": "Char code construction of alert(1) string",
+    "intent": "false_positive"
   },
   {
     "id": "xss-073",
@@ -1916,7 +1988,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Base64 decode of alert(1) passed to eval"
+    "rationale": "Base64 decode of alert(1) passed to eval",
+    "intent": "false_positive"
   },
   {
     "id": "xss-074",
@@ -1943,7 +2016,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "prompt() as alternative to alert()"
+    "rationale": "prompt() as alternative to alert()",
+    "intent": "false_positive"
   },
   {
     "id": "xss-075",
@@ -1970,7 +2044,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "confirm() as alternative to alert()"
+    "rationale": "confirm() as alternative to alert()",
+    "intent": "false_positive"
   },
   {
     "id": "xss-076",
@@ -1997,7 +2072,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "SVG onload with entity-encoded function name"
+    "rationale": "SVG onload with entity-encoded function name",
+    "intent": "false_positive"
   },
   {
     "id": "xss-077",
@@ -2024,7 +2100,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Mixed decimal and hex entities in javascript:"
+    "rationale": "Mixed decimal and hex entities in javascript:",
+    "intent": "false_positive"
   },
   {
     "id": "xss-078",
@@ -2050,7 +2127,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Standard HTML comment is safe"
+    "rationale": "Standard HTML comment is safe",
+    "intent": "false_negative"
   },
   {
     "id": "xss-079",
@@ -2076,7 +2154,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "Template literal without script context"
+    "rationale": "Template literal without script context",
+    "intent": "false_negative"
   },
   {
     "id": "xss-080",
@@ -2097,7 +2176,8 @@
       "filter_evasion",
       "XSS-06"
     ],
-    "rationale": "No nested script tag evasion exists in server.js"
+    "rationale": "No nested script tag evasion exists in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "xss-081",
@@ -2124,7 +2204,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "document.write with unvalidated location.hash"
+    "rationale": "document.write with unvalidated location.hash",
+    "intent": "false_positive"
   },
   {
     "id": "xss-082",
@@ -2151,7 +2232,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "document.write with unvalidated user input"
+    "rationale": "document.write with unvalidated user input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-083",
@@ -2178,7 +2260,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "innerHTML set to unvalidated user input"
+    "rationale": "innerHTML set to unvalidated user input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-084",
@@ -2205,7 +2288,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "innerHTML with unsanitized template interpolation"
+    "rationale": "innerHTML with unsanitized template interpolation",
+    "intent": "false_positive"
   },
   {
     "id": "xss-085",
@@ -2232,7 +2316,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "outerHTML set to unvalidated input"
+    "rationale": "outerHTML set to unvalidated input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-086",
@@ -2259,7 +2344,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "eval() with unvalidated user input"
+    "rationale": "eval() with unvalidated user input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-087",
@@ -2286,7 +2372,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "setTimeout with string arg allows code injection"
+    "rationale": "setTimeout with string arg allows code injection",
+    "intent": "false_positive"
   },
   {
     "id": "xss-088",
@@ -2313,7 +2400,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "setInterval with string arg allows code injection"
+    "rationale": "setInterval with string arg allows code injection",
+    "intent": "false_positive"
   },
   {
     "id": "xss-089",
@@ -2340,7 +2428,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "Function constructor executes arbitrary code"
+    "rationale": "Function constructor executes arbitrary code",
+    "intent": "false_positive"
   },
   {
     "id": "xss-090",
@@ -2367,7 +2456,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "Location assignment enables javascript: navigation"
+    "rationale": "Location assignment enables javascript: navigation",
+    "intent": "false_positive"
   },
   {
     "id": "xss-091",
@@ -2394,7 +2484,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "Location href set to unvalidated input"
+    "rationale": "Location href set to unvalidated input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-092",
@@ -2421,7 +2512,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "insertAdjacentHTML injects raw HTML from input"
+    "rationale": "insertAdjacentHTML injects raw HTML from input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-093",
@@ -2448,7 +2540,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "jQuery .html() sets innerHTML from input"
+    "rationale": "jQuery .html() sets innerHTML from input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-094",
@@ -2474,7 +2567,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "textContent is a safe DOM property (no HTML parsing)"
+    "rationale": "textContent is a safe DOM property (no HTML parsing)",
+    "intent": "false_negative"
   },
   {
     "id": "xss-095",
@@ -2500,7 +2594,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "Arrow function callback, not string argument"
+    "rationale": "Arrow function callback, not string argument",
+    "intent": "false_negative"
   },
   {
     "id": "xss-096",
@@ -2521,7 +2616,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "No document.write calls exist in server.js (it is server-side Node.js)"
+    "rationale": "No document.write calls exist in server.js (it is server-side Node.js)",
+    "intent": "false_positive"
   },
   {
     "id": "xss-097",
@@ -2542,7 +2638,8 @@
       "dom_based",
       "XSS-07"
     ],
-    "rationale": "No innerHTML assignments exist in server.js"
+    "rationale": "No innerHTML assignments exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "xss-098",
@@ -2569,7 +2666,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "User-supplied name containing script tag echoed without sanitization"
+    "rationale": "User-supplied name containing script tag echoed without sanitization",
+    "intent": "false_positive"
   },
   {
     "id": "xss-099",
@@ -2596,7 +2694,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "Stored XSS via img onerror in comment display"
+    "rationale": "Stored XSS via img onerror in comment display",
+    "intent": "false_positive"
   },
   {
     "id": "xss-100",
@@ -2623,7 +2722,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "Stored XSS via SVG onload in profile bio rendering"
+    "rationale": "Stored XSS via SVG onload in profile bio rendering",
+    "intent": "false_positive"
   },
   {
     "id": "xss-101",
@@ -2643,7 +2743,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "The /api/echo endpoint returns JSON, not rendered HTML"
+    "rationale": "The /api/echo endpoint returns JSON, not rendered HTML",
+    "intent": "false_negative"
   },
   {
     "id": "xss-102",
@@ -2669,7 +2770,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "HTML entity escaping prevents stored XSS"
+    "rationale": "HTML entity escaping prevents stored XSS",
+    "intent": "false_negative"
   },
   {
     "id": "xss-103",
@@ -2690,7 +2792,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "The /form route does not concatenate req.body into HTML"
+    "rationale": "The /form route does not concatenate req.body into HTML",
+    "intent": "false_positive"
   },
   {
     "id": "xss-104",
@@ -2717,7 +2820,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "Base tag hijacks all relative URLs to attacker domain"
+    "rationale": "Base tag hijacks all relative URLs to attacker domain",
+    "intent": "false_positive"
   },
   {
     "id": "xss-105",
@@ -2744,7 +2848,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "Script tag with fabricated nonce attribute"
+    "rationale": "Script tag with fabricated nonce attribute",
+    "intent": "false_positive"
   },
   {
     "id": "xss-106",
@@ -2771,7 +2876,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "JSONP endpoint with attacker-controlled callback name"
+    "rationale": "JSONP endpoint with attacker-controlled callback name",
+    "intent": "false_positive"
   },
   {
     "id": "xss-107",
@@ -2798,7 +2904,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "Preload link to external script resource"
+    "rationale": "Preload link to external script resource",
+    "intent": "false_positive"
   },
   {
     "id": "xss-108",
@@ -2825,7 +2932,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "CSS @import from external domain for data exfiltration"
+    "rationale": "CSS @import from external domain for data exfiltration",
+    "intent": "false_positive"
   },
   {
     "id": "xss-109",
@@ -2851,7 +2959,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "Base tag with same-origin root is safe"
+    "rationale": "Base tag with same-origin root is safe",
+    "intent": "false_negative"
   },
   {
     "id": "xss-110",
@@ -2872,7 +2981,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "server.js does not set any CSP headers"
+    "rationale": "server.js does not set any CSP headers",
+    "intent": "false_positive"
   },
   {
     "id": "xss-111",
@@ -2899,7 +3009,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "Angular template expression injection via constructor chain"
+    "rationale": "Angular template expression injection via constructor chain",
+    "intent": "false_positive"
   },
   {
     "id": "xss-112",
@@ -2926,7 +3037,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "Angular ng-bind-html with unsanitized user input"
+    "rationale": "Angular ng-bind-html with unsanitized user input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-113",
@@ -2953,7 +3065,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "dangerouslySetInnerHTML with unvalidated user input"
+    "rationale": "dangerouslySetInnerHTML with unvalidated user input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-114",
@@ -2980,7 +3093,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "Vue v-html renders raw HTML from user input"
+    "rationale": "Vue v-html renders raw HTML from user input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-115",
@@ -3007,7 +3121,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "$sce.trustAsHtml bypasses Angular sanitization"
+    "rationale": "$sce.trustAsHtml bypasses Angular sanitization",
+    "intent": "false_positive"
   },
   {
     "id": "xss-116",
@@ -3034,7 +3149,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "jQuery .append() with raw user input"
+    "rationale": "jQuery .append() with raw user input",
+    "intent": "false_positive"
   },
   {
     "id": "xss-117",
@@ -3060,7 +3176,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "React text children are auto-escaped"
+    "rationale": "React text children are auto-escaped",
+    "intent": "false_negative"
   },
   {
     "id": "xss-118",
@@ -3086,7 +3203,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "Vue v-text auto-escapes (unlike v-html)"
+    "rationale": "Vue v-text auto-escapes (unlike v-html)",
+    "intent": "false_negative"
   },
   {
     "id": "xss-119",
@@ -3107,7 +3225,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "Demo app is vanilla Node.js with no Angular framework"
+    "rationale": "Demo app is vanilla Node.js with no Angular framework",
+    "intent": "false_positive"
   },
   {
     "id": "xss-120",
@@ -3128,7 +3247,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "Demo app has no React; dangerouslySetInnerHTML does not exist"
+    "rationale": "Demo app has no React; dangerouslySetInnerHTML does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "xss-121",
@@ -3155,7 +3275,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG element with onload event handler"
+    "rationale": "SVG element with onload event handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-122",
@@ -3182,7 +3303,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG onload exfiltrating document.domain"
+    "rationale": "SVG onload exfiltrating document.domain",
+    "intent": "false_positive"
   },
   {
     "id": "xss-123",
@@ -3209,7 +3331,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "Script tag within SVG namespace"
+    "rationale": "Script tag within SVG namespace",
+    "intent": "false_positive"
   },
   {
     "id": "xss-124",
@@ -3236,7 +3359,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "foreignObject allowing HTML body with onload"
+    "rationale": "foreignObject allowing HTML body with onload",
+    "intent": "false_positive"
   },
   {
     "id": "xss-125",
@@ -3263,7 +3387,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG animate changing href to javascript: URL"
+    "rationale": "SVG animate changing href to javascript: URL",
+    "intent": "false_positive"
   },
   {
     "id": "xss-126",
@@ -3290,7 +3415,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG set element changing href to javascript:"
+    "rationale": "SVG set element changing href to javascript:",
+    "intent": "false_positive"
   },
   {
     "id": "xss-127",
@@ -3317,7 +3443,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG anchor with xlink:href javascript: protocol"
+    "rationale": "SVG anchor with xlink:href javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-128",
@@ -3344,7 +3471,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG use element loading external SVG with onload"
+    "rationale": "SVG use element loading external SVG with onload",
+    "intent": "false_positive"
   },
   {
     "id": "xss-129",
@@ -3371,7 +3499,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG image with xlink:href javascript: protocol"
+    "rationale": "SVG image with xlink:href javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-130",
@@ -3398,7 +3527,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "Onload handler on SVG g (group) element"
+    "rationale": "Onload handler on SVG g (group) element",
+    "intent": "false_positive"
   },
   {
     "id": "xss-131",
@@ -3425,7 +3555,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "Script tag inside SVG desc element"
+    "rationale": "Script tag inside SVG desc element",
+    "intent": "false_positive"
   },
   {
     "id": "xss-132",
@@ -3452,7 +3583,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG filter feImage with javascript: URL"
+    "rationale": "SVG filter feImage with javascript: URL",
+    "intent": "false_positive"
   },
   {
     "id": "xss-133",
@@ -3479,7 +3611,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "MathML element with xlink:href javascript:"
+    "rationale": "MathML element with xlink:href javascript:",
+    "intent": "false_positive"
   },
   {
     "id": "xss-134",
@@ -3505,7 +3638,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG with simple rect element, no event handlers"
+    "rationale": "SVG with simple rect element, no event handlers",
+    "intent": "false_negative"
   },
   {
     "id": "xss-135",
@@ -3531,7 +3665,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "SVG animate with safe opacity animation values"
+    "rationale": "SVG animate with safe opacity animation values",
+    "intent": "false_negative"
   },
   {
     "id": "xss-136",
@@ -3552,7 +3687,8 @@
       "svg_based",
       "XSS-11"
     ],
-    "rationale": "No SVG foreignObject element exists in any demo-app route"
+    "rationale": "No SVG foreignObject element exists in any demo-app route",
+    "intent": "false_positive"
   },
   {
     "id": "xss-137",
@@ -3579,7 +3715,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Noscript content parsed differently in innerHTML context"
+    "rationale": "Noscript content parsed differently in innerHTML context",
+    "intent": "false_positive"
   },
   {
     "id": "xss-138",
@@ -3606,7 +3743,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Style tag closing followed by script injection"
+    "rationale": "Style tag closing followed by script injection",
+    "intent": "false_positive"
   },
   {
     "id": "xss-139",
@@ -3633,7 +3771,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Form with javascript: action inside table (parser quirk)"
+    "rationale": "Form with javascript: action inside table (parser quirk)",
+    "intent": "false_positive"
   },
   {
     "id": "xss-140",
@@ -3660,7 +3799,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Breaking out of textarea context"
+    "rationale": "Breaking out of textarea context",
+    "intent": "false_positive"
   },
   {
     "id": "xss-141",
@@ -3687,7 +3827,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Breaking out of title element context"
+    "rationale": "Breaking out of title element context",
+    "intent": "false_positive"
   },
   {
     "id": "xss-142",
@@ -3714,7 +3855,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Deep namespace confusion causing parser mutation"
+    "rationale": "Deep namespace confusion causing parser mutation",
+    "intent": "false_positive"
   },
   {
     "id": "xss-143",
@@ -3741,7 +3883,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "SVG style element parsed differently than HTML style"
+    "rationale": "SVG style element parsed differently than HTML style",
+    "intent": "false_positive"
   },
   {
     "id": "xss-144",
@@ -3768,7 +3911,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Select element parser removes option wrapper, exposing img"
+    "rationale": "Select element parser removes option wrapper, exposing img",
+    "intent": "false_positive"
   },
   {
     "id": "xss-145",
@@ -3794,7 +3938,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Noscript with safe paragraph text content"
+    "rationale": "Noscript with safe paragraph text content",
+    "intent": "false_negative"
   },
   {
     "id": "xss-146",
@@ -3820,7 +3965,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Style tag with safe CSS properties only"
+    "rationale": "Style tag with safe CSS properties only",
+    "intent": "false_negative"
   },
   {
     "id": "xss-147",
@@ -3841,7 +3987,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "No noscript with img onerror exists in any route"
+    "rationale": "No noscript with img onerror exists in any route",
+    "intent": "false_positive"
   },
   {
     "id": "xss-148",
@@ -3862,7 +4009,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "No title breakout pattern exists in server.js"
+    "rationale": "No title breakout pattern exists in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "xss-149",
@@ -3889,7 +4037,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "URL parameter directly concatenated into HTML response"
+    "rationale": "URL parameter directly concatenated into HTML response",
+    "intent": "false_positive"
   },
   {
     "id": "xss-150",
@@ -3916,7 +4065,8 @@
       "stored_xss",
       "XSS-08"
     ],
-    "rationale": "JSON.stringify output in script context without escaping"
+    "rationale": "JSON.stringify output in script context without escaping",
+    "intent": "false_positive"
   },
   {
     "id": "xss-151",
@@ -3943,7 +4093,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "Object element loading external HTML page"
+    "rationale": "Object element loading external HTML page",
+    "intent": "false_positive"
   },
   {
     "id": "xss-152",
@@ -3970,7 +4121,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "ES module dynamic import from external domain"
+    "rationale": "ES module dynamic import from external domain",
+    "intent": "false_positive"
   },
   {
     "id": "xss-153",
@@ -3997,7 +4149,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "Handlebars triple-stash outputs raw HTML (no escaping)"
+    "rationale": "Handlebars triple-stash outputs raw HTML (no escaping)",
+    "intent": "false_positive"
   },
   {
     "id": "xss-154",
@@ -4024,7 +4177,8 @@
       "framework_specific",
       "XSS-10"
     ],
-    "rationale": "EJS <%- %> tag outputs raw unescaped HTML"
+    "rationale": "EJS <%- %> tag outputs raw unescaped HTML",
+    "intent": "false_positive"
   },
   {
     "id": "xss-155",
@@ -4051,7 +4205,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Breaking out of xmp element context"
+    "rationale": "Breaking out of xmp element context",
+    "intent": "false_positive"
   },
   {
     "id": "xss-156",
@@ -4078,7 +4233,8 @@
       "mutation_xss",
       "XSS-12"
     ],
-    "rationale": "Iframe srcdoc with inline script (bypasses src restrictions)"
+    "rationale": "Iframe srcdoc with inline script (bypasses src restrictions)",
+    "intent": "false_positive"
   },
   {
     "id": "xss-157",
@@ -4105,7 +4261,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "CSS background-image with javascript: protocol"
+    "rationale": "CSS background-image with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-158",
@@ -4132,7 +4289,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "CSS expression() for code execution (IE-specific)"
+    "rationale": "CSS expression() for code execution (IE-specific)",
+    "intent": "false_positive"
   },
   {
     "id": "xss-159",
@@ -4159,7 +4317,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Mozilla XBL binding for arbitrary code execution"
+    "rationale": "Mozilla XBL binding for arbitrary code execution",
+    "intent": "false_positive"
   },
   {
     "id": "xss-160",
@@ -4186,7 +4345,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "IE behavior property loading HTC component"
+    "rationale": "IE behavior property loading HTC component",
+    "intent": "false_positive"
   },
   {
     "id": "xss-161",
@@ -4213,7 +4373,8 @@
       "csp_bypass",
       "XSS-09"
     ],
-    "rationale": "CSS @import from external domain for exfiltration"
+    "rationale": "CSS @import from external domain for exfiltration",
+    "intent": "false_positive"
   },
   {
     "id": "xss-162",
@@ -4240,7 +4401,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "CSS unicode escapes spelling \"expression\""
+    "rationale": "CSS unicode escapes spelling \"expression\"",
+    "intent": "false_positive"
   },
   {
     "id": "xss-163",
@@ -4267,7 +4429,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Legacy IE dynsrc attribute with javascript: protocol"
+    "rationale": "Legacy IE dynsrc attribute with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-164",
@@ -4294,7 +4457,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Legacy lowsrc attribute with javascript: protocol"
+    "rationale": "Legacy lowsrc attribute with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-165",
@@ -4321,7 +4485,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Deprecated bgsound element with javascript: src"
+    "rationale": "Deprecated bgsound element with javascript: src",
+    "intent": "false_positive"
   },
   {
     "id": "xss-166",
@@ -4348,7 +4513,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Stylesheet link with javascript: protocol"
+    "rationale": "Stylesheet link with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-167",
@@ -4375,7 +4541,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Legacy table background attribute with javascript:"
+    "rationale": "Legacy table background attribute with javascript:",
+    "intent": "false_positive"
   },
   {
     "id": "xss-168",
@@ -4402,7 +4569,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Button formaction with javascript: protocol"
+    "rationale": "Button formaction with javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-169",
@@ -4429,7 +4597,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Image input type with onerror handler"
+    "rationale": "Image input type with onerror handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-170",
@@ -4456,7 +4625,8 @@
       "protocol_handlers",
       "XSS-04"
     ],
-    "rationale": "Meta refresh with data: URI containing script"
+    "rationale": "Meta refresh with data: URI containing script",
+    "intent": "false_positive"
   },
   {
     "id": "xss-171",
@@ -4483,7 +4653,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Breaking out of attribute value to inject script"
+    "rationale": "Breaking out of attribute value to inject script",
+    "intent": "false_positive"
   },
   {
     "id": "xss-172",
@@ -4510,7 +4681,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Anchor tag with onmouseover event handler"
+    "rationale": "Anchor tag with onmouseover event handler",
+    "intent": "false_positive"
   },
   {
     "id": "xss-173",
@@ -4537,7 +4709,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Onerror handler stealing cookies via img src redirect"
+    "rationale": "Onerror handler stealing cookies via img src redirect",
+    "intent": "false_positive"
   },
   {
     "id": "xss-174",
@@ -4564,7 +4737,8 @@
       "attribute_injection",
       "XSS-02"
     ],
-    "rationale": "Backtick-quoted event handler value"
+    "rationale": "Backtick-quoted event handler value",
+    "intent": "false_positive"
   },
   {
     "id": "xss-175",
@@ -4591,7 +4765,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Tab character between javascript: and function call"
+    "rationale": "Tab character between javascript: and function call",
+    "intent": "false_positive"
   },
   {
     "id": "xss-176",
@@ -4618,7 +4793,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Newline entity inside javascript: protocol"
+    "rationale": "Newline entity inside javascript: protocol",
+    "intent": "false_positive"
   },
   {
     "id": "xss-177",
@@ -4645,7 +4821,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "CDATA section containing script tag"
+    "rationale": "CDATA section containing script tag",
+    "intent": "false_positive"
   },
   {
     "id": "xss-178",
@@ -4672,7 +4849,8 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Unclosed HTML comment breaking script parsing"
+    "rationale": "Unclosed HTML comment breaking script parsing",
+    "intent": "false_positive"
   },
   {
     "id": "xss-179",
@@ -4699,6 +4877,7 @@
       "encoding_bypass",
       "XSS-05"
     ],
-    "rationale": "Overlong UTF-8 encoding to bypass filters"
+    "rationale": "Overlong UTF-8 encoding to bypass filters",
+    "intent": "false_positive"
   }
 ]

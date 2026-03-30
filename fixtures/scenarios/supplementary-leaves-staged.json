@@ -23,7 +23,8 @@
       "lcp",
       "PERF-02"
     ],
-    "rationale": "Unoptimized 1920x1080 image in hero — LCP element exceeds size budget"
+    "rationale": "Unoptimized 1920x1080 image in hero — LCP element exceeds size budget",
+    "intent": "false_positive"
   },
   {
     "id": "sup-perf-002",
@@ -49,7 +50,8 @@
       "lcp",
       "PERF-02"
     ],
-    "rationale": "Background image reference in render-blocking CSS delays LCP"
+    "rationale": "Background image reference in render-blocking CSS delays LCP",
+    "intent": "false_positive"
   },
   {
     "id": "sup-perf-003",
@@ -75,7 +77,8 @@
       "PERF-02",
       "control"
     ],
-    "rationale": "Lazy-loaded small image does not affect LCP"
+    "rationale": "Lazy-loaded small image does not affect LCP",
+    "intent": "false_negative"
   },
   {
     "id": "sup-perf-004",
@@ -101,7 +104,8 @@
       "cls",
       "PERF-03"
     ],
-    "rationale": "Image without width/height causes CLS when it loads"
+    "rationale": "Image without width/height causes CLS when it loads",
+    "intent": "false_positive"
   },
   {
     "id": "sup-perf-005",
@@ -126,7 +130,8 @@
       "cls",
       "PERF-03"
     ],
-    "rationale": "Empty div for dynamic content — structural check passes, CLS is runtime"
+    "rationale": "Empty div for dynamic content — structural check passes, CLS is runtime",
+    "intent": "false_negative"
   },
   {
     "id": "sup-perf-006",
@@ -146,7 +151,8 @@
       "PERF-03",
       "control"
     ],
-    "rationale": "Logo image has explicit dimensions — no layout shift"
+    "rationale": "Logo image has explicit dimensions — no layout shift",
+    "intent": "false_negative"
   },
   {
     "id": "sup-perf-007",
@@ -171,7 +177,8 @@
       "memory_leak",
       "PERF-05"
     ],
-    "rationale": "Unbounded global array — structural check passes, runtime will OOM"
+    "rationale": "Unbounded global array — structural check passes, runtime will OOM",
+    "intent": "false_negative"
   },
   {
     "id": "sup-perf-008",
@@ -196,7 +203,8 @@
       "memory_leak",
       "PERF-05"
     ],
-    "rationale": "EventEmitter without listener cleanup — memory grows per connection"
+    "rationale": "EventEmitter without listener cleanup — memory grows per connection",
+    "intent": "false_negative"
   },
   {
     "id": "sup-perf-009",
@@ -221,7 +229,8 @@
       "n_plus_1",
       "PERF-06"
     ],
-    "rationale": "Comment documents N+1 pattern — structural check passes, performance is runtime"
+    "rationale": "Comment documents N+1 pattern — structural check passes, performance is runtime",
+    "intent": "false_negative"
   },
   {
     "id": "sup-perf-010",
@@ -246,7 +255,8 @@
       "n_plus_1",
       "PERF-06"
     ],
-    "rationale": "Quadratic query pattern documented in code — structural check only"
+    "rationale": "Quadratic query pattern documented in code — structural check only",
+    "intent": "false_negative"
   },
   {
     "id": "sup-ser-011",
@@ -275,7 +285,8 @@
       "circular_reference",
       "SER-07"
     ],
-    "rationale": "Circular ref caught by try/catch — response still contains status"
+    "rationale": "Circular ref caught by try/catch — response still contains status",
+    "intent": "false_negative"
   },
   {
     "id": "sup-ser-012",
@@ -304,7 +315,8 @@
       "circular_reference",
       "SER-07"
     ],
-    "rationale": "Uncaught circular ref throws TypeError — endpoint crashes, no response"
+    "rationale": "Uncaught circular ref throws TypeError — endpoint crashes, no response",
+    "intent": "false_positive"
   },
   {
     "id": "sup-ser-013",
@@ -330,7 +342,8 @@
       "SER-07",
       "control"
     ],
-    "rationale": "Safe serializer handles circular references gracefully"
+    "rationale": "Safe serializer handles circular references gracefully",
+    "intent": "false_negative"
   },
   {
     "id": "sup-int-014",
@@ -365,7 +378,8 @@
       "http_db",
       "I-04"
     ],
-    "rationale": "HTTP returns hardcoded items (passes), but DB column renamed (fails) — stale response masks schema change"
+    "rationale": "HTTP returns hardcoded items (passes), but DB column renamed (fails) — stale response masks schema change",
+    "intent": "false_positive"
   },
   {
     "id": "sup-int-015",
@@ -400,7 +414,8 @@
       "http_db",
       "I-04"
     ],
-    "rationale": "HTTP still serves data (cached/hardcoded), DB column renamed — cross-surface divergence"
+    "rationale": "HTTP still serves data (cached/hardcoded), DB column renamed — cross-surface divergence",
+    "intent": "false_positive"
   },
   {
     "id": "sup-int-016",
@@ -430,7 +445,8 @@
       "I-04",
       "control"
     ],
-    "rationale": "API and DB both consistent — no cross-surface divergence"
+    "rationale": "API and DB both consistent — no cross-surface divergence",
+    "intent": "false_negative"
   },
   {
     "id": "sup-int-017",
@@ -465,7 +481,8 @@
       "db_http",
       "I-05"
     ],
-    "rationale": "DB schema has id column (passes), but API now serializes as item_id (fails)"
+    "rationale": "DB schema has id column (passes), but API now serializes as item_id (fails)",
+    "intent": "false_positive"
   },
   {
     "id": "sup-int-018",
@@ -501,7 +518,8 @@
       "db_http",
       "I-05"
     ],
-    "rationale": "DB column is boolean, API serializes as string \"true\" — type mismatch across surfaces"
+    "rationale": "DB column is boolean, API serializes as string \"true\" — type mismatch across surfaces",
+    "intent": "false_positive"
   },
   {
     "id": "sup-int-019",
@@ -532,7 +550,8 @@
       "grounding_browser",
       "I-13"
     ],
-    "rationale": "Source has footer (grounding passes), but JS removes it at runtime (browser would fail)"
+    "rationale": "Source has footer (grounding passes), but JS removes it at runtime (browser would fail)",
+    "intent": "false_negative"
   },
   {
     "id": "sup-int-020",
@@ -557,7 +576,8 @@
       "grounding_browser",
       "I-13"
     ],
-    "rationale": "Element in source (grounding passes) but marked async — browser may not see it at check time"
+    "rationale": "Element in source (grounding passes) but marked async — browser may not see it at check time",
+    "intent": "false_negative"
   },
   {
     "id": "sup-int-021",
@@ -592,7 +612,8 @@
       "http_db_timing",
       "I-14"
     ],
-    "rationale": "API serves hardcoded response (passes), DB still has settings table — but in production, cache staleness is invisible"
+    "rationale": "API serves hardcoded response (passes), DB still has settings table — but in production, cache staleness is invisible",
+    "intent": "false_negative"
   },
   {
     "id": "sup-int-022",
@@ -627,7 +648,8 @@
       "http_db_timing",
       "I-14"
     ],
-    "rationale": "HTTP passes (health unaffected), DB fails (column renamed from value to payload)"
+    "rationale": "HTTP passes (health unaffected), DB fails (column renamed from value to payload)",
+    "intent": "false_positive"
   },
   {
     "id": "sup-int-023",
@@ -658,7 +680,8 @@
       "css_invariant",
       "I-15"
     ],
-    "rationale": "CSS predicate passes (display: block), but content predicate expects display: none — side effect of CSS change"
+    "rationale": "CSS predicate passes (display: block), but content predicate expects display: none — side effect of CSS change",
+    "intent": "false_positive"
   },
   {
     "id": "sup-int-024",
@@ -684,7 +707,8 @@
       "css_invariant",
       "I-15"
     ],
-    "rationale": "CSS predicate passes — but hidden content now visible may break invariants"
+    "rationale": "CSS predicate passes — but hidden content now visible may break invariants",
+    "intent": "false_negative"
   },
   {
     "id": "sup-int-025",
@@ -724,7 +748,8 @@
       "system_invariant",
       "I-16"
     ],
-    "rationale": "HTTP has \"active\", DB has status column — both pass, but API status enum differs from DB status enum"
+    "rationale": "HTTP has \"active\", DB has status column — both pass, but API status enum differs from DB status enum",
+    "intent": "false_negative"
   },
   {
     "id": "sup-int-026",
@@ -759,6 +784,7 @@
       "system_invariant",
       "I-16"
     ],
-    "rationale": "Both predicates pass individually, but config says 8080, env says 4000, code defaults 3000 — three-way disagreement"
+    "rationale": "Both predicates pass individually, but config says 8080, env says 4000, code defaults 3000 — three-way disagreement",
+    "intent": "false_negative"
   }
 ]

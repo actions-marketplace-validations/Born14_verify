@@ -15,7 +15,8 @@
       "infrastructure",
       "resource_exists"
     ],
-    "rationale": "aws_db_instance.production is in the terraform state"
+    "rationale": "aws_db_instance.production is in the terraform state",
+    "intent": "false_negative"
   },
   {
     "id": "inf-002",
@@ -33,7 +34,8 @@
       "infrastructure",
       "resource_exists"
     ],
-    "rationale": "aws_s3_bucket.assets is in the terraform state"
+    "rationale": "aws_s3_bucket.assets is in the terraform state",
+    "intent": "false_negative"
   },
   {
     "id": "inf-003",
@@ -51,7 +53,8 @@
       "infrastructure",
       "resource_exists"
     ],
-    "rationale": "aws_security_group.web is in the terraform state"
+    "rationale": "aws_security_group.web is in the terraform state",
+    "intent": "false_negative"
   },
   {
     "id": "inf-004",
@@ -69,7 +72,8 @@
       "infrastructure",
       "resource_exists_fail"
     ],
-    "rationale": "aws_lambda_function.missing is not in terraform state"
+    "rationale": "aws_lambda_function.missing is not in terraform state",
+    "intent": "false_positive"
   },
   {
     "id": "inf-005",
@@ -87,7 +91,8 @@
       "infrastructure",
       "resource_absent"
     ],
-    "rationale": "Resource does not exist, absent assertion passes"
+    "rationale": "Resource does not exist, absent assertion passes",
+    "intent": "false_negative"
   },
   {
     "id": "inf-006",
@@ -105,7 +110,8 @@
       "infrastructure",
       "resource_absent_fail"
     ],
-    "rationale": "Resource exists but assertion says absent → fail"
+    "rationale": "Resource exists but assertion says absent → fail",
+    "intent": "false_positive"
   },
   {
     "id": "inf-007",
@@ -124,7 +130,8 @@
       "infrastructure",
       "attribute"
     ],
-    "rationale": "DB instance engine is postgres"
+    "rationale": "DB instance engine is postgres",
+    "intent": "false_negative"
   },
   {
     "id": "inf-008",
@@ -143,7 +150,8 @@
       "infrastructure",
       "attribute"
     ],
-    "rationale": "deletion_protection is true"
+    "rationale": "deletion_protection is true",
+    "intent": "false_negative"
   },
   {
     "id": "inf-009",
@@ -162,7 +170,8 @@
       "infrastructure",
       "attribute"
     ],
-    "rationale": "Nested tag attribute via dot notation"
+    "rationale": "Nested tag attribute via dot notation",
+    "intent": "false_negative"
   },
   {
     "id": "inf-010",
@@ -181,7 +190,8 @@
       "infrastructure",
       "attribute"
     ],
-    "rationale": "S3 bucket ACL is private"
+    "rationale": "S3 bucket ACL is private",
+    "intent": "false_negative"
   },
   {
     "id": "inf-011",
@@ -200,7 +210,8 @@
       "infrastructure",
       "attribute"
     ],
-    "rationale": "Security group VPC ID matches"
+    "rationale": "Security group VPC ID matches",
+    "intent": "false_negative"
   },
   {
     "id": "inf-012",
@@ -219,7 +230,8 @@
       "infrastructure",
       "attribute_fail"
     ],
-    "rationale": "Engine is postgres not mysql"
+    "rationale": "Engine is postgres not mysql",
+    "intent": "false_positive"
   },
   {
     "id": "inf-013",
@@ -238,7 +250,8 @@
       "infrastructure",
       "attribute_fail"
     ],
-    "rationale": "Attribute does not exist on resource"
+    "rationale": "Attribute does not exist on resource",
+    "intent": "false_positive"
   },
   {
     "id": "inf-014",
@@ -257,7 +270,8 @@
       "infrastructure",
       "attribute_fail"
     ],
-    "rationale": "Resource does not exist in state"
+    "rationale": "Resource does not exist in state",
+    "intent": "false_positive"
   },
   {
     "id": "inf-015",
@@ -274,7 +288,8 @@
       "infrastructure",
       "manifest"
     ],
-    "rationale": "Terraform state matches the manifest.json baseline"
+    "rationale": "Terraform state matches the manifest.json baseline",
+    "intent": "false_negative"
   },
   {
     "id": "inf-016",
@@ -298,7 +313,8 @@
       "infrastructure",
       "multi"
     ],
-    "rationale": "Both resource existence and attribute value pass"
+    "rationale": "Both resource existence and attribute value pass",
+    "intent": "false_negative"
   },
   {
     "id": "inf-017",
@@ -321,7 +337,8 @@
       "infrastructure",
       "multi_fail"
     ],
-    "rationale": "Second resource does not exist, gate fails"
+    "rationale": "Second resource does not exist, gate fails",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-200",
@@ -340,7 +357,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-201",
@@ -359,7 +377,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-202",
@@ -378,7 +397,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-203",
@@ -397,7 +417,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-204",
@@ -416,7 +437,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-205",
@@ -435,7 +457,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references database but .env has no such reference"
+    "rationale": "config.json references database but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-206",
@@ -454,7 +477,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references port but docker-compose.yml has no such reference"
+    "rationale": "config.json references port but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-207",
@@ -473,7 +497,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-208",
@@ -492,7 +517,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references PORT but docker-compose.yml has no such reference"
+    "rationale": ".env references PORT but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-209",
@@ -511,7 +537,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "init.sql references users but server.js has no such reference"
+    "rationale": "init.sql references users but server.js has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-210",
@@ -530,7 +557,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "init.sql references sessions but config.json has no such reference"
+    "rationale": "init.sql references sessions but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-211",
@@ -549,7 +577,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference"
+    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "i-bolster-212",
@@ -568,6 +597,7 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references /health but config.json has no such reference"
+    "rationale": "server.js references /health but config.json has no such reference",
+    "intent": "false_positive"
   }
 ]

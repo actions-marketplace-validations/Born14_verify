@@ -23,7 +23,8 @@
       "wrong_directory",
       "SF-01"
     ],
-    "rationale": "Assumed: config.json edit affects prod config. Actual: config.prod.json is a separate file — agent edited the wrong environment."
+    "rationale": "Assumed: config.json edit affects prod config. Actual: config.prod.json is a separate file — agent edited the wrong environment.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-dir-002",
@@ -49,7 +50,8 @@
       "wrong_directory",
       "SF-01"
     ],
-    "rationale": "Assumed: .env secret rotation propagates to .env.prod. Actual: .env.prod has its own SECRET_KEY — wrong environment file."
+    "rationale": "Assumed: .env secret rotation propagates to .env.prod. Actual: .env.prod has its own SECRET_KEY — wrong environment file.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-dir-003",
@@ -75,7 +77,8 @@
       "wrong_directory",
       "SF-01"
     ],
-    "rationale": "Coincidental pass — .env already has DEBUG=false. Shows how wrong-file checks can produce false confidence."
+    "rationale": "Coincidental pass — .env already has DEBUG=false. Shows how wrong-file checks can produce false confidence.",
+    "intent": "false_negative"
   },
   {
     "id": "sf-dir-004",
@@ -101,7 +104,8 @@
       "wrong_directory",
       "SF-01"
     ],
-    "rationale": "Assumed: staging feature flag exists in base config. Actual: config.json has no betaSignup field at all."
+    "rationale": "Assumed: staging feature flag exists in base config. Actual: config.json has no betaSignup field at all.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-dir-005",
@@ -122,7 +126,8 @@
       "wrong_directory",
       "SF-01"
     ],
-    "rationale": "Assumed: prod analytics=false reflected in staging. Actual: config.staging.json has analytics=true."
+    "rationale": "Assumed: prod analytics=false reflected in staging. Actual: config.staging.json has analytics=true.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-dir-006",
@@ -149,7 +154,8 @@
       "SF-01",
       "control"
     ],
-    "rationale": "Same-environment check — edit and predicate target the same file. No path mismatch."
+    "rationale": "Same-environment check — edit and predicate target the same file. No path mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "sf-moved-007",
@@ -175,7 +181,8 @@
       "file_moved",
       "SF-02"
     ],
-    "rationale": "Assumed: Dockerfile healthcheck follows route rename. Actual: Dockerfile still has /health — cross-file path mismatch."
+    "rationale": "Assumed: Dockerfile healthcheck follows route rename. Actual: Dockerfile still has /health — cross-file path mismatch.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-moved-008",
@@ -201,7 +208,8 @@
       "file_moved",
       "SF-02"
     ],
-    "rationale": "Assumed: config.json port change propagates to .env. Actual: .env still has PORT=3000 — config authority split across files."
+    "rationale": "Assumed: config.json port change propagates to .env. Actual: .env still has PORT=3000 — config authority split across files.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-moved-009",
@@ -227,7 +235,8 @@
       "file_moved",
       "SF-02"
     ],
-    "rationale": "Assumed: Dockerfile entrypoint visible in docker-compose.yml. Actual: compose delegates to Dockerfile build — no explicit reference."
+    "rationale": "Assumed: Dockerfile entrypoint visible in docker-compose.yml. Actual: compose delegates to Dockerfile build — no explicit reference.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-moved-010",
@@ -253,7 +262,8 @@
       "file_moved",
       "SF-02"
     ],
-    "rationale": "Assumed: Dockerfile COPY path reflected in server.js. Actual: server.js has no awareness of its own container path."
+    "rationale": "Assumed: Dockerfile COPY path reflected in server.js. Actual: server.js has no awareness of its own container path.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-moved-011",
@@ -280,7 +290,8 @@
       "SF-02",
       "control"
     ],
-    "rationale": "Same-file check — edit and predicate on same file. No path confusion."
+    "rationale": "Same-file check — edit and predicate on same file. No path confusion.",
+    "intent": "false_negative"
   },
   {
     "id": "sf-ref-012",
@@ -301,7 +312,8 @@
       "wrong_reference",
       "SF-03"
     ],
-    "rationale": "Assumed: prod config port matches compose env. Actual: config.prod.json has port 3000, not 3001 — but the reference chain is fragile."
+    "rationale": "Assumed: prod config port matches compose env. Actual: config.prod.json has port 3000, not 3001 — but the reference chain is fragile.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-ref-013",
@@ -321,7 +333,8 @@
       "wrong_reference",
       "SF-03"
     ],
-    "rationale": "Assumed: .env DB host applies to prod. Actual: .env.prod uses db-primary.internal — environment reference mismatch."
+    "rationale": "Assumed: .env DB host applies to prod. Actual: .env.prod uses db-primary.internal — environment reference mismatch.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-ref-014",
@@ -347,7 +360,8 @@
       "wrong_reference",
       "SF-03"
     ],
-    "rationale": "Assumed: Dockerfile healthcheck tracks route rename. Actual: Dockerfile is a separate file with stale /health reference."
+    "rationale": "Assumed: Dockerfile healthcheck tracks route rename. Actual: Dockerfile is a separate file with stale /health reference.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-ref-015",
@@ -373,7 +387,8 @@
       "wrong_reference",
       "SF-03"
     ],
-    "rationale": "Assumed: docker-compose healthcheck follows route rename. Actual: compose YAML has separate /health reference."
+    "rationale": "Assumed: docker-compose healthcheck follows route rename. Actual: compose YAML has separate /health reference.",
+    "intent": "false_positive"
   },
   {
     "id": "sf-ref-016",
@@ -399,7 +414,8 @@
       "SF-03",
       "control"
     ],
-    "rationale": "Both infrastructure files reference the same health path — no reference mismatch."
+    "rationale": "Both infrastructure files reference the same health path — no reference mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-200",
@@ -418,7 +434,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume server.js has /api/users route — it doesnt"
+    "rationale": "Assume server.js has /api/users route — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-201",
@@ -437,7 +454,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has redis section — it doesnt"
+    "rationale": "Assume config.json has redis section — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-202",
@@ -456,7 +474,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume .env has REDIS_URL — it doesnt"
+    "rationale": "Assume .env has REDIS_URL — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-203",
@@ -475,7 +494,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume init.sql has products table — it doesnt"
+    "rationale": "Assume init.sql has products table — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-204",
@@ -494,7 +514,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume Dockerfile has multi-stage build — it doesnt"
+    "rationale": "Assume Dockerfile has multi-stage build — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-205",
@@ -513,7 +534,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume compose has redis service — it doesnt"
+    "rationale": "Assume compose has redis service — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-206",
@@ -532,7 +554,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume server.js uses express — it uses http"
+    "rationale": "Assume server.js uses express — it uses http",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-207",
@@ -551,7 +574,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has logging config — it doesnt"
+    "rationale": "Assume config.json has logging config — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-208",
@@ -576,7 +600,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Edit adds /api/users, predicate checks wrong file"
+    "rationale": "Edit adds /api/users, predicate checks wrong file",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-209",
@@ -601,7 +626,8 @@
       "fs",
       "state_assumption"
     ],
-    "rationale": "Edit .env port, check wrong file"
+    "rationale": "Edit .env port, check wrong file",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-210",
@@ -620,7 +646,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: server.js has /health"
+    "rationale": "Control: server.js has /health",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-211",
@@ -639,7 +666,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: init.sql has users table"
+    "rationale": "Control: init.sql has users table",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-212",
@@ -658,7 +686,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: compose has healthcheck"
+    "rationale": "Control: compose has healthcheck",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-213",
@@ -677,6 +706,7 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: .env has DATABASE_URL"
+    "rationale": "Control: .env has DATABASE_URL",
+    "intent": "false_negative"
   }
 ]

@@ -15,7 +15,8 @@
       "content",
       "large_file_performance",
       "N-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-002",
@@ -34,7 +35,8 @@
       "content",
       "large_file_performance",
       "N-10"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-003",
@@ -53,7 +55,8 @@
       "content",
       "large_file_performance",
       "N-10"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-004",
@@ -71,7 +74,8 @@
       "content",
       "scaffold_pattern",
       "N-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-005",
@@ -90,7 +94,8 @@
       "content",
       "scaffold_pattern",
       "N-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-006",
@@ -109,7 +114,8 @@
       "content",
       "scaffold_pattern",
       "N-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-007",
@@ -127,7 +133,8 @@
       "content",
       "bundled_content",
       "N-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-008",
@@ -146,7 +153,8 @@
       "content",
       "bundled_content",
       "N-12"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-009",
@@ -165,7 +173,8 @@
       "content",
       "bundled_content",
       "N-12"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-010",
@@ -183,7 +192,8 @@
       "content",
       "json_key_path",
       "N-13"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-011",
@@ -201,7 +211,8 @@
       "content",
       "json_key_path",
       "N-13"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-012",
@@ -220,7 +231,8 @@
       "content",
       "json_key_path",
       "N-13"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-013",
@@ -239,7 +251,8 @@
       "content",
       "json_key_path",
       "N-13"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-014",
@@ -257,7 +270,8 @@
       "content",
       "yaml_toml_value",
       "N-14"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-015",
@@ -276,7 +290,8 @@
       "content",
       "yaml_toml_value",
       "N-14"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-016",
@@ -295,7 +310,8 @@
       "content",
       "yaml_toml_value",
       "N-14"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-017",
@@ -313,7 +329,8 @@
       "content",
       "env_var_reference",
       "N-15"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-018",
@@ -332,7 +349,8 @@
       "content",
       "env_var_reference",
       "N-15"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-019",
@@ -351,7 +369,8 @@
       "content",
       "env_var_reference",
       "N-15"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-020",
@@ -369,7 +388,8 @@
       "content",
       "import_graph",
       "N-16"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-021",
@@ -388,7 +408,8 @@
       "content",
       "import_graph",
       "N-16"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-022",
@@ -407,7 +428,8 @@
       "content",
       "import_graph",
       "N-16"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-023",
@@ -425,7 +447,8 @@
       "content",
       "bom_offset",
       "N-17"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cnt-adv-024",
@@ -444,7 +467,8 @@
       "content",
       "bom_offset",
       "N-17"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cnt-adv-025",
@@ -463,6 +487,7 @@
       "content",
       "bom_offset",
       "N-17"
-    ]
+    ],
+    "intent": "false_positive"
   }
 ]

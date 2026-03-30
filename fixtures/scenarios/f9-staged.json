@@ -23,7 +23,8 @@
       "should-pass",
       "server-js"
     ],
-    "rationale": "Search string \"const PORT = process.env.PORT || 3000;...\" is unique in server.js, F9 should pass"
+    "rationale": "Search string \"const PORT = process.env.PORT || 3000;...\" is unique in server.js, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-002",
@@ -49,7 +50,8 @@
       "should-pass",
       "server-js"
     ],
-    "rationale": "Search string \"if (req.url === '/health') {...\" is unique in server.js, F9 should pass"
+    "rationale": "Search string \"if (req.url === '/health') {...\" is unique in server.js, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-003",
@@ -75,7 +77,8 @@
       "should-pass",
       "server-js"
     ],
-    "rationale": "Search string \"{ id: 1, name: 'Alpha' },...\" is unique in server.js, F9 should pass"
+    "rationale": "Search string \"{ id: 1, name: 'Alpha' },...\" is unique in server.js, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-004",
@@ -101,7 +104,8 @@
       "should-pass",
       "server-js"
     ],
-    "rationale": "Search string \"<title>About - Demo App</title>...\" is unique in server.js, F9 should pass"
+    "rationale": "Search string \"<title>About - Demo App</title>...\" is unique in server.js, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-005",
@@ -127,7 +131,8 @@
       "should-pass",
       "server-js"
     ],
-    "rationale": "Search string \".hero { background: #3498db; color: whit...\" is unique in server.js, F9 should pass"
+    "rationale": "Search string \".hero { background: #3498db; color: whit...\" is unique in server.js, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-006",
@@ -153,7 +158,8 @@
       "should-pass",
       "Dockerfile"
     ],
-    "rationale": "Search string \"FROM node:20-alpine...\" is unique in Dockerfile, F9 should pass"
+    "rationale": "Search string \"FROM node:20-alpine...\" is unique in Dockerfile, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-007",
@@ -179,7 +185,8 @@
       "should-pass",
       "docker-compose-yml"
     ],
-    "rationale": "Search string \"      retries: 3...\" is unique in docker-compose.yml, F9 should pass"
+    "rationale": "Search string \"      retries: 3...\" is unique in docker-compose.yml, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-008",
@@ -205,7 +212,8 @@
       "should-pass",
       "config-json"
     ],
-    "rationale": "Search string \"\"darkMode\": true...\" is unique in config.json, F9 should pass"
+    "rationale": "Search string \"\"darkMode\": true...\" is unique in config.json, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-009",
@@ -231,7 +239,8 @@
       "should-pass",
       "init-sql"
     ],
-    "rationale": "Search string \"username VARCHAR(50) NOT NULL UNIQUE,...\" is unique in init.sql, F9 should pass"
+    "rationale": "Search string \"username VARCHAR(50) NOT NULL UNIQUE,...\" is unique in init.sql, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-exact-010",
@@ -257,7 +266,8 @@
       "should-pass",
       "-env"
     ],
-    "rationale": "Search string \"DEBUG=false...\" is unique in .env, F9 should pass"
+    "rationale": "Search string \"DEBUG=false...\" is unique in .env, F9 should pass",
+    "intent": "false_negative"
   },
   {
     "id": "f9-notfound-011",
@@ -284,7 +294,8 @@
       "should-fail",
       "server-js"
     ],
-    "rationale": "Search string \"const express = require(\"express\");\" doesn't exist in server.js"
+    "rationale": "Search string \"const express = require(\"express\");\" doesn't exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-012",
@@ -311,7 +322,8 @@
       "should-fail",
       "server-js"
     ],
-    "rationale": "Search string \"app.listen(3000)\" doesn't exist in server.js"
+    "rationale": "Search string \"app.listen(3000)\" doesn't exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-013",
@@ -338,7 +350,8 @@
       "should-fail",
       "server-js"
     ],
-    "rationale": "Search string \"class UserController {\" doesn't exist in server.js"
+    "rationale": "Search string \"class UserController {\" doesn't exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-014",
@@ -365,7 +378,8 @@
       "should-fail",
       "server-js"
     ],
-    "rationale": "Search string \"module.exports = server;\" doesn't exist in server.js"
+    "rationale": "Search string \"module.exports = server;\" doesn't exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-015",
@@ -392,7 +406,8 @@
       "should-fail",
       "server-js"
     ],
-    "rationale": "Search string \"res.json({ ok: true })\" doesn't exist in server.js"
+    "rationale": "Search string \"res.json({ ok: true })\" doesn't exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-016",
@@ -419,7 +434,8 @@
       "should-fail",
       "Dockerfile"
     ],
-    "rationale": "Search string \"RUN npm install\" doesn't exist in Dockerfile"
+    "rationale": "Search string \"RUN npm install\" doesn't exist in Dockerfile",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-017",
@@ -446,7 +462,8 @@
       "should-fail",
       "Dockerfile"
     ],
-    "rationale": "Search string \"COPY package.json .\" doesn't exist in Dockerfile"
+    "rationale": "Search string \"COPY package.json .\" doesn't exist in Dockerfile",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-018",
@@ -473,7 +490,8 @@
       "should-fail",
       "config-json"
     ],
-    "rationale": "Search string \"\"redis\": { \"host\": \"localhost\" }\" doesn't exist in config.json"
+    "rationale": "Search string \"\"redis\": { \"host\": \"localhost\" }\" doesn't exist in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-019",
@@ -500,7 +518,8 @@
       "should-fail",
       "init-sql"
     ],
-    "rationale": "Search string \"CREATE TABLE orders (\" doesn't exist in init.sql"
+    "rationale": "Search string \"CREATE TABLE orders (\" doesn't exist in init.sql",
+    "intent": "false_positive"
   },
   {
     "id": "f9-notfound-020",
@@ -527,7 +546,8 @@
       "should-fail",
       "-env"
     ],
-    "rationale": "Search string \"REDIS_URL=redis://localhost:6379\" doesn't exist in .env"
+    "rationale": "Search string \"REDIS_URL=redis://localhost:6379\" doesn't exist in .env",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-021",
@@ -554,7 +574,8 @@
       "should-fail",
       "count-7"
     ],
-    "rationale": "\"res.writeHead(200\" appears 7 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"res.writeHead(200\" appears 7 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-022",
@@ -581,7 +602,8 @@
       "should-fail",
       "count-8"
     ],
-    "rationale": "\"Content-Type\" appears 8 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"Content-Type\" appears 8 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-023",
@@ -608,7 +630,8 @@
       "should-fail",
       "count-7"
     ],
-    "rationale": "\"  return;\" appears 7 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"  return;\" appears 7 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-024",
@@ -635,7 +658,8 @@
       "should-fail",
       "count-4"
     ],
-    "rationale": "\"text/html\" appears 4 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"text/html\" appears 4 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-025",
@@ -662,7 +686,8 @@
       "should-fail",
       "count-3"
     ],
-    "rationale": "\".nav-link\" appears 3 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\".nav-link\" appears 3 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-026",
@@ -689,7 +714,8 @@
       "should-fail",
       "count-3"
     ],
-    "rationale": "\"font-family:\" appears 3 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"font-family:\" appears 3 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-027",
@@ -716,7 +742,8 @@
       "should-fail",
       "count-3"
     ],
-    "rationale": "\"<footer>\" appears 3 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"<footer>\" appears 3 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-028",
@@ -743,7 +770,8 @@
       "should-fail",
       "count-6"
     ],
-    "rationale": "\"border-radius: 4px;\" appears 6 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"border-radius: 4px;\" appears 6 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-029",
@@ -770,7 +798,8 @@
       "should-fail",
       "count-4"
     ],
-    "rationale": "\"padding: 0.5rem;\" appears 4 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"padding: 0.5rem;\" appears 4 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-ambig-030",
@@ -797,7 +826,8 @@
       "should-fail",
       "count-5"
     ],
-    "rationale": "\"color: white;\" appears 5 times in server.js — F9 rejects ambiguous edits"
+    "rationale": "\"color: white;\" appears 5 times in server.js — F9 rejects ambiguous edits",
+    "intent": "false_positive"
   },
   {
     "id": "f9-empty-031",
@@ -824,7 +854,8 @@
       "should-fail",
       "server-js"
     ],
-    "rationale": "Empty search string matches every position — F9 rejects as ambiguous"
+    "rationale": "Empty search string matches every position — F9 rejects as ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-empty-032",
@@ -851,7 +882,8 @@
       "should-fail",
       "Dockerfile"
     ],
-    "rationale": "Empty search string matches every position — F9 rejects as ambiguous"
+    "rationale": "Empty search string matches every position — F9 rejects as ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-empty-033",
@@ -878,7 +910,8 @@
       "should-fail",
       "config-json"
     ],
-    "rationale": "Empty search string matches every position — F9 rejects as ambiguous"
+    "rationale": "Empty search string matches every position — F9 rejects as ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-missing-034",
@@ -904,7 +937,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "File \"nonexistent.js\" does not exist in demo-app"
+    "rationale": "File \"nonexistent.js\" does not exist in demo-app",
+    "intent": "false_positive"
   },
   {
     "id": "f9-missing-035",
@@ -930,7 +964,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "File \"src/app.ts\" does not exist in demo-app"
+    "rationale": "File \"src/app.ts\" does not exist in demo-app",
+    "intent": "false_positive"
   },
   {
     "id": "f9-missing-036",
@@ -956,7 +991,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "File \"package.json\" does not exist in demo-app"
+    "rationale": "File \"package.json\" does not exist in demo-app",
+    "intent": "false_positive"
   },
   {
     "id": "f9-missing-037",
@@ -982,7 +1018,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "File \"README.md\" does not exist in demo-app"
+    "rationale": "File \"README.md\" does not exist in demo-app",
+    "intent": "false_positive"
   },
   {
     "id": "f9-missing-038",
@@ -1008,7 +1045,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "File \"../escape.js\" does not exist in demo-app"
+    "rationale": "File \"../escape.js\" does not exist in demo-app",
+    "intent": "false_positive"
   },
   {
     "id": "f9-missing-039",
@@ -1034,7 +1072,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "File \"server.JS\" does not exist in demo-app"
+    "rationale": "File \"server.JS\" does not exist in demo-app",
+    "intent": "false_positive"
   },
   {
     "id": "f9-missing-040",
@@ -1060,7 +1099,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "File \"Server.js\" does not exist in demo-app"
+    "rationale": "File \"Server.js\" does not exist in demo-app",
+    "intent": "false_positive"
   },
   {
     "id": "f9-wrongfile-041",
@@ -1087,7 +1127,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Search string exists but in a different file than \"Dockerfile\""
+    "rationale": "Search string exists but in a different file than \"Dockerfile\"",
+    "intent": "false_positive"
   },
   {
     "id": "f9-wrongfile-042",
@@ -1114,7 +1155,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Search string exists but in a different file than \"server.js\""
+    "rationale": "Search string exists but in a different file than \"server.js\"",
+    "intent": "false_positive"
   },
   {
     "id": "f9-wrongfile-043",
@@ -1141,7 +1183,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Search string exists but in a different file than \"config.json\""
+    "rationale": "Search string exists but in a different file than \"config.json\"",
+    "intent": "false_positive"
   },
   {
     "id": "f9-wrongfile-044",
@@ -1168,7 +1211,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Search string exists but in a different file than \"init.sql\""
+    "rationale": "Search string exists but in a different file than \"init.sql\"",
+    "intent": "false_positive"
   },
   {
     "id": "f9-whitespace-045",
@@ -1195,7 +1239,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Whitespace difference causes indexOf to miss: tab instead of spaces in CSS indent"
+    "rationale": "Whitespace difference causes indexOf to miss: tab instead of spaces in CSS indent",
+    "intent": "false_positive"
   },
   {
     "id": "f9-whitespace-046",
@@ -1222,7 +1267,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Whitespace difference causes indexOf to miss: double space after colon"
+    "rationale": "Whitespace difference causes indexOf to miss: double space after colon",
+    "intent": "false_positive"
   },
   {
     "id": "f9-whitespace-047",
@@ -1249,7 +1295,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Whitespace difference causes indexOf to miss: trailing space after semicolon"
+    "rationale": "Whitespace difference causes indexOf to miss: trailing space after semicolon",
+    "intent": "false_positive"
   },
   {
     "id": "f9-whitespace-048",
@@ -1276,7 +1323,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Whitespace difference causes indexOf to miss: no spaces around operators"
+    "rationale": "Whitespace difference causes indexOf to miss: no spaces around operators",
+    "intent": "false_positive"
   },
   {
     "id": "f9-whitespace-049",
@@ -1303,7 +1351,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Whitespace difference causes indexOf to miss: wrong indentation depth (8 spaces vs 2)"
+    "rationale": "Whitespace difference causes indexOf to miss: wrong indentation depth (8 spaces vs 2)",
+    "intent": "false_positive"
   },
   {
     "id": "f9-case-050",
@@ -1330,7 +1379,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "F9 uses indexOf (case-sensitive): Const instead of const"
+    "rationale": "F9 uses indexOf (case-sensitive): Const instead of const",
+    "intent": "false_positive"
   },
   {
     "id": "f9-case-051",
@@ -1357,7 +1407,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "F9 uses indexOf (case-sensitive): all caps"
+    "rationale": "F9 uses indexOf (case-sensitive): all caps",
+    "intent": "false_positive"
   },
   {
     "id": "f9-case-052",
@@ -1384,7 +1435,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "F9 uses indexOf (case-sensitive): Content-type instead of Content-Type"
+    "rationale": "F9 uses indexOf (case-sensitive): Content-type instead of Content-Type",
+    "intent": "false_positive"
   },
   {
     "id": "f9-case-053",
@@ -1411,7 +1463,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "F9 uses indexOf (case-sensitive): uppercase MIME type"
+    "rationale": "F9 uses indexOf (case-sensitive): uppercase MIME type",
+    "intent": "false_positive"
   },
   {
     "id": "f9-case-054",
@@ -1438,7 +1491,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "F9 uses indexOf (case-sensitive): .Hero instead of .hero"
+    "rationale": "F9 uses indexOf (case-sensitive): .Hero instead of .hero",
+    "intent": "false_positive"
   },
   {
     "id": "f9-case-055",
@@ -1465,7 +1519,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "F9 uses indexOf (case-sensitive): Users instead of users (SQL)"
+    "rationale": "F9 uses indexOf (case-sensitive): Users instead of users (SQL)",
+    "intent": "false_positive"
   },
   {
     "id": "f9-case-056",
@@ -1493,7 +1548,8 @@
       "should-fail",
       "init-sql"
     ],
-    "rationale": "F9 case-sensitive: \"Users\" vs \"users\" in init.sql"
+    "rationale": "F9 case-sensitive: \"Users\" vs \"users\" in init.sql",
+    "intent": "false_positive"
   },
   {
     "id": "f9-partial-057",
@@ -1518,7 +1574,8 @@
       "partial-match",
       "should-pass"
     ],
-    "rationale": "Substring \"process.env.PORT || 3000\" appears exactly once — valid F9 edit"
+    "rationale": "Substring \"process.env.PORT || 3000\" appears exactly once — valid F9 edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-partial-058",
@@ -1543,7 +1600,8 @@
       "partial-match",
       "should-pass"
     ],
-    "rationale": "Substring \"{ status: 'ok' }\" appears exactly once — valid F9 edit"
+    "rationale": "Substring \"{ status: 'ok' }\" appears exactly once — valid F9 edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-partial-059",
@@ -1568,7 +1626,8 @@
       "partial-match",
       "should-pass"
     ],
-    "rationale": "Substring \".hero .hero-title { color: white; font-s\" appears exactly once — valid F9 edit"
+    "rationale": "Substring \".hero .hero-title { color: white; font-s\" appears exactly once — valid F9 edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-partial-060",
@@ -1593,7 +1652,8 @@
       "partial-match",
       "should-pass"
     ],
-    "rationale": "Substring \"server.listen(PORT\" appears exactly once — valid F9 edit"
+    "rationale": "Substring \"server.listen(PORT\" appears exactly once — valid F9 edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-partial-061",
@@ -1621,7 +1681,8 @@
       "should-fail",
       "count-8"
     ],
-    "rationale": "Short substring \"res.end(\" matches 8 locations — ambiguous"
+    "rationale": "Short substring \"res.end(\" matches 8 locations — ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-partial-062",
@@ -1649,7 +1710,8 @@
       "should-fail",
       "count-8"
     ],
-    "rationale": "Short substring \"req.url\" matches 8 locations — ambiguous"
+    "rationale": "Short substring \"req.url\" matches 8 locations — ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-partial-063",
@@ -1677,7 +1739,8 @@
       "should-fail",
       "count-10"
     ],
-    "rationale": "Short substring \"200\" matches 10 locations — ambiguous"
+    "rationale": "Short substring \"200\" matches 10 locations — ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-partial-064",
@@ -1705,7 +1768,8 @@
       "should-fail",
       "count-33"
     ],
-    "rationale": "Short substring \"color:\" matches 33 locations — ambiguous"
+    "rationale": "Short substring \"color:\" matches 33 locations — ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-overlap-065",
@@ -1736,7 +1800,8 @@
       "same-file",
       "should-pass"
     ],
-    "rationale": "Two edits to server.js with non-overlapping unique search strings — both pass F9"
+    "rationale": "Two edits to server.js with non-overlapping unique search strings — both pass F9",
+    "intent": "false_negative"
   },
   {
     "id": "f9-overlap-066",
@@ -1769,7 +1834,8 @@
       "should-fail",
       "mixed-valid"
     ],
-    "rationale": "Second edit search string is fabricated — F9 rejects entire batch"
+    "rationale": "Second edit search string is fabricated — F9 rejects entire batch",
+    "intent": "false_positive"
   },
   {
     "id": "f9-overlap-067",
@@ -1800,7 +1866,8 @@
       "post-apply-ambiguity",
       "should-pass"
     ],
-    "rationale": "F9 validates each search against the original file content, not after prior edits applied"
+    "rationale": "F9 validates each search against the original file content, not after prior edits applied",
+    "intent": "false_negative"
   },
   {
     "id": "f9-overlap-068",
@@ -1831,7 +1898,8 @@
       "cascade-conflict",
       "should-fail"
     ],
-    "rationale": "F9 passes (both unique in original), but applyEdits fails — first edit destroys second search target"
+    "rationale": "F9 passes (both unique in original), but applyEdits fails — first edit destroys second search target",
+    "intent": "false_positive"
   },
   {
     "id": "f9-multi-069",
@@ -1866,7 +1934,8 @@
       "multi-file",
       "should-pass"
     ],
-    "rationale": "All three searches are unique in their respective files"
+    "rationale": "All three searches are unique in their respective files",
+    "intent": "false_negative"
   },
   {
     "id": "f9-multi-070",
@@ -1898,7 +1967,8 @@
       "file-missing",
       "should-fail"
     ],
-    "rationale": "package.json does not exist in demo-app — F9 fails on file_missing"
+    "rationale": "package.json does not exist in demo-app — F9 fails on file_missing",
+    "intent": "false_positive"
   },
   {
     "id": "f9-large-071",
@@ -1923,7 +1993,8 @@
       "large-search",
       "should-pass"
     ],
-    "rationale": "Multi-line route handler is unique — large search strings are valid"
+    "rationale": "Multi-line route handler is unique — large search strings are valid",
+    "intent": "false_negative"
   },
   {
     "id": "f9-large-072",
@@ -1949,7 +2020,8 @@
       "multi-line",
       "should-pass"
     ],
-    "rationale": "Multi-line CSS block is unique in the about route — valid edit"
+    "rationale": "Multi-line CSS block is unique in the about route — valid edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-special-073",
@@ -1977,7 +2049,8 @@
       "should-fail",
       "ambiguous-match"
     ],
-    "rationale": "Template literal opening appears in every HTML route — ambiguous"
+    "rationale": "Template literal opening appears in every HTML route — ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-special-074",
@@ -2003,7 +2076,8 @@
       "regex-metachar",
       "should-pass"
     ],
-    "rationale": "F9 uses indexOf (literal match), not regex — || is matched literally"
+    "rationale": "F9 uses indexOf (literal match), not regex — || is matched literally",
+    "intent": "false_negative"
   },
   {
     "id": "f9-special-075",
@@ -2029,7 +2103,8 @@
       "template-expression",
       "should-pass"
     ],
-    "rationale": "F9 uses indexOf — template expressions are literal strings, not interpreted"
+    "rationale": "F9 uses indexOf — template expressions are literal strings, not interpreted",
+    "intent": "false_negative"
   },
   {
     "id": "f9-special-076",
@@ -2055,7 +2130,8 @@
       "curly-braces",
       "should-pass"
     ],
-    "rationale": "CSS rule with curly braces matched literally by indexOf"
+    "rationale": "CSS rule with curly braces matched literally by indexOf",
+    "intent": "false_negative"
   },
   {
     "id": "f9-special-077",
@@ -2081,7 +2157,8 @@
       "sql-syntax",
       "should-pass"
     ],
-    "rationale": "SQL parentheses and keywords matched literally"
+    "rationale": "SQL parentheses and keywords matched literally",
+    "intent": "false_negative"
   },
   {
     "id": "f9-crlf-078",
@@ -2107,7 +2184,8 @@
       "normalization",
       "should-pass"
     ],
-    "rationale": "F9 normalizes CRLF→LF in both file and search — should find match"
+    "rationale": "F9 normalizes CRLF→LF in both file and search — should find match",
+    "intent": "false_negative"
   },
   {
     "id": "f9-crlf-079",
@@ -2133,7 +2211,8 @@
       "multi-line",
       "should-pass"
     ],
-    "rationale": "CRLF normalized to LF before matching — multi-line search succeeds"
+    "rationale": "CRLF normalized to LF before matching — multi-line search succeeds",
+    "intent": "false_negative"
   },
   {
     "id": "f9-identity-080",
@@ -2159,7 +2238,8 @@
       "noop",
       "should-pass"
     ],
-    "rationale": "F9 only validates search uniqueness — identical replace is valid"
+    "rationale": "F9 only validates search uniqueness — identical replace is valid",
+    "intent": "false_negative"
   },
   {
     "id": "f9-identity-081",
@@ -2186,7 +2266,8 @@
       "should-pass",
       "Dockerfile"
     ],
-    "rationale": "No-op edit — search is unique, replace is identical"
+    "rationale": "No-op edit — search is unique, replace is identical",
+    "intent": "false_negative"
   },
   {
     "id": "f9-boundary-082",
@@ -2212,7 +2293,8 @@
       "start-of-file",
       "should-pass"
     ],
-    "rationale": "First line of server.js is unique — valid edit"
+    "rationale": "First line of server.js is unique — valid edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-boundary-083",
@@ -2238,7 +2320,8 @@
       "end-of-file",
       "should-pass"
     ],
-    "rationale": "Last lines of server.js are unique — valid edit"
+    "rationale": "Last lines of server.js are unique — valid edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-boundary-084",
@@ -2266,7 +2349,8 @@
       "ambiguous-match",
       "should-fail"
     ],
-    "rationale": "Single character \"c\" appears thousands of times — ambiguous"
+    "rationale": "Single character \"c\" appears thousands of times — ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-unicode-085",
@@ -2292,7 +2376,8 @@
       "emoji-replace",
       "should-pass"
     ],
-    "rationale": "Search is valid ASCII unique match; replace containing emoji is fine for F9"
+    "rationale": "Search is valid ASCII unique match; replace containing emoji is fine for F9",
+    "intent": "false_negative"
   },
   {
     "id": "f9-unicode-086",
@@ -2320,7 +2405,8 @@
       "not-found",
       "should-fail"
     ],
-    "rationale": "Cyrillic variable name does not exist in server.js"
+    "rationale": "Cyrillic variable name does not exist in server.js",
+    "intent": "false_positive"
   },
   {
     "id": "f9-unicode-087",
@@ -2346,7 +2432,8 @@
       "html-context",
       "should-pass"
     ],
-    "rationale": "Partial CSS rule with hex color — unique match in home page style block"
+    "rationale": "Partial CSS rule with hex color — unique match in home page style block",
+    "intent": "false_negative"
   },
   {
     "id": "f9-edge-088",
@@ -2373,7 +2460,8 @@
       "deletion",
       "should-pass"
     ],
-    "rationale": "Deleting content (empty replace) is valid if search is unique"
+    "rationale": "Deleting content (empty replace) is valid if search is unique",
+    "intent": "false_negative"
   },
   {
     "id": "f9-edge-089",
@@ -2399,7 +2487,8 @@
       "config-toggle",
       "should-pass"
     ],
-    "rationale": "Unique config key toggle — valid edit"
+    "rationale": "Unique config key toggle — valid edit",
+    "intent": "false_negative"
   },
   {
     "id": "f9-edge-090",
@@ -2427,7 +2516,8 @@
       "ambiguous-match",
       "should-fail"
     ],
-    "rationale": "Four spaces appears hundreds of times in indented code — ambiguous"
+    "rationale": "Four spaces appears hundreds of times in indented code — ambiguous",
+    "intent": "false_positive"
   },
   {
     "id": "f9-edge-091",
@@ -2455,6 +2545,7 @@
       "ambiguous-match",
       "should-fail"
     ],
-    "rationale": "Single newline matches at every line boundary — ambiguous"
+    "rationale": "Single newline matches at every line boundary — ambiguous",
+    "intent": "false_positive"
   }
 ]

@@ -33,7 +33,8 @@
       "sudo_required",
       "HC-01"
     ],
-    "rationale": "Both patterns exist in files. Port 80 binding is on the host side of compose — container user doesnt matter for host port. But inside container, USER node cannot bind <1024."
+    "rationale": "Both patterns exist in files. Port 80 binding is on the host side of compose — container user doesnt matter for host port. But inside container, USER node cannot bind <1024.",
+    "intent": "false_negative"
   },
   {
     "id": "hc-sudo-002",
@@ -79,7 +80,8 @@
       "sudo_required",
       "HC-01"
     ],
-    "rationale": "Non-root user cannot bind port 443 inside container — EACCES at runtime. All content patterns present."
+    "rationale": "Non-root user cannot bind port 443 inside container — EACCES at runtime. All content patterns present.",
+    "intent": "false_negative"
   },
   {
     "id": "hc-sudo-003",
@@ -115,7 +117,8 @@
       "sudo_required",
       "HC-01"
     ],
-    "rationale": "Non-root user cannot write to /etc/nginx — permission denied. Both patterns present in source."
+    "rationale": "Non-root user cannot write to /etc/nginx — permission denied. Both patterns present in source.",
+    "intent": "false_negative"
   },
   {
     "id": "hc-sudo-004",
@@ -151,7 +154,8 @@
       "sudo_required",
       "HC-01"
     ],
-    "rationale": "systemctl requires root but process runs as \"app\" user — permission denied at runtime"
+    "rationale": "systemctl requires root but process runs as \"app\" user — permission denied at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "hc-sudo-005",
@@ -182,7 +186,8 @@
       "sudo_required",
       "HC-01"
     ],
-    "rationale": "apt-get requires root but USER node is set before RUN — build will fail"
+    "rationale": "apt-get requires root but USER node is set before RUN — build will fail",
+    "intent": "false_negative"
   },
   {
     "id": "hc-sudo-006",
@@ -214,7 +219,8 @@
       "HC-01",
       "control"
     ],
-    "rationale": "No USER directive — default root user can run apt-get without issue"
+    "rationale": "No USER directive — default root user can run apt-get without issue",
+    "intent": "false_negative"
   },
   {
     "id": "hc-docker-007",
@@ -250,7 +256,8 @@
       "docker_socket",
       "HC-02"
     ],
-    "rationale": "Docker socket mounted but USER node is not in docker group — socket access denied"
+    "rationale": "Docker socket mounted but USER node is not in docker group — socket access denied",
+    "intent": "false_negative"
   },
   {
     "id": "hc-docker-008",
@@ -286,7 +293,8 @@
       "docker_socket",
       "HC-02"
     ],
-    "rationale": "Server calls docker exec but user not in docker group — \"permission denied\" on socket"
+    "rationale": "Server calls docker exec but user not in docker group — \"permission denied\" on socket",
+    "intent": "false_negative"
   },
   {
     "id": "hc-docker-009",
@@ -317,7 +325,8 @@
       "docker_socket",
       "HC-02"
     ],
-    "rationale": "docker:dind requires privileged mode but no privileged: true in compose — daemon will not start"
+    "rationale": "docker:dind requires privileged mode but no privileged: true in compose — daemon will not start",
+    "intent": "false_positive"
   },
   {
     "id": "hc-docker-010",
@@ -348,7 +357,8 @@
       "docker_socket",
       "HC-02"
     ],
-    "rationale": "Healthcheck runs docker inspect but docker socket is not mounted — command will fail"
+    "rationale": "Healthcheck runs docker inspect but docker socket is not mounted — command will fail",
+    "intent": "false_positive"
   },
   {
     "id": "hc-docker-011",
@@ -380,7 +390,8 @@
       "HC-02",
       "control"
     ],
-    "rationale": "Socket mounted and default root user — docker commands will work"
+    "rationale": "Socket mounted and default root user — docker commands will work",
+    "intent": "false_negative"
   },
   {
     "id": "hc-ssh-012",
@@ -416,7 +427,8 @@
       "ssh_key_rejected",
       "HC-03"
     ],
-    "rationale": "Config and .env reference different SSH keys — which one is used depends on code, but theyre inconsistent"
+    "rationale": "Config and .env reference different SSH keys — which one is used depends on code, but theyre inconsistent",
+    "intent": "false_negative"
   },
   {
     "id": "hc-ssh-013",
@@ -447,7 +459,8 @@
       "ssh_key_rejected",
       "HC-03"
     ],
-    "rationale": "Server references SSH key but Dockerfile never COPYs it — file wont exist in container"
+    "rationale": "Server references SSH key but Dockerfile never COPYs it — file wont exist in container",
+    "intent": "false_positive"
   },
   {
     "id": "hc-ssh-014",
@@ -483,7 +496,8 @@
       "ssh_key_rejected",
       "HC-03"
     ],
-    "rationale": "Two SSH auth methods configured — agent forwarding AND key file. If agent is empty and key doesnt exist, both fail."
+    "rationale": "Two SSH auth methods configured — agent forwarding AND key file. If agent is empty and key doesnt exist, both fail.",
+    "intent": "false_negative"
   },
   {
     "id": "hc-ssh-015",
@@ -519,7 +533,8 @@
       "ssh_key_rejected",
       "HC-03"
     ],
-    "rationale": "Different key paths per environment — deploying to prod with staging key will be rejected"
+    "rationale": "Different key paths per environment — deploying to prod with staging key will be rejected",
+    "intent": "false_negative"
   },
   {
     "id": "hc-ssh-016",
@@ -556,7 +571,8 @@
       "HC-03",
       "control"
     ],
-    "rationale": "Same SSH key path in both sources — no access mismatch"
+    "rationale": "Same SSH key path in both sources — no access mismatch",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-200",
@@ -581,7 +597,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "Admin route in server.js, no admin role in config.json"
+    "rationale": "Admin route in server.js, no admin role in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-201",
@@ -606,7 +623,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "Auth token check in server.js, no token in .env"
+    "rationale": "Auth token check in server.js, no token in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-202",
@@ -631,7 +649,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "Rate limit function added, no limit in config.json"
+    "rationale": "Rate limit function added, no limit in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-203",
@@ -650,7 +669,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "Session table in init.sql, no session config in .env"
+    "rationale": "Session table in init.sql, no session config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-204",
@@ -675,7 +695,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "CORS header added, no CORS config in .env"
+    "rationale": "CORS header added, no CORS config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-205",
@@ -700,7 +721,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "CSP header added, not in config.json"
+    "rationale": "CSP header added, not in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-206",
@@ -719,7 +741,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "Password hash in init.sql, no hash algo in config"
+    "rationale": "Password hash in init.sql, no hash algo in config",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-207",
@@ -738,7 +761,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: server.js has /health, check it exists"
+    "rationale": "Control: server.js has /health, check it exists",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-208",
@@ -757,7 +781,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: init.sql has sessions table"
+    "rationale": "Control: init.sql has sessions table",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-209",
@@ -776,7 +801,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: .env has SECRET_KEY"
+    "rationale": "Control: .env has SECRET_KEY",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-210",
@@ -795,7 +821,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Dockerfile exposes port, check Dockerfile"
+    "rationale": "Dockerfile exposes port, check Dockerfile",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-211",
@@ -814,7 +841,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Compose has env_file, check compose"
+    "rationale": "Compose has env_file, check compose",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-212",
@@ -833,7 +861,8 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "User table has password_hash, server.js has no bcrypt"
+    "rationale": "User table has password_hash, server.js has no bcrypt",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-213",
@@ -852,6 +881,7 @@
       "cli",
       "cross_file_gap"
     ],
-    "rationale": "Sessions table has expires_at, server.js has no expiry check"
+    "rationale": "Sessions table has expires_at, server.js has no expiry check",
+    "intent": "false_positive"
   }
 ]

@@ -28,7 +28,8 @@
       "health_check",
       "JV-01"
     ],
-    "rationale": "Edit replaces JSON health response — predicate expecting old JSON format fails observation"
+    "rationale": "Edit replaces JSON health response — predicate expecting old JSON format fails observation",
+    "intent": "false_positive"
   },
   {
     "id": "jv-health-002",
@@ -59,7 +60,8 @@
       "health_check",
       "JV-01"
     ],
-    "rationale": "Edit succeeds but creates inconsistency — compose still checks /health while server serves /ready. Both predicates pass because edit only touches server.js and compose is unchanged."
+    "rationale": "Edit succeeds but creates inconsistency — compose still checks /health while server serves /ready. Both predicates pass because edit only touches server.js and compose is unchanged.",
+    "intent": "false_negative"
   },
   {
     "id": "jv-health-003",
@@ -90,7 +92,8 @@
       "health_check",
       "JV-01"
     ],
-    "rationale": "Health returns 503 but compose will retry 3 times — both predicates independently pass"
+    "rationale": "Health returns 503 but compose will retry 3 times — both predicates independently pass",
+    "intent": "false_negative"
   },
   {
     "id": "jv-health-004",
@@ -121,7 +124,8 @@
       "health_check",
       "JV-01"
     ],
-    "rationale": "Server adds header but Dockerfile health still uses wget — both predicates independently pass"
+    "rationale": "Server adds header but Dockerfile health still uses wget — both predicates independently pass",
+    "intent": "false_negative"
   },
   {
     "id": "jv-health-005",
@@ -158,7 +162,8 @@
       "JV-01",
       "control"
     ],
-    "rationale": "Both files updated consistently — no observer conflict"
+    "rationale": "Both files updated consistently — no observer conflict",
+    "intent": "false_negative"
   },
   {
     "id": "jv-schema-006",
@@ -189,7 +194,8 @@
       "schema_introspection",
       "JV-02"
     ],
-    "rationale": "Migration changes email from VARCHAR(255) to TEXT — predicate expecting old type fails"
+    "rationale": "Migration changes email from VARCHAR(255) to TEXT — predicate expecting old type fails",
+    "intent": "false_positive"
   },
   {
     "id": "jv-schema-007",
@@ -220,7 +226,8 @@
       "schema_introspection",
       "JV-02"
     ],
-    "rationale": "Column renamed — predicate checking old name \"password_hash\" fails introspection"
+    "rationale": "Column renamed — predicate checking old name \"password_hash\" fails introspection",
+    "intent": "false_positive"
   },
   {
     "id": "jv-schema-008",
@@ -251,7 +258,8 @@
       "schema_introspection",
       "JV-02"
     ],
-    "rationale": "Migration replaces UUID with SERIAL — predicate checking gen_random_uuid fails"
+    "rationale": "Migration replaces UUID with SERIAL — predicate checking gen_random_uuid fails",
+    "intent": "false_positive"
   },
   {
     "id": "jv-schema-009",
@@ -282,7 +290,8 @@
       "schema_introspection",
       "JV-02"
     ],
-    "rationale": "Old index replaced — predicate checking original index name fails during migration window"
+    "rationale": "Old index replaced — predicate checking original index name fails during migration window",
+    "intent": "false_positive"
   },
   {
     "id": "jv-schema-010",
@@ -313,7 +322,8 @@
       "schema_introspection",
       "JV-02"
     ],
-    "rationale": "Default changed from 0 to 100 — predicate expecting old default fails mid-migration"
+    "rationale": "Default changed from 0 to 100 — predicate expecting old default fails mid-migration",
+    "intent": "false_positive"
   },
   {
     "id": "jv-schema-011",
@@ -340,7 +350,8 @@
       "JV-02",
       "control"
     ],
-    "rationale": "Only checking new state — no conflict with pre-migration schema"
+    "rationale": "Only checking new state — no conflict with pre-migration schema",
+    "intent": "false_negative"
   },
   {
     "id": "jv-hash-012",
@@ -371,7 +382,8 @@
       "hash_conflict",
       "JV-03"
     ],
-    "rationale": "File hash changes mid-write — predicate checking old \"Demo App\" name fails"
+    "rationale": "File hash changes mid-write — predicate checking old \"Demo App\" name fails",
+    "intent": "false_positive"
   },
   {
     "id": "jv-hash-013",
@@ -402,7 +414,8 @@
       "hash_conflict",
       "JV-03"
     ],
-    "rationale": "DATABASE_URL rotated — predicate checking old localhost URL fails mid-write"
+    "rationale": "DATABASE_URL rotated — predicate checking old localhost URL fails mid-write",
+    "intent": "false_positive"
   },
   {
     "id": "jv-hash-014",
@@ -433,7 +446,8 @@
       "hash_conflict",
       "JV-03"
     ],
-    "rationale": "Title changed — hash computed before write sees Demo App, after write sees Live Dashboard"
+    "rationale": "Title changed — hash computed before write sees Demo App, after write sees Live Dashboard",
+    "intent": "false_positive"
   },
   {
     "id": "jv-hash-015",
@@ -464,7 +478,8 @@
       "hash_conflict",
       "JV-03"
     ],
-    "rationale": "Base image changed — file hash mid-write catches inconsistent state"
+    "rationale": "Base image changed — file hash mid-write catches inconsistent state",
+    "intent": "false_positive"
   },
   {
     "id": "jv-hash-016",
@@ -495,7 +510,8 @@
       "hash_conflict",
       "JV-03"
     ],
-    "rationale": "PORT changed — predicate verifying old PORT=3000 fails when hash computed after write"
+    "rationale": "PORT changed — predicate verifying old PORT=3000 fails when hash computed after write",
+    "intent": "false_positive"
   },
   {
     "id": "jv-hash-017",
@@ -522,7 +538,8 @@
       "JV-03",
       "control"
     ],
-    "rationale": "Only checking post-write state — no stale hash conflict"
+    "rationale": "Only checking post-write state — no stale hash conflict",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -552,7 +569,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -582,7 +600,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -612,7 +631,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -643,7 +663,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -668,7 +689,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -693,7 +715,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -718,7 +741,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -748,7 +772,8 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -773,7 +798,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -798,7 +824,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -823,7 +850,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -853,7 +881,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-212",
@@ -880,6 +909,7 @@
       "verify",
       "contention_gap"
     ],
-    "rationale": "Migration adds column that server.js doesnt reference"
+    "rationale": "Migration adds column that server.js doesnt reference",
+    "intent": "false_positive"
   }
 ]

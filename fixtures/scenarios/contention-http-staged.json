@@ -28,7 +28,8 @@
       "route_collision",
       "JH-01"
     ],
-    "rationale": "Second edit search string gone after first edit — both try to add /status before /health"
+    "rationale": "Second edit search string gone after first edit — both try to add /status before /health",
+    "intent": "false_positive"
   },
   {
     "id": "jh-route-002",
@@ -59,7 +60,8 @@
       "route_collision",
       "JH-01"
     ],
-    "rationale": "Both edits target same /api/items response — first edit changes shape, second search gone"
+    "rationale": "Both edits target same /api/items response — first edit changes shape, second search gone",
+    "intent": "false_positive"
   },
   {
     "id": "jh-route-003",
@@ -90,7 +92,8 @@
       "route_collision",
       "JH-01"
     ],
-    "rationale": "Both edits insert before /about — second edit search gone after first edit transforms the line"
+    "rationale": "Both edits insert before /about — second edit search gone after first edit transforms the line",
+    "intent": "false_positive"
   },
   {
     "id": "jh-route-004",
@@ -121,7 +124,8 @@
       "route_collision",
       "JH-01"
     ],
-    "rationale": "Both edits target same health response line — second search gone after first rewrites it"
+    "rationale": "Both edits target same health response line — second search gone after first rewrites it",
+    "intent": "false_positive"
   },
   {
     "id": "jh-route-005",
@@ -152,7 +156,8 @@
       "route_collision",
       "JH-01"
     ],
-    "rationale": "Both edits target same healthcheck test line — second search string gone after first edit"
+    "rationale": "Both edits target same healthcheck test line — second search string gone after first edit",
+    "intent": "false_positive"
   },
   {
     "id": "jh-route-006",
@@ -189,7 +194,8 @@
       "JH-01",
       "control"
     ],
-    "rationale": "Routes inserted at different points — no collision, both apply cleanly"
+    "rationale": "Routes inserted at different points — no collision, both apply cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "jh-sess-007",
@@ -220,7 +226,8 @@
       "session_collision",
       "JH-02"
     ],
-    "rationale": "Both edits target same insertion point with same cookie name but different secrets — collision"
+    "rationale": "Both edits target same insertion point with same cookie name but different secrets — collision",
+    "intent": "false_positive"
   },
   {
     "id": "jh-sess-008",
@@ -251,7 +258,8 @@
       "session_collision",
       "JH-02"
     ],
-    "rationale": "Both edits append after DEBUG=false — second search gone after first edit adds token-alpha"
+    "rationale": "Both edits append after DEBUG=false — second search gone after first edit adds token-alpha",
+    "intent": "false_positive"
   },
   {
     "id": "jh-sess-009",
@@ -282,7 +290,8 @@
       "session_collision",
       "JH-02"
     ],
-    "rationale": "Both edits target session token column — first changes type, second search string gone"
+    "rationale": "Both edits target session token column — first changes type, second search string gone",
+    "intent": "false_positive"
   },
   {
     "id": "jh-sess-010",
@@ -313,7 +322,8 @@
       "session_collision",
       "JH-02"
     ],
-    "rationale": "Both edits target same health response header lines — second search gone after first edit"
+    "rationale": "Both edits target same health response header lines — second search gone after first edit",
+    "intent": "false_positive"
   },
   {
     "id": "jh-sess-011",
@@ -350,7 +360,8 @@
       "JH-02",
       "control"
     ],
-    "rationale": "Session settings in different files with different search strings — no collision"
+    "rationale": "Session settings in different files with different search strings — no collision",
+    "intent": "false_negative"
   },
   {
     "id": "jh-api-012",
@@ -381,7 +392,8 @@
       "api_write",
       "JH-03"
     ],
-    "rationale": "Both edits target same /api/items handler block — second search gone after first rewrites schema"
+    "rationale": "Both edits target same /api/items handler block — second search gone after first rewrites schema",
+    "intent": "false_positive"
   },
   {
     "id": "jh-api-013",
@@ -412,7 +424,8 @@
       "api_write",
       "JH-03"
     ],
-    "rationale": "Both edits insert POST handler before /about — second search gone after first transforms line"
+    "rationale": "Both edits insert POST handler before /about — second search gone after first transforms line",
+    "intent": "false_positive"
   },
   {
     "id": "jh-api-014",
@@ -443,7 +456,8 @@
       "api_write",
       "JH-03"
     ],
-    "rationale": "Both edits insert after view_count — second search gone after first adds likes column"
+    "rationale": "Both edits insert after view_count — second search gone after first adds likes column",
+    "intent": "false_positive"
   },
   {
     "id": "jh-api-015",
@@ -474,7 +488,8 @@
       "api_write",
       "JH-03"
     ],
-    "rationale": "Both edits target /api/echo response — second search gone after first changes shape"
+    "rationale": "Both edits target /api/echo response — second search gone after first changes shape",
+    "intent": "false_positive"
   },
   {
     "id": "jh-api-016",
@@ -505,7 +520,8 @@
       "api_write",
       "JH-03"
     ],
-    "rationale": "Both edits target same database name — second search gone after first renames to demo_v2"
+    "rationale": "Both edits target same database name — second search gone after first renames to demo_v2",
+    "intent": "false_positive"
   },
   {
     "id": "jh-api-017",
@@ -542,7 +558,8 @@
       "JH-03",
       "control"
     ],
-    "rationale": "Edits target different files — no concurrent write collision"
+    "rationale": "Edits target different files — no concurrent write collision",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -572,7 +589,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -602,7 +620,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -632,7 +651,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -663,7 +683,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -688,7 +709,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -713,7 +735,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -738,7 +761,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -768,7 +792,8 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -793,7 +818,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -818,7 +844,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -843,7 +870,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -873,7 +901,8 @@
       "http",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-212",
@@ -900,6 +929,7 @@
       "http",
       "contention_gap"
     ],
-    "rationale": "Migration adds column that server.js doesnt reference"
+    "rationale": "Migration adds column that server.js doesnt reference",
+    "intent": "false_positive"
   }
 ]

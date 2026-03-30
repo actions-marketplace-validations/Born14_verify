@@ -24,7 +24,8 @@
       "log_overhead",
       "OE-02"
     ],
-    "rationale": "Synchronous file write on every health check blocks the event loop — observation probe degrades app performance under load."
+    "rationale": "Synchronous file write on every health check blocks the event loop — observation probe degrades app performance under load.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-002",
@@ -51,7 +52,8 @@
       "log_overhead",
       "OE-02"
     ],
-    "rationale": "Generating stack trace and serializing full headers on every request — logging overhead changes performance characteristics of observed system."
+    "rationale": "Generating stack trace and serializing full headers on every request — logging overhead changes performance characteristics of observed system.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-003",
@@ -88,7 +90,8 @@
       "OE-02",
       "control"
     ],
-    "rationale": "Single character to stdout is non-blocking and negligible overhead — observation does not perturb the system."
+    "rationale": "Single character to stdout is non-blocking and negligible overhead — observation does not perturb the system.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-004",
@@ -126,7 +129,8 @@
       "debug_mode_side_effect",
       "OE-03"
     ],
-    "rationale": "DEBUG=true changes response shape (array vs object wrapper) — tests written in debug mode silently fail in production."
+    "rationale": "DEBUG=true changes response shape (array vs object wrapper) — tests written in debug mode silently fail in production.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-005",
@@ -153,7 +157,8 @@
       "debug_mode_side_effect",
       "OE-03"
     ],
-    "rationale": "Debug mode disables auth — observation/testing with DEBUG=true exercises a fundamentally different code path than production."
+    "rationale": "Debug mode disables auth — observation/testing with DEBUG=true exercises a fundamentally different code path than production.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-006",
@@ -190,7 +195,8 @@
       "OE-03",
       "control"
     ],
-    "rationale": "Debug flag only controls logging verbosity — functional behavior identical in debug and production."
+    "rationale": "Debug flag only controls logging verbosity — functional behavior identical in debug and production.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-007",
@@ -217,7 +223,8 @@
       "probe_side_effect",
       "OE-04"
     ],
-    "rationale": "Health check probe writes to settings table on every invocation — 5s interval means 17,280 writes/day, monitoring probe mutates the observed system."
+    "rationale": "Health check probe writes to settings table on every invocation — 5s interval means 17,280 writes/day, monitoring probe mutates the observed system.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-008",
@@ -244,7 +251,8 @@
       "probe_side_effect",
       "OE-04"
     ],
-    "rationale": "Forcing GC in health check changes memory profile and introduces latency spikes — the probe itself distorts what it measures."
+    "rationale": "Forcing GC in health check changes memory profile and introduces latency spikes — the probe itself distorts what it measures.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-009",
@@ -275,7 +283,8 @@
       "OE-04",
       "control"
     ],
-    "rationale": "Default health check returns static JSON — no database writes, no GC, pure observation."
+    "rationale": "Default health check returns static JSON — no database writes, no GC, pure observation.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-010",
@@ -311,7 +320,8 @@
       "cache_warming",
       "OE-05"
     ],
-    "rationale": "Health check populates global cache — subsequent requests find warm cache, masking cold-start performance issues that real users hit."
+    "rationale": "Health check populates global cache — subsequent requests find warm cache, masking cold-start performance issues that real users hit.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-011",
@@ -338,7 +348,8 @@
       "cache_warming",
       "OE-05"
     ],
-    "rationale": "Health probe triggers lazy DB pool initialization — first real request never hits cold path, observation changes initialization order."
+    "rationale": "Health probe triggers lazy DB pool initialization — first real request never hits cold path, observation changes initialization order.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-012",
@@ -375,7 +386,8 @@
       "OE-05",
       "control"
     ],
-    "rationale": "Health check reads process uptime only — no global state mutation, no cache warming."
+    "rationale": "Health check reads process uptime only — no global state mutation, no cache warming.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-013",
@@ -402,7 +414,8 @@
       "env_initialization",
       "OE-07"
     ],
-    "rationale": "Module-level IIFE writes timestamp to process.env as side effect — importing/requiring this module for inspection mutates global state."
+    "rationale": "Module-level IIFE writes timestamp to process.env as side effect — importing/requiring this module for inspection mutates global state.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-014",
@@ -429,7 +442,8 @@
       "env_initialization",
       "OE-07"
     ],
-    "rationale": "Checking whether DATABASE_URL exists also initializes a connection pool — observation triggers initialization."
+    "rationale": "Checking whether DATABASE_URL exists also initializes a connection pool — observation triggers initialization.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-015",
@@ -457,7 +471,8 @@
       "OE-07",
       "control"
     ],
-    "rationale": "Reading PORT env var with fallback — pure read, no initialization side effect."
+    "rationale": "Reading PORT env var with fallback — pure read, no initialization side effect.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-016",
@@ -484,7 +499,8 @@
       "introspection_lock",
       "OE-08"
     ],
-    "rationale": "Schema introspection acquires ACCESS EXCLUSIVE lock — all concurrent INSERTs/UPDATEs block until observation completes."
+    "rationale": "Schema introspection acquires ACCESS EXCLUSIVE lock — all concurrent INSERTs/UPDATEs block until observation completes.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-017",
@@ -511,7 +527,8 @@
       "introspection_lock",
       "OE-08"
     ],
-    "rationale": "ANALYZE in health probe updates table statistics — observation changes query planner decisions for subsequent queries."
+    "rationale": "ANALYZE in health probe updates table statistics — observation changes query planner decisions for subsequent queries.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-018",
@@ -548,7 +565,8 @@
       "OE-08",
       "control"
     ],
-    "rationale": "information_schema queries use only ACCESS SHARE lock (compatible with all writes) — safe observation."
+    "rationale": "information_schema queries use only ACCESS SHARE lock (compatible with all writes) — safe observation.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-019",
@@ -581,7 +599,8 @@
       "pool_exhaustion",
       "OE-09"
     ],
-    "rationale": "Health check leaks a connection on every invocation — at 5s intervals, 5-connection pool exhausted in 25s. Monitoring kills the app."
+    "rationale": "Health check leaks a connection on every invocation — at 5s intervals, 5-connection pool exhausted in 25s. Monitoring kills the app.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-020",
@@ -608,7 +627,8 @@
       "pool_exhaustion",
       "OE-09"
     ],
-    "rationale": "New connection per health check with no close — monitoring probe accumulates connections until OS limit hit."
+    "rationale": "New connection per health check with no close — monitoring probe accumulates connections until OS limit hit.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-021",
@@ -645,7 +665,8 @@
       "OE-09",
       "control"
     ],
-    "rationale": "Single shared read-only connection reused for all health checks — no pool depletion."
+    "rationale": "Single shared read-only connection reused for all health checks — no pool depletion.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-022",
@@ -678,7 +699,8 @@
       "atime_mutation",
       "OE-10"
     ],
-    "rationale": "statSync on noatime-disabled FS updates atime — incremental backup tools detect \"changes\" caused purely by monitoring, triggering unnecessary backup cycles."
+    "rationale": "statSync on noatime-disabled FS updates atime — incremental backup tools detect \"changes\" caused purely by monitoring, triggering unnecessary backup cycles.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-023",
@@ -711,7 +733,8 @@
       "atime_mutation",
       "OE-10"
     ],
-    "rationale": "Reading config.json updates atime — if cache invalidation uses atime, health checks continuously invalidate config cache."
+    "rationale": "Reading config.json updates atime — if cache invalidation uses atime, health checks continuously invalidate config cache.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-024",
@@ -748,7 +771,8 @@
       "OE-10",
       "control"
     ],
-    "rationale": "Health check reads only in-memory timestamp — no filesystem access, no atime mutation."
+    "rationale": "Health check reads only in-memory timestamp — no filesystem access, no atime mutation.",
+    "intent": "false_negative"
   },
   {
     "id": "oe-025",
@@ -775,7 +799,8 @@
       "versioning_header",
       "OE-11"
     ],
-    "rationale": "Content negotiation means browser monitoring tool (Accept: text/html) sees different response than API consumer (Accept: application/json) — observer tool changes what it observes."
+    "rationale": "Content negotiation means browser monitoring tool (Accept: text/html) sees different response than API consumer (Accept: application/json) — observer tool changes what it observes.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-026",
@@ -811,7 +836,8 @@
       "versioning_header",
       "OE-11"
     ],
-    "rationale": "Monitoring tool without X-API-Version header hits v1, while frontend sends v2 — probe validates different business logic than users experience."
+    "rationale": "Monitoring tool without X-API-Version header hits v1, while frontend sends v2 — probe validates different business logic than users experience.",
+    "intent": "false_positive"
   },
   {
     "id": "oe-027",
@@ -839,6 +865,7 @@
       "OE-11",
       "control"
     ],
-    "rationale": "Unmodified items endpoint returns consistent JSON regardless of request headers — no observer effect."
+    "rationale": "Unmodified items endpoint returns consistent JSON regardless of request headers — no observer effect.",
+    "intent": "false_negative"
   }
 ]

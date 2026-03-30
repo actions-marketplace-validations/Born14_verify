@@ -28,7 +28,8 @@
       "auth_rejection",
       "HH-01"
     ],
-    "rationale": "Auth middleware IS in the code and /api/items route IS in the code — both content predicates pass. The 401 is a runtime behavior, file content is consistent."
+    "rationale": "Auth middleware IS in the code and /api/items route IS in the code — both content predicates pass. The 401 is a runtime behavior, file content is consistent.",
+    "intent": "false_negative"
   },
   {
     "id": "hh-auth-002",
@@ -59,7 +60,8 @@
       "auth_rejection",
       "HH-01"
     ],
-    "rationale": "Route added to server.js but config.json has no mention of /api/admin — whitelist not updated"
+    "rationale": "Route added to server.js but config.json has no mention of /api/admin — whitelist not updated",
+    "intent": "false_positive"
   },
   {
     "id": "hh-auth-003",
@@ -95,7 +97,8 @@
       "auth_rejection",
       "HH-01"
     ],
-    "rationale": "server.js references SECRET_KEY but .env had it removed — auth will fail at runtime"
+    "rationale": "server.js references SECRET_KEY but .env had it removed — auth will fail at runtime",
+    "intent": "false_positive"
   },
   {
     "id": "hh-auth-004",
@@ -131,7 +134,8 @@
       "auth_rejection",
       "HH-01"
     ],
-    "rationale": "Both files contain their respective values — content predicates pass. The mismatch is a runtime auth failure not visible at file level."
+    "rationale": "Both files contain their respective values — content predicates pass. The mismatch is a runtime auth failure not visible at file level.",
+    "intent": "false_negative"
   },
   {
     "id": "hh-auth-005",
@@ -162,7 +166,8 @@
       "auth_rejection",
       "HH-01"
     ],
-    "rationale": "Server references AUTH_TOKEN but .env has no such variable — cross-source access gap"
+    "rationale": "Server references AUTH_TOKEN but .env has no such variable — cross-source access gap",
+    "intent": "false_positive"
   },
   {
     "id": "hh-auth-006",
@@ -189,7 +194,8 @@
       "HH-01",
       "control"
     ],
-    "rationale": "/health is public — edit and predicate both succeed without auth concerns"
+    "rationale": "/health is public — edit and predicate both succeed without auth concerns",
+    "intent": "false_negative"
   },
   {
     "id": "hh-cors-007",
@@ -225,7 +231,8 @@
       "cors_rejection",
       "HH-02"
     ],
-    "rationale": "Both values exist in their files — content passes. But CORS allowlist and frontend URL mismatch means runtime cross-origin failure."
+    "rationale": "Both values exist in their files — content passes. But CORS allowlist and frontend URL mismatch means runtime cross-origin failure.",
+    "intent": "false_negative"
   },
   {
     "id": "hh-cors-008",
@@ -256,7 +263,8 @@
       "cors_rejection",
       "HH-02"
     ],
-    "rationale": "Both patterns found in files but ports dont align — CORS will reject requests from port 3000"
+    "rationale": "Both patterns found in files but ports dont align — CORS will reject requests from port 3000",
+    "intent": "false_negative"
   },
   {
     "id": "hh-cors-009",
@@ -292,7 +300,8 @@
       "cors_rejection",
       "HH-02"
     ],
-    "rationale": "Server comment says \"allow all\" but config restricts — inconsistent CORS intent across files"
+    "rationale": "Server comment says \"allow all\" but config restricts — inconsistent CORS intent across files",
+    "intent": "false_negative"
   },
   {
     "id": "hh-cors-010",
@@ -328,7 +337,8 @@
       "cors_rejection",
       "HH-02"
     ],
-    "rationale": "Both content patterns present but semantically contradictory — .env disables what server enables"
+    "rationale": "Both content patterns present but semantically contradictory — .env disables what server enables",
+    "intent": "false_negative"
   },
   {
     "id": "hh-cors-011",
@@ -365,7 +375,8 @@
       "HH-02",
       "control"
     ],
-    "rationale": "CORS origin configured consistently — .env sets it, server reads it"
+    "rationale": "CORS origin configured consistently — .env sets it, server reads it",
+    "intent": "false_negative"
   },
   {
     "id": "hh-rate-012",
@@ -401,7 +412,8 @@
       "rate_limit",
       "HH-03"
     ],
-    "rationale": "Both content patterns present but 5 req/min rate limit will choke the batch endpoint at runtime"
+    "rationale": "Both content patterns present but 5 req/min rate limit will choke the batch endpoint at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "hh-rate-013",
@@ -437,7 +449,8 @@
       "rate_limit",
       "HH-03"
     ],
-    "rationale": "Health endpoint subject to 3 req/min limit — Docker HEALTHCHECK every 5s will be denied"
+    "rationale": "Health endpoint subject to 3 req/min limit — Docker HEALTHCHECK every 5s will be denied",
+    "intent": "false_negative"
   },
   {
     "id": "hh-rate-014",
@@ -473,7 +486,8 @@
       "rate_limit",
       "HH-03"
     ],
-    "rationale": "Config says 100 but .env overrides to 2 — env takes precedence, silently restrictive"
+    "rationale": "Config says 100 but .env overrides to 2 — env takes precedence, silently restrictive",
+    "intent": "false_negative"
   },
   {
     "id": "hh-rate-015",
@@ -504,7 +518,8 @@
       "rate_limit",
       "HH-03"
     ],
-    "rationale": "Healthcheck fires every 5s but rate limit allows 1 req per 10s — healthcheck will fail"
+    "rationale": "Healthcheck fires every 5s but rate limit allows 1 req per 10s — healthcheck will fail",
+    "intent": "false_negative"
   },
   {
     "id": "hh-rate-016",
@@ -531,7 +546,8 @@
       "HH-03",
       "control"
     ],
-    "rationale": "1000 req/min is generous — no access denial expected"
+    "rationale": "1000 req/min is generous — no access denial expected",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-200",
@@ -556,7 +572,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "Admin route in server.js, no admin role in config.json"
+    "rationale": "Admin route in server.js, no admin role in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-201",
@@ -581,7 +598,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "Auth token check in server.js, no token in .env"
+    "rationale": "Auth token check in server.js, no token in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-202",
@@ -606,7 +624,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "Rate limit function added, no limit in config.json"
+    "rationale": "Rate limit function added, no limit in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-203",
@@ -625,7 +644,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "Session table in init.sql, no session config in .env"
+    "rationale": "Session table in init.sql, no session config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-204",
@@ -650,7 +670,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "CORS header added, no CORS config in .env"
+    "rationale": "CORS header added, no CORS config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-205",
@@ -675,7 +696,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "CSP header added, not in config.json"
+    "rationale": "CSP header added, not in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-206",
@@ -694,7 +716,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "Password hash in init.sql, no hash algo in config"
+    "rationale": "Password hash in init.sql, no hash algo in config",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-207",
@@ -713,7 +736,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: server.js has /health, check it exists"
+    "rationale": "Control: server.js has /health, check it exists",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-208",
@@ -732,7 +756,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: init.sql has sessions table"
+    "rationale": "Control: init.sql has sessions table",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-209",
@@ -751,7 +776,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: .env has SECRET_KEY"
+    "rationale": "Control: .env has SECRET_KEY",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-210",
@@ -770,7 +796,8 @@
       "http",
       "control"
     ],
-    "rationale": "Dockerfile exposes port, check Dockerfile"
+    "rationale": "Dockerfile exposes port, check Dockerfile",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-211",
@@ -789,7 +816,8 @@
       "http",
       "control"
     ],
-    "rationale": "Compose has env_file, check compose"
+    "rationale": "Compose has env_file, check compose",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-212",
@@ -808,7 +836,8 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "User table has password_hash, server.js has no bcrypt"
+    "rationale": "User table has password_hash, server.js has no bcrypt",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-213",
@@ -827,6 +856,7 @@
       "http",
       "cross_file_gap"
     ],
-    "rationale": "Sessions table has expires_at, server.js has no expiry check"
+    "rationale": "Sessions table has expires_at, server.js has no expiry check",
+    "intent": "false_positive"
   }
 ]

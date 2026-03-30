@@ -23,7 +23,8 @@
       "stale_schema",
       "TV-01"
     ],
-    "rationale": "Schema changed by migration — pre-migration hash is stale evidence"
+    "rationale": "Schema changed by migration — pre-migration hash is stale evidence",
+    "intent": "false_positive"
   },
   {
     "id": "tv-schema-002",
@@ -49,7 +50,8 @@
       "stale_schema",
       "TV-01"
     ],
-    "rationale": "New table added — schema snapshot taken before migration is stale"
+    "rationale": "New table added — schema snapshot taken before migration is stale",
+    "intent": "false_positive"
   },
   {
     "id": "tv-schema-003",
@@ -75,7 +77,8 @@
       "stale_schema",
       "TV-01"
     ],
-    "rationale": "Index added — hash of schema before migration is stale"
+    "rationale": "Index added — hash of schema before migration is stale",
+    "intent": "false_positive"
   },
   {
     "id": "tv-schema-004",
@@ -101,7 +104,8 @@
       "stale_schema",
       "TV-01"
     ],
-    "rationale": "Column renamed — predicate checking old name finds stale evidence"
+    "rationale": "Column renamed — predicate checking old name finds stale evidence",
+    "intent": "false_positive"
   },
   {
     "id": "tv-schema-005",
@@ -122,7 +126,8 @@
       "TV-01",
       "control"
     ],
-    "rationale": "No migration applied — hash should match current state"
+    "rationale": "No migration applied — hash should match current state",
+    "intent": "false_negative"
   },
   {
     "id": "tv-config-006",
@@ -148,7 +153,8 @@
       "stale_config",
       "TV-02"
     ],
-    "rationale": "Env changed — config read taken before change is stale"
+    "rationale": "Env changed — config read taken before change is stale",
+    "intent": "false_positive"
   },
   {
     "id": "tv-config-007",
@@ -174,7 +180,8 @@
       "stale_config",
       "TV-02"
     ],
-    "rationale": "NODE_ENV changed but predicate still checks old value — stale config observation"
+    "rationale": "NODE_ENV changed but predicate still checks old value — stale config observation",
+    "intent": "false_positive"
   },
   {
     "id": "tv-config-008",
@@ -200,7 +207,8 @@
       "stale_config",
       "TV-02"
     ],
-    "rationale": "DB name changed — observation of old name is stale evidence"
+    "rationale": "DB name changed — observation of old name is stale evidence",
+    "intent": "false_positive"
   },
   {
     "id": "tv-config-009",
@@ -226,7 +234,8 @@
       "stale_config",
       "TV-02"
     ],
-    "rationale": "Feature flag toggled — predicate checking old state is stale"
+    "rationale": "Feature flag toggled — predicate checking old state is stale",
+    "intent": "false_positive"
   },
   {
     "id": "tv-config-010",
@@ -252,7 +261,8 @@
       "stale_config",
       "TV-02"
     ],
-    "rationale": "Secret rotated — old secret pattern should not be found"
+    "rationale": "Secret rotated — old secret pattern should not be found",
+    "intent": "false_positive"
   },
   {
     "id": "tv-config-011",
@@ -279,7 +289,8 @@
       "TV-02",
       "control"
     ],
-    "rationale": "Predicate checks for new value — observation is fresh"
+    "rationale": "Predicate checks for new value — observation is fresh",
+    "intent": "false_negative"
   },
   {
     "id": "tv-hash-012",
@@ -305,7 +316,8 @@
       "stale_hash",
       "TV-03"
     ],
-    "rationale": "Edit modifies server.js — pre-edit hash is stale evidence"
+    "rationale": "Edit modifies server.js — pre-edit hash is stale evidence",
+    "intent": "false_positive"
   },
   {
     "id": "tv-hash-013",
@@ -331,7 +343,8 @@
       "stale_hash",
       "TV-03"
     ],
-    "rationale": "Config name changed — file hash observation is stale"
+    "rationale": "Config name changed — file hash observation is stale",
+    "intent": "false_positive"
   },
   {
     "id": "tv-hash-014",
@@ -357,7 +370,8 @@
       "stale_hash",
       "TV-03"
     ],
-    "rationale": "Dockerfile changed — hash taken before edit is stale"
+    "rationale": "Dockerfile changed — hash taken before edit is stale",
+    "intent": "false_positive"
   },
   {
     "id": "tv-hash-015",
@@ -388,7 +402,8 @@
       "stale_hash",
       "TV-03"
     ],
-    "rationale": "Multi-file edit — config.json hash from before both edits is stale"
+    "rationale": "Multi-file edit — config.json hash from before both edits is stale",
+    "intent": "false_positive"
   },
   {
     "id": "tv-hash-016",
@@ -409,7 +424,8 @@
       "TV-03",
       "control"
     ],
-    "rationale": "No edit — hash is fresh evidence"
+    "rationale": "No edit — hash is fresh evidence",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-200",
@@ -434,7 +450,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Edit server.js health, config.json has stale health config"
+    "rationale": "Edit server.js health, config.json has stale health config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-201",
@@ -459,7 +476,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference"
+    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-202",
@@ -484,7 +502,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Upgrade Dockerfile node version, .env unchanged"
+    "rationale": "Upgrade Dockerfile node version, .env unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-203",
@@ -509,7 +528,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Change compose port mapping, server.js listen unchanged"
+    "rationale": "Change compose port mapping, server.js listen unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-204",
@@ -536,7 +556,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Add column via migration, server.js has no query for it"
+    "rationale": "Add column via migration, server.js has no query for it",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-205",
@@ -561,7 +582,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Edit init.sql table, config.json has stale DB config"
+    "rationale": "Edit init.sql table, config.json has stale DB config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-206",
@@ -586,7 +608,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Compose env_file changed, .env filename unchanged"
+    "rationale": "Compose env_file changed, .env filename unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-207",
@@ -611,7 +634,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Add CORS header, config.json has no CORS config"
+    "rationale": "Add CORS header, config.json has no CORS config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-208",
@@ -636,7 +660,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Control: edit server.js, verify change"
+    "rationale": "Control: edit server.js, verify change",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-209",
@@ -661,7 +686,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Control: edit .env, verify change"
+    "rationale": "Control: edit .env, verify change",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-210",
@@ -680,7 +706,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Control: Dockerfile has EXPOSE"
+    "rationale": "Control: Dockerfile has EXPOSE",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-211",
@@ -699,7 +726,8 @@
       "verify",
       "control"
     ],
-    "rationale": "Control: compose has healthcheck"
+    "rationale": "Control: compose has healthcheck",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-212",
@@ -724,7 +752,8 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Change healthcheck interval, server.js has no interval awareness"
+    "rationale": "Change healthcheck interval, server.js has no interval awareness",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-213",
@@ -751,6 +780,7 @@
       "verify",
       "temporal_gap"
     ],
-    "rationale": "Add NOT NULL constraint, server.js has no validation"
+    "rationale": "Add NOT NULL constraint, server.js has no validation",
+    "intent": "false_positive"
   }
 ]

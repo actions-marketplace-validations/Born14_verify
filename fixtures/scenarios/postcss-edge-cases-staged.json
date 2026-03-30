@@ -22,7 +22,8 @@
       "postcss",
       "comments",
       "PCSS-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-002",
@@ -47,7 +48,8 @@
       "postcss",
       "comments",
       "PCSS-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-003",
@@ -73,7 +75,8 @@
       "postcss",
       "comments",
       "PCSS-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "postcss-004",
@@ -92,7 +95,8 @@
       "postcss",
       "comments",
       "PCSS-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "postcss-005",
@@ -116,7 +120,8 @@
       "postcss",
       "escaping",
       "PCSS-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-006",
@@ -140,7 +145,8 @@
       "postcss",
       "escaping",
       "PCSS-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-007",
@@ -164,7 +170,8 @@
       "postcss",
       "escaping",
       "PCSS-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-008",
@@ -183,7 +190,8 @@
       "postcss",
       "escaping",
       "PCSS-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "postcss-009",
@@ -207,7 +215,8 @@
       "postcss",
       "empty_rules",
       "PCSS-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-010",
@@ -231,7 +240,8 @@
       "postcss",
       "empty_rules",
       "PCSS-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-011",
@@ -255,7 +265,8 @@
       "postcss",
       "empty_rules",
       "PCSS-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-012",
@@ -279,7 +290,8 @@
       "postcss",
       "at_rules",
       "PCSS-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-013",
@@ -303,7 +315,8 @@
       "postcss",
       "at_rules",
       "PCSS-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-014",
@@ -327,7 +340,8 @@
       "postcss",
       "at_rules",
       "PCSS-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-015",
@@ -351,7 +365,8 @@
       "postcss",
       "at_rules",
       "PCSS-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-016",
@@ -370,7 +385,8 @@
       "postcss",
       "at_rules",
       "PCSS-04"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "postcss-017",
@@ -394,7 +410,8 @@
       "postcss",
       "strings",
       "PCSS-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-018",
@@ -418,7 +435,8 @@
       "postcss",
       "strings",
       "PCSS-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-019",
@@ -442,7 +460,8 @@
       "postcss",
       "strings",
       "PCSS-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-020",
@@ -466,7 +485,8 @@
       "postcss",
       "strings",
       "PCSS-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-021",
@@ -490,7 +510,8 @@
       "postcss",
       "custom_properties",
       "PCSS-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-022",
@@ -514,7 +535,8 @@
       "postcss",
       "custom_properties",
       "PCSS-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-023",
@@ -538,7 +560,8 @@
       "postcss",
       "custom_properties",
       "PCSS-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-024",
@@ -562,7 +585,8 @@
       "postcss",
       "custom_properties",
       "PCSS-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-025",
@@ -581,7 +605,8 @@
       "postcss",
       "custom_properties",
       "PCSS-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "postcss-026",
@@ -605,7 +630,8 @@
       "postcss",
       "math_functions",
       "PCSS-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-027",
@@ -629,7 +655,8 @@
       "postcss",
       "math_functions",
       "PCSS-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-028",
@@ -653,7 +680,8 @@
       "postcss",
       "math_functions",
       "PCSS-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-029",
@@ -677,7 +705,8 @@
       "postcss",
       "selectors",
       "PCSS-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-030",
@@ -701,7 +730,8 @@
       "postcss",
       "selectors",
       "PCSS-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-031",
@@ -725,7 +755,8 @@
       "postcss",
       "selectors",
       "PCSS-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-032",
@@ -749,7 +780,8 @@
       "postcss",
       "selectors",
       "PCSS-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-033",
@@ -773,7 +805,8 @@
       "postcss",
       "important",
       "PCSS-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-034",
@@ -797,7 +830,8 @@
       "postcss",
       "important",
       "PCSS-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-035",
@@ -821,7 +855,8 @@
       "postcss",
       "semicolons",
       "PCSS-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-036",
@@ -845,7 +880,8 @@
       "postcss",
       "semicolons",
       "PCSS-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-037",
@@ -869,7 +905,8 @@
       "postcss",
       "nesting",
       "PCSS-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-038",
@@ -893,7 +930,8 @@
       "postcss",
       "nesting",
       "PCSS-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-039",
@@ -912,7 +950,8 @@
       "postcss",
       "nesting",
       "PCSS-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "postcss-040",
@@ -936,7 +975,8 @@
       "postcss",
       "colors",
       "PCSS-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-041",
@@ -960,7 +1000,8 @@
       "postcss",
       "colors",
       "PCSS-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-042",
@@ -984,7 +1025,8 @@
       "postcss",
       "colors",
       "PCSS-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "postcss-043",
@@ -1003,6 +1045,7 @@
       "postcss",
       "colors",
       "PCSS-12"
-    ]
+    ],
+    "intent": "false_positive"
   }
 ]

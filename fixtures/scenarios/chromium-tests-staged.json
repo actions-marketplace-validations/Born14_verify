@@ -16,7 +16,8 @@
       "css_rendering",
       "box_model",
       "WPT-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-002",
@@ -36,7 +37,8 @@
       "css_rendering",
       "box_model",
       "WPT-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-003",
@@ -56,7 +58,8 @@
       "css_rendering",
       "box_model",
       "WPT-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-004",
@@ -82,7 +85,8 @@
       "css_rendering",
       "box_model",
       "WPT-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-005",
@@ -102,7 +106,8 @@
       "box_model",
       "WPT-01"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-006",
@@ -123,7 +128,8 @@
       "box_model",
       "WPT-01"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-007",
@@ -144,7 +150,8 @@
       "box_model",
       "WPT-01"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-008",
@@ -164,7 +171,8 @@
       "box_model",
       "WPT-01"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-009",
@@ -184,7 +192,8 @@
       "box_model",
       "WPT-01"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-010",
@@ -205,7 +214,8 @@
       "box_model",
       "WPT-01"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-011",
@@ -225,7 +235,8 @@
       "box_model",
       "WPT-01"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-012",
@@ -245,7 +256,8 @@
       "css_rendering",
       "flexbox",
       "WPT-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-013",
@@ -265,7 +277,8 @@
       "css_rendering",
       "flexbox",
       "WPT-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-014",
@@ -285,7 +298,8 @@
       "css_rendering",
       "flexbox",
       "WPT-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-015",
@@ -311,7 +325,8 @@
       "css_rendering",
       "flexbox",
       "WPT-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-016",
@@ -337,7 +352,8 @@
       "css_rendering",
       "flexbox",
       "WPT-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-017",
@@ -358,7 +374,8 @@
       "flexbox",
       "WPT-02"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-018",
@@ -379,7 +396,8 @@
       "flexbox",
       "WPT-02"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-019",
@@ -400,7 +418,8 @@
       "flexbox",
       "WPT-02"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-020",
@@ -421,7 +440,8 @@
       "flexbox",
       "WPT-02"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-021",
@@ -442,7 +462,8 @@
       "flexbox",
       "WPT-02"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-022",
@@ -463,7 +484,8 @@
       "flexbox",
       "WPT-02"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-023",
@@ -484,7 +506,8 @@
       "flexbox",
       "WPT-02"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-024",
@@ -504,7 +527,8 @@
       "css_rendering",
       "grid",
       "WPT-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-025",
@@ -524,7 +548,8 @@
       "css_rendering",
       "grid",
       "WPT-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-026",
@@ -544,7 +569,8 @@
       "css_rendering",
       "grid",
       "WPT-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-027",
@@ -570,7 +596,8 @@
       "css_rendering",
       "grid",
       "WPT-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-028",
@@ -591,7 +618,8 @@
       "grid",
       "WPT-03"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-029",
@@ -612,7 +640,8 @@
       "grid",
       "WPT-03"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-030",
@@ -633,7 +662,8 @@
       "grid",
       "WPT-03"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-031",
@@ -654,7 +684,8 @@
       "grid",
       "WPT-03"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-032",
@@ -675,7 +706,8 @@
       "grid",
       "WPT-03"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-033",
@@ -696,7 +728,8 @@
       "grid",
       "WPT-03"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-034",
@@ -717,7 +750,8 @@
       "grid",
       "WPT-03"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-035",
@@ -737,7 +771,8 @@
       "css_rendering",
       "positioning",
       "WPT-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-036",
@@ -757,7 +792,8 @@
       "css_rendering",
       "positioning",
       "WPT-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-037",
@@ -783,7 +819,8 @@
       "css_rendering",
       "positioning",
       "WPT-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-038",
@@ -809,7 +846,8 @@
       "css_rendering",
       "positioning",
       "WPT-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-039",
@@ -830,7 +868,8 @@
       "positioning",
       "WPT-04"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-040",
@@ -851,7 +890,8 @@
       "positioning",
       "WPT-04"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-041",
@@ -872,7 +912,8 @@
       "positioning",
       "WPT-04"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-042",
@@ -892,7 +933,8 @@
       "positioning",
       "WPT-04"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-043",
@@ -912,7 +954,8 @@
       "positioning",
       "WPT-04"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-044",
@@ -933,7 +976,8 @@
       "positioning",
       "WPT-04"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-045",
@@ -953,7 +997,8 @@
       "positioning",
       "WPT-04"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-046",
@@ -972,7 +1017,8 @@
       "css_rendering",
       "typography",
       "WPT-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-047",
@@ -991,7 +1037,8 @@
       "css_rendering",
       "typography",
       "WPT-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-048",
@@ -1010,7 +1057,8 @@
       "css_rendering",
       "typography",
       "WPT-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-049",
@@ -1030,7 +1078,8 @@
       "css_rendering",
       "typography",
       "WPT-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-050",
@@ -1055,7 +1104,8 @@
       "css_rendering",
       "typography",
       "WPT-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-051",
@@ -1075,7 +1125,8 @@
       "typography",
       "WPT-05"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-052",
@@ -1095,7 +1146,8 @@
       "typography",
       "WPT-05"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-053",
@@ -1116,7 +1168,8 @@
       "typography",
       "WPT-05"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-054",
@@ -1136,7 +1189,8 @@
       "typography",
       "WPT-05"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-055",
@@ -1156,7 +1210,8 @@
       "typography",
       "WPT-05"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-056",
@@ -1176,7 +1231,8 @@
       "typography",
       "WPT-05"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-057",
@@ -1196,7 +1252,8 @@
       "css_rendering",
       "visual_effects",
       "WPT-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-058",
@@ -1216,7 +1273,8 @@
       "css_rendering",
       "visual_effects",
       "WPT-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-059",
@@ -1236,7 +1294,8 @@
       "css_rendering",
       "visual_effects",
       "WPT-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-060",
@@ -1262,7 +1321,8 @@
       "css_rendering",
       "visual_effects",
       "WPT-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-061",
@@ -1283,7 +1343,8 @@
       "visual_effects",
       "WPT-06"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-062",
@@ -1304,7 +1365,8 @@
       "visual_effects",
       "WPT-06"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-063",
@@ -1325,7 +1387,8 @@
       "visual_effects",
       "WPT-06"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-064",
@@ -1346,7 +1409,8 @@
       "visual_effects",
       "WPT-06"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-065",
@@ -1366,7 +1430,8 @@
       "visual_effects",
       "WPT-06"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-066",
@@ -1387,7 +1452,8 @@
       "visual_effects",
       "WPT-06"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-067",
@@ -1408,7 +1474,8 @@
       "visual_effects",
       "WPT-06"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-068",
@@ -1434,7 +1501,8 @@
       "css_rendering",
       "transforms",
       "WPT-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-069",
@@ -1460,7 +1528,8 @@
       "css_rendering",
       "transforms",
       "WPT-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-070",
@@ -1486,7 +1555,8 @@
       "css_rendering",
       "transforms",
       "WPT-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-071",
@@ -1512,7 +1582,8 @@
       "css_rendering",
       "transforms",
       "WPT-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-072",
@@ -1533,7 +1604,8 @@
       "transforms",
       "WPT-07"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-073",
@@ -1554,7 +1626,8 @@
       "transforms",
       "WPT-07"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-074",
@@ -1575,7 +1648,8 @@
       "transforms",
       "WPT-07"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-075",
@@ -1596,7 +1670,8 @@
       "transforms",
       "WPT-07"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-076",
@@ -1616,7 +1691,8 @@
       "transforms",
       "WPT-07"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-077",
@@ -1637,7 +1713,8 @@
       "transforms",
       "WPT-07"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-078",
@@ -1658,7 +1735,8 @@
       "transforms",
       "WPT-07"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-079",
@@ -1678,7 +1756,8 @@
       "css_rendering",
       "animations",
       "WPT-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-080",
@@ -1698,7 +1777,8 @@
       "css_rendering",
       "animations",
       "WPT-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-081",
@@ -1716,7 +1796,8 @@
       "css_rendering",
       "animations",
       "WPT-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-082",
@@ -1741,7 +1822,8 @@
       "css_rendering",
       "animations",
       "WPT-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-083",
@@ -1762,7 +1844,8 @@
       "animations",
       "WPT-08"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-084",
@@ -1783,7 +1866,8 @@
       "animations",
       "WPT-08"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-085",
@@ -1802,7 +1886,8 @@
       "animations",
       "WPT-08"
     ],
-    "expectedFailedGate": "content"
+    "expectedFailedGate": "content",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-086",
@@ -1823,7 +1908,8 @@
       "animations",
       "WPT-08"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-087",
@@ -1843,7 +1929,8 @@
       "animations",
       "WPT-08"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-088",
@@ -1864,7 +1951,8 @@
       "animations",
       "WPT-08"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-089",
@@ -1885,7 +1973,8 @@
       "animations",
       "WPT-08"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-090",
@@ -1905,7 +1994,8 @@
       "css_rendering",
       "overflow",
       "WPT-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-091",
@@ -1925,7 +2015,8 @@
       "css_rendering",
       "overflow",
       "WPT-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-092",
@@ -1945,7 +2036,8 @@
       "css_rendering",
       "overflow",
       "WPT-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-093",
@@ -1970,7 +2062,8 @@
       "css_rendering",
       "overflow",
       "WPT-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-094",
@@ -1991,7 +2084,8 @@
       "overflow",
       "WPT-09"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-095",
@@ -2012,7 +2106,8 @@
       "overflow",
       "WPT-09"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-096",
@@ -2033,7 +2128,8 @@
       "overflow",
       "WPT-09"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-097",
@@ -2053,7 +2149,8 @@
       "overflow",
       "WPT-09"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-098",
@@ -2074,7 +2171,8 @@
       "overflow",
       "WPT-09"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-099",
@@ -2095,7 +2193,8 @@
       "overflow",
       "WPT-09"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-100",
@@ -2115,7 +2214,8 @@
       "overflow",
       "WPT-09"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-101",
@@ -2135,7 +2235,8 @@
       "css_rendering",
       "selectors",
       "WPT-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-102",
@@ -2155,7 +2256,8 @@
       "css_rendering",
       "selectors",
       "WPT-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-103",
@@ -2175,7 +2277,8 @@
       "css_rendering",
       "selectors",
       "WPT-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-104",
@@ -2195,7 +2298,8 @@
       "css_rendering",
       "selectors",
       "WPT-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-105",
@@ -2215,7 +2319,8 @@
       "css_rendering",
       "selectors",
       "WPT-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-106",
@@ -2236,7 +2341,8 @@
       "selectors",
       "WPT-10"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-107",
@@ -2257,7 +2363,8 @@
       "selectors",
       "WPT-10"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-108",
@@ -2278,7 +2385,8 @@
       "selectors",
       "WPT-10"
     ],
-    "expectedFailedGate": "css"
+    "expectedFailedGate": "css",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-109",
@@ -2299,7 +2407,8 @@
       "selectors",
       "WPT-10"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-110",
@@ -2320,7 +2429,8 @@
       "selectors",
       "WPT-10"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-111",
@@ -2341,7 +2451,8 @@
       "selectors",
       "WPT-10"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-112",
@@ -2362,7 +2473,8 @@
       "selectors",
       "WPT-10"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-113",
@@ -2381,7 +2493,8 @@
       "css_rendering",
       "html_existence",
       "WPT-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-114",
@@ -2400,7 +2513,8 @@
       "css_rendering",
       "html_existence",
       "WPT-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-115",
@@ -2419,7 +2533,8 @@
       "css_rendering",
       "html_existence",
       "WPT-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-116",
@@ -2438,7 +2553,8 @@
       "css_rendering",
       "html_existence",
       "WPT-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-117",
@@ -2457,7 +2573,8 @@
       "html_existence",
       "WPT-04"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-118",
@@ -2476,7 +2593,8 @@
       "html_existence",
       "WPT-06"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-119",
@@ -2494,7 +2612,8 @@
       "css_rendering",
       "content_check",
       "WPT-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-120",
@@ -2512,7 +2631,8 @@
       "css_rendering",
       "content_check",
       "WPT-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "wpt-121",
@@ -2531,7 +2651,8 @@
       "content_check",
       "WPT-03"
     ],
-    "expectedFailedGate": "content"
+    "expectedFailedGate": "content",
+    "intent": "false_positive"
   },
   {
     "id": "wpt-122",
@@ -2550,6 +2671,7 @@
       "content_check",
       "WPT-09"
     ],
-    "expectedFailedGate": "content"
+    "expectedFailedGate": "content",
+    "intent": "false_positive"
   }
 ]

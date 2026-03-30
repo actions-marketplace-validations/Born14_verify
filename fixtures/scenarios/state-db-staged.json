@@ -17,7 +17,8 @@
       "wrong_db_identity",
       "SD-01"
     ],
-    "rationale": "Assumed: init.sql runs against prod DB. Actual: .env.prod has /demo_prod, init.sql has no database qualifier — schema file and connection target disagree on DB identity."
+    "rationale": "Assumed: init.sql runs against prod DB. Actual: .env.prod has /demo_prod, init.sql has no database qualifier — schema file and connection target disagree on DB identity.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-identity-002",
@@ -37,7 +38,8 @@
       "wrong_db_identity",
       "SD-01"
     ],
-    "rationale": "Assumed: config.json db name \"demo\" matches staging. Actual: .env.staging has demo_staging. Two different databases."
+    "rationale": "Assumed: config.json db name \"demo\" matches staging. Actual: .env.staging has demo_staging. Two different databases.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-identity-003",
@@ -58,7 +60,8 @@
       "wrong_db_identity",
       "SD-01"
     ],
-    "rationale": "Assumed: staging DB host (localhost). Actual: prod DB host (db-primary.internal). Agent grounded against wrong environment."
+    "rationale": "Assumed: staging DB host (localhost). Actual: prod DB host (db-primary.internal). Agent grounded against wrong environment.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-identity-004",
@@ -84,7 +87,8 @@
       "wrong_db_identity",
       "SD-01"
     ],
-    "rationale": "Assumed: init.sql schema change affects the DB in .env. Actual: .env has no awareness of schema files — DDL and connection are independent surfaces."
+    "rationale": "Assumed: init.sql schema change affects the DB in .env. Actual: .env has no awareness of schema files — DDL and connection are independent surfaces.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-identity-005",
@@ -105,7 +109,8 @@
       "wrong_db_identity",
       "SD-01"
     ],
-    "rationale": "Assumed: same port means same DB. Actual: config.json targets \"demo\" on localhost, config.prod targets \"demo_prod\" on db-primary.internal."
+    "rationale": "Assumed: same port means same DB. Actual: config.json targets \"demo\" on localhost, config.prod targets \"demo_prod\" on db-primary.internal.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-identity-006",
@@ -127,7 +132,8 @@
       "SD-01",
       "control"
     ],
-    "rationale": "Same-source check — config.json confirms its own DB name. No identity mismatch."
+    "rationale": "Same-source check — config.json confirms its own DB name. No identity mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "sd-data-007",
@@ -147,7 +153,8 @@
       "data_assumed_present",
       "SD-02"
     ],
-    "rationale": "Assumed: Alpha/Beta come from DB. Actual: hardcoded in server.js. Agent confuses API response with DB state."
+    "rationale": "Assumed: Alpha/Beta come from DB. Actual: hardcoded in server.js. Agent confuses API response with DB state.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-data-008",
@@ -167,7 +174,8 @@
       "data_assumed_present",
       "SD-02"
     ],
-    "rationale": "Assumed: users table has data (schema exists). Actual: zero rows. SELECT returns empty, not \"table missing\" error."
+    "rationale": "Assumed: users table has data (schema exists). Actual: zero rows. SELECT returns empty, not \"table missing\" error.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-data-009",
@@ -187,7 +195,8 @@
       "data_assumed_present",
       "SD-02"
     ],
-    "rationale": "Assumed: sessions work (table exists). Actual: zero rows — token lookup returns null, not \"expired\"."
+    "rationale": "Assumed: sessions work (table exists). Actual: zero rows — token lookup returns null, not \"expired\".",
+    "intent": "false_positive"
   },
   {
     "id": "sd-data-010",
@@ -207,7 +216,8 @@
       "data_assumed_present",
       "SD-02"
     ],
-    "rationale": "Assumed: settings table has config rows. Actual: empty. App gets null for theme/app_name lookups."
+    "rationale": "Assumed: settings table has config rows. Actual: empty. App gets null for theme/app_name lookups.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-data-011",
@@ -227,7 +237,8 @@
       "data_assumed_present",
       "SD-02"
     ],
-    "rationale": "Assumed: posts table has publishable content. Actual: zero rows. Blog/feed pages render empty."
+    "rationale": "Assumed: posts table has publishable content. Actual: zero rows. Blog/feed pages render empty.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-data-012",
@@ -253,7 +264,8 @@
       "data_assumed_present",
       "SD-02"
     ],
-    "rationale": "Assumed: posts table has data to query. Actual: zero rows. New endpoint returns [] — correct but useless."
+    "rationale": "Assumed: posts table has data to query. Actual: zero rows. New endpoint returns [] — correct but useless.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-data-013",
@@ -274,7 +286,8 @@
       "SD-02",
       "control"
     ],
-    "rationale": "Checking the source of truth directly — Alpha is in server.js, not assumed from DB."
+    "rationale": "Checking the source of truth directly — Alpha is in server.js, not assumed from DB.",
+    "intent": "false_negative"
   },
   {
     "id": "sd-target-014",
@@ -300,7 +313,8 @@
       "migration_wrong_target",
       "SD-03"
     ],
-    "rationale": "Assumed: config.json change propagates to .env. Actual: .env still has /demo — migration targets wrong DB."
+    "rationale": "Assumed: config.json change propagates to .env. Actual: .env still has /demo — migration targets wrong DB.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-target-015",
@@ -326,7 +340,8 @@
       "migration_wrong_target",
       "SD-03"
     ],
-    "rationale": "Assumed: config.json host is the connection target. Actual: .env DATABASE_URL still uses localhost."
+    "rationale": "Assumed: config.json host is the connection target. Actual: .env DATABASE_URL still uses localhost.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-target-016",
@@ -352,7 +367,8 @@
       "migration_wrong_target",
       "SD-03"
     ],
-    "rationale": "Assumed: config.json port governs connection. Actual: .env has :5432 — migration runs against wrong port."
+    "rationale": "Assumed: config.json port governs connection. Actual: .env has :5432 — migration runs against wrong port.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-target-017",
@@ -378,7 +394,8 @@
       "migration_wrong_target",
       "SD-03"
     ],
-    "rationale": "Assumed: tables in \"app\" schema are queryable. Actual: config has no schema setting — queries default to public schema."
+    "rationale": "Assumed: tables in \"app\" schema are queryable. Actual: config has no schema setting — queries default to public schema.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-target-018",
@@ -398,7 +415,8 @@
       "migration_wrong_target",
       "SD-03"
     ],
-    "rationale": "Assumed: staging migration applies to prod. Actual: .env.prod connects to demo_prod, staging DDL ran on demo_staging."
+    "rationale": "Assumed: staging migration applies to prod. Actual: .env.prod connects to demo_prod, staging DDL ran on demo_staging.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-target-019",
@@ -419,7 +437,8 @@
       "migration_wrong_target",
       "SD-03"
     ],
-    "rationale": "Assumed: base config.json DB name applies to prod. Actual: config.prod.json overrides to demo_prod."
+    "rationale": "Assumed: base config.json DB name applies to prod. Actual: config.prod.json overrides to demo_prod.",
+    "intent": "false_positive"
   },
   {
     "id": "sd-target-020",
@@ -445,7 +464,8 @@
       "SD-03",
       "control"
     ],
-    "rationale": "Both config surfaces agree on \"demo\" — no DB identity mismatch."
+    "rationale": "Both config surfaces agree on \"demo\" — no DB identity mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-200",
@@ -464,7 +484,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume server.js has /api/users route — it doesnt"
+    "rationale": "Assume server.js has /api/users route — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-201",
@@ -483,7 +504,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has redis section — it doesnt"
+    "rationale": "Assume config.json has redis section — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-202",
@@ -502,7 +524,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume .env has REDIS_URL — it doesnt"
+    "rationale": "Assume .env has REDIS_URL — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-203",
@@ -521,7 +544,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume init.sql has products table — it doesnt"
+    "rationale": "Assume init.sql has products table — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-204",
@@ -540,7 +564,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume Dockerfile has multi-stage build — it doesnt"
+    "rationale": "Assume Dockerfile has multi-stage build — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-205",
@@ -559,7 +584,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume compose has redis service — it doesnt"
+    "rationale": "Assume compose has redis service — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-206",
@@ -578,7 +604,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume server.js uses express — it uses http"
+    "rationale": "Assume server.js uses express — it uses http",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-207",
@@ -597,7 +624,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has logging config — it doesnt"
+    "rationale": "Assume config.json has logging config — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-208",
@@ -622,7 +650,8 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Edit adds /api/users, predicate checks wrong file"
+    "rationale": "Edit adds /api/users, predicate checks wrong file",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-209",
@@ -647,6 +676,7 @@
       "db",
       "state_assumption"
     ],
-    "rationale": "Edit .env port, check wrong file"
+    "rationale": "Edit .env port, check wrong file",
+    "intent": "false_positive"
   }
 ]

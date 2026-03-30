@@ -28,7 +28,8 @@
       "port_conflict",
       "JC-01"
     ],
-    "rationale": "Edit applies and content matches — but creates runtime port conflict (two services on 3000)"
+    "rationale": "Edit applies and content matches — but creates runtime port conflict (two services on 3000)",
+    "intent": "false_negative"
   },
   {
     "id": "jc-port-002",
@@ -59,7 +60,8 @@
       "port_conflict",
       "JC-01"
     ],
-    "rationale": "App port set to 5432 which is also the database port — port contention across services"
+    "rationale": "App port set to 5432 which is also the database port — port contention across services",
+    "intent": "false_negative"
   },
   {
     "id": "jc-port-003",
@@ -90,7 +92,8 @@
       "port_conflict",
       "JC-01"
     ],
-    "rationale": "Server defaults to 5432 which is the DB port — structural port collision detectable"
+    "rationale": "Server defaults to 5432 which is the DB port — structural port collision detectable",
+    "intent": "false_negative"
   },
   {
     "id": "jc-port-004",
@@ -121,7 +124,8 @@
       "port_conflict",
       "JC-01"
     ],
-    "rationale": "Dockerfile exposes 8080 but docker-compose env still PORT=3000 — port mismatch contention"
+    "rationale": "Dockerfile exposes 8080 but docker-compose env still PORT=3000 — port mismatch contention",
+    "intent": "false_positive"
   },
   {
     "id": "jc-port-005",
@@ -152,7 +156,8 @@
       "port_conflict",
       "JC-01"
     ],
-    "rationale": "Two mappings using host port 3000 — Docker will fail at runtime with port conflict"
+    "rationale": "Two mappings using host port 3000 — Docker will fail at runtime with port conflict",
+    "intent": "false_negative"
   },
   {
     "id": "jc-port-006",
@@ -184,7 +189,8 @@
       "JC-01",
       "control"
     ],
-    "rationale": "Worker on 4000, app on 3000 — different ports, no contention"
+    "rationale": "Worker on 4000, app on 3000 — different ports, no contention",
+    "intent": "false_negative"
   },
   {
     "id": "jc-pid-007",
@@ -215,7 +221,8 @@
       "stale_pid",
       "JC-02"
     ],
-    "rationale": "Config declares pidFile but server.js has no PID management code — stale PID would block startup"
+    "rationale": "Config declares pidFile but server.js has no PID management code — stale PID would block startup",
+    "intent": "false_positive"
   },
   {
     "id": "jc-pid-008",
@@ -246,7 +253,8 @@
       "stale_pid",
       "JC-02"
     ],
-    "rationale": "Config references lockDir but .env has no LOCK_DIR — process lock contention at startup"
+    "rationale": "Config references lockDir but .env has no LOCK_DIR — process lock contention at startup",
+    "intent": "false_positive"
   },
   {
     "id": "jc-pid-009",
@@ -277,7 +285,8 @@
       "stale_pid",
       "JC-02"
     ],
-    "rationale": "Restart policy added but server.js has no signal handler — zombie process on restart"
+    "rationale": "Restart policy added but server.js has no signal handler — zombie process on restart",
+    "intent": "false_positive"
   },
   {
     "id": "jc-pid-010",
@@ -308,7 +317,8 @@
       "stale_pid",
       "JC-02"
     ],
-    "rationale": "Grace period set but no explicit stop_signal — process may not respond to default signal"
+    "rationale": "Grace period set but no explicit stop_signal — process may not respond to default signal",
+    "intent": "false_positive"
   },
   {
     "id": "jc-pid-011",
@@ -335,7 +345,8 @@
       "JC-02",
       "control"
     ],
-    "rationale": "Single file edit, same file check — no PID/lock contention"
+    "rationale": "Single file edit, same file check — no PID/lock contention",
+    "intent": "false_negative"
   },
   {
     "id": "jc-name-012",
@@ -371,7 +382,8 @@
       "container_name",
       "JC-03"
     ],
-    "rationale": "Two services with same container_name — Docker will fail with name conflict at runtime"
+    "rationale": "Two services with same container_name — Docker will fail with name conflict at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "jc-name-013",
@@ -402,7 +414,8 @@
       "container_name",
       "JC-03"
     ],
-    "rationale": "App hostname \"db\" collides with db service in test compose — DNS resolution contention"
+    "rationale": "App hostname \"db\" collides with db service in test compose — DNS resolution contention",
+    "intent": "false_negative"
   },
   {
     "id": "jc-name-014",
@@ -433,7 +446,8 @@
       "container_name",
       "JC-03"
     ],
-    "rationale": "Worker network alias \"app\" conflicts with app service name — Docker DNS contention"
+    "rationale": "Worker network alias \"app\" conflicts with app service name — Docker DNS contention",
+    "intent": "false_negative"
   },
   {
     "id": "jc-name-015",
@@ -459,7 +473,8 @@
       "container_name",
       "JC-03"
     ],
-    "rationale": "Two Dockerfile stages named \"builder\" — later stage overwrites first, creating ambiguity"
+    "rationale": "Two Dockerfile stages named \"builder\" — later stage overwrites first, creating ambiguity",
+    "intent": "false_negative"
   },
   {
     "id": "jc-name-016",
@@ -490,7 +505,8 @@
       "container_name",
       "JC-03"
     ],
-    "rationale": "Volume named \"app\" same as service name — namespace contention in Docker"
+    "rationale": "Volume named \"app\" same as service name — namespace contention in Docker",
+    "intent": "false_negative"
   },
   {
     "id": "jc-name-017",
@@ -527,7 +543,8 @@
       "JC-03",
       "control"
     ],
-    "rationale": "Unique container names — no naming contention"
+    "rationale": "Unique container names — no naming contention",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -557,7 +574,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -587,7 +605,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -617,7 +636,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -648,7 +668,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -673,7 +694,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -698,7 +720,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -723,7 +746,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -753,7 +777,8 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -778,7 +803,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -803,7 +829,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -828,7 +855,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -858,7 +886,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-212",
@@ -885,6 +914,7 @@
       "cli",
       "contention_gap"
     ],
-    "rationale": "Migration adds column that server.js doesnt reference"
+    "rationale": "Migration adds column that server.js doesnt reference",
+    "intent": "false_positive"
   }
 ]

@@ -17,7 +17,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Mustache comment tag exists in template source"
+    "rationale": "Mustache comment tag exists in template source",
+    "intent": "false_negative"
   },
   {
     "id": "mustache-002",
@@ -38,7 +39,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Multiline comment not present in template — fabricated pattern"
+    "rationale": "Multiline comment not present in template — fabricated pattern",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-003",
@@ -59,7 +61,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Padded comment does not exist in source"
+    "rationale": "Padded comment does not exist in source",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-004",
@@ -80,7 +83,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Standalone comment with indentation — fabricated"
+    "rationale": "Standalone comment with indentation — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-005",
@@ -101,7 +105,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Comment embedded in HTML — pattern not in source"
+    "rationale": "Comment embedded in HTML — pattern not in source",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-006",
@@ -122,7 +127,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Empty comment tag not present"
+    "rationale": "Empty comment tag not present",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-007",
@@ -143,7 +149,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Comment containing HTML/script — fabricated"
+    "rationale": "Comment containing HTML/script — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-008",
@@ -163,7 +170,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "The word comment may appear in helper code discussing rendering"
+    "rationale": "The word comment may appear in helper code discussing rendering",
+    "intent": "false_negative"
   },
   {
     "id": "mustache-009",
@@ -184,7 +192,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Adjacent comment tags — fabricated pattern"
+    "rationale": "Adjacent comment tags — fabricated pattern",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-010",
@@ -205,7 +214,8 @@
       "comments",
       "TMPL-01"
     ],
-    "rationale": "Nested mustache in comment — fabricated"
+    "rationale": "Nested mustache in comment — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-011",
@@ -226,7 +236,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Custom delimiter syntax — not present in standard template"
+    "rationale": "Custom delimiter syntax — not present in standard template",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-012",
@@ -247,7 +258,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "ERB-style tag after delimiter change — fabricated"
+    "rationale": "ERB-style tag after delimiter change — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-013",
@@ -268,7 +280,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Delimiter reset from ERB back to mustache — fabricated"
+    "rationale": "Delimiter reset from ERB back to mustache — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-014",
@@ -289,7 +302,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Pipe delimiters — fabricated"
+    "rationale": "Pipe delimiters — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-015",
@@ -310,7 +324,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Unescaped with custom delimiters — fabricated"
+    "rationale": "Unescaped with custom delimiters — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-016",
@@ -331,7 +346,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Section using ERB delimiters — fabricated"
+    "rationale": "Section using ERB delimiters — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-017",
@@ -352,7 +368,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Standalone angle bracket delimiters — fabricated"
+    "rationale": "Standalone angle bracket delimiters — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-018",
@@ -373,7 +390,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Inverted section with ERB delimiters — fabricated"
+    "rationale": "Inverted section with ERB delimiters — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-019",
@@ -394,7 +412,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Partial include with custom delimiters — fabricated"
+    "rationale": "Partial include with custom delimiters — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-020",
@@ -415,7 +434,8 @@
       "delimiters",
       "TMPL-02"
     ],
-    "rationale": "Comment with custom delimiters — fabricated"
+    "rationale": "Comment with custom delimiters — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-021",
@@ -435,7 +455,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Basic mustache variable tag likely present in template"
+    "rationale": "Basic mustache variable tag likely present in template",
+    "intent": "false_negative"
   },
   {
     "id": "mustache-022",
@@ -456,7 +477,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Triple mustache for unescaped HTML — fabricated variable name"
+    "rationale": "Triple mustache for unescaped HTML — fabricated variable name",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-023",
@@ -477,7 +499,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Ampersand unescaped syntax — fabricated variable"
+    "rationale": "Ampersand unescaped syntax — fabricated variable",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-024",
@@ -498,7 +521,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Dot notation access — fabricated nested variable"
+    "rationale": "Dot notation access — fabricated nested variable",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-025",
@@ -519,7 +543,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Integer in data context — fabricated data file content"
+    "rationale": "Integer in data context — fabricated data file content",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-026",
@@ -540,7 +565,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Decimal in data — fabricated"
+    "rationale": "Decimal in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-027",
@@ -561,7 +587,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Null in data — fabricated"
+    "rationale": "Null in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-028",
@@ -582,7 +609,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "HTML entity escape reference — not in helper source"
+    "rationale": "HTML entity escape reference — not in helper source",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-029",
@@ -603,7 +631,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Variable that does not exist in any context — fabricated"
+    "rationale": "Variable that does not exist in any context — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-030",
@@ -624,7 +653,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Interpolation with surrounding pipes — fabricated pattern"
+    "rationale": "Interpolation with surrounding pipes — fabricated pattern",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-031",
@@ -645,7 +675,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Standalone interpolation with indent — fabricated"
+    "rationale": "Standalone interpolation with indent — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-032",
@@ -666,7 +697,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Two variables on one line — fabricated"
+    "rationale": "Two variables on one line — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-033",
@@ -687,7 +719,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Five-level deep dot notation — fabricated"
+    "rationale": "Five-level deep dot notation — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-034",
@@ -708,7 +741,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "Implicit iterator (dot) — fabricated"
+    "rationale": "Implicit iterator (dot) — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-035",
@@ -729,7 +763,8 @@
       "interpolation",
       "TMPL-03"
     ],
-    "rationale": "escapeHtml function reference — fabricated helper"
+    "rationale": "escapeHtml function reference — fabricated helper",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-036",
@@ -750,7 +785,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Truthy section tag — fabricated"
+    "rationale": "Truthy section tag — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-037",
@@ -771,7 +807,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Section closing tag — fabricated"
+    "rationale": "Section closing tag — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-038",
@@ -792,7 +829,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "List iteration pattern — fabricated"
+    "rationale": "List iteration pattern — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-039",
@@ -813,7 +851,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Nested context pushing — fabricated"
+    "rationale": "Nested context pushing — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-040",
@@ -834,7 +873,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Falsy boolean in data — fabricated"
+    "rationale": "Falsy boolean in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-041",
@@ -855,7 +895,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Empty array in data — fabricated"
+    "rationale": "Empty array in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-042",
@@ -876,7 +917,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Implicit iterator in list — fabricated"
+    "rationale": "Implicit iterator in list — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-043",
@@ -897,7 +939,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Doubled section — fabricated"
+    "rationale": "Doubled section — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-044",
@@ -918,7 +961,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Three-level nested sections — fabricated"
+    "rationale": "Three-level nested sections — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-045",
@@ -939,7 +983,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Parent context resolution — fabricated"
+    "rationale": "Parent context resolution — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-046",
@@ -960,7 +1005,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Standalone section on own lines — fabricated multiline"
+    "rationale": "Standalone section on own lines — fabricated multiline",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-047",
@@ -981,7 +1027,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Indented standalone section — fabricated"
+    "rationale": "Indented standalone section — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-048",
@@ -1002,7 +1049,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "Section with padded tag names — fabricated"
+    "rationale": "Section with padded tag names — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-049",
@@ -1023,7 +1071,8 @@
       "sections",
       "TMPL-04"
     ],
-    "rationale": "List rendering with HTML — fabricated"
+    "rationale": "List rendering with HTML — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-050",
@@ -1044,7 +1093,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Inverted section tag — fabricated"
+    "rationale": "Inverted section tag — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-051",
@@ -1065,7 +1115,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Inverted section closing — fabricated"
+    "rationale": "Inverted section closing — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-052",
@@ -1086,7 +1137,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Inverted with false value — fabricated"
+    "rationale": "Inverted with false value — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-053",
@@ -1107,7 +1159,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Inverted with null — fabricated"
+    "rationale": "Inverted with null — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-054",
@@ -1128,7 +1181,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Inverted with empty list — fabricated"
+    "rationale": "Inverted with empty list — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-055",
@@ -1149,7 +1203,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Truthy boolean hiding inverted section — fabricated data"
+    "rationale": "Truthy boolean hiding inverted section — fabricated data",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-056",
@@ -1170,7 +1225,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Non-empty list hiding inverted — fabricated data"
+    "rationale": "Non-empty list hiding inverted — fabricated data",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-057",
@@ -1191,7 +1247,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Standalone inverted on own lines — fabricated"
+    "rationale": "Standalone inverted on own lines — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-058",
@@ -1212,7 +1269,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Normal + inverted combo — fabricated"
+    "rationale": "Normal + inverted combo — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-059",
@@ -1233,7 +1291,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Inverted section for undefined key — fabricated"
+    "rationale": "Inverted section for undefined key — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-060",
@@ -1254,7 +1313,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Two consecutive inverted sections — fabricated"
+    "rationale": "Two consecutive inverted sections — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-061",
@@ -1275,7 +1335,8 @@
       "inverted",
       "TMPL-05"
     ],
-    "rationale": "Indented inverted — fabricated"
+    "rationale": "Indented inverted — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-062",
@@ -1296,7 +1357,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Partial include tag — fabricated"
+    "rationale": "Partial include tag — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-063",
@@ -1317,7 +1379,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Indented partial — fabricated"
+    "rationale": "Indented partial — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-064",
@@ -1338,7 +1401,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Partial with parent context access — fabricated partial file"
+    "rationale": "Partial with parent context access — fabricated partial file",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-065",
@@ -1359,7 +1423,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Partial including another partial — fabricated"
+    "rationale": "Partial including another partial — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-066",
@@ -1380,7 +1445,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Standalone partial — fabricated"
+    "rationale": "Standalone partial — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-067",
@@ -1401,7 +1467,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Padded partial with indentation inheritance — fabricated"
+    "rationale": "Padded partial with indentation inheritance — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-068",
@@ -1422,7 +1489,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Partial inside section — fabricated"
+    "rationale": "Partial inside section — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-069",
@@ -1443,7 +1511,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Missing partial tag — fabricated"
+    "rationale": "Missing partial tag — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-070",
@@ -1464,7 +1533,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Navigation markup in partial — fabricated"
+    "rationale": "Navigation markup in partial — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-071",
@@ -1485,7 +1555,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Path-style partial name — fabricated"
+    "rationale": "Path-style partial name — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-072",
@@ -1506,7 +1577,8 @@
       "partials",
       "TMPL-06"
     ],
-    "rationale": "Handlebars-style registerPartial — not mustache spec, fabricated"
+    "rationale": "Handlebars-style registerPartial — not mustache spec, fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-073",
@@ -1527,7 +1599,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Lambda function in helper — fabricated"
+    "rationale": "Lambda function in helper — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-074",
@@ -1548,7 +1621,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Lambda with text parameter — fabricated"
+    "rationale": "Lambda with text parameter — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-075",
@@ -1569,7 +1643,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Section lambda with render callback — fabricated"
+    "rationale": "Section lambda with render callback — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-076",
@@ -1590,7 +1665,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Dynamic lambda — fabricated"
+    "rationale": "Dynamic lambda — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-077",
@@ -1611,7 +1687,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Lambda section in template — fabricated"
+    "rationale": "Lambda section in template — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-078",
@@ -1632,7 +1709,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Lambda interpolation — fabricated variable name"
+    "rationale": "Lambda interpolation — fabricated variable name",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-079",
@@ -1653,7 +1731,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Lambda returning mustache syntax — fabricated"
+    "rationale": "Lambda returning mustache syntax — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-080",
@@ -1674,7 +1753,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Lambda wrapping text in HTML — fabricated"
+    "rationale": "Lambda wrapping text in HTML — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-081",
@@ -1695,7 +1775,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Non-callable in data — fabricated"
+    "rationale": "Non-callable in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-082",
@@ -1716,7 +1797,8 @@
       "lambdas",
       "TMPL-07"
     ],
-    "rationale": "Lambda call counting — fabricated"
+    "rationale": "Lambda call counting — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-083",
@@ -1737,7 +1819,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "Ampersand entity — fabricated"
+    "rationale": "Ampersand entity — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-084",
@@ -1758,7 +1841,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "Less-than entity — fabricated"
+    "rationale": "Less-than entity — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-085",
@@ -1779,7 +1863,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "Greater-than entity — fabricated"
+    "rationale": "Greater-than entity — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-086",
@@ -1800,7 +1885,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "Quote entity — fabricated"
+    "rationale": "Quote entity — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-087",
@@ -1821,7 +1907,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "Triple mustache unescaped — fabricated variable"
+    "rationale": "Triple mustache unescaped — fabricated variable",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-088",
@@ -1842,7 +1929,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "Ampersand unescaped syntax — fabricated variable"
+    "rationale": "Ampersand unescaped syntax — fabricated variable",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-089",
@@ -1863,7 +1951,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "XSS payload in data — fabricated"
+    "rationale": "XSS payload in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-090",
@@ -1884,7 +1973,8 @@
       "escaping",
       "TMPL-08"
     ],
-    "rationale": "Single quote entity — fabricated"
+    "rationale": "Single quote entity — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-091",
@@ -1905,7 +1995,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Standalone comment line removal — fabricated pattern"
+    "rationale": "Standalone comment line removal — fabricated pattern",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-092",
@@ -1926,7 +2017,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Standalone section tag — fabricated pattern"
+    "rationale": "Standalone section tag — fabricated pattern",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-093",
@@ -1947,7 +2039,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Inline tag with spaces — fabricated pattern"
+    "rationale": "Inline tag with spaces — fabricated pattern",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-094",
@@ -1968,7 +2061,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Triple-space indented partial — fabricated"
+    "rationale": "Triple-space indented partial — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-095",
@@ -1989,7 +2083,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Comment between text is inline, not standalone — fabricated"
+    "rationale": "Comment between text is inline, not standalone — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-096",
@@ -2010,7 +2105,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Tab-indented standalone section — fabricated"
+    "rationale": "Tab-indented standalone section — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-097",
@@ -2031,7 +2127,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Newlines around interpolation — fabricated"
+    "rationale": "Newlines around interpolation — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-098",
@@ -2052,7 +2149,8 @@
       "whitespace",
       "TMPL-09"
     ],
-    "rationale": "Trailing newline after interpolation — fabricated"
+    "rationale": "Trailing newline after interpolation — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-099",
@@ -2073,7 +2171,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Dot notation single level — fabricated"
+    "rationale": "Dot notation single level — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-100",
@@ -2094,7 +2193,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Two-level dot notation — fabricated"
+    "rationale": "Two-level dot notation — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-101",
@@ -2115,7 +2215,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Section context push — fabricated"
+    "rationale": "Section context push — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-102",
@@ -2136,7 +2237,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Parent variable in child section — fabricated"
+    "rationale": "Parent variable in child section — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-103",
@@ -2157,7 +2259,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Deeply nested JSON — fabricated data"
+    "rationale": "Deeply nested JSON — fabricated data",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-104",
@@ -2178,7 +2281,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Nested array item — fabricated data"
+    "rationale": "Nested array item — fabricated data",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-105",
@@ -2199,7 +2303,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Deep context miss — fabricated"
+    "rationale": "Deep context miss — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-106",
@@ -2220,7 +2325,8 @@
       "nested",
       "TMPL-10"
     ],
-    "rationale": "Context shadowing via section — fabricated"
+    "rationale": "Context shadowing via section — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-107",
@@ -2241,7 +2347,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Empty pattern — should fail grounding (no pattern field)"
+    "rationale": "Empty pattern — should fail grounding (no pattern field)",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-108",
@@ -2262,7 +2369,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Static HTML only — fabricated"
+    "rationale": "Static HTML only — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-109",
@@ -2283,7 +2391,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Mismatched open/close tags — fabricated"
+    "rationale": "Mismatched open/close tags — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-110",
@@ -2304,7 +2413,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Closing tag without opener — fabricated"
+    "rationale": "Closing tag without opener — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-111",
@@ -2325,7 +2435,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Single curly braces — fabricated"
+    "rationale": "Single curly braces — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-112",
@@ -2346,7 +2457,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Quadruple braces — fabricated"
+    "rationale": "Quadruple braces — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-113",
@@ -2367,7 +2479,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Whitespace-only variable name — fabricated"
+    "rationale": "Whitespace-only variable name — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-114",
@@ -2388,7 +2501,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Boolean false in data — fabricated"
+    "rationale": "Boolean false in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-115",
@@ -2409,7 +2523,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Zero value in data — fabricated"
+    "rationale": "Zero value in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-116",
@@ -2430,7 +2545,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Empty string in data — fabricated"
+    "rationale": "Empty string in data — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-117",
@@ -2451,7 +2567,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Non-English variable name — fabricated"
+    "rationale": "Non-English variable name — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-118",
@@ -2472,7 +2589,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Hyphenated variable name — fabricated"
+    "rationale": "Hyphenated variable name — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-119",
@@ -2493,7 +2611,8 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Underscored variable name — fabricated"
+    "rationale": "Underscored variable name — fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "mustache-120",
@@ -2514,6 +2633,7 @@
       "edge",
       "TMPL-11"
     ],
-    "rationale": "Three consecutive tags — fabricated"
+    "rationale": "Three consecutive tags — fabricated",
+    "intent": "false_positive"
   }
 ]

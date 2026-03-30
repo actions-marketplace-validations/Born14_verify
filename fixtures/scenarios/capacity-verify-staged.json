@@ -31,7 +31,8 @@
       "log_overflow",
       "IV-01"
     ],
-    "rationale": "Full headers + stack trace per request — health check probe generates megabytes of logs"
+    "rationale": "Full headers + stack trace per request — health check probe generates megabytes of logs",
+    "intent": "false_positive"
   },
   {
     "id": "iv-log-002",
@@ -62,7 +63,8 @@
       "log_overflow",
       "IV-01"
     ],
-    "rationale": "10000 startup lines — log parser buffer fills before the \"listening\" message arrives"
+    "rationale": "10000 startup lines — log parser buffer fills before the \"listening\" message arrives",
+    "intent": "false_negative"
   },
   {
     "id": "iv-log-003",
@@ -93,7 +95,8 @@
       "log_overflow",
       "IV-01"
     ],
-    "rationale": "Circular reference in error logging — JSON.stringify throws, falls back to massive stack trace"
+    "rationale": "Circular reference in error logging — JSON.stringify throws, falls back to massive stack trace",
+    "intent": "false_negative"
   },
   {
     "id": "iv-log-004",
@@ -129,7 +132,8 @@
       "log_overflow",
       "IV-01"
     ],
-    "rationale": "Unlimited log driver + 100 lines per request — docker logs command hangs or OOMs"
+    "rationale": "Unlimited log driver + 100 lines per request — docker logs command hangs or OOMs",
+    "intent": "false_negative"
   },
   {
     "id": "iv-log-005",
@@ -150,7 +154,8 @@
       "IV-01",
       "control"
     ],
-    "rationale": "Single startup log line — well within parser capacity"
+    "rationale": "Single startup log line — well within parser capacity",
+    "intent": "false_negative"
   },
   {
     "id": "iv-metrics-006",
@@ -184,7 +189,8 @@
       "metrics_cardinality",
       "IV-02"
     ],
-    "rationale": "10000 metric lines — cardinality explosion overwhelms metrics scraper or verifier"
+    "rationale": "10000 metric lines — cardinality explosion overwhelms metrics scraper or verifier",
+    "intent": "false_positive"
   },
   {
     "id": "iv-metrics-007",
@@ -219,7 +225,8 @@
       "metrics_cardinality",
       "IV-02"
     ],
-    "rationale": "500 subsystem checks with 200-char details each — health response is ~150KB, parser slow"
+    "rationale": "500 subsystem checks with 200-char details each — health response is ~150KB, parser slow",
+    "intent": "false_positive"
   },
   {
     "id": "iv-metrics-008",
@@ -249,7 +256,8 @@
       "metrics_cardinality",
       "IV-02"
     ],
-    "rationale": "5000 items with 100-char payload each — ~600KB response, verification parse slow"
+    "rationale": "5000 items with 100-char payload each — ~600KB response, verification parse slow",
+    "intent": "false_negative"
   },
   {
     "id": "iv-metrics-009",
@@ -280,7 +288,8 @@
       "metrics_cardinality",
       "IV-02"
     ],
-    "rationale": "50 additional tables — schema introspection returns massive catalog, slow to parse"
+    "rationale": "50 additional tables — schema introspection returns massive catalog, slow to parse",
+    "intent": "false_positive"
   },
   {
     "id": "iv-metrics-010",
@@ -304,7 +313,8 @@
       "IV-02",
       "control"
     ],
-    "rationale": "Compact health response — well within parsing limits"
+    "rationale": "Compact health response — well within parsing limits",
+    "intent": "false_negative"
   },
   {
     "id": "iv-snap-011",
@@ -335,7 +345,8 @@
       "snapshot_size",
       "IV-03"
     ],
-    "rationale": "2000 entries x 200 chars = ~400KB inline data — file hashing and snapshot capture slow"
+    "rationale": "2000 entries x 200 chars = ~400KB inline data — file hashing and snapshot capture slow",
+    "intent": "false_negative"
   },
   {
     "id": "iv-snap-012",
@@ -366,7 +377,8 @@
       "snapshot_size",
       "IV-03"
     ],
-    "rationale": "500 feature flags with descriptions — config.json balloons, snapshot hashing slow"
+    "rationale": "500 feature flags with descriptions — config.json balloons, snapshot hashing slow",
+    "intent": "false_negative"
   },
   {
     "id": "iv-snap-013",
@@ -397,7 +409,8 @@
       "snapshot_size",
       "IV-03"
     ],
-    "rationale": "1000 INSERT statements with 60-char hashes — init.sql grows large, snapshot capture slow"
+    "rationale": "1000 INSERT statements with 60-char hashes — init.sql grows large, snapshot capture slow",
+    "intent": "false_positive"
   },
   {
     "id": "iv-snap-014",
@@ -428,7 +441,8 @@
       "snapshot_size",
       "IV-03"
     ],
-    "rationale": "20 services x 10 env vars with long values — compose file bloated for snapshot"
+    "rationale": "20 services x 10 env vars with long values — compose file bloated for snapshot",
+    "intent": "false_negative"
   },
   {
     "id": "iv-snap-015",
@@ -454,7 +468,8 @@
       "IV-03",
       "control"
     ],
-    "rationale": "Standard fixture — small files, snapshot captures quickly"
+    "rationale": "Standard fixture — small files, snapshot captures quickly",
+    "intent": "false_negative"
   },
   {
     "id": "iv-bolster-100",
@@ -479,7 +494,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-101",
@@ -504,7 +520,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-102",
@@ -529,7 +546,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-103",
@@ -554,7 +572,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-104",
@@ -579,7 +598,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-105",
@@ -604,7 +624,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-106",
@@ -629,7 +650,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-107",
@@ -654,7 +676,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-108",
@@ -680,7 +703,8 @@
       "iv-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "iv-bolster-109",
@@ -706,7 +730,8 @@
       "iv-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "iv-bolster-110",
@@ -732,7 +757,8 @@
       "iv-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "iv-bolster-111",
@@ -757,7 +783,8 @@
       "iv-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "iv-bolster-112",
@@ -775,7 +802,8 @@
       "verify",
       "iv-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "iv-bolster-113",
@@ -794,7 +822,8 @@
       "iv-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "iv-bolster-114",
@@ -814,6 +843,7 @@
       "iv-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

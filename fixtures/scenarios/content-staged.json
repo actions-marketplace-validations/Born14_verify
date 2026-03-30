@@ -15,7 +15,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-002",
@@ -33,7 +34,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-003",
@@ -51,7 +53,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-004",
@@ -69,7 +72,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-005",
@@ -87,7 +91,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-006",
@@ -105,7 +110,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-007",
@@ -123,7 +129,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-008",
@@ -141,7 +148,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-009",
@@ -159,7 +167,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-010",
@@ -177,7 +186,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-011",
@@ -195,7 +205,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-012",
@@ -213,7 +224,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-013",
@@ -231,7 +243,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-014",
@@ -249,7 +262,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-015",
@@ -267,7 +281,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-016",
@@ -285,7 +300,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-017",
@@ -303,7 +319,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-018",
@@ -321,7 +338,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-019",
@@ -339,7 +357,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-020",
@@ -357,7 +376,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-021",
@@ -375,7 +395,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-022",
@@ -393,7 +414,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-exists-023",
@@ -411,7 +433,8 @@
       "content",
       "pattern_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-fab-024",
@@ -430,7 +453,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-025",
@@ -449,7 +473,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-026",
@@ -468,7 +493,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-027",
@@ -487,7 +513,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-028",
@@ -506,7 +533,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-029",
@@ -525,7 +553,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-030",
@@ -544,7 +573,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-031",
@@ -563,7 +593,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-032",
@@ -582,7 +613,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-fab-033",
@@ -601,7 +633,8 @@
       "content",
       "pattern_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-edit-034",
@@ -625,7 +658,8 @@
       "content",
       "pattern_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-edit-035",
@@ -649,7 +683,8 @@
       "content",
       "pattern_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-edit-036",
@@ -673,7 +708,8 @@
       "content",
       "pattern_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-edit-037",
@@ -697,7 +733,8 @@
       "content",
       "pattern_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-edit-038",
@@ -722,7 +759,8 @@
       "content",
       "pattern_after_edit",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-miss-039",
@@ -741,7 +779,8 @@
       "content",
       "file_missing",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-miss-040",
@@ -760,7 +799,8 @@
       "content",
       "file_missing",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-miss-041",
@@ -779,7 +819,8 @@
       "content",
       "file_missing",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-miss-042",
@@ -798,7 +839,8 @@
       "content",
       "file_missing",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-miss-043",
@@ -817,7 +859,8 @@
       "content",
       "file_missing",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-create-044",
@@ -842,7 +885,8 @@
       "content",
       "file_missing_edit",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-nofile-045",
@@ -859,7 +903,8 @@
       "content",
       "no_file_field",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-nopat-046",
@@ -876,7 +921,8 @@
       "content",
       "no_pattern_field",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-case-047",
@@ -894,7 +940,8 @@
       "content",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-case-048",
@@ -913,7 +960,8 @@
       "content",
       "case_sensitivity",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-case-049",
@@ -931,7 +979,8 @@
       "content",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-partial-050",
@@ -949,7 +998,8 @@
       "content",
       "partial_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-partial-051",
@@ -967,7 +1017,8 @@
       "content",
       "partial_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-partial-052",
@@ -985,7 +1036,8 @@
       "content",
       "partial_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-multi-053",
@@ -1003,7 +1055,8 @@
       "content",
       "multiline",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-multi-054",
@@ -1022,7 +1075,8 @@
       "content",
       "multiline",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "content-special-055",
@@ -1040,7 +1094,8 @@
       "content",
       "special_chars",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-special-056",
@@ -1058,7 +1113,8 @@
       "content",
       "special_chars",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-special-057",
@@ -1076,7 +1132,8 @@
       "content",
       "special_chars",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-special-058",
@@ -1094,7 +1151,8 @@
       "content",
       "special_chars",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-special-059",
@@ -1112,7 +1170,8 @@
       "content",
       "special_chars",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-special-060",
@@ -1130,7 +1189,8 @@
       "content",
       "special_chars",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-special-061",
@@ -1148,7 +1208,8 @@
       "content",
       "special_chars",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-edge-062",
@@ -1166,7 +1227,8 @@
       "content",
       "edge_case",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-edge-063",
@@ -1184,7 +1246,8 @@
       "content",
       "edge_case",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-other-064",
@@ -1202,7 +1265,8 @@
       "content",
       "other_files",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-other-065",
@@ -1220,7 +1284,8 @@
       "content",
       "other_files",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "content-other-066",
@@ -1239,6 +1304,7 @@
       "content",
       "other_files",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   }
 ]

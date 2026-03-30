@@ -23,7 +23,8 @@
       "secret_expired",
       "TC-01"
     ],
-    "rationale": "Secret rotated in dev .env but production env still has old key — expired between read and deploy"
+    "rationale": "Secret rotated in dev .env but production env still has old key — expired between read and deploy",
+    "intent": "false_positive"
   },
   {
     "id": "tc-secret-002",
@@ -49,7 +50,8 @@
       "secret_expired",
       "TC-01"
     ],
-    "rationale": "Production secret rotated but base .env not updated — credential drift across environments"
+    "rationale": "Production secret rotated but base .env not updated — credential drift across environments",
+    "intent": "false_positive"
   },
   {
     "id": "tc-secret-003",
@@ -75,7 +77,8 @@
       "secret_expired",
       "TC-01"
     ],
-    "rationale": "Staging secret rotated but production has no awareness — cross-env temporal gap"
+    "rationale": "Staging secret rotated but production has no awareness — cross-env temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-secret-004",
@@ -101,7 +104,8 @@
       "secret_expired",
       "TC-01"
     ],
-    "rationale": "DB URL migrated in dev but staging env still points to old host — credential expiry pattern"
+    "rationale": "DB URL migrated in dev but staging env still points to old host — credential expiry pattern",
+    "intent": "false_positive"
   },
   {
     "id": "tc-secret-005",
@@ -128,7 +132,8 @@
       "TC-01",
       "control"
     ],
-    "rationale": "Same-file rotation and check — secret is fresh"
+    "rationale": "Same-file rotation and check — secret is fresh",
+    "intent": "false_negative"
   },
   {
     "id": "tc-ttl-006",
@@ -154,7 +159,8 @@
       "config_ttl",
       "TC-02"
     ],
-    "rationale": "Dev config updated but prod config still points to old host — TTL expired on config sync"
+    "rationale": "Dev config updated but prod config still points to old host — TTL expired on config sync",
+    "intent": "false_positive"
   },
   {
     "id": "tc-ttl-007",
@@ -180,7 +186,8 @@
       "config_ttl",
       "TC-02"
     ],
-    "rationale": "Prod db name changed but staging config not updated — cross-env config TTL expired"
+    "rationale": "Prod db name changed but staging config not updated — cross-env config TTL expired",
+    "intent": "false_positive"
   },
   {
     "id": "tc-ttl-008",
@@ -206,7 +213,8 @@
       "config_ttl",
       "TC-02"
     ],
-    "rationale": "Base config port changed but staging config still has old value"
+    "rationale": "Base config port changed but staging config still has old value",
+    "intent": "false_positive"
   },
   {
     "id": "tc-ttl-009",
@@ -232,7 +240,8 @@
       "config_ttl",
       "TC-02"
     ],
-    "rationale": "Prod DB URL migrated but staging env not updated — config TTL expired across envs"
+    "rationale": "Prod DB URL migrated but staging env not updated — config TTL expired across envs",
+    "intent": "false_positive"
   },
   {
     "id": "tc-ttl-010",
@@ -259,7 +268,8 @@
       "TC-02",
       "control"
     ],
-    "rationale": "Same-file change and check — config is fresh"
+    "rationale": "Same-file change and check — config is fresh",
+    "intent": "false_negative"
   },
   {
     "id": "tc-flag-011",
@@ -285,7 +295,8 @@
       "flag_toggle",
       "TC-03"
     ],
-    "rationale": "Analytics flag toggled in dev but prod config not updated — flag drift between environments"
+    "rationale": "Analytics flag toggled in dev but prod config not updated — flag drift between environments",
+    "intent": "false_positive"
   },
   {
     "id": "tc-flag-012",
@@ -311,7 +322,8 @@
       "flag_toggle",
       "TC-03"
     ],
-    "rationale": "Dark mode disabled in dev but staging still has it enabled — flag toggle not propagated"
+    "rationale": "Dark mode disabled in dev but staging still has it enabled — flag toggle not propagated",
+    "intent": "false_positive"
   },
   {
     "id": "tc-flag-013",
@@ -337,7 +349,8 @@
       "flag_toggle",
       "TC-03"
     ],
-    "rationale": "Beta signup enabled in prod but base config has no awareness of the flag"
+    "rationale": "Beta signup enabled in prod but base config has no awareness of the flag",
+    "intent": "false_positive"
   },
   {
     "id": "tc-flag-014",
@@ -363,7 +376,8 @@
       "flag_toggle",
       "TC-03"
     ],
-    "rationale": "Debug flag toggled in .env but config.json has no corresponding field — flag toggle gap"
+    "rationale": "Debug flag toggled in .env but config.json has no corresponding field — flag toggle gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-flag-015",
@@ -389,7 +403,8 @@
       "flag_toggle",
       "TC-03"
     ],
-    "rationale": "Config flag toggled but env var for runtime override not present — flag→env gap"
+    "rationale": "Config flag toggled but env var for runtime override not present — flag→env gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-flag-016",
@@ -416,7 +431,8 @@
       "TC-03",
       "control"
     ],
-    "rationale": "Same-file toggle and check — should pass"
+    "rationale": "Same-file toggle and check — should pass",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-200",
@@ -441,7 +457,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Edit server.js health, config.json has stale health config"
+    "rationale": "Edit server.js health, config.json has stale health config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-201",
@@ -466,7 +483,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference"
+    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-202",
@@ -491,7 +509,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Upgrade Dockerfile node version, .env unchanged"
+    "rationale": "Upgrade Dockerfile node version, .env unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-203",
@@ -516,7 +535,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Change compose port mapping, server.js listen unchanged"
+    "rationale": "Change compose port mapping, server.js listen unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-204",
@@ -543,7 +563,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Add column via migration, server.js has no query for it"
+    "rationale": "Add column via migration, server.js has no query for it",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-205",
@@ -568,7 +589,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Edit init.sql table, config.json has stale DB config"
+    "rationale": "Edit init.sql table, config.json has stale DB config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-206",
@@ -593,7 +615,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Compose env_file changed, .env filename unchanged"
+    "rationale": "Compose env_file changed, .env filename unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-207",
@@ -618,7 +641,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Add CORS header, config.json has no CORS config"
+    "rationale": "Add CORS header, config.json has no CORS config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-208",
@@ -643,7 +667,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: edit server.js, verify change"
+    "rationale": "Control: edit server.js, verify change",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-209",
@@ -668,7 +693,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: edit .env, verify change"
+    "rationale": "Control: edit .env, verify change",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-210",
@@ -687,7 +713,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: Dockerfile has EXPOSE"
+    "rationale": "Control: Dockerfile has EXPOSE",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-211",
@@ -706,7 +733,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: compose has healthcheck"
+    "rationale": "Control: compose has healthcheck",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-212",
@@ -731,7 +759,8 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Change healthcheck interval, server.js has no interval awareness"
+    "rationale": "Change healthcheck interval, server.js has no interval awareness",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-213",
@@ -758,6 +787,7 @@
       "config",
       "temporal_gap"
     ],
-    "rationale": "Add NOT NULL constraint, server.js has no validation"
+    "rationale": "Add NOT NULL constraint, server.js has no validation",
+    "intent": "false_positive"
   }
 ]

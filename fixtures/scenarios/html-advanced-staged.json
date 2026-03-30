@@ -27,7 +27,8 @@
       "svg",
       "H-07"
     ],
-    "rationale": "SVG element inserted with class and path child — both should be found."
+    "rationale": "SVG element inserted with class and path child — both should be found.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h07-002",
@@ -62,7 +63,8 @@
       "svg",
       "H-07"
     ],
-    "rationale": "SVG with id, circle child, and viewBox attribute all verifiable."
+    "rationale": "SVG with id, circle child, and viewBox attribute all verifiable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h07-003",
@@ -88,7 +90,8 @@
       "svg",
       "H-07"
     ],
-    "rationale": "No SVG with class chart-icon exists — html gate should fail."
+    "rationale": "No SVG with class chart-icon exists — html gate should fail.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h07-004",
@@ -123,7 +126,8 @@
       "svg",
       "H-07"
     ],
-    "rationale": "SVG with rect and text children, attribute assertions via content check."
+    "rationale": "SVG with rect and text children, attribute assertions via content check.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h28-005",
@@ -159,7 +163,8 @@
       "bidi",
       "H-28"
     ],
-    "rationale": "RTL direction attribute set on container with Arabic text content."
+    "rationale": "RTL direction attribute set on container with Arabic text content.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h28-006",
@@ -190,7 +195,8 @@
       "bidi",
       "H-28"
     ],
-    "rationale": "BDO element with RTL direction — tests bidi text direction rendering."
+    "rationale": "BDO element with RTL direction — tests bidi text direction rendering.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h28-007",
@@ -217,7 +223,8 @@
       "bidi",
       "H-28"
     ],
-    "rationale": "Arabic text added but dir attribute missing — attribute selector fails."
+    "rationale": "Arabic text added but dir attribute missing — attribute selector fails.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h33-008",
@@ -253,7 +260,8 @@
       "web-components",
       "H-33"
     ],
-    "rationale": "Custom element with shadow DOM — host element findable, shadow internals only via content check."
+    "rationale": "Custom element with shadow DOM — host element findable, shadow internals only via content check.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h33-009",
@@ -280,7 +288,8 @@
       "web-components",
       "H-33"
     ],
-    "rationale": "Shadow-internal .inner-badge is not queryable from light DOM — html gate fails."
+    "rationale": "Shadow-internal .inner-badge is not queryable from light DOM — html gate fails.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h33-010",
@@ -311,7 +320,8 @@
       "web-components",
       "H-33"
     ],
-    "rationale": "Custom element without shadow DOM — light DOM content injection, host queryable."
+    "rationale": "Custom element without shadow DOM — light DOM content injection, host queryable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h41-011",
@@ -347,7 +357,8 @@
       "ssr",
       "H-41"
     ],
-    "rationale": "SSR delivers static content, client script hydrates — both present in source."
+    "rationale": "SSR delivers static content, client script hydrates — both present in source.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h41-012",
@@ -374,7 +385,8 @@
       "ssr",
       "H-41"
     ],
-    "rationale": "SSR sends data-hydrate=\"v2\" but predicate expects v1 — attribute mismatch."
+    "rationale": "SSR sends data-hydrate=\"v2\" but predicate expects v1 — attribute mismatch.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h41-013",
@@ -405,7 +417,8 @@
       "ssr",
       "H-41"
     ],
-    "rationale": "React-style hydration marker attribute added and detected."
+    "rationale": "React-style hydration marker attribute added and detected.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h42-014",
@@ -441,7 +454,8 @@
       "rendering",
       "H-42"
     ],
-    "rationale": "Hidden panel and noscript fallback both in DOM — queryable even if hidden."
+    "rationale": "Hidden panel and noscript fallback both in DOM — queryable even if hidden.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h42-015",
@@ -472,7 +486,8 @@
       "template",
       "H-42"
     ],
-    "rationale": "Template element exists in DOM but content not rendered — host queryable."
+    "rationale": "Template element exists in DOM but content not rendered — host queryable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h42-016",
@@ -499,7 +514,8 @@
       "rendering",
       "H-42"
     ],
-    "rationale": "Admin panel only injected when hash is #admin — not in static HTML."
+    "rationale": "Admin panel only injected when hash is #admin — not in static HTML.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h42-017",
@@ -530,7 +546,8 @@
       "data-attribute",
       "H-42"
     ],
-    "rationale": "Both active and inactive states present — data attributes queryable."
+    "rationale": "Both active and inactive states present — data attributes queryable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h43-018",
@@ -566,7 +583,8 @@
       "seo",
       "H-43"
     ],
-    "rationale": "Homepage already has description, og:title, and charset meta tags."
+    "rationale": "Homepage already has description, og:title, and charset meta tags.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h43-019",
@@ -603,7 +621,8 @@
       "og",
       "H-43"
     ],
-    "rationale": "Viewport and og:image meta tags added to head — queryable by attribute selectors."
+    "rationale": "Viewport and og:image meta tags added to head — queryable by attribute selectors.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h43-020",
@@ -630,7 +649,8 @@
       "og",
       "H-43"
     ],
-    "rationale": "og:type is \"website\" but predicate expects \"article\" — attribute mismatch."
+    "rationale": "og:type is \"website\" but predicate expects \"article\" — attribute mismatch.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h43-021",
@@ -662,7 +682,8 @@
       "robots",
       "H-43"
     ],
-    "rationale": "Title changed and robots meta added — content and html checks."
+    "rationale": "Title changed and robots meta added — content and html checks.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h44-022",
@@ -698,7 +719,8 @@
       "validation",
       "H-44"
     ],
-    "rationale": "Contact form has required name and email inputs — attribute selectors match."
+    "rationale": "Contact form has required name and email inputs — attribute selectors match.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h44-023",
@@ -740,7 +762,8 @@
       "pattern",
       "H-44"
     ],
-    "rationale": "HTML5 validation attributes added — pattern, minlength, maxlength all queryable."
+    "rationale": "HTML5 validation attributes added — pattern, minlength, maxlength all queryable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h44-024",
@@ -772,7 +795,8 @@
       "custom-validity",
       "H-44"
     ],
-    "rationale": "Tel input with pattern plus programmatic setCustomValidity."
+    "rationale": "Tel input with pattern plus programmatic setCustomValidity.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h44-025",
@@ -799,7 +823,8 @@
       "validation",
       "H-44"
     ],
-    "rationale": "Subject select is not required — attribute selector for required fails."
+    "rationale": "Subject select is not required — attribute selector for required fails.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h45-026",
@@ -831,7 +856,8 @@
       "landmark",
       "H-45"
     ],
-    "rationale": "ARIA role and label added to nav — both queryable via attribute selectors."
+    "rationale": "ARIA role and label added to nav — both queryable via attribute selectors.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h45-027",
@@ -863,7 +889,8 @@
       "tabindex",
       "H-45"
     ],
-    "rationale": "aria-label and tabindex on search input — accessible name and tab order."
+    "rationale": "aria-label and tabindex on search input — accessible name and tab order.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h45-028",
@@ -899,7 +926,8 @@
       "aria-live",
       "H-45"
     ],
-    "rationale": "ARIA live region with polite announce and atomic update."
+    "rationale": "ARIA live region with polite announce and atomic update.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h45-029",
@@ -926,7 +954,8 @@
       "aria",
       "H-45"
     ],
-    "rationale": "Button has no aria-expanded attribute — attribute selector fails."
+    "rationale": "Button has no aria-expanded attribute — attribute selector fails.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h45-030",
@@ -957,7 +986,8 @@
       "skip-nav",
       "H-45"
     ],
-    "rationale": "Skip navigation link for keyboard users — standard a11y pattern."
+    "rationale": "Skip navigation link for keyboard users — standard a11y pattern.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h46-031",
@@ -993,7 +1023,8 @@
       "sandbox",
       "H-46"
     ],
-    "rationale": "Sandboxed iframe with title for a11y — host element queryable."
+    "rationale": "Sandboxed iframe with title for a11y — host element queryable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h46-032",
@@ -1024,7 +1055,8 @@
       "srcdoc",
       "H-46"
     ],
-    "rationale": "Iframe with srcdoc — inline content verifiable via content predicate."
+    "rationale": "Iframe with srcdoc — inline content verifiable via content predicate.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h46-033",
@@ -1051,7 +1083,8 @@
       "cross-origin",
       "H-46"
     ],
-    "rationale": "Iframe src is about:blank but predicate expects https://example.com."
+    "rationale": "Iframe src is about:blank but predicate expects https://example.com.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h47-034",
@@ -1093,7 +1126,8 @@
       "srcset",
       "H-47"
     ],
-    "rationale": "Picture element with WebP/AVIF sources and PNG fallback — all queryable."
+    "rationale": "Picture element with WebP/AVIF sources and PNG fallback — all queryable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h47-035",
@@ -1130,7 +1164,8 @@
       "responsive",
       "H-47"
     ],
-    "rationale": "Img with srcset for density descriptors and sizes for breakpoints."
+    "rationale": "Img with srcset for density descriptors and sizes for breakpoints.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h47-036",
@@ -1162,7 +1197,8 @@
       "art-direction",
       "H-47"
     ],
-    "rationale": "Art direction via picture/source media queries with lazy loading."
+    "rationale": "Art direction via picture/source media queries with lazy loading.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h47-037",
@@ -1189,7 +1225,8 @@
       "srcset",
       "H-47"
     ],
-    "rationale": "Logo img has no srcset attribute — attribute selector fails."
+    "rationale": "Logo img has no srcset attribute — attribute selector fails.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h48-038",
@@ -1225,7 +1262,8 @@
       "modal",
       "H-48"
     ],
-    "rationale": "Native dialog with open attribute — queryable in DOM, close button inside."
+    "rationale": "Native dialog with open attribute — queryable in DOM, close button inside.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h48-039",
@@ -1262,7 +1300,8 @@
       "form",
       "H-48"
     ],
-    "rationale": "Closed dialog with form method=dialog pattern — host and contents queryable."
+    "rationale": "Closed dialog with form method=dialog pattern — host and contents queryable.",
+    "intent": "false_negative"
   },
   {
     "id": "hadv-h48-040",
@@ -1289,7 +1328,8 @@
       "state",
       "H-48"
     ],
-    "rationale": "Dialog has no open attribute — open state assertion fails."
+    "rationale": "Dialog has no open attribute — open state assertion fails.",
+    "intent": "false_positive"
   },
   {
     "id": "hadv-h48-041",
@@ -1326,6 +1366,7 @@
       "a11y",
       "H-48"
     ],
-    "rationale": "Open dialog with autofocus select and label association — a11y aware dialog."
+    "rationale": "Open dialog with autofocus select and label association — a11y aware dialog.",
+    "intent": "false_negative"
   }
 ]

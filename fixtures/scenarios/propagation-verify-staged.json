@@ -23,7 +23,8 @@
       "schema_query",
       "PV-01"
     ],
-    "rationale": "Schema gate would pass (column exists) but query gate fails (app unaware) — verification chain gap"
+    "rationale": "Schema gate would pass (column exists) but query gate fails (app unaware) — verification chain gap",
+    "intent": "false_positive"
   },
   {
     "id": "pv-schema-002",
@@ -49,7 +50,8 @@
       "schema_query",
       "PV-01"
     ],
-    "rationale": "Index exists in schema but app has no email query — schema verification doesnt propagate to query layer"
+    "rationale": "Index exists in schema but app has no email query — schema verification doesnt propagate to query layer",
+    "intent": "false_positive"
   },
   {
     "id": "pv-schema-003",
@@ -75,7 +77,8 @@
       "schema_query",
       "PV-01"
     ],
-    "rationale": "Schema verification passes (articles table exists) but query verification fails (code uses old name)"
+    "rationale": "Schema verification passes (articles table exists) but query verification fails (code uses old name)",
+    "intent": "false_positive"
   },
   {
     "id": "pv-schema-004",
@@ -101,7 +104,8 @@
       "schema_query",
       "PV-01"
     ],
-    "rationale": "Schema constraint verification passes but config verification unaware of cascade policy"
+    "rationale": "Schema constraint verification passes but config verification unaware of cascade policy",
+    "intent": "false_positive"
   },
   {
     "id": "pv-schema-005",
@@ -128,7 +132,8 @@
       "PV-01",
       "control"
     ],
-    "rationale": "Same-file check — column is present in schema"
+    "rationale": "Same-file check — column is present in schema",
+    "intent": "false_negative"
   },
   {
     "id": "pv-snapshot-006",
@@ -154,7 +159,8 @@
       "stale_snapshot",
       "PV-02"
     ],
-    "rationale": "File exists (gate 1 passes) but content check uses stale pattern from before edit"
+    "rationale": "File exists (gate 1 passes) but content check uses stale pattern from before edit",
+    "intent": "false_positive"
   },
   {
     "id": "pv-snapshot-007",
@@ -180,7 +186,8 @@
       "stale_snapshot",
       "PV-02"
     ],
-    "rationale": "File exists and is valid, but hash check uses stale snapshot — verification chain broken"
+    "rationale": "File exists and is valid, but hash check uses stale snapshot — verification chain broken",
+    "intent": "false_positive"
   },
   {
     "id": "pv-snapshot-008",
@@ -206,7 +213,8 @@
       "stale_snapshot",
       "PV-02"
     ],
-    "rationale": "File exists check passes but content verification uses pre-edit snapshot of DATABASE_URL"
+    "rationale": "File exists check passes but content verification uses pre-edit snapshot of DATABASE_URL",
+    "intent": "false_positive"
   },
   {
     "id": "pv-snapshot-009",
@@ -232,7 +240,8 @@
       "stale_snapshot",
       "PV-02"
     ],
-    "rationale": "Schema file exists but content verification for \"posts\" uses stale snapshot after rename"
+    "rationale": "Schema file exists but content verification for \"posts\" uses stale snapshot after rename",
+    "intent": "false_positive"
   },
   {
     "id": "pv-snapshot-010",
@@ -259,7 +268,8 @@
       "PV-02",
       "control"
     ],
-    "rationale": "Content check uses fresh evidence — should pass"
+    "rationale": "Content check uses fresh evidence — should pass",
+    "intent": "false_negative"
   },
   {
     "id": "pv-functional-011",
@@ -285,7 +295,8 @@
       "health_functional",
       "PV-03"
     ],
-    "rationale": "Health endpoint passes (unchanged) but functional check for items.name fails — health gate doesnt cascade"
+    "rationale": "Health endpoint passes (unchanged) but functional check for items.name fails — health gate doesnt cascade",
+    "intent": "false_positive"
   },
   {
     "id": "pv-functional-012",
@@ -311,7 +322,8 @@
       "health_functional",
       "PV-03"
     ],
-    "rationale": "Health endpoint responds OK but homepage content is broken — health gate passes, functional fails"
+    "rationale": "Health endpoint responds OK but homepage content is broken — health gate passes, functional fails",
+    "intent": "false_positive"
   },
   {
     "id": "pv-functional-013",
@@ -337,7 +349,8 @@
       "health_functional",
       "PV-03"
     ],
-    "rationale": "Health route exists but Dockerfile healthcheck targets wrong port — health→deploy verification gap"
+    "rationale": "Health route exists but Dockerfile healthcheck targets wrong port — health→deploy verification gap",
+    "intent": "false_positive"
   },
   {
     "id": "pv-functional-014",
@@ -363,7 +376,8 @@
       "health_functional",
       "PV-03"
     ],
-    "rationale": "Health check passes but nav link text changed — health gate doesnt propagate to content gate"
+    "rationale": "Health check passes but nav link text changed — health gate doesnt propagate to content gate",
+    "intent": "false_positive"
   },
   {
     "id": "pv-functional-015",
@@ -384,7 +398,8 @@
       "PV-03",
       "control"
     ],
-    "rationale": "No edit — health response pattern should be found"
+    "rationale": "No edit — health response pattern should be found",
+    "intent": "false_negative"
   },
   {
     "id": "pv-bolster-100",
@@ -409,7 +424,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-101",
@@ -434,7 +450,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-102",
@@ -459,7 +476,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-103",
@@ -484,7 +502,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-104",
@@ -509,7 +528,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-105",
@@ -534,7 +554,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-106",
@@ -559,7 +580,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-107",
@@ -584,7 +606,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-108",
@@ -610,7 +633,8 @@
       "pv-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "pv-bolster-109",
@@ -636,7 +660,8 @@
       "pv-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "pv-bolster-110",
@@ -662,7 +687,8 @@
       "pv-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "pv-bolster-111",
@@ -687,7 +713,8 @@
       "pv-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "pv-bolster-112",
@@ -705,7 +732,8 @@
       "verify",
       "pv-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "pv-bolster-113",
@@ -724,7 +752,8 @@
       "pv-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "pv-bolster-114",
@@ -744,6 +773,7 @@
       "pv-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

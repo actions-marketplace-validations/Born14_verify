@@ -33,7 +33,8 @@
       "oom_killed",
       "IC-01"
     ],
-    "rationale": "Container limited to 128MB but Node heap set to 512MB — OOM kill inevitable"
+    "rationale": "Container limited to 128MB but Node heap set to 512MB — OOM kill inevitable",
+    "intent": "false_negative"
   },
   {
     "id": "ic-oom-002",
@@ -64,7 +65,8 @@
       "oom_killed",
       "IC-01"
     ],
-    "rationale": "Unbounded in-memory cache with no container memory limit — will grow until OOM"
+    "rationale": "Unbounded in-memory cache with no container memory limit — will grow until OOM",
+    "intent": "false_positive"
   },
   {
     "id": "ic-oom-003",
@@ -100,7 +102,8 @@
       "oom_killed",
       "IC-01"
     ],
-    "rationale": "64MB memory limit but code allocates 256MB buffer — OOM kill on first image process"
+    "rationale": "64MB memory limit but code allocates 256MB buffer — OOM kill on first image process",
+    "intent": "false_negative"
   },
   {
     "id": "ic-oom-004",
@@ -136,7 +139,8 @@
       "oom_killed",
       "IC-01"
     ],
-    "rationale": "1000 entries × 512KB = ~500MB cache but heap limited to 64MB — config is a lie"
+    "rationale": "1000 entries × 512KB = ~500MB cache but heap limited to 64MB — config is a lie",
+    "intent": "false_negative"
   },
   {
     "id": "ic-oom-005",
@@ -167,7 +171,8 @@
       "oom_killed",
       "IC-01"
     ],
-    "rationale": "Prod has 128MB limit but test has no limit — tests pass but prod OOMs"
+    "rationale": "Prod has 128MB limit but test has no limit — tests pass but prod OOMs",
+    "intent": "false_positive"
   },
   {
     "id": "ic-oom-006",
@@ -204,7 +209,8 @@
       "IC-01",
       "control"
     ],
-    "rationale": "Container 512MB, heap 256MB — sufficient headroom for Node overhead + GC"
+    "rationale": "Container 512MB, heap 256MB — sufficient headroom for Node overhead + GC",
+    "intent": "false_negative"
   },
   {
     "id": "ic-pid-007",
@@ -235,7 +241,8 @@
       "pid_limit",
       "IC-02"
     ],
-    "rationale": "Workers spawned per CPU but config.json has no maxWorkers — container may have limited CPUs"
+    "rationale": "Workers spawned per CPU but config.json has no maxWorkers — container may have limited CPUs",
+    "intent": "false_positive"
   },
   {
     "id": "ic-pid-008",
@@ -271,7 +278,8 @@
       "pid_limit",
       "IC-02"
     ],
-    "rationale": "PID limit of 10 but each request spawns a child — 10 concurrent requests will fork-bomb"
+    "rationale": "PID limit of 10 but each request spawns a child — 10 concurrent requests will fork-bomb",
+    "intent": "false_negative"
   },
   {
     "id": "ic-pid-009",
@@ -302,7 +310,8 @@
       "pid_limit",
       "IC-02"
     ],
-    "rationale": "16 workers requested but no process manager — node directly cannot manage worker lifecycle"
+    "rationale": "16 workers requested but no process manager — node directly cannot manage worker lifecycle",
+    "intent": "false_positive"
   },
   {
     "id": "ic-pid-010",
@@ -333,7 +342,8 @@
       "pid_limit",
       "IC-02"
     ],
-    "rationale": "Background jobs enabled with unlimited concurrency but no PID limit in compose"
+    "rationale": "Background jobs enabled with unlimited concurrency but no PID limit in compose",
+    "intent": "false_positive"
   },
   {
     "id": "ic-pid-011",
@@ -370,7 +380,8 @@
       "IC-02",
       "control"
     ],
-    "rationale": "2 workers well within PID limit of 50 — no capacity concern"
+    "rationale": "2 workers well within PID limit of 50 — no capacity concern",
+    "intent": "false_negative"
   },
   {
     "id": "ic-ulimit-012",
@@ -406,7 +417,8 @@
       "ulimit_exceeded",
       "IC-03"
     ],
-    "rationale": "File descriptor limit 256 but file watcher opens fd per file — large apps exceed limit"
+    "rationale": "File descriptor limit 256 but file watcher opens fd per file — large apps exceed limit",
+    "intent": "false_negative"
   },
   {
     "id": "ic-ulimit-013",
@@ -442,7 +454,8 @@
       "ulimit_exceeded",
       "IC-03"
     ],
-    "rationale": "FD limit 1024 but max connections 2000 — each connection uses an fd, will exceed ulimit"
+    "rationale": "FD limit 1024 but max connections 2000 — each connection uses an fd, will exceed ulimit",
+    "intent": "false_negative"
   },
   {
     "id": "ic-ulimit-014",
@@ -473,7 +486,8 @@
       "ulimit_exceeded",
       "IC-03"
     ],
-    "rationale": "Code calculates 316+ FDs needed but compose has no ulimits config — default may be too low"
+    "rationale": "Code calculates 316+ FDs needed but compose has no ulimits config — default may be too low",
+    "intent": "false_positive"
   },
   {
     "id": "ic-ulimit-015",
@@ -504,7 +518,8 @@
       "ulimit_exceeded",
       "IC-03"
     ],
-    "rationale": "File watcher on directory tree but no fd limit config anywhere — prod may hit default ulimit"
+    "rationale": "File watcher on directory tree but no fd limit config anywhere — prod may hit default ulimit",
+    "intent": "false_positive"
   },
   {
     "id": "ic-ulimit-016",
@@ -535,7 +550,8 @@
       "ulimit_exceeded",
       "IC-03"
     ],
-    "rationale": "OPEN_FILE_LIMIT env var set but no actual ulimits config — env var is cosmetic, not enforced"
+    "rationale": "OPEN_FILE_LIMIT env var set but no actual ulimits config — env var is cosmetic, not enforced",
+    "intent": "false_positive"
   },
   {
     "id": "ic-ulimit-017",
@@ -567,7 +583,8 @@
       "IC-03",
       "control"
     ],
-    "rationale": "Generous fd limit of 65536 — more than sufficient for any reasonable Node.js app"
+    "rationale": "Generous fd limit of 65536 — more than sufficient for any reasonable Node.js app",
+    "intent": "false_negative"
   },
   {
     "id": "cc-bolster-200",
@@ -586,7 +603,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-201",
@@ -605,7 +623,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-202",
@@ -624,7 +643,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-203",
@@ -643,7 +663,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-204",
@@ -662,7 +683,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-205",
@@ -681,7 +703,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "config.json references database but .env has no such reference"
+    "rationale": "config.json references database but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-206",
@@ -700,7 +723,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "config.json references port but docker-compose.yml has no such reference"
+    "rationale": "config.json references port but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-207",
@@ -719,7 +743,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-208",
@@ -738,7 +763,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": ".env references PORT but docker-compose.yml has no such reference"
+    "rationale": ".env references PORT but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-209",
@@ -757,7 +783,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "init.sql references users but server.js has no such reference"
+    "rationale": "init.sql references users but server.js has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-210",
@@ -776,7 +803,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "init.sql references sessions but config.json has no such reference"
+    "rationale": "init.sql references sessions but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-211",
@@ -795,7 +823,8 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference"
+    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cc-bolster-212",
@@ -814,6 +843,7 @@
       "cli",
       "cross_file"
     ],
-    "rationale": "server.js references /health but config.json has no such reference"
+    "rationale": "server.js references /health but config.json has no such reference",
+    "intent": "false_positive"
   }
 ]

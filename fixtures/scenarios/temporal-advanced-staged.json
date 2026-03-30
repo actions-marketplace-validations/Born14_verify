@@ -16,7 +16,8 @@
       "temporal",
       "transient_pass",
       "TO-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-002",
@@ -36,7 +37,8 @@
       "temporal",
       "transient_pass",
       "TO-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-003",
@@ -55,7 +57,8 @@
       "temporal",
       "transient_pass",
       "TO-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-004",
@@ -77,7 +80,8 @@
       "temporal",
       "retry_nondeterminism",
       "TO-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-005",
@@ -100,7 +104,8 @@
       "temporal",
       "retry_nondeterminism",
       "TO-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-006",
@@ -125,7 +130,8 @@
       "temporal",
       "split_state_observation",
       "TO-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-007",
@@ -151,7 +157,8 @@
       "temporal",
       "split_state_observation",
       "TO-04"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-008",
@@ -171,7 +178,8 @@
       "temporal",
       "split_state_observation",
       "TO-04"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-009",
@@ -189,7 +197,8 @@
       "temporal",
       "debounce_timing",
       "TO-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-010",
@@ -209,7 +218,8 @@
       "temporal",
       "debounce_timing",
       "TO-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-011",
@@ -228,7 +238,8 @@
       "temporal",
       "animation_midpoint",
       "TO-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-012",
@@ -248,7 +259,8 @@
       "temporal",
       "animation_midpoint",
       "TO-07"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-013",
@@ -268,7 +280,8 @@
       "temporal",
       "animation_midpoint",
       "TO-07"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-014",
@@ -286,7 +299,8 @@
       "temporal",
       "eventual_consistency",
       "TO-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-015",
@@ -306,7 +320,8 @@
       "temporal",
       "eventual_consistency",
       "TO-08"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-016",
@@ -329,7 +344,8 @@
       "temporal",
       "eventual_consistency",
       "TO-08"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-017",
@@ -351,7 +367,8 @@
       "temporal",
       "background_job_incomplete",
       "TO-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-018",
@@ -374,7 +391,8 @@
       "temporal",
       "background_job_incomplete",
       "TO-09"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-019",
@@ -392,7 +410,8 @@
       "temporal",
       "timezone_rendering",
       "TO-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-020",
@@ -415,7 +434,8 @@
       "temporal",
       "timezone_rendering",
       "TO-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-021",
@@ -435,7 +455,8 @@
       "temporal",
       "timezone_rendering",
       "TO-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-022",
@@ -457,7 +478,8 @@
       "temporal",
       "dst_transition",
       "TO-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-023",
@@ -476,7 +498,8 @@
       "temporal",
       "dst_transition",
       "TO-12"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-024",
@@ -494,7 +517,8 @@
       "temporal",
       "clock_drift",
       "TO-13"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-025",
@@ -517,7 +541,8 @@
       "temporal",
       "clock_drift",
       "TO-13"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-026",
@@ -539,7 +564,8 @@
       "temporal",
       "locale_date_format",
       "TO-14"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-027",
@@ -562,7 +588,8 @@
       "temporal",
       "locale_date_format",
       "TO-14"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-028",
@@ -581,7 +608,8 @@
       "temporal",
       "locale_date_format",
       "TO-14"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-029",
@@ -603,7 +631,8 @@
       "temporal",
       "ttl_expiry",
       "TO-15"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "temp-adv-030",
@@ -626,7 +655,8 @@
       "temporal",
       "ttl_expiry",
       "TO-15"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "temp-adv-031",
@@ -646,6 +676,7 @@
       "temporal",
       "ttl_expiry",
       "TO-15"
-    ]
+    ],
+    "intent": "false_positive"
   }
 ]

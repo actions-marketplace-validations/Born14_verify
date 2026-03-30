@@ -27,7 +27,8 @@
       "css_js_coupling",
       "PB-01"
     ],
-    "rationale": "CSS class renamed but HTML elements still use old class — style won't apply via renamed selector"
+    "rationale": "CSS class renamed but HTML elements still use old class — style won't apply via renamed selector",
+    "intent": "false_positive"
   },
   {
     "id": "pb-cssjs-002",
@@ -57,7 +58,8 @@
       "css_js_coupling",
       "PB-01"
     ],
-    "rationale": "CSS class renamed from .subtitle to .tagline — HTML element still has old class, style lost"
+    "rationale": "CSS class renamed from .subtitle to .tagline — HTML element still has old class, style lost",
+    "intent": "false_positive"
   },
   {
     "id": "pb-cssjs-003",
@@ -87,7 +89,8 @@
       "css_js_coupling",
       "PB-01"
     ],
-    "rationale": "CSS class .hero renamed to .banner — HTML div still has class=\"hero\", background lost"
+    "rationale": "CSS class .hero renamed to .banner — HTML div still has class=\"hero\", background lost",
+    "intent": "false_positive"
   },
   {
     "id": "pb-cssjs-004",
@@ -114,7 +117,8 @@
       "PB-01",
       "pure"
     ],
-    "rationale": "CSS class renamed but HTML class attribute not updated — structural propagation gap"
+    "rationale": "CSS class renamed but HTML class attribute not updated — structural propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pb-cssjs-005",
@@ -141,7 +145,8 @@
       "PB-01",
       "pure"
     ],
-    "rationale": "CSS rule renamed — old class rule no longer present in source"
+    "rationale": "CSS rule renamed — old class rule no longer present in source",
+    "intent": "false_positive"
   },
   {
     "id": "pb-htmlsel-006",
@@ -170,7 +175,8 @@
       "html_selector",
       "PB-02"
     ],
-    "rationale": "HTML tag changed from h1 to h2 — CSS/selector targeting h1 finds nothing"
+    "rationale": "HTML tag changed from h1 to h2 — CSS/selector targeting h1 finds nothing",
+    "intent": "false_positive"
   },
   {
     "id": "pb-htmlsel-007",
@@ -199,7 +205,8 @@
       "html_selector",
       "PB-02"
     ],
-    "rationale": "Nav element removed but CSS rules for .nav-link still defined — orphaned styles"
+    "rationale": "Nav element removed but CSS rules for .nav-link still defined — orphaned styles",
+    "intent": "false_positive"
   },
   {
     "id": "pb-htmlsel-008",
@@ -228,7 +235,8 @@
       "html_selector",
       "PB-02"
     ],
-    "rationale": "Footer tag replaced with div — CSS footer selector no longer matches any element"
+    "rationale": "Footer tag replaced with div — CSS footer selector no longer matches any element",
+    "intent": "false_positive"
   },
   {
     "id": "pb-htmlsel-009",
@@ -255,7 +263,8 @@
       "PB-02",
       "pure"
     ],
-    "rationale": "Form action changed but no matching route handler — HTML→API propagation gap"
+    "rationale": "Form action changed but no matching route handler — HTML→API propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pb-htmlsel-010",
@@ -282,7 +291,8 @@
       "PB-02",
       "pure"
     ],
-    "rationale": "HTML table removed — class reference gone but CSS rules remain orphaned"
+    "rationale": "HTML table removed — class reference gone but CSS rules remain orphaned",
+    "intent": "false_positive"
   },
   {
     "id": "pb-apifrontend-011",
@@ -309,7 +319,8 @@
       "PB-03",
       "pure"
     ],
-    "rationale": "API data changed to Omega but homepage hardcodes \"Item Alpha\" — API→UI propagation gap"
+    "rationale": "API data changed to Omega but homepage hardcodes \"Item Alpha\" — API→UI propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pb-apifrontend-012",
@@ -336,7 +347,8 @@
       "PB-03",
       "pure"
     ],
-    "rationale": "API item removed but homepage HTML still hardcodes \"Item Beta\" — the propagation gap IS the finding (content still present)"
+    "rationale": "API item removed but homepage HTML still hardcodes \"Item Beta\" — the propagation gap IS the finding (content still present)",
+    "intent": "false_negative"
   },
   {
     "id": "pb-apifrontend-013",
@@ -363,7 +375,8 @@
       "PB-03",
       "pure"
     ],
-    "rationale": "API status changed — old value no longer in source"
+    "rationale": "API status changed — old value no longer in source",
+    "intent": "false_positive"
   },
   {
     "id": "pb-apifrontend-014",
@@ -390,7 +403,8 @@
       "PB-03",
       "pure"
     ],
-    "rationale": "Homepage title changed but about page title still uses old \"Demo App\" prefix — cross-route propagation gap"
+    "rationale": "Homepage title changed but about page title still uses old \"Demo App\" prefix — cross-route propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pb-apifrontend-015",
@@ -417,7 +431,8 @@
       "PB-03",
       "control"
     ],
-    "rationale": "Same-surface edit and check — no propagation needed, should pass"
+    "rationale": "Same-surface edit and check — no propagation needed, should pass",
+    "intent": "false_negative"
   },
   {
     "id": "pb-bolster-100",
@@ -442,7 +457,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-101",
@@ -467,7 +483,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-102",
@@ -492,7 +509,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-103",
@@ -517,7 +535,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-104",
@@ -542,7 +561,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-105",
@@ -567,7 +587,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-106",
@@ -592,7 +613,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-107",
@@ -617,7 +639,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-108",
@@ -643,7 +666,8 @@
       "pb-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "pb-bolster-109",
@@ -669,7 +693,8 @@
       "pb-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "pb-bolster-110",
@@ -695,7 +720,8 @@
       "pb-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "pb-bolster-111",
@@ -720,7 +746,8 @@
       "pb-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "pb-bolster-112",
@@ -738,7 +765,8 @@
       "browser",
       "pb-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "pb-bolster-113",
@@ -757,7 +785,8 @@
       "pb-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "pb-bolster-114",
@@ -777,6 +806,7 @@
       "pb-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

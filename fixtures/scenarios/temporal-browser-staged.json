@@ -26,7 +26,8 @@
       "dom_settle",
       "TB-01"
     ],
-    "rationale": "100ms delay is within 300ms settle window — browser gate should capture final state"
+    "rationale": "100ms delay is within 300ms settle window — browser gate should capture final state",
+    "intent": "false_negative"
   },
   {
     "id": "tb-settle-002",
@@ -55,7 +56,8 @@
       "dom_settle",
       "TB-01"
     ],
-    "rationale": "50ms class toggle — settle window should capture the applied class"
+    "rationale": "50ms class toggle — settle window should capture the applied class",
+    "intent": "false_negative"
   },
   {
     "id": "tb-settle-003",
@@ -80,7 +82,8 @@
       "TB-01",
       "control"
     ],
-    "rationale": "Static CSS — no timing issue, should pass immediately"
+    "rationale": "Static CSS — no timing issue, should pass immediately",
+    "intent": "false_negative"
   },
   {
     "id": "tb-async-004",
@@ -108,7 +111,8 @@
       "async_content",
       "TB-02"
     ],
-    "rationale": "Async content at 100ms — settle window should wait for mutation before checking"
+    "rationale": "Async content at 100ms — settle window should wait for mutation before checking",
+    "intent": "false_negative"
   },
   {
     "id": "tb-async-005",
@@ -136,7 +140,8 @@
       "async_content",
       "TB-02"
     ],
-    "rationale": "Text set after 150ms — DOM container exists immediately, content arrives within settle"
+    "rationale": "Text set after 150ms — DOM container exists immediately, content arrives within settle",
+    "intent": "false_negative"
   },
   {
     "id": "tb-async-006",
@@ -158,7 +163,8 @@
       "async_content",
       "TB-02"
     ],
-    "rationale": "Element never created — should fail regardless of settle window"
+    "rationale": "Element never created — should fail regardless of settle window",
+    "intent": "false_positive"
   },
   {
     "id": "tb-trans-007",
@@ -188,7 +194,8 @@
       "transition_midpoint",
       "TB-03"
     ],
-    "rationale": "Transition exists but animations disabled — gate captures CSS-declared final value"
+    "rationale": "Transition exists but animations disabled — gate captures CSS-declared final value",
+    "intent": "false_negative"
   },
   {
     "id": "tb-trans-008",
@@ -213,7 +220,8 @@
       "TB-03",
       "control"
     ],
-    "rationale": "Animated element has color #9b59b6 — with animations disabled, should get exact value"
+    "rationale": "Animated element has color #9b59b6 — with animations disabled, should get exact value",
+    "intent": "false_negative"
   },
   {
     "id": "tb-trans-009",
@@ -243,7 +251,8 @@
       "transition_midpoint",
       "TB-03"
     ],
-    "rationale": "Transition added but not triggered — color should be the authored #0066cc"
+    "rationale": "Transition added but not triggered — color should be the authored #0066cc",
+    "intent": "false_negative"
   },
   {
     "id": "tb-pure-010",
@@ -270,7 +279,8 @@
       "TB-01",
       "pure"
     ],
-    "rationale": "CSS edited in source — content gate should find new value"
+    "rationale": "CSS edited in source — content gate should find new value",
+    "intent": "false_negative"
   },
   {
     "id": "tb-pure-011",
@@ -297,7 +307,8 @@
       "TB-01",
       "pure"
     ],
-    "rationale": "CSS change in server.js but config.json has no CSS — cross-file temporal gap"
+    "rationale": "CSS change in server.js but config.json has no CSS — cross-file temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "tb-pure-012",
@@ -324,7 +335,8 @@
       "TB-02",
       "pure"
     ],
-    "rationale": "CSS edited — old value should no longer be present"
+    "rationale": "CSS edited — old value should no longer be present",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-100",
@@ -352,7 +364,8 @@
       "media_query",
       "TB-04"
     ],
-    "rationale": "Media query not applied at default viewport — temporal viewport mismatch"
+    "rationale": "Media query not applied at default viewport — temporal viewport mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-101",
@@ -380,7 +393,8 @@
       "media_query",
       "TB-04"
     ],
-    "rationale": "Media query not applied at default viewport — temporal viewport mismatch"
+    "rationale": "Media query not applied at default viewport — temporal viewport mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-102",
@@ -407,7 +421,8 @@
       "TB-04",
       "control"
     ],
-    "rationale": "Media query not applied at default viewport — temporal viewport mismatch"
+    "rationale": "Media query not applied at default viewport — temporal viewport mismatch",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-103",
@@ -433,7 +448,8 @@
       "stale_css",
       "TB-05"
     ],
-    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+    "rationale": "CSS edited but predicate checks for old value — stale rendering",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-104",
@@ -459,7 +475,8 @@
       "stale_css",
       "TB-05"
     ],
-    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+    "rationale": "CSS edited but predicate checks for old value — stale rendering",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-105",
@@ -485,7 +502,8 @@
       "stale_css",
       "TB-05"
     ],
-    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+    "rationale": "CSS edited but predicate checks for old value — stale rendering",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-106",
@@ -512,7 +530,8 @@
       "TB-05",
       "control"
     ],
-    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+    "rationale": "CSS edited but predicate checks for old value — stale rendering",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-107",
@@ -538,7 +557,8 @@
       "stale_css",
       "TB-05"
     ],
-    "rationale": "CSS edited but predicate checks for old value — stale rendering"
+    "rationale": "CSS edited but predicate checks for old value — stale rendering",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-108",
@@ -565,7 +585,8 @@
       "TB-06",
       "control"
     ],
-    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-109",
@@ -592,7 +613,8 @@
       "TB-06",
       "control"
     ],
-    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-110",
@@ -618,7 +640,8 @@
       "cross_route_bleed",
       "TB-06"
     ],
-    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-111",
@@ -644,7 +667,8 @@
       "cross_route_bleed",
       "TB-06"
     ],
-    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship",
+    "intent": "false_positive"
   },
   {
     "id": "tb-bolster-112",
@@ -671,7 +695,8 @@
       "TB-06",
       "control"
     ],
-    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship"
+    "rationale": "CSS edit on one route checked on another — cross-route temporal relationship",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-113",
@@ -698,7 +723,8 @@
       "TB-07",
       "control"
     ],
-    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-114",
@@ -725,7 +751,8 @@
       "TB-07",
       "control"
     ],
-    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-115",
@@ -752,7 +779,8 @@
       "TB-07",
       "control"
     ],
-    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-116",
@@ -779,7 +807,8 @@
       "TB-07",
       "control"
     ],
-    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction",
+    "intent": "false_negative"
   },
   {
     "id": "tb-bolster-117",
@@ -806,6 +835,7 @@
       "TB-07",
       "control"
     ],
-    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction"
+    "rationale": "CSS specificity determines which rule wins — temporal ordering + specificity interaction",
+    "intent": "false_negative"
   }
 ]

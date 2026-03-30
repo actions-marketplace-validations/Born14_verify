@@ -28,7 +28,8 @@
       "stale_pool",
       "TD-01"
     ],
-    "rationale": "Migration adds new column but predicate checks existing column — should still exist"
+    "rationale": "Migration adds new column but predicate checks existing column — should still exist",
+    "intent": "false_negative"
   },
   {
     "id": "td-stale-002",
@@ -59,7 +60,8 @@
       "stale_pool",
       "TD-01"
     ],
-    "rationale": "After migration, new column should be visible — tests if gate refreshes schema"
+    "rationale": "After migration, new column should be visible — tests if gate refreshes schema",
+    "intent": "false_negative"
   },
   {
     "id": "td-stale-003",
@@ -89,7 +91,8 @@
       "stale_pool",
       "TD-01"
     ],
-    "rationale": "Table renamed — stale pool might still see old name, but fresh introspection should not"
+    "rationale": "Table renamed — stale pool might still see old name, but fresh introspection should not",
+    "intent": "false_positive"
   },
   {
     "id": "td-stale-004",
@@ -120,7 +123,8 @@
       "stale_pool",
       "TD-01"
     ],
-    "rationale": "Column dropped — predicate should detect absence even if pool cached old schema"
+    "rationale": "Column dropped — predicate should detect absence even if pool cached old schema",
+    "intent": "false_positive"
   },
   {
     "id": "td-stale-005",
@@ -143,7 +147,8 @@
       "TD-01",
       "control"
     ],
-    "rationale": "No schema change — existing table should be found"
+    "rationale": "No schema change — existing table should be found",
+    "intent": "false_negative"
   },
   {
     "id": "td-lag-006",
@@ -177,7 +182,8 @@
       "replication_lag",
       "TD-02"
     ],
-    "rationale": "Schema change added column but API layer not updated — stale response shape"
+    "rationale": "Schema change added column but API layer not updated — stale response shape",
+    "intent": "false_positive"
   },
   {
     "id": "td-lag-007",
@@ -211,7 +217,8 @@
       "replication_lag",
       "TD-02"
     ],
-    "rationale": "Schema changed but API response format unchanged — DB/API shape mismatch"
+    "rationale": "Schema changed but API response format unchanged — DB/API shape mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "td-seq-008",
@@ -241,7 +248,8 @@
       "sequence_visibility",
       "TD-03"
     ],
-    "rationale": "New table created — should be immediately visible after migration"
+    "rationale": "New table created — should be immediately visible after migration",
+    "intent": "false_negative"
   },
   {
     "id": "td-seq-009",
@@ -272,7 +280,8 @@
       "sequence_visibility",
       "TD-03"
     ],
-    "rationale": "New table + column should be visible immediately after CREATE TABLE"
+    "rationale": "New table + column should be visible immediately after CREATE TABLE",
+    "intent": "false_negative"
   },
   {
     "id": "td-seq-010",
@@ -294,7 +303,8 @@
       "sequence_visibility",
       "TD-03"
     ],
-    "rationale": "Table never created — should not exist"
+    "rationale": "Table never created — should not exist",
+    "intent": "false_positive"
   },
   {
     "id": "td-pure-011",
@@ -321,7 +331,8 @@
       "TD-01",
       "pure"
     ],
-    "rationale": "Edit adds column to init.sql — content gate should find it"
+    "rationale": "Edit adds column to init.sql — content gate should find it",
+    "intent": "false_negative"
   },
   {
     "id": "td-pure-012",
@@ -348,7 +359,8 @@
       "TD-01",
       "pure"
     ],
-    "rationale": "Table renamed in init.sql — old name should not be found"
+    "rationale": "Table renamed in init.sql — old name should not be found",
+    "intent": "false_positive"
   },
   {
     "id": "td-pure-013",
@@ -375,7 +387,8 @@
       "TD-02",
       "pure"
     ],
-    "rationale": "Column renamed in schema but server.js code references old name — DB/API desync"
+    "rationale": "Column renamed in schema but server.js code references old name — DB/API desync",
+    "intent": "false_positive"
   },
   {
     "id": "td-pure-014",
@@ -402,7 +415,8 @@
       "TD-01",
       "pure"
     ],
-    "rationale": "Schema constraint added but config has no awareness — temporal gap between layers"
+    "rationale": "Schema constraint added but config has no awareness — temporal gap between layers",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-100",
@@ -430,7 +444,8 @@
       "index_gap",
       "TD-04"
     ],
-    "rationale": "Database index/constraint added but application code unaware"
+    "rationale": "Database index/constraint added but application code unaware",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-101",
@@ -458,7 +473,8 @@
       "index_gap",
       "TD-04"
     ],
-    "rationale": "Database index/constraint added but application code unaware"
+    "rationale": "Database index/constraint added but application code unaware",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-102",
@@ -486,7 +502,8 @@
       "index_gap",
       "TD-04"
     ],
-    "rationale": "Database index/constraint added but application code unaware"
+    "rationale": "Database index/constraint added but application code unaware",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-103",
@@ -514,7 +531,8 @@
       "index_gap",
       "TD-04"
     ],
-    "rationale": "Database index/constraint added but application code unaware"
+    "rationale": "Database index/constraint added but application code unaware",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-104",
@@ -542,7 +560,8 @@
       "type_change",
       "TD-05"
     ],
-    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+    "rationale": "Column type/constraint changed via migration but dependent code not updated",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-105",
@@ -570,7 +589,8 @@
       "type_change",
       "TD-05"
     ],
-    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+    "rationale": "Column type/constraint changed via migration but dependent code not updated",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-106",
@@ -598,7 +618,8 @@
       "type_change",
       "TD-05"
     ],
-    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+    "rationale": "Column type/constraint changed via migration but dependent code not updated",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-107",
@@ -626,7 +647,8 @@
       "type_change",
       "TD-05"
     ],
-    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+    "rationale": "Column type/constraint changed via migration but dependent code not updated",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-108",
@@ -655,7 +677,8 @@
       "TD-05",
       "control"
     ],
-    "rationale": "Column type/constraint changed via migration but dependent code not updated"
+    "rationale": "Column type/constraint changed via migration but dependent code not updated",
+    "intent": "false_negative"
   },
   {
     "id": "td-bolster-109",
@@ -687,7 +710,8 @@
       "multi_migration",
       "TD-06"
     ],
-    "rationale": "Multiple migrations applied but application layer not updated"
+    "rationale": "Multiple migrations applied but application layer not updated",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-110",
@@ -719,7 +743,8 @@
       "multi_migration",
       "TD-06"
     ],
-    "rationale": "Multiple migrations applied but application layer not updated"
+    "rationale": "Multiple migrations applied but application layer not updated",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-111",
@@ -752,7 +777,8 @@
       "TD-06",
       "control"
     ],
-    "rationale": "Multiple migrations applied but application layer not updated"
+    "rationale": "Multiple migrations applied but application layer not updated",
+    "intent": "false_negative"
   },
   {
     "id": "td-bolster-112",
@@ -780,7 +806,8 @@
       "foreign_key",
       "TD-07"
     ],
-    "rationale": "Foreign key/constraint added but application code has no awareness"
+    "rationale": "Foreign key/constraint added but application code has no awareness",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-113",
@@ -808,7 +835,8 @@
       "foreign_key",
       "TD-07"
     ],
-    "rationale": "Foreign key/constraint added but application code has no awareness"
+    "rationale": "Foreign key/constraint added but application code has no awareness",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-114",
@@ -836,7 +864,8 @@
       "foreign_key",
       "TD-07"
     ],
-    "rationale": "Foreign key/constraint added but application code has no awareness"
+    "rationale": "Foreign key/constraint added but application code has no awareness",
+    "intent": "false_positive"
   },
   {
     "id": "td-bolster-115",
@@ -865,6 +894,7 @@
       "TD-07",
       "control"
     ],
-    "rationale": "Foreign key/constraint added but application code has no awareness"
+    "rationale": "Foreign key/constraint added but application code has no awareness",
+    "intent": "false_negative"
   }
 ]

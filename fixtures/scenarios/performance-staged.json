@@ -14,7 +14,8 @@
       "performance",
       "bundle_size"
     ],
-    "rationale": "server.js is small (~10KB), well under 512KB default"
+    "rationale": "server.js is small (~10KB), well under 512KB default",
+    "intent": "false_negative"
   },
   {
     "id": "perf-002",
@@ -32,7 +33,8 @@
       "performance",
       "bundle_size_fail"
     ],
-    "rationale": "server.js is >100 bytes, should fail with very low threshold"
+    "rationale": "server.js is >100 bytes, should fail with very low threshold",
+    "intent": "false_positive"
   },
   {
     "id": "perf-003",
@@ -49,7 +51,8 @@
       "performance",
       "image_optimization"
     ],
-    "rationale": "No image files in demo-app, nothing to optimize"
+    "rationale": "No image files in demo-app, nothing to optimize",
+    "intent": "false_negative"
   },
   {
     "id": "perf-004",
@@ -67,7 +70,8 @@
       "performance",
       "lazy_loading"
     ],
-    "rationale": "demo-app has <img class=\"logo\"> without loading=\"lazy\" — gate finds issues and returns failure"
+    "rationale": "demo-app has <img class=\"logo\"> without loading=\"lazy\" — gate finds issues and returns failure",
+    "intent": "false_positive"
   },
   {
     "id": "perf-005",
@@ -84,7 +88,8 @@
       "performance",
       "connection_count"
     ],
-    "rationale": "No external script/link tags in demo-app HTML"
+    "rationale": "No external script/link tags in demo-app HTML",
+    "intent": "false_negative"
   },
   {
     "id": "perf-006",
@@ -102,7 +107,8 @@
       "performance",
       "connection_count"
     ],
-    "rationale": "Zero external connections < threshold of 1"
+    "rationale": "Zero external connections < threshold of 1",
+    "intent": "false_negative"
   },
   {
     "id": "perf-007",
@@ -120,7 +126,8 @@
       "performance",
       "unminified_assets"
     ],
-    "rationale": "server.js has comments, whitespace, long variable names"
+    "rationale": "server.js has comments, whitespace, long variable names",
+    "intent": "false_positive"
   },
   {
     "id": "perf-008",
@@ -138,7 +145,8 @@
       "performance",
       "render_blocking"
     ],
-    "rationale": "demo-app uses <style> blocks, no external CSS links to block render"
+    "rationale": "demo-app uses <style> blocks, no external CSS links to block render",
+    "intent": "false_negative"
   },
   {
     "id": "perf-009",
@@ -156,7 +164,8 @@
       "performance",
       "dom_depth"
     ],
-    "rationale": "demo-app HTML is not deeply nested (max ~6-7 levels)"
+    "rationale": "demo-app HTML is not deeply nested (max ~6-7 levels)",
+    "intent": "false_negative"
   },
   {
     "id": "perf-010",
@@ -174,7 +183,8 @@
       "performance",
       "cache_headers"
     ],
-    "rationale": "demo-app sets Content-Type but no Cache-Control headers"
+    "rationale": "demo-app sets Content-Type but no Cache-Control headers",
+    "intent": "false_negative"
   },
   {
     "id": "perf-011",
@@ -192,7 +202,8 @@
       "performance",
       "duplicate_deps"
     ],
-    "rationale": "demo-app has no package.json with dependencies"
+    "rationale": "demo-app has no package.json with dependencies",
+    "intent": "false_negative"
   },
   {
     "id": "perf-012",
@@ -209,7 +220,8 @@
       "performance",
       "response_time"
     ],
-    "rationale": "response_time is deferred/advisory without a running server"
+    "rationale": "response_time is deferred/advisory without a running server",
+    "intent": "false_negative"
   },
   {
     "id": "perf-013",
@@ -231,7 +243,8 @@
       "performance",
       "multi"
     ],
-    "rationale": "Both checks pass on demo-app"
+    "rationale": "Both checks pass on demo-app",
+    "intent": "false_negative"
   },
   {
     "id": "perf-014",
@@ -253,7 +266,8 @@
       "performance",
       "multi_fail"
     ],
-    "rationale": "Second predicate has impossible threshold, gate fails"
+    "rationale": "Second predicate has impossible threshold, gate fails",
+    "intent": "false_positive"
   },
   {
     "id": "perf-bolster-100",
@@ -272,7 +286,8 @@
       "bundle_size",
       "threshold_pass"
     ],
-    "rationale": "generous 1KB threshold passes"
+    "rationale": "generous 1KB threshold passes",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-101",
@@ -291,7 +306,8 @@
       "bundle_size",
       "threshold_pass"
     ],
-    "rationale": "50KB threshold passes"
+    "rationale": "50KB threshold passes",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-102",
@@ -310,7 +326,8 @@
       "bundle_size",
       "threshold_fail"
     ],
-    "rationale": "10-byte threshold fails"
+    "rationale": "10-byte threshold fails",
+    "intent": "false_positive"
   },
   {
     "id": "perf-bolster-103",
@@ -329,7 +346,8 @@
       "dom_depth",
       "threshold_pass"
     ],
-    "rationale": "generous depth threshold passes"
+    "rationale": "generous depth threshold passes",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-104",
@@ -348,7 +366,8 @@
       "dom_depth",
       "threshold_fail"
     ],
-    "rationale": "strict 3-level depth threshold fails"
+    "rationale": "strict 3-level depth threshold fails",
+    "intent": "false_positive"
   },
   {
     "id": "perf-bolster-105",
@@ -367,7 +386,8 @@
       "connection_count",
       "threshold_pass"
     ],
-    "rationale": "100 connections threshold passes"
+    "rationale": "100 connections threshold passes",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-106",
@@ -386,7 +406,8 @@
       "connection_count",
       "threshold_pass"
     ],
-    "rationale": "0 threshold passes (no externals)"
+    "rationale": "0 threshold passes (no externals)",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-107",
@@ -410,7 +431,8 @@
       "render_blocking",
       "edit_pass"
     ],
-    "rationale": "Add inline script, check render_blocking"
+    "rationale": "Add inline script, check render_blocking",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-108",
@@ -435,7 +457,8 @@
       "render_blocking",
       "edit_fail"
     ],
-    "rationale": "Add external CSS link, check render_blocking"
+    "rationale": "Add external CSS link, check render_blocking",
+    "intent": "false_positive"
   },
   {
     "id": "perf-bolster-109",
@@ -459,7 +482,8 @@
       "bundle_size",
       "edit_pass"
     ],
-    "rationale": "Add large inline CSS, check bundle_size (still small)"
+    "rationale": "Add large inline CSS, check bundle_size (still small)",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-110",
@@ -484,7 +508,8 @@
       "dom_depth",
       "edit_fail"
     ],
-    "rationale": "Add deeply nested HTML, check dom_depth"
+    "rationale": "Add deeply nested HTML, check dom_depth",
+    "intent": "false_positive"
   },
   {
     "id": "perf-bolster-111",
@@ -509,7 +534,8 @@
       "lazy_loading",
       "edit_pass"
     ],
-    "rationale": "Add lazy loading to img, check lazy_loading passes"
+    "rationale": "Add lazy loading to img, check lazy_loading passes",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-112",
@@ -535,7 +561,8 @@
       "multi",
       "multi_pass"
     ],
-    "rationale": "three clean checks all pass"
+    "rationale": "three clean checks all pass",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-113",
@@ -558,7 +585,8 @@
       "multi",
       "multi_fail"
     ],
-    "rationale": "bundle passes but lazy_loading fails"
+    "rationale": "bundle passes but lazy_loading fails",
+    "intent": "false_positive"
   },
   {
     "id": "perf-bolster-114",
@@ -580,7 +608,8 @@
       "multi",
       "multi_pass"
     ],
-    "rationale": "both advisory checks pass"
+    "rationale": "both advisory checks pass",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-115",
@@ -598,7 +627,8 @@
       "image_optimization",
       "edge_case"
     ],
-    "rationale": "img with alt text passes optimization"
+    "rationale": "img with alt text passes optimization",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-116",
@@ -616,7 +646,8 @@
       "unminified_assets",
       "edge_case"
     ],
-    "rationale": "inline CSS is not externally minifiable"
+    "rationale": "inline CSS is not externally minifiable",
+    "intent": "false_negative"
   },
   {
     "id": "perf-bolster-117",
@@ -634,6 +665,7 @@
       "duplicate_deps",
       "edge_case"
     ],
-    "rationale": "no external deps means no duplicates"
+    "rationale": "no external deps means no duplicates",
+    "intent": "false_negative"
   }
 ]

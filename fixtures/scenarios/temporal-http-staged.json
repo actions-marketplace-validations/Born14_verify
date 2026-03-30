@@ -28,7 +28,8 @@
       "startup_race",
       "TH-01"
     ],
-    "rationale": "Health endpoint renamed but predicate checks old path — simulates startup race where old route is gone"
+    "rationale": "Health endpoint renamed but predicate checks old path — simulates startup race where old route is gone",
+    "intent": "false_positive"
   },
   {
     "id": "th-race-002",
@@ -60,7 +61,8 @@
       "startup_race",
       "TH-01"
     ],
-    "rationale": "Server responds with starting status — health check finds wrong body content"
+    "rationale": "Server responds with starting status — health check finds wrong body content",
+    "intent": "false_positive"
   },
   {
     "id": "th-race-003",
@@ -91,7 +93,8 @@
       "startup_race",
       "TH-01"
     ],
-    "rationale": "Server returns 503 during startup phase — predicate expects 200"
+    "rationale": "Server returns 503 during startup phase — predicate expects 200",
+    "intent": "false_positive"
   },
   {
     "id": "th-race-004",
@@ -118,7 +121,8 @@
       "TH-01",
       "control"
     ],
-    "rationale": "No edit — health endpoint works as expected"
+    "rationale": "No edit — health endpoint works as expected",
+    "intent": "false_negative"
   },
   {
     "id": "th-cache-005",
@@ -150,7 +154,8 @@
       "stale_cache",
       "TH-02"
     ],
-    "rationale": "API response changed but predicate checks for old stale content"
+    "rationale": "API response changed but predicate checks for old stale content",
+    "intent": "false_positive"
   },
   {
     "id": "th-cache-006",
@@ -182,7 +187,8 @@
       "stale_cache",
       "TH-02"
     ],
-    "rationale": "Item removed from API but predicate still expects it — stale cache pattern"
+    "rationale": "Item removed from API but predicate still expects it — stale cache pattern",
+    "intent": "false_positive"
   },
   {
     "id": "th-cache-007",
@@ -217,7 +223,8 @@
       "stale_cache",
       "TH-02"
     ],
-    "rationale": "Response format changed but predicate checks old key name — stale contract"
+    "rationale": "Response format changed but predicate checks old key name — stale contract",
+    "intent": "false_positive"
   },
   {
     "id": "th-cache-008",
@@ -250,7 +257,8 @@
       "TH-02",
       "control"
     ],
-    "rationale": "Edit and check match — no staleness"
+    "rationale": "Edit and check match — no staleness",
+    "intent": "false_negative"
   },
   {
     "id": "th-seq-009",
@@ -288,7 +296,8 @@
       "sequence_timing",
       "TH-01"
     ],
-    "rationale": "Health endpoint is stable — both immediate and delayed checks pass"
+    "rationale": "Health endpoint is stable — both immediate and delayed checks pass",
+    "intent": "false_negative"
   },
   {
     "id": "th-seq-010",
@@ -327,7 +336,8 @@
       "http",
       "sequence_timing"
     ],
-    "rationale": "POST then GET — server handles both methods in sequence"
+    "rationale": "POST then GET — server handles both methods in sequence",
+    "intent": "false_negative"
   },
   {
     "id": "th-seq-011",
@@ -370,7 +380,8 @@
       "sequence_timing",
       "TH-02"
     ],
-    "rationale": "Route renamed — first step gets 404, sequence fails"
+    "rationale": "Route renamed — first step gets 404, sequence fails",
+    "intent": "false_positive"
   },
   {
     "id": "th-pure-012",
@@ -397,7 +408,8 @@
       "TH-02",
       "pure"
     ],
-    "rationale": "Route renamed in server.js — old pattern no longer present (pure tier)"
+    "rationale": "Route renamed in server.js — old pattern no longer present (pure tier)",
+    "intent": "false_positive"
   },
   {
     "id": "th-pure-013",
@@ -424,7 +436,8 @@
       "TH-01",
       "pure"
     ],
-    "rationale": "Dockerfile checks /ready but server.js has no /ready route — cross-file desync"
+    "rationale": "Dockerfile checks /ready but server.js has no /ready route — cross-file desync",
+    "intent": "false_positive"
   },
   {
     "id": "th-pure-014",
@@ -451,7 +464,8 @@
       "TH-02",
       "pure"
     ],
-    "rationale": "Content-Type changed in server.js but Dockerfile has no reference to it"
+    "rationale": "Content-Type changed in server.js but Dockerfile has no reference to it",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-100",
@@ -477,7 +491,8 @@
       "stale_response",
       "TH-03"
     ],
-    "rationale": "HTTP response edited but stale cache might serve old data"
+    "rationale": "HTTP response edited but stale cache might serve old data",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-101",
@@ -503,7 +518,8 @@
       "stale_response",
       "TH-03"
     ],
-    "rationale": "HTTP response edited but stale cache might serve old data"
+    "rationale": "HTTP response edited but stale cache might serve old data",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-102",
@@ -529,7 +545,8 @@
       "stale_response",
       "TH-03"
     ],
-    "rationale": "HTTP response edited but stale cache might serve old data"
+    "rationale": "HTTP response edited but stale cache might serve old data",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-103",
@@ -556,7 +573,8 @@
       "TH-03",
       "control"
     ],
-    "rationale": "HTTP response edited but stale cache might serve old data"
+    "rationale": "HTTP response edited but stale cache might serve old data",
+    "intent": "false_negative"
   },
   {
     "id": "th-bolster-104",
@@ -582,7 +600,8 @@
       "route_config_gap",
       "TH-04"
     ],
-    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+    "rationale": "New route added but supporting config not updated — route/config temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-105",
@@ -608,7 +627,8 @@
       "route_config_gap",
       "TH-04"
     ],
-    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+    "rationale": "New route added but supporting config not updated — route/config temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-106",
@@ -634,7 +654,8 @@
       "route_config_gap",
       "TH-04"
     ],
-    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+    "rationale": "New route added but supporting config not updated — route/config temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-107",
@@ -661,7 +682,8 @@
       "TH-04",
       "control"
     ],
-    "rationale": "New route added but supporting config not updated — route/config temporal gap"
+    "rationale": "New route added but supporting config not updated — route/config temporal gap",
+    "intent": "false_negative"
   },
   {
     "id": "th-bolster-108",
@@ -688,7 +710,8 @@
       "TH-05",
       "control"
     ],
-    "rationale": "HTTP header changed but downstream config not updated"
+    "rationale": "HTTP header changed but downstream config not updated",
+    "intent": "false_negative"
   },
   {
     "id": "th-bolster-109",
@@ -714,7 +737,8 @@
       "header_desync",
       "TH-05"
     ],
-    "rationale": "HTTP header changed but downstream config not updated"
+    "rationale": "HTTP header changed but downstream config not updated",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-110",
@@ -740,7 +764,8 @@
       "header_desync",
       "TH-05"
     ],
-    "rationale": "HTTP header changed but downstream config not updated"
+    "rationale": "HTTP header changed but downstream config not updated",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-111",
@@ -767,7 +792,8 @@
       "TH-05",
       "control"
     ],
-    "rationale": "HTTP header changed but downstream config not updated"
+    "rationale": "HTTP header changed but downstream config not updated",
+    "intent": "false_negative"
   },
   {
     "id": "th-bolster-112",
@@ -793,7 +819,8 @@
       "error_handling",
       "TH-06"
     ],
-    "rationale": "HTTP error handling changed but config/compose not updated"
+    "rationale": "HTTP error handling changed but config/compose not updated",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-113",
@@ -819,7 +846,8 @@
       "error_handling",
       "TH-06"
     ],
-    "rationale": "HTTP error handling changed but config/compose not updated"
+    "rationale": "HTTP error handling changed but config/compose not updated",
+    "intent": "false_positive"
   },
   {
     "id": "th-bolster-114",
@@ -846,7 +874,8 @@
       "TH-06",
       "control"
     ],
-    "rationale": "HTTP error handling changed but config/compose not updated"
+    "rationale": "HTTP error handling changed but config/compose not updated",
+    "intent": "false_negative"
   },
   {
     "id": "th-bolster-115",
@@ -873,6 +902,7 @@
       "TH-06",
       "control"
     ],
-    "rationale": "HTTP error handling changed but config/compose not updated"
+    "rationale": "HTTP error handling changed but config/compose not updated",
+    "intent": "false_negative"
   }
 ]

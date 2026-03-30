@@ -15,7 +15,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-002",
@@ -33,7 +34,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-003",
@@ -51,7 +53,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-004",
@@ -69,7 +72,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-005",
@@ -88,7 +92,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-006",
@@ -107,7 +112,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-007",
@@ -126,7 +132,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-008",
@@ -145,7 +152,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-009",
@@ -164,7 +172,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-010",
@@ -183,7 +192,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-011",
@@ -202,7 +212,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-012",
@@ -221,7 +232,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-013",
@@ -240,7 +252,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-014",
@@ -259,7 +272,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-015",
@@ -278,7 +292,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-016",
@@ -297,7 +312,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-017",
@@ -316,7 +332,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-018",
@@ -335,7 +352,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-019",
@@ -354,7 +372,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-020",
@@ -373,7 +392,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-021",
@@ -391,7 +411,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-022",
@@ -409,7 +430,8 @@
       "db",
       "table_existence",
       "DB-01"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-023",
@@ -428,7 +450,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-024",
@@ -447,7 +470,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-025",
@@ -466,7 +490,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-026",
@@ -485,7 +510,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-027",
@@ -504,7 +530,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-028",
@@ -523,7 +550,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-029",
@@ -542,7 +570,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-030",
@@ -561,7 +590,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-031",
@@ -580,7 +610,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-032",
@@ -599,7 +630,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-033",
@@ -618,7 +650,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-034",
@@ -637,7 +670,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-035",
@@ -656,7 +690,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-036",
@@ -676,7 +711,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-037",
@@ -696,7 +732,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-038",
@@ -716,7 +753,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-039",
@@ -736,7 +774,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-040",
@@ -756,7 +795,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-041",
@@ -776,7 +816,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-042",
@@ -796,7 +837,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-043",
@@ -816,7 +858,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-044",
@@ -836,7 +879,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-045",
@@ -856,7 +900,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-046",
@@ -876,7 +921,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-047",
@@ -896,7 +942,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-048",
@@ -916,7 +963,8 @@
       "db",
       "column_existence",
       "DB-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-049",
@@ -936,7 +984,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-050",
@@ -956,7 +1005,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-051",
@@ -976,7 +1026,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-052",
@@ -996,7 +1047,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-053",
@@ -1016,7 +1068,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-054",
@@ -1036,7 +1089,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-055",
@@ -1056,7 +1110,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-056",
@@ -1076,7 +1131,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-057",
@@ -1096,7 +1152,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-058",
@@ -1116,7 +1173,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-059",
@@ -1136,7 +1194,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-060",
@@ -1156,7 +1215,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-061",
@@ -1177,7 +1237,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-062",
@@ -1198,7 +1259,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-063",
@@ -1219,7 +1281,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-064",
@@ -1240,7 +1303,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-065",
@@ -1261,7 +1325,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-066",
@@ -1282,7 +1347,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-067",
@@ -1303,7 +1369,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-068",
@@ -1324,7 +1391,8 @@
       "db",
       "column_type",
       "DB-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-069",
@@ -1342,7 +1410,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-070",
@@ -1360,7 +1429,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-071",
@@ -1378,7 +1448,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-072",
@@ -1396,7 +1467,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-073",
@@ -1414,7 +1486,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-074",
@@ -1432,7 +1505,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-075",
@@ -1450,7 +1524,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-076",
@@ -1468,7 +1543,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-077",
@@ -1487,7 +1563,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-078",
@@ -1506,7 +1583,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-079",
@@ -1525,7 +1603,8 @@
       "db",
       "constraints",
       "DB-04"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-080",
@@ -1543,7 +1622,8 @@
       "db",
       "foreign_keys",
       "DB-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-081",
@@ -1561,7 +1641,8 @@
       "db",
       "foreign_keys",
       "DB-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-082",
@@ -1580,7 +1661,8 @@
       "db",
       "foreign_keys",
       "DB-05"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-083",
@@ -1599,7 +1681,8 @@
       "db",
       "foreign_keys",
       "DB-05"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-084",
@@ -1623,7 +1706,8 @@
       "db",
       "foreign_keys",
       "DB-05"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-085",
@@ -1641,7 +1725,8 @@
       "db",
       "indexes",
       "DB-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-086",
@@ -1659,7 +1744,8 @@
       "db",
       "indexes",
       "DB-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-087",
@@ -1677,7 +1763,8 @@
       "db",
       "indexes",
       "DB-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-088",
@@ -1695,7 +1782,8 @@
       "db",
       "indexes",
       "DB-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-089",
@@ -1714,7 +1802,8 @@
       "db",
       "indexes",
       "DB-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-090",
@@ -1733,7 +1822,8 @@
       "db",
       "indexes",
       "DB-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-091",
@@ -1752,7 +1842,8 @@
       "db",
       "indexes",
       "DB-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-092",
@@ -1776,7 +1867,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-093",
@@ -1801,7 +1893,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-094",
@@ -1833,7 +1926,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-095",
@@ -1868,7 +1962,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-096",
@@ -1892,7 +1987,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-097",
@@ -1922,7 +2018,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-098",
@@ -1947,7 +2044,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-099",
@@ -1973,7 +2071,8 @@
       "db",
       "migration_patterns",
       "DB-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-100",
@@ -2005,7 +2104,8 @@
       "db",
       "anti_patterns",
       "DB-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-101",
@@ -2034,7 +2134,8 @@
       "db",
       "anti_patterns",
       "DB-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-102",
@@ -2064,7 +2165,8 @@
       "db",
       "anti_patterns",
       "DB-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-103",
@@ -2100,7 +2202,8 @@
       "db",
       "anti_patterns",
       "DB-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-104",
@@ -2132,7 +2235,8 @@
       "db",
       "anti_patterns",
       "DB-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-105",
@@ -2162,7 +2266,8 @@
       "db",
       "anti_patterns",
       "DB-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-106",
@@ -2182,7 +2287,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-107",
@@ -2202,7 +2308,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-108",
@@ -2234,7 +2341,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-109",
@@ -2266,7 +2374,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-110",
@@ -2292,7 +2401,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-111",
@@ -2322,7 +2432,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-112",
@@ -2352,7 +2463,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-113",
@@ -2382,7 +2494,8 @@
       "db",
       "data_types",
       "DB-09"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-114",
@@ -2423,7 +2536,8 @@
       "db",
       "multi_table",
       "DB-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-115",
@@ -2453,7 +2567,8 @@
       "db",
       "multi_table",
       "DB-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-116",
@@ -2484,7 +2599,8 @@
       "db",
       "multi_table",
       "DB-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-117",
@@ -2519,7 +2635,8 @@
       "db",
       "multi_table",
       "DB-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-118",
@@ -2555,7 +2672,8 @@
       "db",
       "multi_table",
       "DB-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-119",
@@ -2585,7 +2703,8 @@
       "db",
       "multi_table",
       "DB-10"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-120",
@@ -2604,7 +2723,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-121",
@@ -2623,7 +2743,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-122",
@@ -2642,7 +2763,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-123",
@@ -2661,7 +2783,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-124",
@@ -2680,7 +2803,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-125",
@@ -2700,7 +2824,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-126",
@@ -2720,7 +2845,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-127",
@@ -2740,7 +2866,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-128",
@@ -2760,7 +2887,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-129",
@@ -2780,7 +2908,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-130",
@@ -2799,7 +2928,8 @@
       "db",
       "naming",
       "DB-11"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "spdb-131",
@@ -2829,7 +2959,8 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-132",
@@ -2861,7 +2992,8 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-133",
@@ -2897,7 +3029,8 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-134",
@@ -2927,7 +3060,8 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-135",
@@ -2951,7 +3085,8 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-136",
@@ -2980,7 +3115,8 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-137",
@@ -3011,7 +3147,8 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "spdb-138",
@@ -3035,6 +3172,7 @@
       "db",
       "evolution",
       "DB-12"
-    ]
+    ],
+    "intent": "false_negative"
   }
 ]

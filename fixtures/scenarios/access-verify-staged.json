@@ -26,7 +26,8 @@
       "auth_gated",
       "HV-01"
     ],
-    "rationale": "Health endpoint returns 401 without Bearer token — probe fails"
+    "rationale": "Health endpoint returns 401 without Bearer token — probe fails",
+    "intent": "false_positive"
   },
   {
     "id": "hv-auth-002",
@@ -55,7 +56,8 @@
       "auth_gated",
       "HV-01"
     ],
-    "rationale": "Health endpoint needs ?key=probe-key — probe without key gets 403"
+    "rationale": "Health endpoint needs ?key=probe-key — probe without key gets 403",
+    "intent": "false_positive"
   },
   {
     "id": "hv-auth-003",
@@ -89,7 +91,8 @@
       "auth_gated",
       "HV-01"
     ],
-    "rationale": "Health endpoint restricted to localhost — external verification probe gets 403"
+    "rationale": "Health endpoint restricted to localhost — external verification probe gets 403",
+    "intent": "false_positive"
   },
   {
     "id": "hv-auth-004",
@@ -123,7 +126,8 @@
       "auth_gated",
       "HV-01"
     ],
-    "rationale": "Health requires basic auth but Docker HEALTHCHECK wget sends none — container marked unhealthy"
+    "rationale": "Health requires basic auth but Docker HEALTHCHECK wget sends none — container marked unhealthy",
+    "intent": "false_positive"
   },
   {
     "id": "hv-auth-005",
@@ -148,7 +152,8 @@
       "HV-01",
       "control"
     ],
-    "rationale": "Health endpoint is public — probe succeeds without credentials"
+    "rationale": "Health endpoint is public — probe succeeds without credentials",
+    "intent": "false_negative"
   },
   {
     "id": "hv-port-006",
@@ -182,7 +187,8 @@
       "port_not_exposed",
       "HV-02"
     ],
-    "rationale": "Metrics server on 9090 but compose only maps 3000 — external probe cannot reach metrics"
+    "rationale": "Metrics server on 9090 but compose only maps 3000 — external probe cannot reach metrics",
+    "intent": "false_positive"
   },
   {
     "id": "hv-port-007",
@@ -213,7 +219,8 @@
       "port_not_exposed",
       "HV-02"
     ],
-    "rationale": "Debug server created but Dockerfile does not EXPOSE 4000 — port invisible to verifier"
+    "rationale": "Debug server created but Dockerfile does not EXPOSE 4000 — port invisible to verifier",
+    "intent": "false_positive"
   },
   {
     "id": "hv-port-008",
@@ -244,7 +251,8 @@
       "port_not_exposed",
       "HV-02"
     ],
-    "rationale": "Admin server on 8080 but compose has no port mapping for it — unreachable"
+    "rationale": "Admin server on 8080 but compose has no port mapping for it — unreachable",
+    "intent": "false_positive"
   },
   {
     "id": "hv-port-009",
@@ -278,7 +286,8 @@
       "port_not_exposed",
       "HV-02"
     ],
-    "rationale": "Port bound to 127.0.0.1 — only accessible from inside Docker host, not from external probe"
+    "rationale": "Port bound to 127.0.0.1 — only accessible from inside Docker host, not from external probe",
+    "intent": "false_positive"
   },
   {
     "id": "hv-port-010",
@@ -304,7 +313,8 @@
       "HV-02",
       "control"
     ],
-    "rationale": "Port 3000 properly exposed in both Dockerfile and compose — verification can reach it"
+    "rationale": "Port 3000 properly exposed in both Dockerfile and compose — verification can reach it",
+    "intent": "false_negative"
   },
   {
     "id": "hv-role-011",
@@ -332,7 +342,8 @@
       "role_restricted",
       "HV-03"
     ],
-    "rationale": "Schema introspection needs pg_catalog access — REVOKE blocks the verifier"
+    "rationale": "Schema introspection needs pg_catalog access — REVOKE blocks the verifier",
+    "intent": "false_positive"
   },
   {
     "id": "hv-role-012",
@@ -363,7 +374,8 @@
       "role_restricted",
       "HV-03"
     ],
-    "rationale": "Table in private schema — app user with public schema access cannot introspect internal.audit"
+    "rationale": "Table in private schema — app user with public schema access cannot introspect internal.audit",
+    "intent": "false_negative"
   },
   {
     "id": "hv-role-013",
@@ -399,7 +411,8 @@
       "role_restricted",
       "HV-03"
     ],
-    "rationale": "Read-only replica connection — schema changes from init.sql never reach the replica"
+    "rationale": "Read-only replica connection — schema changes from init.sql never reach the replica",
+    "intent": "false_positive"
   },
   {
     "id": "hv-role-014",
@@ -426,7 +439,8 @@
       "role_restricted",
       "HV-03"
     ],
-    "rationale": "USAGE revoked on schema — introspection query returns empty even though table exists"
+    "rationale": "USAGE revoked on schema — introspection query returns empty even though table exists",
+    "intent": "false_positive"
   },
   {
     "id": "hv-role-015",
@@ -453,7 +467,8 @@
       "HV-03",
       "control"
     ],
-    "rationale": "Default credentials have full introspection access — schema checks pass"
+    "rationale": "Default credentials have full introspection access — schema checks pass",
+    "intent": "false_negative"
   },
   {
     "id": "hv-bolster-100",
@@ -478,7 +493,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-101",
@@ -503,7 +519,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-102",
@@ -528,7 +545,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-103",
@@ -553,7 +571,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-104",
@@ -578,7 +597,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-105",
@@ -603,7 +623,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-106",
@@ -628,7 +649,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-107",
@@ -653,7 +675,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-108",
@@ -679,7 +702,8 @@
       "hv-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "hv-bolster-109",
@@ -705,7 +729,8 @@
       "hv-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "hv-bolster-110",
@@ -731,7 +756,8 @@
       "hv-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "hv-bolster-111",
@@ -756,7 +782,8 @@
       "hv-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "hv-bolster-112",
@@ -774,7 +801,8 @@
       "verify",
       "hv-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "hv-bolster-113",
@@ -793,7 +821,8 @@
       "hv-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "hv-bolster-114",
@@ -813,6 +842,7 @@
       "hv-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

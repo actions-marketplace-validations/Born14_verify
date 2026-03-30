@@ -28,7 +28,8 @@
       "mtime_hotreload",
       "FG-01"
     ],
-    "rationale": "Assumed: reading config is side-effect-free. Actual: file watcher on config.json triggers reload when mtime changes. server.js has no watcher."
+    "rationale": "Assumed: reading config is side-effect-free. Actual: file watcher on config.json triggers reload when mtime changes. server.js has no watcher.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-mtime-002",
@@ -59,7 +60,8 @@
       "mtime_hotreload",
       "FG-01"
     ],
-    "rationale": "Assumed: lastChecked in config is inert. Actual: any write to config.json (even adding null field) updates mtime. server.js has no handler."
+    "rationale": "Assumed: lastChecked in config is inert. Actual: any write to config.json (even adding null field) updates mtime. server.js has no handler.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-mtime-003",
@@ -90,7 +92,8 @@
       "mtime_hotreload",
       "FG-01"
     ],
-    "rationale": "Assumed: reading staging config is harmless. Actual: hot reload watcher fires on access. .env.staging has no such note."
+    "rationale": "Assumed: reading staging config is harmless. Actual: hot reload watcher fires on access. .env.staging has no such note.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-mtime-004",
@@ -122,7 +125,8 @@
       "mtime_hotreload",
       "FG-01"
     ],
-    "rationale": "Assumed: config version is readable without side effects. Actual: version-aware systems may increment on read. server.js has no awareness."
+    "rationale": "Assumed: config version is readable without side effects. Actual: version-aware systems may increment on read. server.js has no awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-mtime-005",
@@ -143,7 +147,8 @@
       "FG-01",
       "control"
     ],
-    "rationale": "Static file check — reading config.json in test doesn't trigger any watcher."
+    "rationale": "Static file check — reading config.json in test doesn't trigger any watcher.",
+    "intent": "false_negative"
   },
   {
     "id": "fg-lazy-006",
@@ -174,7 +179,8 @@
       "lazy_init",
       "FG-02"
     ],
-    "rationale": "Assumed: reading DATABASE_URL is pure. Actual: lazy init pattern means first access creates pool. No pool.connect in server.js."
+    "rationale": "Assumed: reading DATABASE_URL is pure. Actual: lazy init pattern means first access creates pool. No pool.connect in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-lazy-007",
@@ -205,7 +211,8 @@
       "lazy_init",
       "FG-02"
     ],
-    "rationale": "Assumed: checking DEBUG flag is read-only. Actual: reading triggers debug subsystem init. config.json has no DEBUG field."
+    "rationale": "Assumed: checking DEBUG flag is read-only. Actual: reading triggers debug subsystem init. config.json has no DEBUG field.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-lazy-008",
@@ -236,7 +243,8 @@
       "lazy_init",
       "FG-02"
     ],
-    "rationale": "Assumed: reading SECRET_KEY is pure. Actual: first access triggers HMAC derivation. .env.prod has different secret, not \"not-very-secret\"."
+    "rationale": "Assumed: reading SECRET_KEY is pure. Actual: first access triggers HMAC derivation. .env.prod has different secret, not \"not-very-secret\".",
+    "intent": "false_positive"
   },
   {
     "id": "fg-lazy-009",
@@ -261,7 +269,8 @@
       "lazy_init",
       "FG-02"
     ],
-    "rationale": "Assumed: .env and .env.staging have same NODE_ENV. Actual: .env has production, .env.staging has staging. Read triggers different init paths."
+    "rationale": "Assumed: .env and .env.staging have same NODE_ENV. Actual: .env has production, .env.staging has staging. Read triggers different init paths.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-lazy-010",
@@ -282,7 +291,8 @@
       "FG-02",
       "control"
     ],
-    "rationale": "Static file check — reading .env as text file doesn't trigger any lazy initialization."
+    "rationale": "Static file check — reading .env as text file doesn't trigger any lazy initialization.",
+    "intent": "false_negative"
   },
   {
     "id": "fg-audit-011",
@@ -313,7 +323,8 @@
       "secret_audit",
       "FG-03"
     ],
-    "rationale": "Assumed: reading secrets is transparent. Actual: secret access creates audit log entry. server.js has no audit log reference."
+    "rationale": "Assumed: reading secrets is transparent. Actual: secret access creates audit log entry. server.js has no audit log reference.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-audit-012",
@@ -344,7 +355,8 @@
       "secret_audit",
       "FG-03"
     ],
-    "rationale": "Assumed: checking prod secret is read-only. Actual: compliance logging fires on every access. config.prod.json has no compliance config."
+    "rationale": "Assumed: checking prod secret is read-only. Actual: compliance logging fires on every access. config.prod.json has no compliance config.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-audit-013",
@@ -375,7 +387,8 @@
       "secret_audit",
       "FG-03"
     ],
-    "rationale": "Assumed: checking DATABASE_URL format is read-only. Actual: any connection attempt is logged in pg_stat_activity. init.sql has no reference."
+    "rationale": "Assumed: checking DATABASE_URL format is read-only. Actual: any connection attempt is logged in pg_stat_activity. init.sql has no reference.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-audit-014",
@@ -406,7 +419,8 @@
       "secret_audit",
       "FG-03"
     ],
-    "rationale": "Assumed: env validation is harmless. Actual: each var access = one audit entry. Bulk check = N entries. config.json has no audit field."
+    "rationale": "Assumed: env validation is harmless. Actual: each var access = one audit entry. Bulk check = N entries. config.json has no audit field.",
+    "intent": "false_positive"
   },
   {
     "id": "fg-audit-015",
@@ -427,7 +441,8 @@
       "FG-03",
       "control"
     ],
-    "rationale": "Static file check — reading .env as text doesn't trigger any audit system."
+    "rationale": "Static file check — reading .env as text doesn't trigger any audit system.",
+    "intent": "false_negative"
   },
   {
     "id": "fg-bolster-100",
@@ -452,7 +467,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-101",
@@ -477,7 +493,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-102",
@@ -502,7 +519,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-103",
@@ -527,7 +545,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-104",
@@ -552,7 +571,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-105",
@@ -577,7 +597,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-106",
@@ -602,7 +623,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-107",
@@ -627,7 +649,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-108",
@@ -653,7 +676,8 @@
       "fg-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "fg-bolster-109",
@@ -679,7 +703,8 @@
       "fg-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fg-bolster-110",
@@ -705,7 +730,8 @@
       "fg-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fg-bolster-111",
@@ -730,7 +756,8 @@
       "fg-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "fg-bolster-112",
@@ -748,7 +775,8 @@
       "config",
       "fg-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "fg-bolster-113",
@@ -767,7 +795,8 @@
       "fg-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "fg-bolster-114",
@@ -787,6 +816,7 @@
       "fg-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

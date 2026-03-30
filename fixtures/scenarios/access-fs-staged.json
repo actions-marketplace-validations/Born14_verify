@@ -23,7 +23,8 @@
       "permission_denied",
       "HF-01"
     ],
-    "rationale": "Agent adds DB_HOST to server.js but /etc/hosts is a system file — app cannot write it"
+    "rationale": "Agent adds DB_HOST to server.js but /etc/hosts is a system file — app cannot write it",
+    "intent": "false_positive"
   },
   {
     "id": "hf-perm-002",
@@ -49,7 +50,8 @@
       "permission_denied",
       "HF-01"
     ],
-    "rationale": "Agent sets cert path in .env but predicate expects cert file in root-owned /etc/ssl/"
+    "rationale": "Agent sets cert path in .env but predicate expects cert file in root-owned /etc/ssl/",
+    "intent": "false_positive"
   },
   {
     "id": "hf-perm-003",
@@ -75,7 +77,8 @@
       "permission_denied",
       "HF-01"
     ],
-    "rationale": "Config references /var/log/app.log but app user lacks write permission to /var/log/"
+    "rationale": "Config references /var/log/app.log but app user lacks write permission to /var/log/",
+    "intent": "false_positive"
   },
   {
     "id": "hf-perm-004",
@@ -101,7 +104,8 @@
       "permission_denied",
       "HF-01"
     ],
-    "rationale": "App tries to write PID to /var/run/ which requires root — permission denied at runtime"
+    "rationale": "App tries to write PID to /var/run/ which requires root — permission denied at runtime",
+    "intent": "false_positive"
   },
   {
     "id": "hf-perm-005",
@@ -127,7 +131,8 @@
       "permission_denied",
       "HF-01"
     ],
-    "rationale": "Dockerfile COPY to /usr/local/bin/ but predicate checks host path — not the container"
+    "rationale": "Dockerfile COPY to /usr/local/bin/ but predicate checks host path — not the container",
+    "intent": "false_positive"
   },
   {
     "id": "hf-perm-006",
@@ -154,7 +159,8 @@
       "HF-01",
       "control"
     ],
-    "rationale": "Both edit and predicate target the same writable app file — no permission issue"
+    "rationale": "Both edit and predicate target the same writable app file — no permission issue",
+    "intent": "false_negative"
   },
   {
     "id": "hf-trav-007",
@@ -180,7 +186,8 @@
       "path_traversal",
       "HF-02"
     ],
-    "rationale": "Path traversal ../../etc/passwd escapes app sandbox — should be blocked"
+    "rationale": "Path traversal ../../etc/passwd escapes app sandbox — should be blocked",
+    "intent": "false_positive"
   },
   {
     "id": "hf-trav-008",
@@ -206,7 +213,8 @@
       "path_traversal",
       "HF-02"
     ],
-    "rationale": "Deep traversal ../../../tmp/ escapes sandbox — content should never land"
+    "rationale": "Deep traversal ../../../tmp/ escapes sandbox — content should never land",
+    "intent": "false_positive"
   },
   {
     "id": "hf-trav-009",
@@ -232,7 +240,8 @@
       "path_traversal",
       "HF-02"
     ],
-    "rationale": "Absolute path /root/.ssh/ is outside app boundary — sandbox violation"
+    "rationale": "Absolute path /root/.ssh/ is outside app boundary — sandbox violation",
+    "intent": "false_positive"
   },
   {
     "id": "hf-trav-010",
@@ -258,7 +267,8 @@
       "path_traversal",
       "HF-02"
     ],
-    "rationale": "Edit is valid but predicate uses ../ traversal to check file outside app dir"
+    "rationale": "Edit is valid but predicate uses ../ traversal to check file outside app dir",
+    "intent": "false_positive"
   },
   {
     "id": "hf-trav-011",
@@ -284,7 +294,8 @@
       "path_traversal",
       "HF-02"
     ],
-    "rationale": "Path uses node_modules + ../ traversal to escape sandbox boundary"
+    "rationale": "Path uses node_modules + ../ traversal to escape sandbox boundary",
+    "intent": "false_positive"
   },
   {
     "id": "hf-trav-012",
@@ -311,7 +322,8 @@
       "HF-02",
       "control"
     ],
-    "rationale": "Relative path stays within app directory — no traversal violation"
+    "rationale": "Relative path stays within app directory — no traversal violation",
+    "intent": "false_negative"
   },
   {
     "id": "hf-owner-013",
@@ -337,7 +349,8 @@
       "ownership_mismatch",
       "HF-03"
     ],
-    "rationale": "/opt/data is owned by root — container mounts it but app user cannot write"
+    "rationale": "/opt/data is owned by root — container mounts it but app user cannot write",
+    "intent": "false_positive"
   },
   {
     "id": "hf-owner-014",
@@ -363,7 +376,8 @@
       "ownership_mismatch",
       "HF-03"
     ],
-    "rationale": "Container runs as user node but /etc/crontab is owned by root — cannot write cron entry"
+    "rationale": "Container runs as user node but /etc/crontab is owned by root — cannot write cron entry",
+    "intent": "false_positive"
   },
   {
     "id": "hf-owner-015",
@@ -389,7 +403,8 @@
       "ownership_mismatch",
       "HF-03"
     ],
-    "rationale": "Shared volume mounted but nginx.conf is owned by www-data — app user cannot read/write"
+    "rationale": "Shared volume mounted but nginx.conf is owned by www-data — app user cannot read/write",
+    "intent": "false_positive"
   },
   {
     "id": "hf-owner-016",
@@ -415,7 +430,8 @@
       "ownership_mismatch",
       "HF-03"
     ],
-    "rationale": "/tmp/app.lock may be owned by previous process run as different user — ownership conflict"
+    "rationale": "/tmp/app.lock may be owned by previous process run as different user — ownership conflict",
+    "intent": "false_positive"
   },
   {
     "id": "hf-owner-017",
@@ -441,7 +457,8 @@
       "ownership_mismatch",
       "HF-03"
     ],
-    "rationale": "PostgreSQL data directory owned by postgres user — app user has no access"
+    "rationale": "PostgreSQL data directory owned by postgres user — app user has no access",
+    "intent": "false_positive"
   },
   {
     "id": "hf-owner-018",
@@ -468,7 +485,8 @@
       "HF-03",
       "control"
     ],
-    "rationale": "Both edit and predicate operate on app-owned server.js — no ownership issue"
+    "rationale": "Both edit and predicate operate on app-owned server.js — no ownership issue",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-200",
@@ -493,7 +511,8 @@
       "fs",
       "cross_file_gap"
     ],
-    "rationale": "Admin route in server.js, no admin role in config.json"
+    "rationale": "Admin route in server.js, no admin role in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-201",
@@ -518,7 +537,8 @@
       "fs",
       "cross_file_gap"
     ],
-    "rationale": "Auth token check in server.js, no token in .env"
+    "rationale": "Auth token check in server.js, no token in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-202",
@@ -543,7 +563,8 @@
       "fs",
       "cross_file_gap"
     ],
-    "rationale": "Rate limit function added, no limit in config.json"
+    "rationale": "Rate limit function added, no limit in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-203",
@@ -562,7 +583,8 @@
       "fs",
       "cross_file_gap"
     ],
-    "rationale": "Session table in init.sql, no session config in .env"
+    "rationale": "Session table in init.sql, no session config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-204",
@@ -587,7 +609,8 @@
       "fs",
       "cross_file_gap"
     ],
-    "rationale": "CORS header added, no CORS config in .env"
+    "rationale": "CORS header added, no CORS config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-205",
@@ -612,7 +635,8 @@
       "fs",
       "cross_file_gap"
     ],
-    "rationale": "CSP header added, not in config.json"
+    "rationale": "CSP header added, not in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-206",
@@ -631,7 +655,8 @@
       "fs",
       "cross_file_gap"
     ],
-    "rationale": "Password hash in init.sql, no hash algo in config"
+    "rationale": "Password hash in init.sql, no hash algo in config",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-207",
@@ -650,7 +675,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: server.js has /health, check it exists"
+    "rationale": "Control: server.js has /health, check it exists",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-208",
@@ -669,7 +695,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: init.sql has sessions table"
+    "rationale": "Control: init.sql has sessions table",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-209",
@@ -688,7 +715,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: .env has SECRET_KEY"
+    "rationale": "Control: .env has SECRET_KEY",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-210",
@@ -707,7 +735,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Dockerfile exposes port, check Dockerfile"
+    "rationale": "Dockerfile exposes port, check Dockerfile",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-211",
@@ -726,6 +755,7 @@
       "fs",
       "control"
     ],
-    "rationale": "Compose has env_file, check compose"
+    "rationale": "Compose has env_file, check compose",
+    "intent": "false_negative"
   }
 ]

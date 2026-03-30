@@ -15,7 +15,8 @@
       "security",
       "xss"
     ],
-    "rationale": "server.js uses template literals in res.end(), no client-side XSS vectors"
+    "rationale": "server.js uses template literals in res.end(), no client-side XSS vectors",
+    "intent": "false_negative"
   },
   {
     "id": "sec-002",
@@ -39,7 +40,8 @@
       "security",
       "xss"
     ],
-    "rationale": "Scanner scans source files not staging edits; original source has no innerHTML"
+    "rationale": "Scanner scans source files not staging edits; original source has no innerHTML",
+    "intent": "false_negative"
   },
   {
     "id": "sec-003",
@@ -57,7 +59,8 @@
       "security",
       "sql_injection"
     ],
-    "rationale": "demo-app has no SQL queries with string interpolation"
+    "rationale": "demo-app has no SQL queries with string interpolation",
+    "intent": "false_negative"
   },
   {
     "id": "sec-004",
@@ -81,7 +84,8 @@
       "security",
       "sql_injection"
     ],
-    "rationale": "Scanner scans source files not staging edits; original source has no SQL injection"
+    "rationale": "Scanner scans source files not staging edits; original source has no SQL injection",
+    "intent": "false_negative"
   },
   {
     "id": "sec-005",
@@ -99,7 +103,8 @@
       "security",
       "secrets_in_code"
     ],
-    "rationale": "server.js does not contain API keys or hardcoded passwords"
+    "rationale": "server.js does not contain API keys or hardcoded passwords",
+    "intent": "false_negative"
   },
   {
     "id": "sec-006",
@@ -123,7 +128,8 @@
       "security",
       "secrets_in_code"
     ],
-    "rationale": "Scanner scans source files not staging edits; original source has no hardcoded secrets"
+    "rationale": "Scanner scans source files not staging edits; original source has no hardcoded secrets",
+    "intent": "false_negative"
   },
   {
     "id": "sec-007",
@@ -141,7 +147,8 @@
       "security",
       "csp"
     ],
-    "rationale": "demo-app does not set CSP headers, so findings expected"
+    "rationale": "demo-app does not set CSP headers, so findings expected",
+    "intent": "false_negative"
   },
   {
     "id": "sec-008",
@@ -159,7 +166,8 @@
       "security",
       "cors"
     ],
-    "rationale": "demo-app has no CORS headers at all (not even wildcard)"
+    "rationale": "demo-app has no CORS headers at all (not even wildcard)",
+    "intent": "false_negative"
   },
   {
     "id": "sec-009",
@@ -177,7 +185,8 @@
       "security",
       "eval_usage"
     ],
-    "rationale": "demo-app does not use eval()"
+    "rationale": "demo-app does not use eval()",
+    "intent": "false_negative"
   },
   {
     "id": "sec-010",
@@ -201,7 +210,8 @@
       "security",
       "eval_usage"
     ],
-    "rationale": "Scanner scans source files not staging edits; original source has no eval()"
+    "rationale": "Scanner scans source files not staging edits; original source has no eval()",
+    "intent": "false_negative"
   },
   {
     "id": "sec-011",
@@ -219,7 +229,8 @@
       "security",
       "prototype_pollution"
     ],
-    "rationale": "demo-app has no __proto__ or constructor.prototype access"
+    "rationale": "demo-app has no __proto__ or constructor.prototype access",
+    "intent": "false_negative"
   },
   {
     "id": "sec-012",
@@ -243,7 +254,8 @@
       "security",
       "prototype_pollution"
     ],
-    "rationale": "Scanner scans source files not staging edits; original source has no __proto__"
+    "rationale": "Scanner scans source files not staging edits; original source has no __proto__",
+    "intent": "false_negative"
   },
   {
     "id": "sec-013",
@@ -261,7 +273,8 @@
       "security",
       "path_traversal"
     ],
-    "rationale": "demo-app does not do file I/O with user input"
+    "rationale": "demo-app does not do file I/O with user input",
+    "intent": "false_negative"
   },
   {
     "id": "sec-014",
@@ -285,7 +298,8 @@
       "security",
       "path_traversal"
     ],
-    "rationale": "Scanner scans source files not staging edits; original source has no file reads"
+    "rationale": "Scanner scans source files not staging edits; original source has no file reads",
+    "intent": "false_negative"
   },
   {
     "id": "sec-015",
@@ -303,7 +317,8 @@
       "security",
       "open_redirect"
     ],
-    "rationale": "demo-app has no redirect logic"
+    "rationale": "demo-app has no redirect logic",
+    "intent": "false_negative"
   },
   {
     "id": "sec-016",
@@ -327,7 +342,8 @@
       "security",
       "open_redirect"
     ],
-    "rationale": "Scanner scans source files not staging edits; original source has no redirects"
+    "rationale": "Scanner scans source files not staging edits; original source has no redirects",
+    "intent": "false_negative"
   },
   {
     "id": "sec-017",
@@ -345,7 +361,8 @@
       "security",
       "rate_limiting"
     ],
-    "rationale": "rate_limiting scanner does not flag missing middleware; no_findings is correct"
+    "rationale": "rate_limiting scanner does not flag missing middleware; no_findings is correct",
+    "intent": "false_negative"
   },
   {
     "id": "sec-018",
@@ -363,7 +380,8 @@
       "security",
       "insecure_deserialization"
     ],
-    "rationale": "demo-app JSON.stringify is serialization, not deserialization of user input"
+    "rationale": "demo-app JSON.stringify is serialization, not deserialization of user input",
+    "intent": "false_negative"
   },
   {
     "id": "sec-019",
@@ -386,7 +404,8 @@
       "security",
       "multi"
     ],
-    "rationale": "Both checks pass on clean demo-app"
+    "rationale": "Both checks pass on clean demo-app",
+    "intent": "false_negative"
   },
   {
     "id": "sec-020",
@@ -409,7 +428,8 @@
       "security",
       "multi_fail"
     ],
-    "rationale": "CSP check finds missing headers, gate fails"
+    "rationale": "CSP check finds missing headers, gate fails",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-200",
@@ -428,7 +448,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-201",
@@ -447,7 +468,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-202",
@@ -466,7 +488,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-203",
@@ -485,7 +508,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-204",
@@ -504,7 +528,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-205",
@@ -523,7 +548,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references database but .env has no such reference"
+    "rationale": "config.json references database but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-206",
@@ -542,7 +568,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references port but docker-compose.yml has no such reference"
+    "rationale": "config.json references port but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-207",
@@ -561,7 +588,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-208",
@@ -580,7 +608,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references PORT but docker-compose.yml has no such reference"
+    "rationale": ".env references PORT but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-209",
@@ -599,6 +628,7 @@
       "general",
       "cross_file"
     ],
-    "rationale": "init.sql references users but server.js has no such reference"
+    "rationale": "init.sql references users but server.js has no such reference",
+    "intent": "false_positive"
   }
 ]

@@ -23,7 +23,8 @@
       "FS-06"
     ],
     "rationale": "Removing the first line leaves server.js missing the require. The content pattern no longer matches.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs06-002",
@@ -49,7 +50,8 @@
       "FS-06"
     ],
     "rationale": "Config truncated to just \"{\". The pattern \"Demo App\" no longer exists in the file.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs06-003",
@@ -68,7 +70,8 @@
       "empty-file",
       "FS-06"
     ],
-    "rationale": "Control case: server.js unmodified, content predicate matches the require statement."
+    "rationale": "Control case: server.js unmodified, content predicate matches the require statement.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs13-004",
@@ -93,7 +96,8 @@
       "binary-confusion",
       "FS-13"
     ],
-    "rationale": "The text \"binary marker\" is present even though preceded by null bytes in a comment. Content predicate matches the text portion."
+    "rationale": "The text \"binary marker\" is present even though preceded by null bytes in a comment. Content predicate matches the text portion.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs13-005",
@@ -113,7 +117,8 @@
       "FS-13"
     ],
     "rationale": "server.js is a text file. The PNG magic bytes do not exist. Content predicate fails.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs13-006",
@@ -132,7 +137,8 @@
       "binary-confusion",
       "FS-13"
     ],
-    "rationale": "Control: Dockerfile is a text file with the expected content."
+    "rationale": "Control: Dockerfile is a text file with the expected content.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs25-007",
@@ -157,7 +163,8 @@
       "read-only",
       "FS-25"
     ],
-    "rationale": "Normal edit of Dockerfile. File is writable, edit applies, content predicate matches."
+    "rationale": "Normal edit of Dockerfile. File is writable, edit applies, content predicate matches.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs25-008",
@@ -176,7 +183,8 @@
       "read-only",
       "FS-25"
     ],
-    "rationale": "Control: Dockerfile exists with expected content. No edit needed."
+    "rationale": "Control: Dockerfile exists with expected content. No edit needed.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs25-009",
@@ -202,7 +210,8 @@
       "FS-25"
     ],
     "rationale": "Search string does not exist in Dockerfile. Edit cannot be applied. Content predicate fails.",
-    "expectedFailedGate": "syntax"
+    "expectedFailedGate": "syntax",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs26-010",
@@ -221,7 +230,8 @@
       "dotfiles",
       "FS-26"
     ],
-    "rationale": "Control: config.json is a regular file, content predicate works normally."
+    "rationale": "Control: config.json is a regular file, content predicate works normally.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs26-011",
@@ -241,7 +251,8 @@
       "FS-26"
     ],
     "rationale": "No .env file exists in the demo-app fixture. Content predicate fails grounding.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs26-012",
@@ -261,7 +272,8 @@
       "FS-26"
     ],
     "rationale": "No .gitignore exists in demo-app. Content predicate on missing dotfile fails.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs27-013",
@@ -280,7 +292,8 @@
       "symlink",
       "FS-27"
     ],
-    "rationale": "Control: server.js is a real file. Content predicate resolves normally."
+    "rationale": "Control: server.js is a real file. Content predicate resolves normally.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs27-014",
@@ -300,7 +313,8 @@
       "FS-27"
     ],
     "rationale": "Path traversal outside app directory. The pipeline should reject or fail to find this file.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs28-015",
@@ -325,7 +339,8 @@
       "timestamp",
       "FS-28"
     ],
-    "rationale": "No-op edit (search equals replace). File content unchanged. Content predicate still passes."
+    "rationale": "No-op edit (search equals replace). File content unchanged. Content predicate still passes.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs28-016",
@@ -351,7 +366,8 @@
       "FS-28"
     ],
     "rationale": "Port changed from 3000 to 8080 via edit. Old content pattern no longer matches.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs28-017",
@@ -376,7 +392,8 @@
       "timestamp",
       "FS-28"
     ],
-    "rationale": "Edit changes port to 8080. Predicate checks for new value and matches."
+    "rationale": "Edit changes port to 8080. Predicate checks for new value and matches.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs29-018",
@@ -402,7 +419,8 @@
       "FS-29"
     ],
     "rationale": "HTML output truncated — </body></html> removed. Content predicate for </html> fails.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs29-019",
@@ -428,7 +446,8 @@
       "FS-29"
     ],
     "rationale": "Settings table definition truncated mid-way. The JSONB column no longer exists in source.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs29-020",
@@ -447,7 +466,8 @@
       "truncated",
       "FS-29"
     ],
-    "rationale": "Control: init.sql is complete and contains the settings table definition."
+    "rationale": "Control: init.sql is complete and contains the settings table definition.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs30-021",
@@ -466,7 +486,8 @@
       "file-lock",
       "FS-30"
     ],
-    "rationale": "Control: docker-compose.yml is accessible and contains healthcheck configuration."
+    "rationale": "Control: docker-compose.yml is accessible and contains healthcheck configuration.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs30-022",
@@ -486,7 +507,8 @@
       "FS-30"
     ],
     "rationale": "File locked-file.dat does not exist. Simulates inaccessible file — content predicate fails.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs31-023",
@@ -512,7 +534,8 @@
       "FS-31"
     ],
     "rationale": "Edit changes port from 3000 to 4000. Predicate expects the old value — race between intent and state.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs31-024",
@@ -537,7 +560,8 @@
       "race-condition",
       "FS-31"
     ],
-    "rationale": "Edit and predicate both reference port 4000. No race — consistent state."
+    "rationale": "Edit and predicate both reference port 4000. No race — consistent state.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs33-025",
@@ -562,7 +586,8 @@
       "file-identity",
       "FS-33"
     ],
-    "rationale": "Entire config.json replaced. New content matches predicate. Path unchanged, content new."
+    "rationale": "Entire config.json replaced. New content matches predicate. Path unchanged, content new.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs33-026",
@@ -588,7 +613,8 @@
       "FS-33"
     ],
     "rationale": "File fully replaced. Old \"darkMode\" key no longer exists in the new content.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs35-027",
@@ -607,7 +633,8 @@
       "build-mismatch",
       "FS-35"
     ],
-    "rationale": "Control: Dockerfile copies server.js which exists. Source and build config are consistent."
+    "rationale": "Control: Dockerfile copies server.js which exists. Source and build config are consistent.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs35-028",
@@ -633,7 +660,8 @@
       "FS-35"
     ],
     "rationale": "Dockerfile now references app.js instead of server.js. Predicate expects old COPY target.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs35-029",
@@ -658,7 +686,8 @@
       "build-mismatch",
       "FS-35"
     ],
-    "rationale": "Adding COPY config.json to Dockerfile. Both files exist, build and source consistent."
+    "rationale": "Adding COPY config.json to Dockerfile. Both files exist, build and source consistent.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs36-030",
@@ -684,7 +713,8 @@
       "FS-36"
     ],
     "rationale": "Source title changed to \"Updated App\". Predicate expects old \"Demo App\" title — stale expectation.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs36-031",
@@ -709,7 +739,8 @@
       "stale-generated",
       "FS-36"
     ],
-    "rationale": "Source changed and predicate references the new value. No staleness."
+    "rationale": "Source changed and predicate references the new value. No staleness.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs36-032",
@@ -735,7 +766,8 @@
       "FS-36"
     ],
     "rationale": "Dockerfile CMD changed from server.js to app.js. Predicate expects old CMD.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs37-033",
@@ -754,7 +786,8 @@
       "minification",
       "FS-37"
     ],
-    "rationale": "The /edge-cases route has minified CSS. Content predicate matches the exact minified string."
+    "rationale": "The /edge-cases route has minified CSS. Content predicate matches the exact minified string.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs37-034",
@@ -774,7 +807,8 @@
       "FS-37"
     ],
     "rationale": "Source has minified CSS without whitespace. Predicate expects formatted version with newlines.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs37-035",
@@ -794,7 +828,8 @@
       "minification",
       "FS-37"
     ],
-    "rationale": "CSS parser extracts .minified { color: #ff6600 } from minified block correctly."
+    "rationale": "CSS parser extracts .minified { color: #ff6600 } from minified block correctly.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs38-036",
@@ -813,7 +848,8 @@
       "source-map",
       "FS-38"
     ],
-    "rationale": "Control: Content predicate reads actual server.js source, not any source map."
+    "rationale": "Control: Content predicate reads actual server.js source, not any source map.",
+    "intent": "false_negative"
   },
   {
     "id": "fsadv-fs38-037",
@@ -833,7 +869,8 @@
       "FS-38"
     ],
     "rationale": "No server.js.map exists. Source maps are not part of the demo-app fixture.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "fsadv-fs38-038",
@@ -858,6 +895,7 @@
       "source-map",
       "FS-38"
     ],
-    "rationale": "Injected a sourceMappingURL comment. Content predicate verifies the text exists in source."
+    "rationale": "Injected a sourceMappingURL comment. Content predicate verifies the text exists in source.",
+    "intent": "false_negative"
   }
 ]

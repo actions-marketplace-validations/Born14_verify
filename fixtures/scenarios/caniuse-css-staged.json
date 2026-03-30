@@ -16,7 +16,8 @@
       "caniuse",
       "layout",
       "flexbox"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-002",
@@ -36,7 +37,8 @@
       "layout",
       "flexbox"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-003",
@@ -54,7 +56,8 @@
       "caniuse",
       "layout",
       "flexbox_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-004",
@@ -73,7 +76,8 @@
       "caniuse",
       "layout",
       "grid"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-005",
@@ -92,7 +96,8 @@
       "caniuse",
       "layout",
       "grid_auto_fill"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-006",
@@ -111,7 +116,8 @@
       "caniuse",
       "layout",
       "grid_auto_fit"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-007",
@@ -131,7 +137,8 @@
       "layout",
       "grid"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-008",
@@ -150,7 +157,8 @@
       "caniuse",
       "layout",
       "subgrid"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-009",
@@ -168,7 +176,8 @@
       "caniuse",
       "layout",
       "subgrid_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-010",
@@ -187,7 +196,8 @@
       "caniuse",
       "layout",
       "container_queries"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-011",
@@ -206,7 +216,8 @@
       "caniuse",
       "layout",
       "container_queries"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-012",
@@ -226,7 +237,8 @@
       "layout",
       "container_queries"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-013",
@@ -245,7 +257,8 @@
       "caniuse",
       "layout",
       "aspect_ratio"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-014",
@@ -265,7 +278,8 @@
       "layout",
       "aspect_ratio"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-015",
@@ -283,7 +297,8 @@
       "caniuse",
       "layout",
       "aspect_ratio_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-016",
@@ -302,7 +317,8 @@
       "caniuse",
       "layout",
       "gap"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-017",
@@ -321,7 +337,8 @@
       "caniuse",
       "layout",
       "gap"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-018",
@@ -341,7 +358,8 @@
       "layout",
       "gap"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-019",
@@ -360,7 +378,8 @@
       "caniuse",
       "layout",
       "place_items"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-020",
@@ -379,7 +398,8 @@
       "caniuse",
       "layout",
       "place_items"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-021",
@@ -398,7 +418,8 @@
       "caniuse",
       "layout",
       "clamp"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-022",
@@ -417,7 +438,8 @@
       "caniuse",
       "layout",
       "min_max"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-023",
@@ -436,7 +458,8 @@
       "caniuse",
       "layout",
       "min_max"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-024",
@@ -455,7 +478,8 @@
       "caniuse",
       "layout",
       "fit_content"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-025",
@@ -474,7 +498,8 @@
       "caniuse",
       "layout",
       "fit_content"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-026",
@@ -492,7 +517,8 @@
       "caniuse",
       "layout",
       "fit_content_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-027",
@@ -511,7 +537,8 @@
       "caniuse",
       "layout",
       "logical_properties"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-028",
@@ -530,7 +557,8 @@
       "caniuse",
       "layout",
       "logical_properties"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-029",
@@ -549,7 +577,8 @@
       "caniuse",
       "layout",
       "logical_properties"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-030",
@@ -568,7 +597,8 @@
       "caniuse",
       "colors",
       "oklch"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-031",
@@ -588,7 +618,8 @@
       "colors",
       "oklch"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-032",
@@ -606,7 +637,8 @@
       "caniuse",
       "colors",
       "oklch_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-033",
@@ -625,7 +657,8 @@
       "caniuse",
       "colors",
       "lch"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-034",
@@ -645,7 +678,8 @@
       "colors",
       "lch"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-035",
@@ -664,7 +698,8 @@
       "caniuse",
       "colors",
       "color_mix"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-036",
@@ -683,7 +718,8 @@
       "caniuse",
       "colors",
       "color_mix"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-037",
@@ -703,7 +739,8 @@
       "colors",
       "color_mix"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-038",
@@ -722,7 +759,8 @@
       "caniuse",
       "colors",
       "relative_color"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-039",
@@ -741,7 +779,8 @@
       "caniuse",
       "colors",
       "relative_color"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-040",
@@ -760,7 +799,8 @@
       "caniuse",
       "colors",
       "color_function"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-041",
@@ -780,7 +820,8 @@
       "colors",
       "color_function"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-042",
@@ -798,7 +839,8 @@
       "caniuse",
       "colors",
       "forced_colors"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-043",
@@ -817,7 +859,8 @@
       "caniuse",
       "colors",
       "light_dark"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-044",
@@ -836,7 +879,8 @@
       "caniuse",
       "colors",
       "accent_color"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-045",
@@ -855,7 +899,8 @@
       "caniuse",
       "colors",
       "accent_color"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-046",
@@ -874,7 +919,8 @@
       "caniuse",
       "colors",
       "color_scheme"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-047",
@@ -894,7 +940,8 @@
       "colors",
       "color_scheme"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-048",
@@ -912,7 +959,8 @@
       "caniuse",
       "colors",
       "color_scheme_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-049",
@@ -931,7 +979,8 @@
       "caniuse",
       "typography",
       "variable_fonts"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-050",
@@ -949,7 +998,8 @@
       "caniuse",
       "typography",
       "variable_fonts"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-051",
@@ -969,7 +1019,8 @@
       "typography",
       "variable_fonts"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-052",
@@ -987,7 +1038,8 @@
       "caniuse",
       "typography",
       "font_display"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-053",
@@ -1005,7 +1057,8 @@
       "caniuse",
       "typography",
       "font_display"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-054",
@@ -1024,7 +1077,8 @@
       "caniuse",
       "typography",
       "text_wrap"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-055",
@@ -1043,7 +1097,8 @@
       "caniuse",
       "typography",
       "text_wrap"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-056",
@@ -1063,7 +1118,8 @@
       "typography",
       "text_wrap"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-057",
@@ -1082,7 +1138,8 @@
       "caniuse",
       "typography",
       "hanging_punctuation"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-058",
@@ -1101,7 +1158,8 @@
       "caniuse",
       "typography",
       "hanging_punctuation"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-059",
@@ -1120,7 +1178,8 @@
       "caniuse",
       "typography",
       "initial_letter"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-060",
@@ -1139,7 +1198,8 @@
       "caniuse",
       "typography",
       "initial_letter"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-061",
@@ -1158,7 +1218,8 @@
       "caniuse",
       "typography",
       "text_decoration_thickness"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-062",
@@ -1177,7 +1238,8 @@
       "caniuse",
       "typography",
       "text_decoration_thickness"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-063",
@@ -1196,7 +1258,8 @@
       "caniuse",
       "typography",
       "text_decoration_thickness"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-064",
@@ -1214,7 +1277,8 @@
       "caniuse",
       "selectors",
       "has"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-065",
@@ -1233,7 +1297,8 @@
       "caniuse",
       "selectors",
       "has"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-066",
@@ -1253,7 +1318,8 @@
       "selectors",
       "has"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-067",
@@ -1271,7 +1337,8 @@
       "caniuse",
       "selectors",
       "is"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-068",
@@ -1289,7 +1356,8 @@
       "caniuse",
       "selectors",
       "where"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-069",
@@ -1308,7 +1376,8 @@
       "caniuse",
       "selectors",
       "is"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-070",
@@ -1327,7 +1396,8 @@
       "caniuse",
       "selectors",
       "not_multi"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-071",
@@ -1345,7 +1415,8 @@
       "caniuse",
       "selectors",
       "nth_child_of"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-072",
@@ -1364,7 +1435,8 @@
       "caniuse",
       "selectors",
       "focus_visible"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-073",
@@ -1382,7 +1454,8 @@
       "caniuse",
       "selectors",
       "focus_visible_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-074",
@@ -1400,7 +1473,8 @@
       "caniuse",
       "selectors",
       "dir"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-075",
@@ -1418,7 +1492,8 @@
       "caniuse",
       "selectors",
       "lang"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-076",
@@ -1437,7 +1512,8 @@
       "caniuse",
       "selectors",
       "backdrop"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-077",
@@ -1456,7 +1532,8 @@
       "caniuse",
       "selectors",
       "marker"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-078",
@@ -1475,7 +1552,8 @@
       "caniuse",
       "selectors",
       "marker"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-079",
@@ -1494,7 +1572,8 @@
       "caniuse",
       "selectors",
       "selection"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-080",
@@ -1513,7 +1592,8 @@
       "caniuse",
       "selectors",
       "placeholder"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-081",
@@ -1531,7 +1611,8 @@
       "caniuse",
       "selectors",
       "placeholder_prefixed"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-082",
@@ -1549,7 +1630,8 @@
       "caniuse",
       "selectors",
       "placeholder_prefixed"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-083",
@@ -1568,7 +1650,8 @@
       "caniuse",
       "animations",
       "scroll_driven"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-084",
@@ -1587,7 +1670,8 @@
       "caniuse",
       "animations",
       "scroll_driven"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-085",
@@ -1605,7 +1689,8 @@
       "caniuse",
       "animations",
       "scroll_driven_fallback"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-086",
@@ -1624,7 +1709,8 @@
       "caniuse",
       "animations",
       "scroll_driven"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-087",
@@ -1643,7 +1729,8 @@
       "caniuse",
       "animations",
       "view_transitions"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-088",
@@ -1661,7 +1748,8 @@
       "caniuse",
       "animations",
       "view_transitions"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-089",
@@ -1679,7 +1767,8 @@
       "caniuse",
       "animations",
       "view_transitions"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-090",
@@ -1698,7 +1787,8 @@
       "caniuse",
       "animations",
       "discrete"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-091",
@@ -1716,7 +1806,8 @@
       "caniuse",
       "animations",
       "discrete_starting_style"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-092",
@@ -1736,7 +1827,8 @@
       "animations",
       "discrete"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-093",
@@ -1755,7 +1847,8 @@
       "caniuse",
       "visual",
       "backdrop_filter"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-094",
@@ -1773,7 +1866,8 @@
       "caniuse",
       "visual",
       "backdrop_filter_prefixed"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-095",
@@ -1793,7 +1887,8 @@
       "visual",
       "backdrop_filter"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-096",
@@ -1812,7 +1907,8 @@
       "caniuse",
       "visual",
       "mix_blend_mode"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-097",
@@ -1832,7 +1928,8 @@
       "visual",
       "mix_blend_mode"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-098",
@@ -1851,7 +1948,8 @@
       "caniuse",
       "visual",
       "clip_path"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-099",
@@ -1870,7 +1968,8 @@
       "caniuse",
       "visual",
       "clip_path"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-100",
@@ -1889,7 +1988,8 @@
       "caniuse",
       "visual",
       "mask_image"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-101",
@@ -1907,7 +2007,8 @@
       "caniuse",
       "visual",
       "mask_image_prefixed"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-102",
@@ -1926,7 +2027,8 @@
       "caniuse",
       "visual",
       "filter"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-103",
@@ -1945,7 +2047,8 @@
       "caniuse",
       "visual",
       "object_fit"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-104",
@@ -1964,7 +2067,8 @@
       "caniuse",
       "visual",
       "object_position"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-105",
@@ -1982,7 +2086,8 @@
       "caniuse",
       "visual",
       "image_set"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-106",
@@ -2001,7 +2106,8 @@
       "caniuse",
       "visual",
       "content_visibility"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-107",
@@ -2020,7 +2126,8 @@
       "caniuse",
       "visual",
       "content_visibility"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-108",
@@ -2038,7 +2145,8 @@
       "caniuse",
       "modern",
       "layer"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-109",
@@ -2056,7 +2164,8 @@
       "caniuse",
       "modern",
       "layer"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-110",
@@ -2074,7 +2183,8 @@
       "caniuse",
       "modern",
       "property"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-111",
@@ -2092,7 +2202,8 @@
       "caniuse",
       "modern",
       "property"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-112",
@@ -2110,7 +2221,8 @@
       "caniuse",
       "modern",
       "scope"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-113",
@@ -2128,7 +2240,8 @@
       "caniuse",
       "modern",
       "scope"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-114",
@@ -2146,7 +2259,8 @@
       "caniuse",
       "modern",
       "starting_style"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-115",
@@ -2164,7 +2278,8 @@
       "caniuse",
       "modern",
       "supports"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-116",
@@ -2182,7 +2297,8 @@
       "caniuse",
       "modern",
       "supports"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-117",
@@ -2200,7 +2316,8 @@
       "caniuse",
       "modern",
       "container"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-118",
@@ -2219,7 +2336,8 @@
       "caniuse",
       "modern",
       "popover"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-119",
@@ -2237,7 +2355,8 @@
       "caniuse",
       "modern",
       "popover"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-120",
@@ -2256,7 +2375,8 @@
       "caniuse",
       "modern",
       "anchor_positioning"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-121",
@@ -2275,7 +2395,8 @@
       "caniuse",
       "modern",
       "anchor_positioning"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-122",
@@ -2293,7 +2414,8 @@
       "caniuse",
       "modern",
       "nesting"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-123",
@@ -2312,7 +2434,8 @@
       "caniuse",
       "layout",
       "scroll_snap"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-124",
@@ -2331,7 +2454,8 @@
       "caniuse",
       "layout",
       "scroll_snap"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-125",
@@ -2351,7 +2475,8 @@
       "layout",
       "scroll_snap"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-126",
@@ -2370,7 +2495,8 @@
       "caniuse",
       "layout",
       "overscroll_behavior"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-127",
@@ -2389,7 +2515,8 @@
       "caniuse",
       "typography",
       "writing_mode"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-128",
@@ -2408,7 +2535,8 @@
       "caniuse",
       "typography",
       "hyphens"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-129",
@@ -2427,7 +2555,8 @@
       "caniuse",
       "typography",
       "font_palette"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-130",
@@ -2446,7 +2575,8 @@
       "caniuse",
       "visual",
       "touch_action"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-131",
@@ -2465,7 +2595,8 @@
       "caniuse",
       "visual",
       "will_change"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-132",
@@ -2484,7 +2615,8 @@
       "caniuse",
       "visual",
       "contain"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-133",
@@ -2502,7 +2634,8 @@
       "caniuse",
       "animations",
       "prefers_reduced_motion"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-134",
@@ -2520,7 +2653,8 @@
       "caniuse",
       "colors",
       "prefers_contrast"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-135",
@@ -2538,7 +2672,8 @@
       "caniuse",
       "colors",
       "color_gamut"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-136",
@@ -2556,7 +2691,8 @@
       "caniuse",
       "modern",
       "inert"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-137",
@@ -2574,7 +2710,8 @@
       "caniuse",
       "modern",
       "dialog"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-138",
@@ -2592,7 +2729,8 @@
       "caniuse",
       "modern",
       "details_name"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-139",
@@ -2611,7 +2749,8 @@
       "caniuse",
       "animations",
       "individual_transforms"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-140",
@@ -2630,7 +2769,8 @@
       "caniuse",
       "animations",
       "individual_transforms"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-141",
@@ -2649,7 +2789,8 @@
       "caniuse",
       "animations",
       "individual_transforms"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-142",
@@ -2668,7 +2809,8 @@
       "caniuse",
       "cross_cutting",
       "webkit_prefix"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-143",
@@ -2687,7 +2829,8 @@
       "caniuse",
       "cross_cutting",
       "webkit_prefix"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-144",
@@ -2706,7 +2849,8 @@
       "caniuse",
       "cross_cutting",
       "moz_prefix"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-145",
@@ -2725,7 +2869,8 @@
       "caniuse",
       "cross_cutting",
       "css_variables"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-146",
@@ -2744,7 +2889,8 @@
       "caniuse",
       "cross_cutting",
       "css_variables"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-147",
@@ -2764,7 +2910,8 @@
       "cross_cutting",
       "css_variables"
     ],
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "caniuse-148",
@@ -2783,7 +2930,8 @@
       "caniuse",
       "cross_cutting",
       "calc"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-149",
@@ -2802,7 +2950,8 @@
       "caniuse",
       "cross_cutting",
       "calc"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-150",
@@ -2821,7 +2970,8 @@
       "caniuse",
       "cross_cutting",
       "env_function"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "caniuse-151",
@@ -2840,6 +2990,7 @@
       "caniuse",
       "cross_cutting",
       "round_function"
-    ]
+    ],
+    "intent": "false_negative"
   }
 ]

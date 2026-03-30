@@ -34,7 +34,8 @@
       "auth_escalation",
       "HM-01"
     ],
-    "rationale": "GET is public but POST requires Authorization header — step 2 fails with 401"
+    "rationale": "GET is public but POST requires Authorization header — step 2 fails with 401",
+    "intent": "false_positive"
   },
   {
     "id": "hm-rw-002",
@@ -70,7 +71,8 @@
       "auth_escalation",
       "HM-01"
     ],
-    "rationale": "Both edits succeed at file level but config.prod.json should be deployment-gated — implicit privilege escalation"
+    "rationale": "Both edits succeed at file level but config.prod.json should be deployment-gated — implicit privilege escalation",
+    "intent": "false_negative"
   },
   {
     "id": "hm-rw-003",
@@ -106,7 +108,8 @@
       "auth_escalation",
       "HM-01"
     ],
-    "rationale": "Dev .env is writable but .env.prod contains production secrets — should require elevated access"
+    "rationale": "Dev .env is writable but .env.prod contains production secrets — should require elevated access",
+    "intent": "false_negative"
   },
   {
     "id": "hm-rw-004",
@@ -143,7 +146,8 @@
       "auth_escalation",
       "HM-01"
     ],
-    "rationale": "GET /health succeeds but POST /health has no handler — 404 or method not allowed"
+    "rationale": "GET /health succeeds but POST /health has no handler — 404 or method not allowed",
+    "intent": "false_positive"
   },
   {
     "id": "hm-rw-005",
@@ -175,7 +179,8 @@
       "HM-01",
       "control"
     ],
-    "rationale": "Both predicates check the same writable file — no privilege escalation"
+    "rationale": "Both predicates check the same writable file — no privilege escalation",
+    "intent": "false_negative"
   },
   {
     "id": "hm-sql-006",
@@ -207,7 +212,8 @@
       "admin_required",
       "HM-02"
     ],
-    "rationale": "SELECT on users works with read role but ALTER TABLE requires admin — column never created"
+    "rationale": "SELECT on users works with read role but ALTER TABLE requires admin — column never created",
+    "intent": "false_positive"
   },
   {
     "id": "hm-sql-007",
@@ -238,7 +244,8 @@
       "admin_required",
       "HM-02"
     ],
-    "rationale": "Table query works but DROP INDEX requires schema-change privilege — index survives"
+    "rationale": "Table query works but DROP INDEX requires schema-change privilege — index survives",
+    "intent": "false_negative"
   },
   {
     "id": "hm-sql-008",
@@ -269,7 +276,8 @@
       "admin_required",
       "HM-02"
     ],
-    "rationale": "Reading posts is fine but CREATE TABLE requires DDL privilege — audit_log never created"
+    "rationale": "Reading posts is fine but CREATE TABLE requires DDL privilege — audit_log never created",
+    "intent": "false_positive"
   },
   {
     "id": "hm-sql-009",
@@ -300,7 +308,8 @@
       "admin_required",
       "HM-02"
     ],
-    "rationale": "GRANT requires superuser — settings table readable but privilege escalation blocked"
+    "rationale": "GRANT requires superuser — settings table readable but privilege escalation blocked",
+    "intent": "false_negative"
   },
   {
     "id": "hm-sql-010",
@@ -326,7 +335,8 @@
       "HM-02",
       "control"
     ],
-    "rationale": "Both steps are read-only queries — no privilege escalation needed"
+    "rationale": "Both steps are read-only queries — no privilege escalation needed",
+    "intent": "false_negative"
   },
   {
     "id": "hm-sudo-011",
@@ -364,7 +374,8 @@
       "sudo_required",
       "HM-03"
     ],
-    "rationale": "Code deploys fine but binding to port 80 requires root — container fails to start"
+    "rationale": "Code deploys fine but binding to port 80 requires root — container fails to start",
+    "intent": "false_positive"
   },
   {
     "id": "hm-sudo-012",
@@ -395,7 +406,8 @@
       "sudo_required",
       "HM-03"
     ],
-    "rationale": "Compose file edited but /var/log/app mount requires root on host — runtime access denied"
+    "rationale": "Compose file edited but /var/log/app mount requires root on host — runtime access denied",
+    "intent": "false_negative"
   },
   {
     "id": "hm-sudo-013",
@@ -426,7 +438,8 @@
       "sudo_required",
       "HM-03"
     ],
-    "rationale": "Config edit succeeds but applying it requires service restart with elevated privileges"
+    "rationale": "Config edit succeeds but applying it requires service restart with elevated privileges",
+    "intent": "false_negative"
   },
   {
     "id": "hm-sudo-014",
@@ -457,7 +470,8 @@
       "sudo_required",
       "HM-03"
     ],
-    "rationale": "Compose file valid but creating custom Docker network with IPAM requires daemon root"
+    "rationale": "Compose file valid but creating custom Docker network with IPAM requires daemon root",
+    "intent": "false_negative"
   },
   {
     "id": "hm-sudo-015",
@@ -489,7 +503,8 @@
       "HM-03",
       "control"
     ],
-    "rationale": "Both steps operate within app-user permissions — no sudo needed"
+    "rationale": "Both steps operate within app-user permissions — no sudo needed",
+    "intent": "false_negative"
   },
   {
     "id": "hm-bolster-100",
@@ -514,7 +529,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-101",
@@ -539,7 +555,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-102",
@@ -564,7 +581,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-103",
@@ -589,7 +607,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-104",
@@ -614,7 +633,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-105",
@@ -639,7 +659,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-106",
@@ -664,7 +685,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-107",
@@ -689,7 +711,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-108",
@@ -715,7 +738,8 @@
       "hm-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "hm-bolster-109",
@@ -741,7 +765,8 @@
       "hm-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "hm-bolster-110",
@@ -767,7 +792,8 @@
       "hm-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "hm-bolster-111",
@@ -792,7 +818,8 @@
       "hm-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "hm-bolster-112",
@@ -810,7 +837,8 @@
       "multistep",
       "hm-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "hm-bolster-113",
@@ -829,7 +857,8 @@
       "hm-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "hm-bolster-114",
@@ -849,6 +878,7 @@
       "hm-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

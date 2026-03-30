@@ -29,7 +29,8 @@
       "css_conflict",
       "JB-01"
     ],
-    "rationale": "Both edits target same h1 color — second search string gone after first changes to red"
+    "rationale": "Both edits target same h1 color — second search string gone after first changes to red",
+    "intent": "false_positive"
   },
   {
     "id": "jb-css-002",
@@ -61,7 +62,8 @@
       "css_conflict",
       "JB-01"
     ],
-    "rationale": "Both edits target same body background — second search gone after first changes to navy"
+    "rationale": "Both edits target same body background — second search gone after first changes to navy",
+    "intent": "false_positive"
   },
   {
     "id": "jb-css-003",
@@ -93,7 +95,8 @@
       "css_conflict",
       "JB-01"
     ],
-    "rationale": "Both edits change .hero background — second search gone after first applies red background"
+    "rationale": "Both edits change .hero background — second search gone after first applies red background",
+    "intent": "false_positive"
   },
   {
     "id": "jb-css-004",
@@ -125,7 +128,8 @@
       "css_conflict",
       "JB-01"
     ],
-    "rationale": "Both edits target same nav-link color — second search gone after first changes to red"
+    "rationale": "Both edits target same nav-link color — second search gone after first changes to red",
+    "intent": "false_positive"
   },
   {
     "id": "jb-css-005",
@@ -157,7 +161,8 @@
       "css_conflict",
       "JB-01"
     ],
-    "rationale": "Both edits change .badge background — second search gone after first changes to blue"
+    "rationale": "Both edits change .badge background — second search gone after first changes to blue",
+    "intent": "false_positive"
   },
   {
     "id": "jb-css-006",
@@ -196,7 +201,8 @@
       "JB-01",
       "control"
     ],
-    "rationale": "Different selectors — no CSS conflict, both edits apply cleanly"
+    "rationale": "Different selectors — no CSS conflict, both edits apply cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "jb-store-007",
@@ -227,7 +233,8 @@
       "localstorage_collision",
       "JB-02"
     ],
-    "rationale": "Both edits insert before same footer — second search gone after first adds dark theme script"
+    "rationale": "Both edits insert before same footer — second search gone after first adds dark theme script",
+    "intent": "false_positive"
   },
   {
     "id": "jb-store-008",
@@ -258,7 +265,8 @@
       "localstorage_collision",
       "JB-02"
     ],
-    "rationale": "Both edits insert after title tag — second search gone after first adds Feature A script"
+    "rationale": "Both edits insert after title tag — second search gone after first adds Feature A script",
+    "intent": "false_positive"
   },
   {
     "id": "jb-store-009",
@@ -289,7 +297,8 @@
       "localstorage_collision",
       "JB-02"
     ],
-    "rationale": "Both edits insert before </body> in homepage — second search gone after first adds compact cookie"
+    "rationale": "Both edits insert before </body> in homepage — second search gone after first adds compact cookie",
+    "intent": "false_positive"
   },
   {
     "id": "jb-store-010",
@@ -320,7 +329,8 @@
       "localstorage_collision",
       "JB-02"
     ],
-    "rationale": "Both edits insert before about footer — second search gone after first sets admin role"
+    "rationale": "Both edits insert before about footer — second search gone after first sets admin role",
+    "intent": "false_positive"
   },
   {
     "id": "jb-store-011",
@@ -357,7 +367,8 @@
       "JB-02",
       "control"
     ],
-    "rationale": "Different keys in different page footers — no storage collision"
+    "rationale": "Different keys in different page footers — no storage collision",
+    "intent": "false_negative"
   },
   {
     "id": "jb-dom-012",
@@ -388,7 +399,8 @@
       "dom_mutation",
       "JB-03"
     ],
-    "rationale": "Both edits target same h1 — second search gone after first renames to Alpha Dashboard"
+    "rationale": "Both edits target same h1 — second search gone after first renames to Alpha Dashboard",
+    "intent": "false_positive"
   },
   {
     "id": "jb-dom-013",
@@ -419,7 +431,8 @@
       "dom_mutation",
       "JB-03"
     ],
-    "rationale": "Both edits target same nav links — second search gone after first restructures nav"
+    "rationale": "Both edits target same nav links — second search gone after first restructures nav",
+    "intent": "false_positive"
   },
   {
     "id": "jb-dom-014",
@@ -450,7 +463,8 @@
       "dom_mutation",
       "JB-03"
     ],
-    "rationale": "Both edits target same subtitle — second search gone after first changes text"
+    "rationale": "Both edits target same subtitle — second search gone after first changes text",
+    "intent": "false_positive"
   },
   {
     "id": "jb-dom-015",
@@ -481,7 +495,8 @@
       "dom_mutation",
       "JB-03"
     ],
-    "rationale": "Both edits target same .hero-title — second search gone after first changes to Our Mission"
+    "rationale": "Both edits target same .hero-title — second search gone after first changes to Our Mission",
+    "intent": "false_positive"
   },
   {
     "id": "jb-dom-016",
@@ -512,7 +527,8 @@
       "dom_mutation",
       "JB-03"
     ],
-    "rationale": "Both edits target same form h1 — second search gone after first renames it"
+    "rationale": "Both edits target same form h1 — second search gone after first renames it",
+    "intent": "false_positive"
   },
   {
     "id": "jb-dom-017",
@@ -549,7 +565,8 @@
       "JB-03",
       "control"
     ],
-    "rationale": "Different elements on different pages — no DOM mutation collision"
+    "rationale": "Different elements on different pages — no DOM mutation collision",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -579,7 +596,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -609,7 +627,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -639,7 +658,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -670,7 +690,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -695,7 +716,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -720,7 +742,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -745,7 +768,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -775,7 +799,8 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -800,7 +825,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -825,7 +851,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -850,7 +877,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -880,7 +908,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-212",
@@ -907,6 +936,7 @@
       "browser",
       "contention_gap"
     ],
-    "rationale": "Migration adds column that server.js doesnt reference"
+    "rationale": "Migration adds column that server.js doesnt reference",
+    "intent": "false_positive"
   }
 ]

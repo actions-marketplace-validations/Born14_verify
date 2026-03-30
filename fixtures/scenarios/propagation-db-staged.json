@@ -23,7 +23,8 @@
       "column_gap",
       "PD-01"
     ],
-    "rationale": "Column added to schema but app code never selects or displays it — schema→query gap"
+    "rationale": "Column added to schema but app code never selects or displays it — schema→query gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-column-002",
@@ -49,7 +50,8 @@
       "column_gap",
       "PD-01"
     ],
-    "rationale": "Avatar column added but API response has no avatar field — DDL→API propagation gap"
+    "rationale": "Avatar column added but API response has no avatar field — DDL→API propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-column-003",
@@ -75,7 +77,8 @@
       "column_gap",
       "PD-01"
     ],
-    "rationale": "Category column in schema but no API or HTML displays it — schema→response gap"
+    "rationale": "Category column in schema but no API or HTML displays it — schema→response gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-column-004",
@@ -101,7 +104,8 @@
       "column_gap",
       "PD-01"
     ],
-    "rationale": "Phone column in DB but config has no phone-related setting — schema→config gap"
+    "rationale": "Phone column in DB but config has no phone-related setting — schema→config gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-column-005",
@@ -127,7 +131,8 @@
       "column_gap",
       "PD-01"
     ],
-    "rationale": "New table created in schema but no API endpoint serves it — schema→route gap"
+    "rationale": "New table created in schema but no API endpoint serves it — schema→route gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-column-006",
@@ -154,7 +159,8 @@
       "PD-01",
       "control"
     ],
-    "rationale": "Same-file check — column is present in schema"
+    "rationale": "Same-file check — column is present in schema",
+    "intent": "false_negative"
   },
   {
     "id": "pd-constraint-007",
@@ -180,7 +186,8 @@
       "constraint_gap",
       "PD-02"
     ],
-    "rationale": "DB constraint added but app has no validation — constraint→validation propagation gap"
+    "rationale": "DB constraint added but app has no validation — constraint→validation propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-constraint-008",
@@ -206,7 +213,8 @@
       "constraint_gap",
       "PD-02"
     ],
-    "rationale": "Unique constraint on title but app has no duplicate detection — DB→app validation gap"
+    "rationale": "Unique constraint on title but app has no duplicate detection — DB→app validation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-constraint-009",
@@ -232,7 +240,8 @@
       "constraint_gap",
       "PD-02"
     ],
-    "rationale": "CHECK constraint in DB but app never validates range — constraint→code propagation gap"
+    "rationale": "CHECK constraint in DB but app never validates range — constraint→code propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-constraint-010",
@@ -258,7 +267,8 @@
       "constraint_gap",
       "PD-02"
     ],
-    "rationale": "Email format constraint in DB but app has no email validation — dual-layer gap"
+    "rationale": "Email format constraint in DB but app has no email validation — dual-layer gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-constraint-011",
@@ -285,7 +295,8 @@
       "PD-02",
       "control"
     ],
-    "rationale": "Same-file check — constraint is present in schema"
+    "rationale": "Same-file check — constraint is present in schema",
+    "intent": "false_negative"
   },
   {
     "id": "pd-index-012",
@@ -311,7 +322,8 @@
       "index_gap",
       "PD-03"
     ],
-    "rationale": "Index created for user_id lookups but app has no user-filtered query — index→query gap"
+    "rationale": "Index created for user_id lookups but app has no user-filtered query — index→query gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-index-013",
@@ -337,7 +349,8 @@
       "index_gap",
       "PD-03"
     ],
-    "rationale": "Email index created but no app route queries by email — index optimization unexploited"
+    "rationale": "Email index created but no app route queries by email — index optimization unexploited",
+    "intent": "false_positive"
   },
   {
     "id": "pd-index-014",
@@ -363,7 +376,8 @@
       "index_gap",
       "PD-03"
     ],
-    "rationale": "Composite index added but config has no optimization awareness — schema→config gap"
+    "rationale": "Composite index added but config has no optimization awareness — schema→config gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-index-015",
@@ -389,7 +403,8 @@
       "index_gap",
       "PD-03"
     ],
-    "rationale": "Settings index created but no API endpoint uses settings table — index→route gap"
+    "rationale": "Settings index created but no API endpoint uses settings table — index→route gap",
+    "intent": "false_positive"
   },
   {
     "id": "pd-index-016",
@@ -416,7 +431,8 @@
       "PD-03",
       "control"
     ],
-    "rationale": "Same-file check — index definition is present in schema"
+    "rationale": "Same-file check — index definition is present in schema",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-200",
@@ -441,7 +457,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Add column to init.sql, server.js unaware"
+    "rationale": "Add column to init.sql, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-201",
@@ -466,7 +483,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Change .env port, compose not updated"
+    "rationale": "Change .env port, compose not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-202",
@@ -491,7 +509,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Change config.json feature flag, server.js not updated"
+    "rationale": "Change config.json feature flag, server.js not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-203",
@@ -516,7 +535,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Rename column in init.sql, server.js uses old name"
+    "rationale": "Rename column in init.sql, server.js uses old name",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-204",
@@ -541,7 +561,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Add env var to .env, Dockerfile has no matching ENV"
+    "rationale": "Add env var to .env, Dockerfile has no matching ENV",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-205",
@@ -566,7 +587,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Change Dockerfile node version, compose image tag unchanged"
+    "rationale": "Change Dockerfile node version, compose image tag unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-206",
@@ -593,7 +615,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Add migration column, config.json has no reference"
+    "rationale": "Add migration column, config.json has no reference",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-207",
@@ -618,7 +641,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Change health response, Dockerfile healthcheck unchanged"
+    "rationale": "Change health response, Dockerfile healthcheck unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-208",
@@ -643,7 +667,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: edit server.js, check server.js"
+    "rationale": "Control: edit server.js, check server.js",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-209",
@@ -668,7 +693,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-210",
@@ -687,7 +713,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: init.sql has users table"
+    "rationale": "Control: init.sql has users table",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-211",
@@ -712,7 +739,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Add table to init.sql, server.js has no API for it"
+    "rationale": "Add table to init.sql, server.js has no API for it",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-212",
@@ -737,7 +765,8 @@
       "db",
       "propagation_gap"
     ],
-    "rationale": "Change compose service name, Dockerfile unchanged"
+    "rationale": "Change compose service name, Dockerfile unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-213",
@@ -756,6 +785,7 @@
       "db",
       "control"
     ],
-    "rationale": "Control: compose has app service"
+    "rationale": "Control: compose has app service",
+    "intent": "false_negative"
   }
 ]

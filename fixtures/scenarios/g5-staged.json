@@ -33,7 +33,8 @@
       "direct": 1,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-direct-css-002",
@@ -69,7 +70,8 @@
       "direct": 1,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-direct-css-003",
@@ -105,7 +107,8 @@
       "direct": 1,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-direct-content-004",
@@ -139,7 +142,8 @@
       "direct": 1,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-direct-content-005",
@@ -173,7 +177,8 @@
       "direct": 1,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-direct-http-006",
@@ -210,7 +215,8 @@
       "direct": 1,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-scaffold-http-007",
@@ -247,7 +253,8 @@
       "direct": 0,
       "scaffolding": 1,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-direct-db-008",
@@ -283,7 +290,8 @@
       "direct": 1,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-scaffold-009",
@@ -319,7 +327,8 @@
       "direct": 0,
       "scaffolding": 1,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-scaffold-010",
@@ -355,7 +364,8 @@
       "direct": 0,
       "scaffolding": 1,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-scaffold-011",
@@ -392,7 +402,8 @@
       "direct": 0,
       "scaffolding": 1,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-unexplained-012",
@@ -425,7 +436,8 @@
       "direct": 0,
       "scaffolding": 0,
       "unexplained": 1
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-unexplained-013",
@@ -458,7 +470,8 @@
       "direct": 0,
       "scaffolding": 0,
       "unexplained": 1
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-mixed-014",
@@ -503,7 +516,8 @@
       "direct": 1,
       "scaffolding": 1,
       "unexplained": 1
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-mixed-015",
@@ -549,7 +563,8 @@
       "direct": 2,
       "scaffolding": 0,
       "unexplained": 0
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g5-nopred-016",
@@ -576,7 +591,8 @@
       "direct": 0,
       "scaffolding": 0,
       "unexplained": 1
-    }
+    },
+    "intent": "false_negative"
   },
   {
     "id": "g-bolster-200",
@@ -595,7 +611,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-201",
@@ -614,7 +631,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-202",
@@ -633,7 +651,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-203",
@@ -652,7 +671,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-204",
@@ -671,7 +691,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-205",
@@ -690,7 +711,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references database but .env has no such reference"
+    "rationale": "config.json references database but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-206",
@@ -709,7 +731,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references port but docker-compose.yml has no such reference"
+    "rationale": "config.json references port but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-207",
@@ -728,7 +751,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-208",
@@ -747,7 +771,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references PORT but docker-compose.yml has no such reference"
+    "rationale": ".env references PORT but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-209",
@@ -766,7 +791,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "init.sql references users but server.js has no such reference"
+    "rationale": "init.sql references users but server.js has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-210",
@@ -785,7 +811,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "init.sql references sessions but config.json has no such reference"
+    "rationale": "init.sql references sessions but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-211",
@@ -804,7 +831,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference"
+    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-212",
@@ -823,7 +851,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references /health but config.json has no such reference"
+    "rationale": "server.js references /health but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "g-bolster-213",
@@ -842,6 +871,7 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references /api/echo but config.json has no such reference"
+    "rationale": "server.js references /api/echo but config.json has no such reference",
+    "intent": "false_positive"
   }
 ]

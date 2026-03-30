@@ -28,7 +28,8 @@
       "csp_blocked",
       "HB-01"
     ],
-    "rationale": "Edit adds onclick but CSP script-src none blocks all inline scripts — content exists but behaviour is dead"
+    "rationale": "Edit adds onclick but CSP script-src none blocks all inline scripts — content exists but behaviour is dead",
+    "intent": "false_negative"
   },
   {
     "id": "hb-csp-002",
@@ -59,7 +60,8 @@
       "csp_blocked",
       "HB-01"
     ],
-    "rationale": "Script tag exists in source but CSP requires nonce — browser will refuse to execute it"
+    "rationale": "Script tag exists in source but CSP requires nonce — browser will refuse to execute it",
+    "intent": "false_negative"
   },
   {
     "id": "hb-csp-003",
@@ -91,7 +93,8 @@
       "csp_blocked",
       "HB-01"
     ],
-    "rationale": "Edit uses eval() for styling but default CSP blocks unsafe-eval — background never changes"
+    "rationale": "Edit uses eval() for styling but default CSP blocks unsafe-eval — background never changes",
+    "intent": "false_positive"
   },
   {
     "id": "hb-csp-004",
@@ -123,7 +126,8 @@
       "csp_blocked",
       "HB-01"
     ],
-    "rationale": "Inline <style> added but CSP style-src self blocks inline styles — rule never applies"
+    "rationale": "Inline <style> added but CSP style-src self blocks inline styles — rule never applies",
+    "intent": "false_positive"
   },
   {
     "id": "hb-csp-005",
@@ -155,7 +159,8 @@
       "csp_blocked",
       "HB-01"
     ],
-    "rationale": "HTML attribute present but CSP img-src self blocks external URL — image will not load"
+    "rationale": "HTML attribute present but CSP img-src self blocks external URL — image will not load",
+    "intent": "false_negative"
   },
   {
     "id": "hb-csp-006",
@@ -182,7 +187,8 @@
       "HB-01",
       "control"
     ],
-    "rationale": "No CSP restriction — inline script is present and would execute normally"
+    "rationale": "No CSP restriction — inline script is present and would execute normally",
+    "intent": "false_negative"
   },
   {
     "id": "hb-cors-007",
@@ -208,7 +214,8 @@
       "cors_rejected",
       "HB-02"
     ],
-    "rationale": "CORS header set to specific origin — other origins cannot access the API response"
+    "rationale": "CORS header set to specific origin — other origins cannot access the API response",
+    "intent": "false_negative"
   },
   {
     "id": "hb-cors-008",
@@ -234,7 +241,8 @@
       "cors_rejected",
       "HB-02"
     ],
-    "rationale": "Fetch to third-party API will be CORS-blocked — #details content unchanged from default"
+    "rationale": "Fetch to third-party API will be CORS-blocked — #details content unchanged from default",
+    "intent": "false_negative"
   },
   {
     "id": "hb-cors-009",
@@ -268,7 +276,8 @@
       "cors_rejected",
       "HB-02"
     ],
-    "rationale": "Client-side POST without proper CORS preflight handling — browser blocks the request"
+    "rationale": "Client-side POST without proper CORS preflight handling — browser blocks the request",
+    "intent": "false_positive"
   },
   {
     "id": "hb-cors-010",
@@ -299,7 +308,8 @@
       "cors_rejected",
       "HB-02"
     ],
-    "rationale": "CORS wildcard * with credentials:include is explicitly forbidden by the spec — browser rejects"
+    "rationale": "CORS wildcard * with credentials:include is explicitly forbidden by the spec — browser rejects",
+    "intent": "false_negative"
   },
   {
     "id": "hb-cors-011",
@@ -326,7 +336,8 @@
       "HB-02",
       "control"
     ],
-    "rationale": "Same-origin fetch — no CORS restriction, request succeeds"
+    "rationale": "Same-origin fetch — no CORS restriction, request succeeds",
+    "intent": "false_negative"
   },
   {
     "id": "hb-sandbox-012",
@@ -353,7 +364,8 @@
       "iframe_sandbox",
       "HB-03"
     ],
-    "rationale": "iframe sandbox=\"\" blocks all capabilities — form inside cannot be submitted"
+    "rationale": "iframe sandbox=\"\" blocks all capabilities — form inside cannot be submitted",
+    "intent": "false_negative"
   },
   {
     "id": "hb-sandbox-013",
@@ -379,7 +391,8 @@
       "iframe_sandbox",
       "HB-03"
     ],
-    "rationale": "iframe sandbox=\"\" prevents script execution inside the embedded page"
+    "rationale": "iframe sandbox=\"\" prevents script execution inside the embedded page",
+    "intent": "false_negative"
   },
   {
     "id": "hb-sandbox-014",
@@ -410,7 +423,8 @@
       "iframe_sandbox",
       "HB-03"
     ],
-    "rationale": "sandbox allows scripts but not navigation — nav-links inside iframe cannot escape to parent"
+    "rationale": "sandbox allows scripts but not navigation — nav-links inside iframe cannot escape to parent",
+    "intent": "false_negative"
   },
   {
     "id": "hb-sandbox-015",
@@ -436,7 +450,8 @@
       "iframe_sandbox",
       "HB-03"
     ],
-    "rationale": "Without allow-same-origin the iframe is treated as cross-origin — no cookie or localStorage access"
+    "rationale": "Without allow-same-origin the iframe is treated as cross-origin — no cookie or localStorage access",
+    "intent": "false_negative"
   },
   {
     "id": "hb-sandbox-016",
@@ -463,7 +478,8 @@
       "HB-03",
       "control"
     ],
-    "rationale": "Full sandbox permissions — form submission, scripts, and cookies all work"
+    "rationale": "Full sandbox permissions — form submission, scripts, and cookies all work",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-200",
@@ -488,7 +504,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "Admin route in server.js, no admin role in config.json"
+    "rationale": "Admin route in server.js, no admin role in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-201",
@@ -513,7 +530,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "Auth token check in server.js, no token in .env"
+    "rationale": "Auth token check in server.js, no token in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-202",
@@ -538,7 +556,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "Rate limit function added, no limit in config.json"
+    "rationale": "Rate limit function added, no limit in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-203",
@@ -557,7 +576,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "Session table in init.sql, no session config in .env"
+    "rationale": "Session table in init.sql, no session config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-204",
@@ -582,7 +602,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "CORS header added, no CORS config in .env"
+    "rationale": "CORS header added, no CORS config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-205",
@@ -607,7 +628,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "CSP header added, not in config.json"
+    "rationale": "CSP header added, not in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-206",
@@ -626,7 +648,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "Password hash in init.sql, no hash algo in config"
+    "rationale": "Password hash in init.sql, no hash algo in config",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-207",
@@ -645,7 +668,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Control: server.js has /health, check it exists"
+    "rationale": "Control: server.js has /health, check it exists",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-208",
@@ -664,7 +688,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Control: init.sql has sessions table"
+    "rationale": "Control: init.sql has sessions table",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-209",
@@ -683,7 +708,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Control: .env has SECRET_KEY"
+    "rationale": "Control: .env has SECRET_KEY",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-210",
@@ -702,7 +728,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Dockerfile exposes port, check Dockerfile"
+    "rationale": "Dockerfile exposes port, check Dockerfile",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-211",
@@ -721,7 +748,8 @@
       "browser",
       "control"
     ],
-    "rationale": "Compose has env_file, check compose"
+    "rationale": "Compose has env_file, check compose",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-212",
@@ -740,7 +768,8 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "User table has password_hash, server.js has no bcrypt"
+    "rationale": "User table has password_hash, server.js has no bcrypt",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-213",
@@ -759,6 +788,7 @@
       "browser",
       "cross_file_gap"
     ],
-    "rationale": "Sessions table has expires_at, server.js has no expiry check"
+    "rationale": "Sessions table has expires_at, server.js has no expiry check",
+    "intent": "false_positive"
   }
 ]

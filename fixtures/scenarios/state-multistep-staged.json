@@ -24,7 +24,8 @@
       "filename_format",
       "SM-01"
     ],
-    "rationale": "Assumed: .env PORT change propagates to config.json. Actual: config.json still has port: 3000. Two independent sources."
+    "rationale": "Assumed: .env PORT change propagates to config.json. Actual: config.json still has port: 3000. Two independent sources.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-file-002",
@@ -50,7 +51,8 @@
       "filename_format",
       "SM-01"
     ],
-    "rationale": "Assumed: new API route reflected in Dockerfile. Actual: Dockerfile has no awareness of route structure."
+    "rationale": "Assumed: new API route reflected in Dockerfile. Actual: Dockerfile has no awareness of route structure.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-file-003",
@@ -76,7 +78,8 @@
       "filename_format",
       "SM-01"
     ],
-    "rationale": "Assumed: config.json DB name change propagates to .env DATABASE_URL. Actual: .env still has /demo."
+    "rationale": "Assumed: config.json DB name change propagates to .env DATABASE_URL. Actual: .env still has /demo.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-file-004",
@@ -102,7 +105,8 @@
       "filename_format",
       "SM-01"
     ],
-    "rationale": "Assumed: docker-compose healthcheck follows route rename. Actual: compose YAML is independent file."
+    "rationale": "Assumed: docker-compose healthcheck follows route rename. Actual: compose YAML is independent file.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-file-005",
@@ -140,7 +144,8 @@
       "SM-01",
       "control"
     ],
-    "rationale": "Both sources updated consistently — step outputs match step assumptions."
+    "rationale": "Both sources updated consistently — step outputs match step assumptions.",
+    "intent": "false_negative"
   },
   {
     "id": "sm-build-006",
@@ -166,7 +171,8 @@
       "build_output",
       "SM-02"
     ],
-    "rationale": "Assumed: source title visible in Dockerfile. Actual: Dockerfile only copies server.js, doesn't contain app content."
+    "rationale": "Assumed: source title visible in Dockerfile. Actual: Dockerfile only copies server.js, doesn't contain app content.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-build-007",
@@ -192,7 +198,8 @@
       "build_output",
       "SM-02"
     ],
-    "rationale": "Assumed: .env NODE_ENV affects config.json. Actual: config.json is static — no environment awareness."
+    "rationale": "Assumed: .env NODE_ENV affects config.json. Actual: config.json is static — no environment awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-build-008",
@@ -218,7 +225,8 @@
       "build_output",
       "SM-02"
     ],
-    "rationale": "Assumed: Dockerfile installs dependencies. Actual: Dockerfile only copies server.js — no package.json, no npm install."
+    "rationale": "Assumed: Dockerfile installs dependencies. Actual: Dockerfile only copies server.js — no package.json, no npm install.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-build-009",
@@ -244,7 +252,8 @@
       "build_output",
       "SM-02"
     ],
-    "rationale": "Assumed: config.json features propagate to compose env. Actual: docker-compose.yml has no feature flag awareness."
+    "rationale": "Assumed: config.json features propagate to compose env. Actual: docker-compose.yml has no feature flag awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-build-010",
@@ -271,7 +280,8 @@
       "SM-02",
       "control"
     ],
-    "rationale": "Edit and check in same file — no cross-file assumption."
+    "rationale": "Edit and check in same file — no cross-file assumption.",
+    "intent": "false_negative"
   },
   {
     "id": "sm-migration-011",
@@ -297,7 +307,8 @@
       "migration_output",
       "SM-03"
     ],
-    "rationale": "Assumed: schema column appears in application code. Actual: server.js has no DB queries — schema and code are independent."
+    "rationale": "Assumed: schema column appears in application code. Actual: server.js has no DB queries — schema and code are independent.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-migration-012",
@@ -323,7 +334,8 @@
       "migration_output",
       "SM-03"
     ],
-    "rationale": "Assumed: new table reflected in config. Actual: config.json has no schema awareness."
+    "rationale": "Assumed: new table reflected in config. Actual: config.json has no schema awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-migration-013",
@@ -349,7 +361,8 @@
       "migration_output",
       "SM-03"
     ],
-    "rationale": "Assumed: index creation visible in .env config. Actual: .env has no schema metadata."
+    "rationale": "Assumed: index creation visible in .env config. Actual: .env has no schema metadata.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-migration-014",
@@ -375,7 +388,8 @@
       "migration_output",
       "SM-03"
     ],
-    "rationale": "Assumed: column type change propagates to app layer. Actual: server.js has no type awareness."
+    "rationale": "Assumed: column type change propagates to app layer. Actual: server.js has no type awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-migration-015",
@@ -401,7 +415,8 @@
       "migration_output",
       "SM-03"
     ],
-    "rationale": "Assumed: FK cascade behavior in config. Actual: config.json has no schema constraint awareness."
+    "rationale": "Assumed: FK cascade behavior in config. Actual: config.json has no schema constraint awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "sm-migration-016",
@@ -428,7 +443,8 @@
       "SM-03",
       "control"
     ],
-    "rationale": "Same-file check — migration edit verified against migration file. No cross-step assumption."
+    "rationale": "Same-file check — migration edit verified against migration file. No cross-step assumption.",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-200",
@@ -447,7 +463,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume server.js has /api/users route — it doesnt"
+    "rationale": "Assume server.js has /api/users route — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-201",
@@ -466,7 +483,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has redis section — it doesnt"
+    "rationale": "Assume config.json has redis section — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-202",
@@ -485,7 +503,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume .env has REDIS_URL — it doesnt"
+    "rationale": "Assume .env has REDIS_URL — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-203",
@@ -504,7 +523,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume init.sql has products table — it doesnt"
+    "rationale": "Assume init.sql has products table — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-204",
@@ -523,7 +543,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume Dockerfile has multi-stage build — it doesnt"
+    "rationale": "Assume Dockerfile has multi-stage build — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-205",
@@ -542,7 +563,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume compose has redis service — it doesnt"
+    "rationale": "Assume compose has redis service — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-206",
@@ -561,7 +583,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume server.js uses express — it uses http"
+    "rationale": "Assume server.js uses express — it uses http",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-207",
@@ -580,7 +603,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has logging config — it doesnt"
+    "rationale": "Assume config.json has logging config — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-208",
@@ -605,7 +629,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Edit adds /api/users, predicate checks wrong file"
+    "rationale": "Edit adds /api/users, predicate checks wrong file",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-209",
@@ -630,7 +655,8 @@
       "multistep",
       "state_assumption"
     ],
-    "rationale": "Edit .env port, check wrong file"
+    "rationale": "Edit .env port, check wrong file",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-210",
@@ -649,7 +675,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: server.js has /health"
+    "rationale": "Control: server.js has /health",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-211",
@@ -668,7 +695,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: init.sql has users table"
+    "rationale": "Control: init.sql has users table",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-212",
@@ -687,7 +715,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: compose has healthcheck"
+    "rationale": "Control: compose has healthcheck",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-213",
@@ -706,6 +735,7 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: .env has DATABASE_URL"
+    "rationale": "Control: .env has DATABASE_URL",
+    "intent": "false_negative"
   }
 ]

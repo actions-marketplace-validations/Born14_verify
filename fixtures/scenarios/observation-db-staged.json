@@ -28,7 +28,8 @@
       "introspection_artifact",
       "FD-01"
     ],
-    "rationale": "Assumed: schema introspection is read-only. Actual: pg_stat_statements extension tracks every query — observation adds measurement artifacts. server.js has no reference."
+    "rationale": "Assumed: schema introspection is read-only. Actual: pg_stat_statements extension tracks every query — observation adds measurement artifacts. server.js has no reference.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-introspect-002",
@@ -54,7 +55,8 @@
       "introspection_artifact",
       "FD-01"
     ],
-    "rationale": "Assumed: reading tables doesn't trigger maintenance. Actual: SELECT updates tuple statistics, triggering auto-analyze. App has no awareness."
+    "rationale": "Assumed: reading tables doesn't trigger maintenance. Actual: SELECT updates tuple statistics, triggering auto-analyze. App has no awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-introspect-003",
@@ -85,7 +87,8 @@
       "introspection_artifact",
       "FD-01"
     ],
-    "rationale": "Assumed: schema introspection is side-effect-free. Actual: schema_versions table tracks observations — each look updates last_introspected_at."
+    "rationale": "Assumed: schema introspection is side-effect-free. Actual: schema_versions table tracks observations — each look updates last_introspected_at.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-introspect-004",
@@ -116,7 +119,8 @@
       "introspection_artifact",
       "FD-01"
     ],
-    "rationale": "Assumed: queries don't generate logs. Actual: query_log table grows with each observation. Config has no awareness."
+    "rationale": "Assumed: queries don't generate logs. Actual: query_log table grows with each observation. Config has no awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-introspect-005",
@@ -137,7 +141,8 @@
       "FD-01",
       "control"
     ],
-    "rationale": "Static schema check — no observation side effects. File content doesn't change from reading it."
+    "rationale": "Static schema check — no observation side effects. File content doesn't change from reading it.",
+    "intent": "false_negative"
   },
   {
     "id": "fd-select-006",
@@ -168,7 +173,8 @@
       "select_side_effect",
       "FD-02"
     ],
-    "rationale": "Assumed: SELECT is read-only. Actual: trigger updates last_accessed on read. Observation mutates observed state."
+    "rationale": "Assumed: SELECT is read-only. Actual: trigger updates last_accessed on read. Observation mutates observed state.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-select-007",
@@ -199,7 +205,8 @@
       "select_side_effect",
       "FD-02"
     ],
-    "rationale": "Assumed: reading data doesn't create audit entries. Actual: audit_trail grows with each query. App has no audit awareness."
+    "rationale": "Assumed: reading data doesn't create audit entries. Actual: audit_trail grows with each query. App has no audit awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-select-008",
@@ -225,7 +232,8 @@
       "select_side_effect",
       "FD-02"
     ],
-    "rationale": "Assumed: SELECT on posts is read-only. Actual: view_count trigger fires on read. Each observation inflates metrics."
+    "rationale": "Assumed: SELECT on posts is read-only. Actual: view_count trigger fires on read. Each observation inflates metrics.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-select-009",
@@ -251,7 +259,8 @@
       "select_side_effect",
       "FD-02"
     ],
-    "rationale": "Assumed: checking session is read-only. Actual: lookup extends expiry — observation changes session lifetime."
+    "rationale": "Assumed: checking session is read-only. Actual: lookup extends expiry — observation changes session lifetime.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-select-010",
@@ -272,7 +281,8 @@
       "FD-02",
       "control"
     ],
-    "rationale": "Static file check — no database observation, no side effects."
+    "rationale": "Static file check — no database observation, no side effects.",
+    "intent": "false_negative"
   },
   {
     "id": "fd-conn-011",
@@ -303,7 +313,8 @@
       "connection_count",
       "FD-03"
     ],
-    "rationale": "Assumed: observation is free. Actual: each probe holds a connection slot. At max_connections=20, 20 concurrent probes = pool exhaustion."
+    "rationale": "Assumed: observation is free. Actual: each probe holds a connection slot. At max_connections=20, 20 concurrent probes = pool exhaustion.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-conn-012",
@@ -334,7 +345,8 @@
       "connection_count",
       "FD-03"
     ],
-    "rationale": "Assumed: querying connection count is read-only. Actual: the query itself is a connection — Heisenberg: you can't observe connections without being one."
+    "rationale": "Assumed: querying connection count is read-only. Actual: the query itself is a connection — Heisenberg: you can't observe connections without being one.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-conn-013",
@@ -365,7 +377,8 @@
       "connection_count",
       "FD-03"
     ],
-    "rationale": "Assumed: server.js respects pool_size. Actual: server.js has no DB client — pool_size in config is inert."
+    "rationale": "Assumed: server.js respects pool_size. Actual: server.js has no DB client — pool_size in config is inert.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-conn-014",
@@ -391,7 +404,8 @@
       "connection_count",
       "FD-03"
     ],
-    "rationale": "Assumed: config timeout propagates to .env. Actual: .env has no timeout config — observation timeout only in config.json."
+    "rationale": "Assumed: config timeout propagates to .env. Actual: .env has no timeout config — observation timeout only in config.json.",
+    "intent": "false_positive"
   },
   {
     "id": "fd-conn-015",
@@ -417,7 +431,8 @@
       "FD-03",
       "control"
     ],
-    "rationale": "Static file check — config and schema files are read without any DB connections."
+    "rationale": "Static file check — config and schema files are read without any DB connections.",
+    "intent": "false_negative"
   },
   {
     "id": "fd-bolster-100",
@@ -442,7 +457,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-101",
@@ -467,7 +483,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-102",
@@ -492,7 +509,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-103",
@@ -517,7 +535,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-104",
@@ -542,7 +561,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-105",
@@ -567,7 +587,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-106",
@@ -592,7 +613,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-107",
@@ -617,7 +639,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-108",
@@ -643,7 +666,8 @@
       "fd-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "fd-bolster-109",
@@ -669,7 +693,8 @@
       "fd-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fd-bolster-110",
@@ -695,7 +720,8 @@
       "fd-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fd-bolster-111",
@@ -720,7 +746,8 @@
       "fd-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "fd-bolster-112",
@@ -738,7 +765,8 @@
       "db",
       "fd-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "fd-bolster-113",
@@ -757,7 +785,8 @@
       "fd-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "fd-bolster-114",
@@ -777,6 +806,7 @@
       "fd-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

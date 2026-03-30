@@ -23,7 +23,8 @@
       "api_version",
       "SH-01"
     ],
-    "rationale": "Assumed: /api/items still exists. Actual: renamed to /api/v2/items. Agent calls the old version."
+    "rationale": "Assumed: /api/items still exists. Actual: renamed to /api/v2/items. Agent calls the old version.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-version-002",
@@ -49,7 +50,8 @@
       "api_version",
       "SH-01"
     ],
-    "rationale": "Assumed: health returns {status:\"ok\"}. Actual: format changed to {healthy,version}. Parsing old format fails."
+    "rationale": "Assumed: health returns {status:\"ok\"}. Actual: format changed to {healthy,version}. Parsing old format fails.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-version-003",
@@ -75,7 +77,8 @@
       "api_version",
       "SH-01"
     ],
-    "rationale": "Assumed: /api/items returns bare array. Actual: wrapped in {data,total} envelope. Client parsing breaks."
+    "rationale": "Assumed: /api/items returns bare array. Actual: wrapped in {data,total} envelope. Client parsing breaks.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-version-004",
@@ -101,7 +104,8 @@
       "api_version",
       "SH-01"
     ],
-    "rationale": "Assumed: config.json port controls server. Actual: server.js reads PORT from env, ignores config.json."
+    "rationale": "Assumed: config.json port controls server. Actual: server.js reads PORT from env, ignores config.json.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-version-005",
@@ -128,7 +132,8 @@
       "SH-01",
       "control"
     ],
-    "rationale": "Edit and check same file — new item appears in server.js. No version mismatch."
+    "rationale": "Edit and check same file — new item appears in server.js. No version mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "sh-moved-006",
@@ -154,7 +159,8 @@
       "endpoint_moved",
       "SH-02"
     ],
-    "rationale": "Assumed: Dockerfile healthcheck tracks route rename. Actual: Dockerfile still references /health — endpoint moved but consumer didn't follow."
+    "rationale": "Assumed: Dockerfile healthcheck tracks route rename. Actual: Dockerfile still references /health — endpoint moved but consumer didn't follow.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-moved-007",
@@ -180,7 +186,8 @@
       "endpoint_moved",
       "SH-02"
     ],
-    "rationale": "Assumed: /about still exists. Actual: renamed to /info. Agent's route map is stale."
+    "rationale": "Assumed: /about still exists. Actual: renamed to /info. Agent's route map is stale.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-moved-008",
@@ -206,7 +213,8 @@
       "endpoint_moved",
       "SH-02"
     ],
-    "rationale": "Assumed: nav link updated with route. Actual: homepage HTML still has href=\"/api/items\" — broken internal link."
+    "rationale": "Assumed: nav link updated with route. Actual: homepage HTML still has href=\"/api/items\" — broken internal link.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-moved-009",
@@ -232,7 +240,8 @@
       "endpoint_moved",
       "SH-02"
     ],
-    "rationale": "Assumed: form action follows route rename. Actual: form action still says /api/echo — route and form are independent."
+    "rationale": "Assumed: form action follows route rename. Actual: form action still says /api/echo — route and form are independent.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-moved-010",
@@ -258,7 +267,8 @@
       "SH-02",
       "control"
     ],
-    "rationale": "Both infra and app agree on /health path — no endpoint relocation."
+    "rationale": "Both infra and app agree on /health path — no endpoint relocation.",
+    "intent": "false_negative"
   },
   {
     "id": "sh-format-011",
@@ -284,7 +294,8 @@
       "format_changed",
       "SH-03"
     ],
-    "rationale": "Assumed: items have name field. Actual: renamed to title. Client parsing by field name breaks."
+    "rationale": "Assumed: items have name field. Actual: renamed to title. Client parsing by field name breaks.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-format-012",
@@ -310,7 +321,8 @@
       "format_changed",
       "SH-03"
     ],
-    "rationale": "Tricky: application/json still appears in /api/items route. Predicate passes on wrong match — false confidence."
+    "rationale": "Tricky: application/json still appears in /api/items route. Predicate passes on wrong match — false confidence.",
+    "intent": "false_negative"
   },
   {
     "id": "sh-format-013",
@@ -336,7 +348,8 @@
       "format_changed",
       "SH-03"
     ],
-    "rationale": "Assumed: /api/echo returns JSON. Actual: changed to XML. Agent parsing JSON.parse(response) breaks."
+    "rationale": "Assumed: /api/echo returns JSON. Actual: changed to XML. Agent parsing JSON.parse(response) breaks.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-format-014",
@@ -362,7 +375,8 @@
       "format_changed",
       "SH-03"
     ],
-    "rationale": "Assumed: items response is bare array. Actual: wrapped in pagination object. response[0] is now undefined."
+    "rationale": "Assumed: items response is bare array. Actual: wrapped in pagination object. response[0] is now undefined.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-format-015",
@@ -388,7 +402,8 @@
       "format_changed",
       "SH-03"
     ],
-    "rationale": "Assumed: 404 returns text/plain. Actual: changed to JSON. Error handling that checks for plain text breaks."
+    "rationale": "Assumed: 404 returns text/plain. Actual: changed to JSON. Error handling that checks for plain text breaks.",
+    "intent": "false_positive"
   },
   {
     "id": "sh-format-016",
@@ -415,7 +430,8 @@
       "SH-03",
       "control"
     ],
-    "rationale": "Same format, new data — response structure unchanged, just more items. No format mismatch."
+    "rationale": "Same format, new data — response structure unchanged, just more items. No format mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-200",
@@ -434,7 +450,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume server.js has /api/users route — it doesnt"
+    "rationale": "Assume server.js has /api/users route — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-201",
@@ -453,7 +470,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has redis section — it doesnt"
+    "rationale": "Assume config.json has redis section — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-202",
@@ -472,7 +490,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume .env has REDIS_URL — it doesnt"
+    "rationale": "Assume .env has REDIS_URL — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-203",
@@ -491,7 +510,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume init.sql has products table — it doesnt"
+    "rationale": "Assume init.sql has products table — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-204",
@@ -510,7 +530,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume Dockerfile has multi-stage build — it doesnt"
+    "rationale": "Assume Dockerfile has multi-stage build — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-205",
@@ -529,7 +550,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume compose has redis service — it doesnt"
+    "rationale": "Assume compose has redis service — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-206",
@@ -548,7 +570,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume server.js uses express — it uses http"
+    "rationale": "Assume server.js uses express — it uses http",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-207",
@@ -567,7 +590,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has logging config — it doesnt"
+    "rationale": "Assume config.json has logging config — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-208",
@@ -592,7 +616,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Edit adds /api/users, predicate checks wrong file"
+    "rationale": "Edit adds /api/users, predicate checks wrong file",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-209",
@@ -617,7 +642,8 @@
       "http",
       "state_assumption"
     ],
-    "rationale": "Edit .env port, check wrong file"
+    "rationale": "Edit .env port, check wrong file",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-210",
@@ -636,7 +662,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: server.js has /health"
+    "rationale": "Control: server.js has /health",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-211",
@@ -655,7 +682,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: init.sql has users table"
+    "rationale": "Control: init.sql has users table",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-212",
@@ -674,7 +702,8 @@
       "http",
       "control"
     ],
-    "rationale": "Control: compose has healthcheck"
+    "rationale": "Control: compose has healthcheck",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-213",
@@ -693,6 +722,7 @@
       "http",
       "control"
     ],
-    "rationale": "Control: .env has DATABASE_URL"
+    "rationale": "Control: .env has DATABASE_URL",
+    "intent": "false_negative"
   }
 ]

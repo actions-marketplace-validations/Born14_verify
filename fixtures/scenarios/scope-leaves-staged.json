@@ -31,7 +31,8 @@
       "css_blast_radius",
       "SC-02"
     ],
-    "rationale": "Universal * selector applies color:red and resets margin/padding/font-size on ALL elements — intended to style one thing, destroys entire page."
+    "rationale": "Universal * selector applies color:red and resets margin/padding/font-size on ALL elements — intended to style one thing, destroys entire page.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-002",
@@ -65,7 +66,8 @@
       "css_blast_radius",
       "SC-02"
     ],
-    "rationale": "Bare \"a\" selector intended for nav links — but affects every anchor on every page including about, form, and edge-cases."
+    "rationale": "Bare \"a\" selector intended for nav links — but affects every anchor on every page including about, form, and edge-cases.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-003",
@@ -103,7 +105,8 @@
       "SC-02",
       "control"
     ],
-    "rationale": "Footer selector targets only the footer element — single element on page, no unintended scope expansion."
+    "rationale": "Footer selector targets only the footer element — single element on page, no unintended scope expansion.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-004",
@@ -136,7 +139,8 @@
       "migration_collateral",
       "SC-03"
     ],
-    "rationale": "Adding role column with CHECK constraint to users table — sessions and posts FKs reference users(id), any ALTER that locks users blocks all dependent table writes."
+    "rationale": "Adding role column with CHECK constraint to users table — sessions and posts FKs reference users(id), any ALTER that locks users blocks all dependent table writes.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-005",
@@ -169,7 +173,8 @@
       "migration_collateral",
       "SC-03"
     ],
-    "rationale": "Renaming username->user_name and email->email_address breaks all app queries, views, and indexes referencing the old column names — blast radius extends to entire codebase."
+    "rationale": "Renaming username->user_name and email->email_address breaks all app queries, views, and indexes referencing the old column names — blast radius extends to entire codebase.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-006",
@@ -203,7 +208,8 @@
       "SC-03",
       "control"
     ],
-    "rationale": "Adding nullable column to settings — no FK dependencies, no existing queries reference it, zero blast radius."
+    "rationale": "Adding nullable column to settings — no FK dependencies, no existing queries reference it, zero blast radius.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-007",
@@ -230,7 +236,8 @@
       "env_cascading",
       "SC-04"
     ],
-    "rationale": "Changing DATABASE_URL host/port/dbname — affects app server, migration runner, backup scheduler, and any service reading this variable."
+    "rationale": "Changing DATABASE_URL host/port/dbname — affects app server, migration runner, backup scheduler, and any service reading this variable.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-008",
@@ -257,7 +264,8 @@
       "env_cascading",
       "SC-04"
     ],
-    "rationale": "Rotating SECRET_KEY without session migration — all existing signed sessions/tokens become invalid, every logged-in user force-logged-out."
+    "rationale": "Rotating SECRET_KEY without session migration — all existing signed sessions/tokens become invalid, every logged-in user force-logged-out.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-009",
@@ -285,7 +293,8 @@
       "SC-04",
       "control"
     ],
-    "rationale": "NODE_ENV change only affects logging verbosity and error display — no cross-service session or data impact."
+    "rationale": "NODE_ENV change only affects logging verbosity and error display — no cross-service session or data impact.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-010",
@@ -329,7 +338,8 @@
       "port_cascading",
       "SC-05"
     ],
-    "rationale": "Port changed to 4000 in .env and server.js but Dockerfile still EXPOSE 3000 and healthcheck still hits :3000 — container fails health check, Docker restarts it indefinitely."
+    "rationale": "Port changed to 4000 in .env and server.js but Dockerfile still EXPOSE 3000 and healthcheck still hits :3000 — container fails health check, Docker restarts it indefinitely.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-011",
@@ -367,7 +377,8 @@
       "port_cascading",
       "SC-05"
     ],
-    "rationale": "App listens on 8080 but compose maps host:3000->container:3000 — incoming traffic hits empty port, app unreachable."
+    "rationale": "App listens on 8080 but compose maps host:3000->container:3000 — incoming traffic hits empty port, app unreachable.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-012",
@@ -410,7 +421,8 @@
       "SC-05",
       "control"
     ],
-    "rationale": "Port 3000 consistent across .env, Dockerfile, and server.js — no cascading mismatch."
+    "rationale": "Port 3000 consistent across .env, Dockerfile, and server.js — no cascading mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-013",
@@ -437,7 +449,8 @@
       "global_state_leak",
       "SC-07"
     ],
-    "rationale": "require() returns cached singleton — mutating config.app.name in health check changes app name for ALL routes, single endpoint mutates global state."
+    "rationale": "require() returns cached singleton — mutating config.app.name in health check changes app name for ALL routes, single endpoint mutates global state.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-014",
@@ -464,7 +477,8 @@
       "global_state_leak",
       "SC-07"
     ],
-    "rationale": "Prototype pollution via Object.prototype._debug — every object in the entire process now has _debug:true, affecting JSON serialization, iterations, and type checks globally."
+    "rationale": "Prototype pollution via Object.prototype._debug — every object in the entire process now has _debug:true, affecting JSON serialization, iterations, and type checks globally.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-015",
@@ -501,7 +515,8 @@
       "SC-07",
       "control"
     ],
-    "rationale": "Spread into local copy — mutations affect only the local variable, global singleton untouched."
+    "rationale": "Spread into local copy — mutations affect only the local variable, global singleton untouched.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-016",
@@ -528,7 +543,8 @@
       "package_cascade",
       "SC-08"
     ],
-    "rationale": "Upgrading from Node 20 to 22 in Dockerfile — native modules (bcrypt, canvas, etc.) require rebuild, may not support new V8 ABI, cascading build failures."
+    "rationale": "Upgrading from Node 20 to 22 in Dockerfile — native modules (bcrypt, canvas, etc.) require rebuild, may not support new V8 ABI, cascading build failures.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-017",
@@ -555,7 +571,8 @@
       "package_cascade",
       "SC-08"
     ],
-    "rationale": "Switching from Alpine (musl) to Bookworm (glibc) — all pre-compiled binaries in node_modules are musl-linked, fail to load on glibc runtime."
+    "rationale": "Switching from Alpine (musl) to Bookworm (glibc) — all pre-compiled binaries in node_modules are musl-linked, fail to load on glibc runtime.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-018",
@@ -583,7 +600,8 @@
       "SC-08",
       "control"
     ],
-    "rationale": "Patch version pin within same major — backward compatible, no native module rebuild needed."
+    "rationale": "Patch version pin within same major — backward compatible, no native module rebuild needed.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-019",
@@ -610,7 +628,8 @@
       "dns_cascade",
       "SC-09"
     ],
-    "rationale": "Changing database host to replica — reads work but writes fail (replica is read-only), affects all services sharing this config: app, backup scheduler, migration runner."
+    "rationale": "Changing database host to replica — reads work but writes fail (replica is read-only), affects all services sharing this config: app, backup scheduler, migration runner.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-020",
@@ -643,7 +662,8 @@
       "dns_cascade",
       "SC-09"
     ],
-    "rationale": "DATABASE_URL points to external host but docker-compose still runs local db service — app connects to wrong database, local db runs uselessly consuming resources."
+    "rationale": "DATABASE_URL points to external host but docker-compose still runs local db service — app connects to wrong database, local db runs uselessly consuming resources.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-021",
@@ -671,7 +691,8 @@
       "SC-09",
       "control"
     ],
-    "rationale": "Database host is localhost — no external DNS dependency, docker-compose service networking handles resolution."
+    "rationale": "Database host is localhost — no external DNS dependency, docker-compose service networking handles resolution.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-022",
@@ -698,7 +719,8 @@
       "shared_utility_break",
       "SC-11"
     ],
-    "rationale": "Monkey-patching JSON.stringify to strip nulls — every route, every library, every serialization in the process silently loses null values."
+    "rationale": "Monkey-patching JSON.stringify to strip nulls — every route, every library, every serialization in the process silently loses null values.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-023",
@@ -731,7 +753,8 @@
       "shared_utility_break",
       "SC-11"
     ],
-    "rationale": "Date.now returns fixed timestamp — session expiry, cache TTL, rate limiting, and all time-dependent logic frozen. One test override breaks entire runtime."
+    "rationale": "Date.now returns fixed timestamp — session expiry, cache TTL, rate limiting, and all time-dependent logic frozen. One test override breaks entire runtime.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-024",
@@ -768,7 +791,8 @@
       "SC-11",
       "control"
     ],
-    "rationale": "Local helper function wraps JSON.stringify — no global mutation, callers use it explicitly."
+    "rationale": "Local helper function wraps JSON.stringify — no global mutation, callers use it explicitly.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-025",
@@ -801,7 +825,8 @@
       "config_rename_break",
       "SC-12"
     ],
-    "rationale": "Renaming \"port\" to \"listenPort\" — any code reading config.app.port gets undefined, falls back to wrong default or crashes."
+    "rationale": "Renaming \"port\" to \"listenPort\" — any code reading config.app.port gets undefined, falls back to wrong default or crashes.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-026",
@@ -834,7 +859,8 @@
       "config_rename_break",
       "SC-12"
     ],
-    "rationale": "camelCase to snake_case rename — all JavaScript code reading features.darkMode gets undefined, feature silently disabled for all users."
+    "rationale": "camelCase to snake_case rename — all JavaScript code reading features.darkMode gets undefined, feature silently disabled for all users.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-027",
@@ -867,7 +893,8 @@
       "config_rename_break",
       "SC-12"
     ],
-    "rationale": "Settings key renamed from \"theme\" to \"app.theme\" without data migration — old rows with key=\"theme\" orphaned, new queries return NULL."
+    "rationale": "Settings key renamed from \"theme\" to \"app.theme\" without data migration — old rows with key=\"theme\" orphaned, new queries return NULL.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-028",
@@ -901,6 +928,7 @@
       "SC-12",
       "control"
     ],
-    "rationale": "Both old (darkMode) and new (dark_mode) keys present — backward compatible, consumers of either key work."
+    "rationale": "Both old (darkMode) and new (dark_mode) keys present — backward compatible, consumers of either key work.",
+    "intent": "false_negative"
   }
 ]

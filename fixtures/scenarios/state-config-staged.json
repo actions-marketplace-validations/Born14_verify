@@ -18,7 +18,8 @@
       "feature_flag_divergence",
       "SA-01"
     ],
-    "rationale": "Assumed: staging has darkMode=true. Actual: prod has darkMode=false. Agent inspected wrong environment."
+    "rationale": "Assumed: staging has darkMode=true. Actual: prod has darkMode=false. Agent inspected wrong environment.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-envflag-002",
@@ -39,7 +40,8 @@
       "feature_flag_divergence",
       "SA-01"
     ],
-    "rationale": "Assumed: staging has analytics=true. Actual: prod has analytics=false. Feature verified against wrong env."
+    "rationale": "Assumed: staging has analytics=true. Actual: prod has analytics=false. Feature verified against wrong env.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-envflag-003",
@@ -60,7 +62,8 @@
       "feature_flag_divergence",
       "SA-01"
     ],
-    "rationale": "Assumed: staging has betaSignup. Actual: prod has betaSignup=false. Environment identity mismatch."
+    "rationale": "Assumed: staging has betaSignup. Actual: prod has betaSignup=false. Environment identity mismatch.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-envflag-004",
@@ -81,7 +84,8 @@
       "feature_flag_divergence",
       "SA-01"
     ],
-    "rationale": "Assumed: staging env (DEBUG=true). Actual: prod env (DEBUG=false). Env file identity mismatch."
+    "rationale": "Assumed: staging env (DEBUG=true). Actual: prod env (DEBUG=false). Env file identity mismatch.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-envflag-005",
@@ -102,7 +106,8 @@
       "feature_flag_divergence",
       "SA-01"
     ],
-    "rationale": "Assumed: staging DB (demo_staging). Actual: prod DB (demo_prod). Agent queried wrong database identity."
+    "rationale": "Assumed: staging DB (demo_staging). Actual: prod DB (demo_prod). Agent queried wrong database identity.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-envflag-006",
@@ -123,7 +128,8 @@
       "feature_flag_divergence",
       "SA-01"
     ],
-    "rationale": "Assumed: staging DB host (localhost). Actual: prod host (db-primary.internal). Wrong host belief."
+    "rationale": "Assumed: staging DB host (localhost). Actual: prod host (db-primary.internal). Wrong host belief.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-envflag-007",
@@ -144,7 +150,8 @@
       "feature_flag_divergence",
       "SA-01"
     ],
-    "rationale": "Assumed: staging override propagated to base. Actual: base config.json still has analytics=false."
+    "rationale": "Assumed: staging override propagated to base. Actual: base config.json still has analytics=false.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-envflag-008",
@@ -166,7 +173,8 @@
       "SA-01",
       "control"
     ],
-    "rationale": "Same-environment check — staging config confirms its own value. No environment identity error."
+    "rationale": "Same-environment check — staging config confirms its own value. No environment identity error.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-default-009",
@@ -193,7 +201,8 @@
       "default_masks_missing",
       "SA-02"
     ],
-    "rationale": "Assumed: PORT=3000 is explicitly configured. Actual: PORT missing, || 3000 fallback creates silent degradation."
+    "rationale": "Assumed: PORT=3000 is explicitly configured. Actual: PORT missing, || 3000 fallback creates silent degradation.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-default-010",
@@ -220,7 +229,8 @@
       "default_masks_missing",
       "SA-02"
     ],
-    "rationale": "Assumed: DATABASE_URL is set. Actual: removed. config.json db settings create false sense of connectivity."
+    "rationale": "Assumed: DATABASE_URL is set. Actual: removed. config.json db settings create false sense of connectivity.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-default-011",
@@ -246,7 +256,8 @@
       "default_masks_missing",
       "SA-02"
     ],
-    "rationale": "Assumed: SECRET_KEY exists. Actual: removed, no fallback. Auth/sessions silently broken."
+    "rationale": "Assumed: SECRET_KEY exists. Actual: removed, no fallback. Auth/sessions silently broken.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-default-012",
@@ -273,7 +284,8 @@
       "default_masks_missing",
       "SA-02"
     ],
-    "rationale": "Assumed: NODE_ENV=production. Actual: removed, Node defaults to undefined. Libraries change behavior silently."
+    "rationale": "Assumed: NODE_ENV=production. Actual: removed, Node defaults to undefined. Libraries change behavior silently.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-default-013",
@@ -300,7 +312,8 @@
       "default_masks_missing",
       "SA-02"
     ],
-    "rationale": "Assumed: DEBUG=false explicitly. Actual: DEBUG absent. Libraries treat undefined !== \"false\"."
+    "rationale": "Assumed: DEBUG=false explicitly. Actual: DEBUG absent. Libraries treat undefined !== \"false\".",
+    "intent": "false_positive"
   },
   {
     "id": "sc-default-014",
@@ -322,7 +335,8 @@
       "SA-02",
       "control"
     ],
-    "rationale": "PORT exists and matches — no missing config, no masking default."
+    "rationale": "PORT exists and matches — no missing config, no masking default.",
+    "intent": "false_negative"
   },
   {
     "id": "sc-precedence-015",
@@ -348,7 +362,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: .env governs PORT. Actual: docker-compose hardcodes PORT=3000, overrides .env inside container."
+    "rationale": "Assumed: .env governs PORT. Actual: docker-compose hardcodes PORT=3000, overrides .env inside container.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-016",
@@ -374,7 +389,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: config.json is the DB name authority. Actual: .env DATABASE_URL has /demo — app reads .env at runtime."
+    "rationale": "Assumed: config.json is the DB name authority. Actual: .env DATABASE_URL has /demo — app reads .env at runtime.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-017",
@@ -400,7 +416,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: config.json port governs Docker networking. Actual: Dockerfile EXPOSE is a build-time declaration."
+    "rationale": "Assumed: config.json port governs Docker networking. Actual: Dockerfile EXPOSE is a build-time declaration.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-018",
@@ -426,7 +443,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: config.json host is authoritative. Actual: .env DATABASE_URL has localhost — connection string wins."
+    "rationale": "Assumed: config.json host is authoritative. Actual: .env DATABASE_URL has localhost — connection string wins.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-019",
@@ -452,7 +470,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: docker-compose PORT governs healthcheck. Actual: Dockerfile healthcheck has hardcoded :3000."
+    "rationale": "Assumed: docker-compose PORT governs healthcheck. Actual: Dockerfile healthcheck has hardcoded :3000.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-020",
@@ -478,7 +497,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: config.json name is read by server.js. Actual: server.js hardcodes \"Demo App\" — config.json is unused."
+    "rationale": "Assumed: config.json name is read by server.js. Actual: server.js hardcodes \"Demo App\" — config.json is unused.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-021",
@@ -504,7 +524,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: config.json port is authoritative. Actual: .env DATABASE_URL has :5432 — connection string wins."
+    "rationale": "Assumed: config.json port is authoritative. Actual: .env DATABASE_URL has :5432 — connection string wins.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-022",
@@ -525,7 +546,8 @@
       "precedence_conflict",
       "SA-03"
     ],
-    "rationale": "Assumed: staging env governs prod. Actual: .env.prod overrides — DEBUG=false in production."
+    "rationale": "Assumed: staging env governs prod. Actual: .env.prod overrides — DEBUG=false in production.",
+    "intent": "false_positive"
   },
   {
     "id": "sc-precedence-023",
@@ -553,7 +575,8 @@
       "SA-03",
       "control"
     ],
-    "rationale": "Same-file edit + check — no cross-source assumption, no precedence ambiguity."
+    "rationale": "Same-file edit + check — no cross-source assumption, no precedence ambiguity.",
+    "intent": "false_negative"
   },
   {
     "id": "st-bolster-200",
@@ -572,7 +595,8 @@
       "config",
       "state_assumption"
     ],
-    "rationale": "Assume server.js has /api/users route — it doesnt"
+    "rationale": "Assume server.js has /api/users route — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-201",
@@ -591,7 +615,8 @@
       "config",
       "state_assumption"
     ],
-    "rationale": "Assume config.json has redis section — it doesnt"
+    "rationale": "Assume config.json has redis section — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-202",
@@ -610,7 +635,8 @@
       "config",
       "state_assumption"
     ],
-    "rationale": "Assume .env has REDIS_URL — it doesnt"
+    "rationale": "Assume .env has REDIS_URL — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-203",
@@ -629,7 +655,8 @@
       "config",
       "state_assumption"
     ],
-    "rationale": "Assume init.sql has products table — it doesnt"
+    "rationale": "Assume init.sql has products table — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-204",
@@ -648,7 +675,8 @@
       "config",
       "state_assumption"
     ],
-    "rationale": "Assume Dockerfile has multi-stage build — it doesnt"
+    "rationale": "Assume Dockerfile has multi-stage build — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-205",
@@ -667,7 +695,8 @@
       "config",
       "state_assumption"
     ],
-    "rationale": "Assume compose has redis service — it doesnt"
+    "rationale": "Assume compose has redis service — it doesnt",
+    "intent": "false_positive"
   },
   {
     "id": "st-bolster-206",
@@ -686,6 +715,7 @@
       "config",
       "state_assumption"
     ],
-    "rationale": "Assume server.js uses express — it uses http"
+    "rationale": "Assume server.js uses express — it uses http",
+    "intent": "false_positive"
   }
 ]

@@ -23,7 +23,8 @@
       "stale_image",
       "PC-01"
     ],
-    "rationale": "Dockerfile base image updated but compose has no image reference — build→deploy gap"
+    "rationale": "Dockerfile base image updated but compose has no image reference — build→deploy gap",
+    "intent": "false_positive"
   },
   {
     "id": "pc-image-002",
@@ -49,7 +50,8 @@
       "stale_image",
       "PC-01"
     ],
-    "rationale": "Dockerfile exposes 8080 but compose port mapping still references 3000 — build→deploy port mismatch"
+    "rationale": "Dockerfile exposes 8080 but compose port mapping still references 3000 — build→deploy port mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "pc-image-003",
@@ -75,7 +77,8 @@
       "stale_image",
       "PC-01"
     ],
-    "rationale": "WORKDIR changed but compose volumes/config not updated — build artifact path mismatch"
+    "rationale": "WORKDIR changed but compose volumes/config not updated — build artifact path mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "pc-image-004",
@@ -101,7 +104,8 @@
       "stale_image",
       "PC-01"
     ],
-    "rationale": "CMD changed to npm start but no package.json with start script — build command gap"
+    "rationale": "CMD changed to npm start but no package.json with start script — build command gap",
+    "intent": "false_positive"
   },
   {
     "id": "pc-image-005",
@@ -127,7 +131,8 @@
       "stale_image",
       "PC-01"
     ],
-    "rationale": "Dockerfile healthcheck path changed but compose healthcheck not updated — dual healthcheck drift"
+    "rationale": "Dockerfile healthcheck path changed but compose healthcheck not updated — dual healthcheck drift",
+    "intent": "false_positive"
   },
   {
     "id": "pc-image-006",
@@ -154,7 +159,8 @@
       "PC-01",
       "control"
     ],
-    "rationale": "Same-file check — value is present"
+    "rationale": "Same-file check — value is present",
+    "intent": "false_negative"
   },
   {
     "id": "pc-dep-007",
@@ -180,7 +186,8 @@
       "missing_install",
       "PC-02"
     ],
-    "rationale": "Express required in code but Dockerfile has no npm install step — dependency not installed"
+    "rationale": "Express required in code but Dockerfile has no npm install step — dependency not installed",
+    "intent": "false_positive"
   },
   {
     "id": "pc-dep-008",
@@ -206,7 +213,8 @@
       "missing_install",
       "PC-02"
     ],
-    "rationale": "PG driver required but config has no driver setting — dependency→config propagation gap"
+    "rationale": "PG driver required but config has no driver setting — dependency→config propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pc-dep-009",
@@ -232,7 +240,8 @@
       "missing_install",
       "PC-02"
     ],
-    "rationale": "Redis required in code but compose has no redis service — runtime dependency missing"
+    "rationale": "Redis required in code but compose has no redis service — runtime dependency missing",
+    "intent": "false_positive"
   },
   {
     "id": "pc-dep-010",
@@ -258,7 +267,8 @@
       "missing_install",
       "PC-02"
     ],
-    "rationale": "dotenv loaded but .env not included in Docker COPY — file not in image"
+    "rationale": "dotenv loaded but .env not included in Docker COPY — file not in image",
+    "intent": "false_positive"
   },
   {
     "id": "pc-dep-011",
@@ -285,7 +295,8 @@
       "PC-02",
       "control"
     ],
-    "rationale": "Same-file check — require is present"
+    "rationale": "Same-file check — require is present",
+    "intent": "false_negative"
   },
   {
     "id": "pc-restart-012",
@@ -311,7 +322,8 @@
       "no_restart",
       "PC-03"
     ],
-    "rationale": "Env var added but compose env section not updated — process wont see new var"
+    "rationale": "Env var added but compose env section not updated — process wont see new var",
+    "intent": "false_positive"
   },
   {
     "id": "pc-restart-013",
@@ -337,7 +349,8 @@
       "no_restart",
       "PC-03"
     ],
-    "rationale": "REDIS_URL added but server code never reads it — env→code propagation gap"
+    "rationale": "REDIS_URL added but server code never reads it — env→code propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pc-restart-014",
@@ -363,7 +376,8 @@
       "no_restart",
       "PC-03"
     ],
-    "rationale": "Connection limit env var added but config has no pool settings — env→config gap"
+    "rationale": "Connection limit env var added but config has no pool settings — env→config gap",
+    "intent": "false_positive"
   },
   {
     "id": "pc-restart-015",
@@ -389,7 +403,8 @@
       "no_restart",
       "PC-03"
     ],
-    "rationale": "Compose env port changed but Dockerfile EXPOSE not updated — deploy→build propagation gap"
+    "rationale": "Compose env port changed but Dockerfile EXPOSE not updated — deploy→build propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pc-restart-016",
@@ -415,7 +430,8 @@
       "no_restart",
       "PC-03"
     ],
-    "rationale": "CORS env var added to prod config but compose doesnt forward it — env→deploy gap"
+    "rationale": "CORS env var added to prod config but compose doesnt forward it — env→deploy gap",
+    "intent": "false_positive"
   },
   {
     "id": "pc-restart-017",
@@ -442,7 +458,8 @@
       "PC-03",
       "control"
     ],
-    "rationale": "Same-file check — env var is present"
+    "rationale": "Same-file check — env var is present",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-200",
@@ -467,7 +484,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Add column to init.sql, server.js unaware"
+    "rationale": "Add column to init.sql, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-201",
@@ -492,7 +510,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Change .env port, compose not updated"
+    "rationale": "Change .env port, compose not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-202",
@@ -517,7 +536,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Change config.json feature flag, server.js not updated"
+    "rationale": "Change config.json feature flag, server.js not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-203",
@@ -542,7 +562,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Rename column in init.sql, server.js uses old name"
+    "rationale": "Rename column in init.sql, server.js uses old name",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-204",
@@ -567,7 +588,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Add env var to .env, Dockerfile has no matching ENV"
+    "rationale": "Add env var to .env, Dockerfile has no matching ENV",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-205",
@@ -592,7 +614,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Change Dockerfile node version, compose image tag unchanged"
+    "rationale": "Change Dockerfile node version, compose image tag unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-206",
@@ -619,7 +642,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Add migration column, config.json has no reference"
+    "rationale": "Add migration column, config.json has no reference",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-207",
@@ -644,7 +668,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Change health response, Dockerfile healthcheck unchanged"
+    "rationale": "Change health response, Dockerfile healthcheck unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-208",
@@ -669,7 +694,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: edit server.js, check server.js"
+    "rationale": "Control: edit server.js, check server.js",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-209",
@@ -694,7 +720,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-210",
@@ -713,7 +740,8 @@
       "cli",
       "control"
     ],
-    "rationale": "Control: init.sql has users table"
+    "rationale": "Control: init.sql has users table",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-211",
@@ -738,7 +766,8 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Add table to init.sql, server.js has no API for it"
+    "rationale": "Add table to init.sql, server.js has no API for it",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-212",
@@ -763,6 +792,7 @@
       "cli",
       "propagation_gap"
     ],
-    "rationale": "Change compose service name, Dockerfile unchanged"
+    "rationale": "Change compose service name, Dockerfile unchanged",
+    "intent": "false_positive"
   }
 ]

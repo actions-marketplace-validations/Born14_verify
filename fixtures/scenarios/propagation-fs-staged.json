@@ -23,7 +23,8 @@
       "source_artifact",
       "PF-01"
     ],
-    "rationale": "Port changed in config.json but .env not updated — cross-file propagation gap"
+    "rationale": "Port changed in config.json but .env not updated — cross-file propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-artifact-002",
@@ -49,7 +50,8 @@
       "source_artifact",
       "PF-01"
     ],
-    "rationale": "Port changed in config but Dockerfile not updated — build artifact stale"
+    "rationale": "Port changed in config but Dockerfile not updated — build artifact stale",
+    "intent": "false_positive"
   },
   {
     "id": "pf-artifact-003",
@@ -75,7 +77,8 @@
       "source_artifact",
       "PF-01"
     ],
-    "rationale": ".env port changed but docker-compose environment not updated"
+    "rationale": ".env port changed but docker-compose environment not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pf-artifact-004",
@@ -101,7 +104,8 @@
       "source_artifact",
       "PF-01"
     ],
-    "rationale": "DB name changed in config but DATABASE_URL in .env still points to old name"
+    "rationale": "DB name changed in config but DATABASE_URL in .env still points to old name",
+    "intent": "false_positive"
   },
   {
     "id": "pf-artifact-005",
@@ -127,7 +131,8 @@
       "source_artifact",
       "PF-01"
     ],
-    "rationale": "DB host changed in config.json but .env DATABASE_URL still points to localhost"
+    "rationale": "DB host changed in config.json but .env DATABASE_URL still points to localhost",
+    "intent": "false_positive"
   },
   {
     "id": "pf-artifact-006",
@@ -153,7 +158,8 @@
       "source_artifact",
       "PF-01"
     ],
-    "rationale": "Dockerfile healthcheck path changed but docker-compose not updated"
+    "rationale": "Dockerfile healthcheck path changed but docker-compose not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pf-artifact-007",
@@ -179,7 +185,8 @@
       "source_artifact",
       "PF-01"
     ],
-    "rationale": "App name changed in config but server.js HTML titles not updated — config→source propagation gap"
+    "rationale": "App name changed in config but server.js HTML titles not updated — config→source propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-artifact-008",
@@ -206,7 +213,8 @@
       "PF-01",
       "control"
     ],
-    "rationale": "Same-file check — no propagation needed, should pass"
+    "rationale": "Same-file check — no propagation needed, should pass",
+    "intent": "false_negative"
   },
   {
     "id": "pf-rebuild-009",
@@ -232,7 +240,8 @@
       "rebuild_gap",
       "PF-02"
     ],
-    "rationale": "Route handler renamed but nav link in same file still references old route — intra-file propagation gap"
+    "rationale": "Route handler renamed but nav link in same file still references old route — intra-file propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-rebuild-010",
@@ -258,7 +267,8 @@
       "rebuild_gap",
       "PF-02"
     ],
-    "rationale": "CMD changed to app.js but COPY still copies server.js — Dockerfile internal propagation gap"
+    "rationale": "CMD changed to app.js but COPY still copies server.js — Dockerfile internal propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-rebuild-011",
@@ -284,7 +294,8 @@
       "rebuild_gap",
       "PF-02"
     ],
-    "rationale": "Env changed to development but server.js has no conditional logic for it — config→code propagation gap"
+    "rationale": "Env changed to development but server.js has no conditional logic for it — config→code propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-rebuild-012",
@@ -310,7 +321,8 @@
       "rebuild_gap",
       "PF-02"
     ],
-    "rationale": "Schema column added but API layer not updated — DB→API propagation gap"
+    "rationale": "Schema column added but API layer not updated — DB→API propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-rebuild-013",
@@ -336,7 +348,8 @@
       "rebuild_gap",
       "PF-02"
     ],
-    "rationale": "Table renamed in schema but server.js code not updated — schema→code propagation gap"
+    "rationale": "Table renamed in schema but server.js code not updated — schema→code propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-rebuild-014",
@@ -362,7 +375,8 @@
       "rebuild_gap",
       "PF-02"
     ],
-    "rationale": "Feature flag enabled but server has no analytics implementation — config→behavior propagation gap"
+    "rationale": "Feature flag enabled but server has no analytics implementation — config→behavior propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pf-rebuild-015",
@@ -389,7 +403,8 @@
       "PF-02",
       "control"
     ],
-    "rationale": "Same-file check — no propagation needed, should pass"
+    "rationale": "Same-file check — no propagation needed, should pass",
+    "intent": "false_negative"
   },
   {
     "id": "pf-bolster-100",
@@ -414,7 +429,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-101",
@@ -439,7 +455,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-102",
@@ -464,7 +481,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-103",
@@ -489,7 +507,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-104",
@@ -514,7 +533,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-105",
@@ -539,7 +559,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-106",
@@ -564,7 +585,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-107",
@@ -589,7 +611,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-108",
@@ -615,7 +638,8 @@
       "pf-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "pf-bolster-109",
@@ -641,7 +665,8 @@
       "pf-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "pf-bolster-110",
@@ -667,7 +692,8 @@
       "pf-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "pf-bolster-111",
@@ -692,7 +718,8 @@
       "pf-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "pf-bolster-112",
@@ -710,7 +737,8 @@
       "fs",
       "pf-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "pf-bolster-113",
@@ -729,7 +757,8 @@
       "pf-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "pf-bolster-114",
@@ -749,6 +778,7 @@
       "pf-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

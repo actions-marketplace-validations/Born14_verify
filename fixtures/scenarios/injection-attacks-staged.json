@@ -24,7 +24,8 @@
       "prompt_injection",
       "INJ-01"
     ],
-    "rationale": "Direct prompt injection pattern embedded in response body"
+    "rationale": "Direct prompt injection pattern embedded in response body",
+    "intent": "false_positive"
   },
   {
     "id": "inj-002",
@@ -51,7 +52,8 @@
       "prompt_injection",
       "INJ-01"
     ],
-    "rationale": "DAN jailbreak pattern in string literal"
+    "rationale": "DAN jailbreak pattern in string literal",
+    "intent": "false_positive"
   },
   {
     "id": "inj-003",
@@ -78,7 +80,8 @@
       "prompt_injection",
       "INJ-01"
     ],
-    "rationale": "Instruction override pattern attempting secret exfiltration"
+    "rationale": "Instruction override pattern attempting secret exfiltration",
+    "intent": "false_positive"
   },
   {
     "id": "inj-004",
@@ -104,7 +107,8 @@
       "prompt_injection",
       "INJ-01"
     ],
-    "rationale": "Normal response body with no injection patterns"
+    "rationale": "Normal response body with no injection patterns",
+    "intent": "false_negative"
   },
   {
     "id": "inj-005",
@@ -130,7 +134,8 @@
       "prompt_injection",
       "INJ-01"
     ],
-    "rationale": "Benign developer comment with the word \"instructions\""
+    "rationale": "Benign developer comment with the word \"instructions\"",
+    "intent": "false_negative"
   },
   {
     "id": "inj-006",
@@ -151,7 +156,8 @@
       "prompt_injection",
       "INJ-01"
     ],
-    "rationale": "Fabricated function name not present in demo-app source"
+    "rationale": "Fabricated function name not present in demo-app source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-007",
@@ -178,7 +184,8 @@
       "prompt_injection",
       "INJ-02"
     ],
-    "rationale": "Fetches untrusted external content and evals it"
+    "rationale": "Fetches untrusted external content and evals it",
+    "intent": "false_positive"
   },
   {
     "id": "inj-008",
@@ -205,7 +212,8 @@
       "prompt_injection",
       "INJ-02"
     ],
-    "rationale": "Unsanitized header value reflected into HTML response"
+    "rationale": "Unsanitized header value reflected into HTML response",
+    "intent": "false_positive"
   },
   {
     "id": "inj-009",
@@ -232,7 +240,8 @@
       "prompt_injection",
       "INJ-02"
     ],
-    "rationale": "External JSON data passed to Function constructor"
+    "rationale": "External JSON data passed to Function constructor",
+    "intent": "false_positive"
   },
   {
     "id": "inj-010",
@@ -258,7 +267,8 @@
       "prompt_injection",
       "INJ-02"
     ],
-    "rationale": "JSON.parse of literal string is safe"
+    "rationale": "JSON.parse of literal string is safe",
+    "intent": "false_negative"
   },
   {
     "id": "inj-011",
@@ -279,7 +289,8 @@
       "prompt_injection",
       "INJ-02"
     ],
-    "rationale": "Fabricated sanitizer function not in source"
+    "rationale": "Fabricated sanitizer function not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-012",
@@ -306,7 +317,8 @@
       "prompt_injection",
       "INJ-03"
     ],
-    "rationale": "JSON field value breaks out of eval context via quote injection"
+    "rationale": "JSON field value breaks out of eval context via quote injection",
+    "intent": "false_positive"
   },
   {
     "id": "inj-013",
@@ -333,7 +345,8 @@
       "prompt_injection",
       "INJ-03"
     ],
-    "rationale": "CSV formula injection via =CMD pattern"
+    "rationale": "CSV formula injection via =CMD pattern",
+    "intent": "false_positive"
   },
   {
     "id": "inj-014",
@@ -360,7 +373,8 @@
       "prompt_injection",
       "INJ-03"
     ],
-    "rationale": "Template literal SQL construction with unsanitized input"
+    "rationale": "Template literal SQL construction with unsanitized input",
+    "intent": "false_positive"
   },
   {
     "id": "inj-015",
@@ -386,7 +400,8 @@
       "prompt_injection",
       "INJ-03"
     ],
-    "rationale": "Parameterized query is safe from injection"
+    "rationale": "Parameterized query is safe from injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-016",
@@ -407,7 +422,8 @@
       "prompt_injection",
       "INJ-03"
     ],
-    "rationale": "Fabricated module not in source"
+    "rationale": "Fabricated module not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-017",
@@ -434,7 +450,8 @@
       "prompt_injection",
       "INJ-04"
     ],
-    "rationale": "Mimics system prompt delimiter to escalate privileges"
+    "rationale": "Mimics system prompt delimiter to escalate privileges",
+    "intent": "false_positive"
   },
   {
     "id": "inj-018",
@@ -461,7 +478,8 @@
       "prompt_injection",
       "INJ-04"
     ],
-    "rationale": "User data mimics assistant response format with fake key"
+    "rationale": "User data mimics assistant response format with fake key",
+    "intent": "false_positive"
   },
   {
     "id": "inj-019",
@@ -488,7 +506,8 @@
       "prompt_injection",
       "INJ-04"
     ],
-    "rationale": "XML-style role tag delimiters used in LLM prompt formats"
+    "rationale": "XML-style role tag delimiters used in LLM prompt formats",
+    "intent": "false_positive"
   },
   {
     "id": "inj-020",
@@ -514,7 +533,8 @@
       "prompt_injection",
       "INJ-04"
     ],
-    "rationale": "Benign log message mentioning system is not role confusion"
+    "rationale": "Benign log message mentioning system is not role confusion",
+    "intent": "false_negative"
   },
   {
     "id": "inj-021",
@@ -535,7 +555,8 @@
       "prompt_injection",
       "INJ-04"
     ],
-    "rationale": "Fabricated function name not present in source"
+    "rationale": "Fabricated function name not present in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-022",
@@ -562,7 +583,8 @@
       "prompt_injection",
       "INJ-05"
     ],
-    "rationale": "First call sets trusted=true, second call evals arbitrary input"
+    "rationale": "First call sets trusted=true, second call evals arbitrary input",
+    "intent": "false_positive"
   },
   {
     "id": "inj-023",
@@ -589,7 +611,8 @@
       "prompt_injection",
       "INJ-05"
     ],
-    "rationale": "Accumulates chunks then executes when trigger word appears"
+    "rationale": "Accumulates chunks then executes when trigger word appears",
+    "intent": "false_positive"
   },
   {
     "id": "inj-024",
@@ -615,7 +638,8 @@
       "prompt_injection",
       "INJ-05"
     ],
-    "rationale": "Stateful but only increments a counter"
+    "rationale": "Stateful but only increments a counter",
+    "intent": "false_negative"
   },
   {
     "id": "inj-025",
@@ -636,7 +660,8 @@
       "prompt_injection",
       "INJ-05"
     ],
-    "rationale": "Fabricated guard function not in source"
+    "rationale": "Fabricated guard function not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-026",
@@ -663,7 +688,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "Base64 decode piped directly to eval"
+    "rationale": "Base64 decode piped directly to eval",
+    "intent": "false_positive"
   },
   {
     "id": "inj-027",
@@ -690,7 +716,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "Hex-escaped module name to evade static analysis"
+    "rationale": "Hex-escaped module name to evade static analysis",
+    "intent": "false_positive"
   },
   {
     "id": "inj-028",
@@ -717,7 +744,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "Unicode escape sequences spell out eval to bypass filters"
+    "rationale": "Unicode escape sequences spell out eval to bypass filters",
+    "intent": "false_positive"
   },
   {
     "id": "inj-029",
@@ -743,7 +771,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "Base64 encoding without eval is safe"
+    "rationale": "Base64 encoding without eval is safe",
+    "intent": "false_negative"
   },
   {
     "id": "inj-030",
@@ -769,7 +798,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "Hex color code is not an encoding-based injection"
+    "rationale": "Hex color code is not an encoding-based injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-031",
@@ -790,7 +820,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "Fabricated function not present in source"
+    "rationale": "Fabricated function not present in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-032",
@@ -817,7 +848,8 @@
       "tool_injection",
       "INJ-07"
     ],
-    "rationale": "Fake tool_use XML block could confuse tool-calling LLMs"
+    "rationale": "Fake tool_use XML block could confuse tool-calling LLMs",
+    "intent": "false_positive"
   },
   {
     "id": "inj-033",
@@ -844,7 +876,8 @@
       "tool_injection",
       "INJ-07"
     ],
-    "rationale": "JSON resembling a tool call with dangerous file edit"
+    "rationale": "JSON resembling a tool call with dangerous file edit",
+    "intent": "false_positive"
   },
   {
     "id": "inj-034",
@@ -871,7 +904,8 @@
       "tool_injection",
       "INJ-07"
     ],
-    "rationale": "OpenAI function_call format embedded in response data"
+    "rationale": "OpenAI function_call format embedded in response data",
+    "intent": "false_positive"
   },
   {
     "id": "inj-035",
@@ -897,7 +931,8 @@
       "tool_injection",
       "INJ-07"
     ],
-    "rationale": "Benign JSON with tool-sounding keys but no injection structure"
+    "rationale": "Benign JSON with tool-sounding keys but no injection structure",
+    "intent": "false_negative"
   },
   {
     "id": "inj-036",
@@ -918,7 +953,8 @@
       "tool_injection",
       "INJ-07"
     ],
-    "rationale": "Fabricated validator not in source"
+    "rationale": "Fabricated validator not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-037",
@@ -945,7 +981,8 @@
       "tool_injection",
       "INJ-08"
     ],
-    "rationale": "URL parameter passed directly to readFileSync without sanitization"
+    "rationale": "URL parameter passed directly to readFileSync without sanitization",
+    "intent": "false_positive"
   },
   {
     "id": "inj-038",
@@ -972,7 +1009,8 @@
       "tool_injection",
       "INJ-08"
     ],
-    "rationale": "URL param concatenated into shell command"
+    "rationale": "URL param concatenated into shell command",
+    "intent": "false_positive"
   },
   {
     "id": "inj-039",
@@ -999,7 +1037,8 @@
       "tool_injection",
       "INJ-08"
     ],
-    "rationale": "String concatenation SQL injection via query parameter"
+    "rationale": "String concatenation SQL injection via query parameter",
+    "intent": "false_positive"
   },
   {
     "id": "inj-040",
@@ -1025,7 +1064,8 @@
       "tool_injection",
       "INJ-08"
     ],
-    "rationale": "Allowlist validation prevents path traversal"
+    "rationale": "Allowlist validation prevents path traversal",
+    "intent": "false_negative"
   },
   {
     "id": "inj-041",
@@ -1046,7 +1086,8 @@
       "tool_injection",
       "INJ-08"
     ],
-    "rationale": "Fabricated sanitizer not in source"
+    "rationale": "Fabricated sanitizer not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-042",
@@ -1073,7 +1114,8 @@
       "tool_injection",
       "INJ-09"
     ],
-    "rationale": "User input directly controls Content-Type header"
+    "rationale": "User input directly controls Content-Type header",
+    "intent": "false_positive"
   },
   {
     "id": "inj-043",
@@ -1100,7 +1142,8 @@
       "tool_injection",
       "INJ-09"
     ],
-    "rationale": "JSONP callback without validation allows arbitrary JS execution"
+    "rationale": "JSONP callback without validation allows arbitrary JS execution",
+    "intent": "false_positive"
   },
   {
     "id": "inj-044",
@@ -1127,7 +1170,8 @@
       "tool_injection",
       "INJ-09"
     ],
-    "rationale": "User-controlled template string in response"
+    "rationale": "User-controlled template string in response",
+    "intent": "false_positive"
   },
   {
     "id": "inj-045",
@@ -1153,7 +1197,8 @@
       "tool_injection",
       "INJ-09"
     ],
-    "rationale": "Content-Type is hardcoded, no user control"
+    "rationale": "Content-Type is hardcoded, no user control",
+    "intent": "false_negative"
   },
   {
     "id": "inj-046",
@@ -1174,7 +1219,8 @@
       "tool_injection",
       "INJ-09"
     ],
-    "rationale": "Fabricated validator not in source"
+    "rationale": "Fabricated validator not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-047",
@@ -1201,7 +1247,8 @@
       "tool_injection",
       "INJ-10"
     ],
-    "rationale": "Code comment attempts to override agent goal"
+    "rationale": "Code comment attempts to override agent goal",
+    "intent": "false_positive"
   },
   {
     "id": "inj-048",
@@ -1228,7 +1275,8 @@
       "tool_injection",
       "INJ-10"
     ],
-    "rationale": "String literal attempts to redefine agent goal"
+    "rationale": "String literal attempts to redefine agent goal",
+    "intent": "false_positive"
   },
   {
     "id": "inj-049",
@@ -1255,7 +1303,8 @@
       "tool_injection",
       "INJ-10"
     ],
-    "rationale": "Comment mimics agent TODO format with dangerous command"
+    "rationale": "Comment mimics agent TODO format with dangerous command",
+    "intent": "false_positive"
   },
   {
     "id": "inj-050",
@@ -1281,7 +1330,8 @@
       "tool_injection",
       "INJ-10"
     ],
-    "rationale": "Normal development TODO comment"
+    "rationale": "Normal development TODO comment",
+    "intent": "false_negative"
   },
   {
     "id": "inj-051",
@@ -1302,7 +1352,8 @@
       "tool_injection",
       "INJ-10"
     ],
-    "rationale": "Fabricated goal validator not in source"
+    "rationale": "Fabricated goal validator not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-052",
@@ -1329,7 +1380,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "CSS-hidden element contains prompt injection payload"
+    "rationale": "CSS-hidden element contains prompt injection payload",
+    "intent": "false_positive"
   },
   {
     "id": "inj-053",
@@ -1356,7 +1408,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "Zero-width chars interspersed in eval call to evade detection"
+    "rationale": "Zero-width chars interspersed in eval call to evade detection",
+    "intent": "false_positive"
   },
   {
     "id": "inj-054",
@@ -1383,7 +1436,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "Invisible text overlay with prompt injection payload"
+    "rationale": "Invisible text overlay with prompt injection payload",
+    "intent": "false_positive"
   },
   {
     "id": "inj-055",
@@ -1409,7 +1463,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "Legitimate CSS hidden element for UI toggle, no injection content"
+    "rationale": "Legitimate CSS hidden element for UI toggle, no injection content",
+    "intent": "false_negative"
   },
   {
     "id": "inj-056",
@@ -1430,7 +1485,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "Fabricated scanner not in source"
+    "rationale": "Fabricated scanner not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-057",
@@ -1457,7 +1513,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "HTML comment contains injection instructions targeting LLM"
+    "rationale": "HTML comment contains injection instructions targeting LLM",
+    "intent": "false_positive"
   },
   {
     "id": "inj-058",
@@ -1484,7 +1541,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "Block comment disguises malicious command as developer documentation"
+    "rationale": "Block comment disguises malicious command as developer documentation",
+    "intent": "false_positive"
   },
   {
     "id": "inj-059",
@@ -1511,7 +1569,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "CSS comment targeting AI agent with javascript: URL"
+    "rationale": "CSS comment targeting AI agent with javascript: URL",
+    "intent": "false_positive"
   },
   {
     "id": "inj-060",
@@ -1537,7 +1596,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "Normal development comment with no injection content"
+    "rationale": "Normal development comment with no injection content",
+    "intent": "false_negative"
   },
   {
     "id": "inj-061",
@@ -1563,7 +1623,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "Standard JSDoc comment is not injection"
+    "rationale": "Standard JSDoc comment is not injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-062",
@@ -1584,7 +1645,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "Fabricated function not in source"
+    "rationale": "Fabricated function not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-063",
@@ -1611,7 +1673,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Meta description contains prompt injection targeting LLM scraping"
+    "rationale": "Meta description contains prompt injection targeting LLM scraping",
+    "intent": "false_positive"
   },
   {
     "id": "inj-064",
@@ -1638,7 +1701,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Data attribute contains injection payload"
+    "rationale": "Data attribute contains injection payload",
+    "intent": "false_positive"
   },
   {
     "id": "inj-065",
@@ -1665,7 +1729,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Custom HTTP header contains injection instruction"
+    "rationale": "Custom HTTP header contains injection instruction",
+    "intent": "false_positive"
   },
   {
     "id": "inj-066",
@@ -1691,7 +1756,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Standard meta tags with benign content"
+    "rationale": "Standard meta tags with benign content",
+    "intent": "false_negative"
   },
   {
     "id": "inj-067",
@@ -1712,7 +1778,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Fabricated sanitizer not in source"
+    "rationale": "Fabricated sanitizer not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-068",
@@ -1739,7 +1806,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Environment variable default contains injection payload"
+    "rationale": "Environment variable default contains injection payload",
+    "intent": "false_positive"
   },
   {
     "id": "inj-069",
@@ -1766,7 +1834,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Error message crosses from throw context to response context with injection"
+    "rationale": "Error message crosses from throw context to response context with injection",
+    "intent": "false_positive"
   },
   {
     "id": "inj-070",
@@ -1793,7 +1862,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Injection payload written to log then read back into response"
+    "rationale": "Injection payload written to log then read back into response",
+    "intent": "false_positive"
   },
   {
     "id": "inj-071",
@@ -1819,7 +1889,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Normal error message crossing contexts is not injection"
+    "rationale": "Normal error message crossing contexts is not injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-072",
@@ -1845,7 +1916,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Normal env var default is not cross-context injection"
+    "rationale": "Normal env var default is not cross-context injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-073",
@@ -1866,7 +1938,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Fabricated guard not in source"
+    "rationale": "Fabricated guard not in source",
+    "intent": "false_positive"
   },
   {
     "id": "inj-074",
@@ -1898,7 +1971,8 @@
       "INJ-01",
       "http_detection"
     ],
-    "rationale": "HTTP response body check detects injection text in API output"
+    "rationale": "HTTP response body check detects injection text in API output",
+    "intent": "false_positive"
   },
   {
     "id": "inj-075",
@@ -1930,7 +2004,8 @@
       "INJ-04",
       "http_detection"
     ],
-    "rationale": "HTTP response leaks role delimiter pattern"
+    "rationale": "HTTP response leaks role delimiter pattern",
+    "intent": "false_positive"
   },
   {
     "id": "inj-076",
@@ -1962,7 +2037,8 @@
       "INJ-07",
       "http_detection"
     ],
-    "rationale": "HTTP response contains tool call XML markup"
+    "rationale": "HTTP response contains tool call XML markup",
+    "intent": "false_positive"
   },
   {
     "id": "inj-077",
@@ -1990,7 +2066,8 @@
       "INJ-08",
       "http_detection"
     ],
-    "rationale": "Echo endpoint evals the request body"
+    "rationale": "Echo endpoint evals the request body",
+    "intent": "false_positive"
   },
   {
     "id": "inj-078",
@@ -2018,7 +2095,8 @@
       "INJ-06",
       "content_detection"
     ],
-    "rationale": "Content scan detects Buffer.from piped to eval"
+    "rationale": "Content scan detects Buffer.from piped to eval",
+    "intent": "false_positive"
   },
   {
     "id": "inj-079",
@@ -2046,7 +2124,8 @@
       "INJ-02",
       "content_detection"
     ],
-    "rationale": "Content scan finds eval of external fetch result"
+    "rationale": "Content scan finds eval of external fetch result",
+    "intent": "false_positive"
   },
   {
     "id": "inj-080",
@@ -2074,7 +2153,8 @@
       "INJ-03",
       "content_detection"
     ],
-    "rationale": "Content scan detects SQL string concatenation pattern"
+    "rationale": "Content scan detects SQL string concatenation pattern",
+    "intent": "false_positive"
   },
   {
     "id": "inj-081",
@@ -2101,7 +2181,8 @@
       "prompt_injection",
       "INJ-01"
     ],
-    "rationale": "Script tag sets document title to injection payload"
+    "rationale": "Script tag sets document title to injection payload",
+    "intent": "false_positive"
   },
   {
     "id": "inj-082",
@@ -2128,7 +2209,8 @@
       "prompt_injection",
       "INJ-02"
     ],
-    "rationale": "Server-side request forgery via user-controlled header"
+    "rationale": "Server-side request forgery via user-controlled header",
+    "intent": "false_positive"
   },
   {
     "id": "inj-083",
@@ -2155,7 +2237,8 @@
       "prompt_injection",
       "INJ-05"
     ],
-    "rationale": "setTimeout with user-controlled string — equivalent to eval"
+    "rationale": "setTimeout with user-controlled string — equivalent to eval",
+    "intent": "false_positive"
   },
   {
     "id": "inj-084",
@@ -2182,7 +2265,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "CharCode array spells process.exit(1) and is evaled"
+    "rationale": "CharCode array spells process.exit(1) and is evaled",
+    "intent": "false_positive"
   },
   {
     "id": "inj-085",
@@ -2209,7 +2293,8 @@
       "tool_injection",
       "INJ-07"
     ],
-    "rationale": "Markdown code block mimics tool invocation format"
+    "rationale": "Markdown code block mimics tool invocation format",
+    "intent": "false_positive"
   },
   {
     "id": "inj-086",
@@ -2236,7 +2321,8 @@
       "tool_injection",
       "INJ-08"
     ],
-    "rationale": "User input in RegExp constructor enables ReDoS attacks"
+    "rationale": "User input in RegExp constructor enables ReDoS attacks",
+    "intent": "false_positive"
   },
   {
     "id": "inj-087",
@@ -2263,7 +2349,8 @@
       "tool_injection",
       "INJ-09"
     ],
-    "rationale": "Open redirect via user-controlled Location header"
+    "rationale": "Open redirect via user-controlled Location header",
+    "intent": "false_positive"
   },
   {
     "id": "inj-088",
@@ -2290,7 +2377,8 @@
       "tool_injection",
       "INJ-10"
     ],
-    "rationale": "Hidden form field attempts to override agent goal"
+    "rationale": "Hidden form field attempts to override agent goal",
+    "intent": "false_positive"
   },
   {
     "id": "inj-089",
@@ -2317,7 +2405,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "White-on-white text hides injection instructions from visual inspection"
+    "rationale": "White-on-white text hides injection instructions from visual inspection",
+    "intent": "false_positive"
   },
   {
     "id": "inj-090",
@@ -2344,7 +2433,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "Conditional comment targets AI agents specifically"
+    "rationale": "Conditional comment targets AI agents specifically",
+    "intent": "false_positive"
   },
   {
     "id": "inj-091",
@@ -2371,7 +2461,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Meta tag with ai-agent name contains destructive directive"
+    "rationale": "Meta tag with ai-agent name contains destructive directive",
+    "intent": "false_positive"
   },
   {
     "id": "inj-092",
@@ -2398,7 +2489,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Global state persists injection text across request boundaries"
+    "rationale": "Global state persists injection text across request boundaries",
+    "intent": "false_positive"
   },
   {
     "id": "inj-093",
@@ -2425,7 +2517,8 @@
       "prompt_injection",
       "INJ-03"
     ],
-    "rationale": "Object.assign with user-controlled JSON enables prototype pollution"
+    "rationale": "Object.assign with user-controlled JSON enables prototype pollution",
+    "intent": "false_positive"
   },
   {
     "id": "inj-094",
@@ -2452,7 +2545,8 @@
       "prompt_injection",
       "INJ-04"
     ],
-    "rationale": "Markdown headers mimicking chat role structure"
+    "rationale": "Markdown headers mimicking chat role structure",
+    "intent": "false_positive"
   },
   {
     "id": "inj-095",
@@ -2479,7 +2573,8 @@
       "prompt_injection",
       "INJ-06"
     ],
-    "rationale": "Base64-encoded string decoded and evaled"
+    "rationale": "Base64-encoded string decoded and evaled",
+    "intent": "false_positive"
   },
   {
     "id": "inj-096",
@@ -2506,7 +2601,8 @@
       "tool_injection",
       "INJ-09"
     ],
-    "rationale": "User controls HTTP status code — can fake errors or redirects"
+    "rationale": "User controls HTTP status code — can fake errors or redirects",
+    "intent": "false_positive"
   },
   {
     "id": "inj-097",
@@ -2533,7 +2629,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "aria-hidden element with overflow:hidden conceals injection payload"
+    "rationale": "aria-hidden element with overflow:hidden conceals injection payload",
+    "intent": "false_positive"
   },
   {
     "id": "inj-098",
@@ -2560,7 +2657,8 @@
       "context_poisoning",
       "INJ-12"
     ],
-    "rationale": "Noscript comment targets agents that parse HTML without executing JS"
+    "rationale": "Noscript comment targets agents that parse HTML without executing JS",
+    "intent": "false_positive"
   },
   {
     "id": "inj-099",
@@ -2587,7 +2685,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Link tag title attribute carries injection payload"
+    "rationale": "Link tag title attribute carries injection payload",
+    "intent": "false_positive"
   },
   {
     "id": "inj-100",
@@ -2614,7 +2713,8 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Cookie value contains injection pattern crossing from header to client context"
+    "rationale": "Cookie value contains injection pattern crossing from header to client context",
+    "intent": "false_positive"
   },
   {
     "id": "inj-101",
@@ -2640,7 +2740,8 @@
       "prompt_injection",
       "INJ-05"
     ],
-    "rationale": "Stateful session management without any code execution risk"
+    "rationale": "Stateful session management without any code execution risk",
+    "intent": "false_negative"
   },
   {
     "id": "inj-102",
@@ -2666,7 +2767,8 @@
       "tool_injection",
       "INJ-07"
     ],
-    "rationale": "JSON Schema definition is not a tool call injection"
+    "rationale": "JSON Schema definition is not a tool call injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-103",
@@ -2692,7 +2794,8 @@
       "tool_injection",
       "INJ-08"
     ],
-    "rationale": "parseInt coerces to number, no injection risk"
+    "rationale": "parseInt coerces to number, no injection risk",
+    "intent": "false_negative"
   },
   {
     "id": "inj-104",
@@ -2718,7 +2821,8 @@
       "tool_injection",
       "INJ-10"
     ],
-    "rationale": "The word \"goal\" in page content is not goal substitution"
+    "rationale": "The word \"goal\" in page content is not goal substitution",
+    "intent": "false_negative"
   },
   {
     "id": "inj-105",
@@ -2744,7 +2848,8 @@
       "context_poisoning",
       "INJ-11"
     ],
-    "rationale": "Screen reader only text for accessibility is not hidden injection"
+    "rationale": "Screen reader only text for accessibility is not hidden injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-106",
@@ -2770,7 +2875,8 @@
       "context_poisoning",
       "INJ-13"
     ],
-    "rationale": "Standard Open Graph meta tags are not injection"
+    "rationale": "Standard Open Graph meta tags are not injection",
+    "intent": "false_negative"
   },
   {
     "id": "inj-107",
@@ -2796,6 +2902,7 @@
       "context_poisoning",
       "INJ-14"
     ],
-    "rationale": "Structured logging crossing contexts with safe data is not injection"
+    "rationale": "Structured logging crossing contexts with safe data is not injection",
+    "intent": "false_negative"
   }
 ]

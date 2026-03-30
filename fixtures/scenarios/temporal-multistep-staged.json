@@ -23,7 +23,8 @@
       "stale_build",
       "TM-01"
     ],
-    "rationale": "Server port changed but Dockerfile EXPOSE not updated — build step stale"
+    "rationale": "Server port changed but Dockerfile EXPOSE not updated — build step stale",
+    "intent": "false_positive"
   },
   {
     "id": "tm-build-002",
@@ -49,7 +50,8 @@
       "stale_build",
       "TM-01"
     ],
-    "rationale": "Health route renamed but Dockerfile HEALTHCHECK CMD still references /health"
+    "rationale": "Health route renamed but Dockerfile HEALTHCHECK CMD still references /health",
+    "intent": "false_positive"
   },
   {
     "id": "tm-build-003",
@@ -75,7 +77,8 @@
       "stale_build",
       "TM-01"
     ],
-    "rationale": "Config port changed but docker-compose environment not updated — stale build config"
+    "rationale": "Config port changed but docker-compose environment not updated — stale build config",
+    "intent": "false_positive"
   },
   {
     "id": "tm-build-004",
@@ -101,7 +104,8 @@
       "stale_build",
       "TM-01"
     ],
-    "rationale": ".env port changed but compose healthcheck URL still references port 3000"
+    "rationale": ".env port changed but compose healthcheck URL still references port 3000",
+    "intent": "false_positive"
   },
   {
     "id": "tm-build-005",
@@ -127,7 +131,8 @@
       "stale_build",
       "TM-01"
     ],
-    "rationale": "COPY changed to app.js but CMD still runs server.js — multi-step Dockerfile inconsistency"
+    "rationale": "COPY changed to app.js but CMD still runs server.js — multi-step Dockerfile inconsistency",
+    "intent": "false_positive"
   },
   {
     "id": "tm-build-006",
@@ -154,7 +159,8 @@
       "TM-01",
       "control"
     ],
-    "rationale": "Same-file edit and check — no cross-step dependency, should pass"
+    "rationale": "Same-file edit and check — no cross-step dependency, should pass",
+    "intent": "false_negative"
   },
   {
     "id": "tm-migrate-007",
@@ -180,7 +186,8 @@
       "stale_seed",
       "TM-02"
     ],
-    "rationale": "Schema column added but app code not updated — migration→app ordering gap"
+    "rationale": "Schema column added but app code not updated — migration→app ordering gap",
+    "intent": "false_positive"
   },
   {
     "id": "tm-migrate-008",
@@ -206,7 +213,8 @@
       "stale_seed",
       "TM-02"
     ],
-    "rationale": "Index added but app code has no email query path — migration step without app step"
+    "rationale": "Index added but app code has no email query path — migration step without app step",
+    "intent": "false_positive"
   },
   {
     "id": "tm-migrate-009",
@@ -232,7 +240,8 @@
       "stale_seed",
       "TM-02"
     ],
-    "rationale": "Table renamed in schema but app code never updated — seed step reads stale schema name"
+    "rationale": "Table renamed in schema but app code never updated — seed step reads stale schema name",
+    "intent": "false_positive"
   },
   {
     "id": "tm-migrate-010",
@@ -258,7 +267,8 @@
       "stale_seed",
       "TM-02"
     ],
-    "rationale": "Schema constraint added but app config not updated — migration→config ordering gap"
+    "rationale": "Schema constraint added but app config not updated — migration→config ordering gap",
+    "intent": "false_positive"
   },
   {
     "id": "tm-migrate-011",
@@ -285,7 +295,8 @@
       "TM-02",
       "control"
     ],
-    "rationale": "Same-file edit and check — should pass"
+    "rationale": "Same-file edit and check — should pass",
+    "intent": "false_negative"
   },
   {
     "id": "tm-cache-012",
@@ -311,7 +322,8 @@
       "cached_config",
       "TM-03"
     ],
-    "rationale": "Env changed to dev but config.json still has prod defaults — cached config pattern"
+    "rationale": "Env changed to dev but config.json still has prod defaults — cached config pattern",
+    "intent": "false_positive"
   },
   {
     "id": "tm-cache-013",
@@ -337,7 +349,8 @@
       "cached_config",
       "TM-03"
     ],
-    "rationale": "Config feature toggled but env var for override not added — process reads cached .env"
+    "rationale": "Config feature toggled but env var for override not added — process reads cached .env",
+    "intent": "false_positive"
   },
   {
     "id": "tm-cache-014",
@@ -363,7 +376,8 @@
       "cached_config",
       "TM-03"
     ],
-    "rationale": "Database URL updated in .env but config.json still has localhost — cached config surface"
+    "rationale": "Database URL updated in .env but config.json still has localhost — cached config surface",
+    "intent": "false_positive"
   },
   {
     "id": "tm-cache-015",
@@ -389,7 +403,8 @@
       "cached_config",
       "TM-03"
     ],
-    "rationale": "Secret rotated in .env but config.json has no awareness — cached process reads stale"
+    "rationale": "Secret rotated in .env but config.json has no awareness — cached process reads stale",
+    "intent": "false_positive"
   },
   {
     "id": "tm-cache-016",
@@ -415,7 +430,8 @@
       "cached_config",
       "TM-03"
     ],
-    "rationale": "Debug flag enabled but server.js never reads it — config→runtime cache gap"
+    "rationale": "Debug flag enabled but server.js never reads it — config→runtime cache gap",
+    "intent": "false_positive"
   },
   {
     "id": "tm-cache-017",
@@ -442,7 +458,8 @@
       "TM-03",
       "control"
     ],
-    "rationale": "Same-file edit and check — should pass"
+    "rationale": "Same-file edit and check — should pass",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-200",
@@ -467,7 +484,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Edit server.js health, config.json has stale health config"
+    "rationale": "Edit server.js health, config.json has stale health config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-201",
@@ -492,7 +510,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference"
+    "rationale": "Edit .env SECRET_KEY, server.js still uses old reference",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-202",
@@ -517,7 +536,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Upgrade Dockerfile node version, .env unchanged"
+    "rationale": "Upgrade Dockerfile node version, .env unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-203",
@@ -542,7 +562,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Change compose port mapping, server.js listen unchanged"
+    "rationale": "Change compose port mapping, server.js listen unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-204",
@@ -569,7 +590,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Add column via migration, server.js has no query for it"
+    "rationale": "Add column via migration, server.js has no query for it",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-205",
@@ -594,7 +616,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Edit init.sql table, config.json has stale DB config"
+    "rationale": "Edit init.sql table, config.json has stale DB config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-206",
@@ -619,7 +642,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Compose env_file changed, .env filename unchanged"
+    "rationale": "Compose env_file changed, .env filename unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-207",
@@ -644,7 +668,8 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Add CORS header, config.json has no CORS config"
+    "rationale": "Add CORS header, config.json has no CORS config",
+    "intent": "false_positive"
   },
   {
     "id": "te-bolster-208",
@@ -669,7 +694,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: edit server.js, verify change"
+    "rationale": "Control: edit server.js, verify change",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-209",
@@ -694,7 +720,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: edit .env, verify change"
+    "rationale": "Control: edit .env, verify change",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-210",
@@ -713,7 +740,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: Dockerfile has EXPOSE"
+    "rationale": "Control: Dockerfile has EXPOSE",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-211",
@@ -732,7 +760,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: compose has healthcheck"
+    "rationale": "Control: compose has healthcheck",
+    "intent": "false_negative"
   },
   {
     "id": "te-bolster-212",
@@ -757,6 +786,7 @@
       "multistep",
       "temporal_gap"
     ],
-    "rationale": "Change healthcheck interval, server.js has no interval awareness"
+    "rationale": "Change healthcheck interval, server.js has no interval awareness",
+    "intent": "false_positive"
   }
 ]

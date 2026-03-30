@@ -28,7 +28,8 @@
       "missing_grant",
       "HD-01"
     ],
-    "rationale": "Role app_user created but no GRANT statement exists — SELECT/INSERT will fail"
+    "rationale": "Role app_user created but no GRANT statement exists — SELECT/INSERT will fail",
+    "intent": "false_positive"
   },
   {
     "id": "hd-grant-002",
@@ -64,7 +65,8 @@
       "missing_grant",
       "HD-01"
     ],
-    "rationale": "Server does INSERT but init.sql only GRANTs SELECT — INSERT permission denied"
+    "rationale": "Server does INSERT but init.sql only GRANTs SELECT — INSERT permission denied",
+    "intent": "false_positive"
   },
   {
     "id": "hd-grant-003",
@@ -95,7 +97,8 @@
       "missing_grant",
       "HD-01"
     ],
-    "rationale": "audit_log table created but no GRANT — no role can access it"
+    "rationale": "audit_log table created but no GRANT — no role can access it",
+    "intent": "false_positive"
   },
   {
     "id": "hd-grant-004",
@@ -131,7 +134,8 @@
       "missing_grant",
       "HD-01"
     ],
-    "rationale": "Server runs ALTER but only SELECT/INSERT granted — ALTER requires table ownership or explicit grant"
+    "rationale": "Server runs ALTER but only SELECT/INSERT granted — ALTER requires table ownership or explicit grant",
+    "intent": "false_positive"
   },
   {
     "id": "hd-grant-005",
@@ -167,7 +171,8 @@
       "missing_grant",
       "HD-01"
     ],
-    "rationale": "Server deletes expired sessions but only SELECT granted — DELETE permission denied"
+    "rationale": "Server deletes expired sessions but only SELECT granted — DELETE permission denied",
+    "intent": "false_positive"
   },
   {
     "id": "hd-grant-006",
@@ -199,7 +204,8 @@
       "HD-01",
       "control"
     ],
-    "rationale": "Proper GRANT ALL on both tables — no permission issues"
+    "rationale": "Proper GRANT ALL on both tables — no permission issues",
+    "intent": "false_negative"
   },
   {
     "id": "hd-conn-007",
@@ -225,7 +231,8 @@
       "HD-02",
       "control"
     ],
-    "rationale": "Both point to localhost — connection config is consistent"
+    "rationale": "Both point to localhost — connection config is consistent",
+    "intent": "false_negative"
   },
   {
     "id": "hd-conn-008",
@@ -250,7 +257,8 @@
       "connection_denied",
       "HD-02"
     ],
-    "rationale": "Both patterns exist in their files — but db names mismatch means prod connection will fail"
+    "rationale": "Both patterns exist in their files — but db names mismatch means prod connection will fail",
+    "intent": "false_negative"
   },
   {
     "id": "hd-conn-009",
@@ -281,7 +289,8 @@
       "connection_denied",
       "HD-02"
     ],
-    "rationale": "Config points to remote host but .env DATABASE_URL still has localhost — connection will use wrong host"
+    "rationale": "Config points to remote host but .env DATABASE_URL still has localhost — connection will use wrong host",
+    "intent": "false_positive"
   },
   {
     "id": "hd-conn-010",
@@ -312,7 +321,8 @@
       "connection_denied",
       "HD-02"
     ],
-    "rationale": ".env port is 5433, config says 5432 — which source wins depends on app, both values present in files"
+    "rationale": ".env port is 5433, config says 5432 — which source wins depends on app, both values present in files",
+    "intent": "false_negative"
   },
   {
     "id": "hd-conn-011",
@@ -348,7 +358,8 @@
       "connection_denied",
       "HD-02"
     ],
-    "rationale": "Both passwords exist but differ — app uses DB_PASSWORD, Postgres uses POSTGRES_PASSWORD — auth will fail"
+    "rationale": "Both passwords exist but differ — app uses DB_PASSWORD, Postgres uses POSTGRES_PASSWORD — auth will fail",
+    "intent": "false_negative"
   },
   {
     "id": "hd-schema-012",
@@ -379,7 +390,8 @@
       "schema_restriction",
       "HD-03"
     ],
-    "rationale": "Table in restricted schema but config has no search_path — queries to \"users\" will fail"
+    "rationale": "Table in restricted schema but config has no search_path — queries to \"users\" will fail",
+    "intent": "false_positive"
   },
   {
     "id": "hd-schema-013",
@@ -415,7 +427,8 @@
       "schema_restriction",
       "HD-03"
     ],
-    "rationale": "init.sql creates in app_private, server queries unqualified \"users\" — schema resolution will fail at runtime but both content patterns exist"
+    "rationale": "init.sql creates in app_private, server queries unqualified \"users\" — schema resolution will fail at runtime but both content patterns exist",
+    "intent": "false_negative"
   },
   {
     "id": "hd-schema-014",
@@ -446,7 +459,8 @@
       "schema_restriction",
       "HD-03"
     ],
-    "rationale": "GRANT covers public schema but audit_log is in audit schema — grant does not apply"
+    "rationale": "GRANT covers public schema but audit_log is in audit schema — grant does not apply",
+    "intent": "false_negative"
   },
   {
     "id": "hd-schema-015",
@@ -482,7 +496,8 @@
       "schema_restriction",
       "HD-03"
     ],
-    "rationale": "search_path is \"public\" but table is in \"custom\" — unqualified queries will not find it"
+    "rationale": "search_path is \"public\" but table is in \"custom\" — unqualified queries will not find it",
+    "intent": "false_negative"
   },
   {
     "id": "hd-schema-016",
@@ -514,7 +529,8 @@
       "HD-03",
       "control"
     ],
-    "rationale": "Tables in public schema with GRANT ALL — no schema restriction"
+    "rationale": "Tables in public schema with GRANT ALL — no schema restriction",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-200",
@@ -539,7 +555,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "Admin route in server.js, no admin role in config.json"
+    "rationale": "Admin route in server.js, no admin role in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-201",
@@ -564,7 +581,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "Auth token check in server.js, no token in .env"
+    "rationale": "Auth token check in server.js, no token in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-202",
@@ -589,7 +607,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "Rate limit function added, no limit in config.json"
+    "rationale": "Rate limit function added, no limit in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-203",
@@ -608,7 +627,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "Session table in init.sql, no session config in .env"
+    "rationale": "Session table in init.sql, no session config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-204",
@@ -633,7 +653,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "CORS header added, no CORS config in .env"
+    "rationale": "CORS header added, no CORS config in .env",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-205",
@@ -658,7 +679,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "CSP header added, not in config.json"
+    "rationale": "CSP header added, not in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-206",
@@ -677,7 +699,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "Password hash in init.sql, no hash algo in config"
+    "rationale": "Password hash in init.sql, no hash algo in config",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-207",
@@ -696,7 +719,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: server.js has /health, check it exists"
+    "rationale": "Control: server.js has /health, check it exists",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-208",
@@ -715,7 +739,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: init.sql has sessions table"
+    "rationale": "Control: init.sql has sessions table",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-209",
@@ -734,7 +759,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: .env has SECRET_KEY"
+    "rationale": "Control: .env has SECRET_KEY",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-210",
@@ -753,7 +779,8 @@
       "db",
       "control"
     ],
-    "rationale": "Dockerfile exposes port, check Dockerfile"
+    "rationale": "Dockerfile exposes port, check Dockerfile",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-211",
@@ -772,7 +799,8 @@
       "db",
       "control"
     ],
-    "rationale": "Compose has env_file, check compose"
+    "rationale": "Compose has env_file, check compose",
+    "intent": "false_negative"
   },
   {
     "id": "ac-bolster-212",
@@ -791,7 +819,8 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "User table has password_hash, server.js has no bcrypt"
+    "rationale": "User table has password_hash, server.js has no bcrypt",
+    "intent": "false_positive"
   },
   {
     "id": "ac-bolster-213",
@@ -810,6 +839,7 @@
       "db",
       "cross_file_gap"
     ],
-    "rationale": "Sessions table has expires_at, server.js has no expiry check"
+    "rationale": "Sessions table has expires_at, server.js has no expiry check",
+    "intent": "false_positive"
   }
 ]

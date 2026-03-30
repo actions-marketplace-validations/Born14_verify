@@ -24,7 +24,8 @@
       "token_cost",
       "BUD-01"
     ],
-    "rationale": "Unbounded while(true) loop consuming unlimited input is a token budget anti-pattern"
+    "rationale": "Unbounded while(true) loop consuming unlimited input is a token budget anti-pattern",
+    "intent": "false_positive"
   },
   {
     "id": "bud-002",
@@ -51,7 +52,8 @@
       "token_cost",
       "BUD-01"
     ],
-    "rationale": "Recursive template expansion without depth limit can blow token budgets exponentially"
+    "rationale": "Recursive template expansion without depth limit can blow token budgets exponentially",
+    "intent": "false_positive"
   },
   {
     "id": "bud-003",
@@ -77,7 +79,8 @@
       "token_cost",
       "BUD-01"
     ],
-    "rationale": "Bounded body reading with explicit size limit is budget-safe"
+    "rationale": "Bounded body reading with explicit size limit is budget-safe",
+    "intent": "false_negative"
   },
   {
     "id": "bud-004",
@@ -98,7 +101,8 @@
       "token_cost",
       "BUD-01"
     ],
-    "rationale": "No tokenBudgetTracker exists in demo-app; fabricated predicate fails grounding"
+    "rationale": "No tokenBudgetTracker exists in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-005",
@@ -125,7 +129,8 @@
       "per_model_cost",
       "BUD-02"
     ],
-    "rationale": "Hardcoded gpt-4 calls with no cost tracking or budget check is a budget violation pattern"
+    "rationale": "Hardcoded gpt-4 calls with no cost tracking or budget check is a budget violation pattern",
+    "intent": "false_positive"
   },
   {
     "id": "bud-006",
@@ -151,7 +156,8 @@
       "per_model_cost",
       "BUD-02"
     ],
-    "rationale": "Cost estimation with budget check prevents per-model overspend"
+    "rationale": "Cost estimation with budget check prevents per-model overspend",
+    "intent": "false_negative"
   },
   {
     "id": "bud-007",
@@ -178,7 +184,8 @@
       "per_model_cost",
       "BUD-02"
     ],
-    "rationale": "Sequential expensive model calls in a loop with no aggregate cost tracking"
+    "rationale": "Sequential expensive model calls in a loop with no aggregate cost tracking",
+    "intent": "false_positive"
   },
   {
     "id": "bud-008",
@@ -199,7 +206,8 @@
       "per_model_cost",
       "BUD-02"
     ],
-    "rationale": "No CostTracker module in demo-app; fabricated predicate fails grounding"
+    "rationale": "No CostTracker module in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-009",
@@ -226,7 +234,8 @@
       "cost_projection",
       "BUD-03"
     ],
-    "rationale": "Batch loop without checking projected cost before each iteration risks overshoot"
+    "rationale": "Batch loop without checking projected cost before each iteration risks overshoot",
+    "intent": "false_positive"
   },
   {
     "id": "bud-010",
@@ -252,7 +261,8 @@
       "cost_projection",
       "BUD-03"
     ],
-    "rationale": "Batch processing with projected cost check enables graceful budget-aware stopping"
+    "rationale": "Batch processing with projected cost check enables graceful budget-aware stopping",
+    "intent": "false_negative"
   },
   {
     "id": "bud-011",
@@ -273,7 +283,8 @@
       "cost_projection",
       "BUD-03"
     ],
-    "rationale": "No projectionEngine in demo-app; fabricated predicate fails grounding"
+    "rationale": "No projectionEngine in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-012",
@@ -300,7 +311,8 @@
       "hidden_cost",
       "BUD-04"
     ],
-    "rationale": "Unbounded retry loop accumulates hidden costs with no visibility or limit"
+    "rationale": "Unbounded retry loop accumulates hidden costs with no visibility or limit",
+    "intent": "false_positive"
   },
   {
     "id": "bud-013",
@@ -327,7 +339,8 @@
       "hidden_cost",
       "BUD-04"
     ],
-    "rationale": "Silent fallback chain escalates to most expensive model without operator awareness"
+    "rationale": "Silent fallback chain escalates to most expensive model without operator awareness",
+    "intent": "false_positive"
   },
   {
     "id": "bud-014",
@@ -353,7 +366,8 @@
       "hidden_cost",
       "BUD-04"
     ],
-    "rationale": "Bounded retries with explicit cost tracking makes hidden costs visible"
+    "rationale": "Bounded retries with explicit cost tracking makes hidden costs visible",
+    "intent": "false_negative"
   },
   {
     "id": "bud-015",
@@ -380,7 +394,8 @@
       "cost_attribution",
       "BUD-05"
     ],
-    "rationale": "Shared API key across tenants makes cost attribution impossible"
+    "rationale": "Shared API key across tenants makes cost attribution impossible",
+    "intent": "false_positive"
   },
   {
     "id": "bud-016",
@@ -406,7 +421,8 @@
       "cost_attribution",
       "BUD-05"
     ],
-    "rationale": "Per-tenant cost tracking and attribution headers enable proper cost allocation"
+    "rationale": "Per-tenant cost tracking and attribution headers enable proper cost allocation",
+    "intent": "false_negative"
   },
   {
     "id": "bud-017",
@@ -427,7 +443,8 @@
       "cost_attribution",
       "BUD-05"
     ],
-    "rationale": "No attributionLedger in demo-app; fabricated predicate fails grounding"
+    "rationale": "No attributionLedger in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-018",
@@ -454,7 +471,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "N+1 API pattern: 2 calls per user, unbounded by user count"
+    "rationale": "N+1 API pattern: 2 calls per user, unbounded by user count",
+    "intent": "false_positive"
   },
   {
     "id": "bud-019",
@@ -481,7 +499,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "Promise.all on unbounded subscriber list has no call count limit"
+    "rationale": "Promise.all on unbounded subscriber list has no call count limit",
+    "intent": "false_positive"
   },
   {
     "id": "bud-020",
@@ -507,7 +526,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "Batch fetching with concurrency and total call limits is budget-safe"
+    "rationale": "Batch fetching with concurrency and total call limits is budget-safe",
+    "intent": "false_negative"
   },
   {
     "id": "bud-021",
@@ -528,7 +548,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "No apiCallBudget in demo-app; fabricated predicate fails grounding"
+    "rationale": "No apiCallBudget in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-022",
@@ -555,7 +576,8 @@
       "redundant_calls",
       "BUD-07"
     ],
-    "rationale": "Same config endpoint fetched 3 times in one handler wastes API budget"
+    "rationale": "Same config endpoint fetched 3 times in one handler wastes API budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-023",
@@ -581,7 +603,8 @@
       "redundant_calls",
       "BUD-07"
     ],
-    "rationale": "Caching with TTL prevents redundant identical API calls"
+    "rationale": "Caching with TTL prevents redundant identical API calls",
+    "intent": "false_negative"
   },
   {
     "id": "bud-024",
@@ -608,7 +631,8 @@
       "redundant_calls",
       "BUD-07"
     ],
-    "rationale": "Same settings query repeated per loop iteration is an N+1 anti-pattern"
+    "rationale": "Same settings query repeated per loop iteration is an N+1 anti-pattern",
+    "intent": "false_positive"
   },
   {
     "id": "bud-025",
@@ -635,7 +659,8 @@
       "cascading_calls",
       "BUD-08"
     ],
-    "rationale": "Event handler triggers webhooks which could trigger more events, creating unbounded cascade"
+    "rationale": "Event handler triggers webhooks which could trigger more events, creating unbounded cascade",
+    "intent": "false_positive"
   },
   {
     "id": "bud-026",
@@ -661,7 +686,8 @@
       "cascading_calls",
       "BUD-08"
     ],
-    "rationale": "Depth guard and fan-out limit prevent unbounded cascading calls"
+    "rationale": "Depth guard and fan-out limit prevent unbounded cascading calls",
+    "intent": "false_negative"
   },
   {
     "id": "bud-027",
@@ -688,7 +714,8 @@
       "cascading_calls",
       "BUD-08"
     ],
-    "rationale": "Re-enqueue on failure creates infinite cascade if message always fails"
+    "rationale": "Re-enqueue on failure creates infinite cascade if message always fails",
+    "intent": "false_positive"
   },
   {
     "id": "bud-028",
@@ -715,7 +742,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "Infinite polling loop with no timeout or max attempts consumes unlimited API calls"
+    "rationale": "Infinite polling loop with no timeout or max attempts consumes unlimited API calls",
+    "intent": "false_positive"
   },
   {
     "id": "bud-029",
@@ -741,7 +769,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "Bounded polling with exponential backoff conserves API call budget"
+    "rationale": "Bounded polling with exponential backoff conserves API call budget",
+    "intent": "false_negative"
   },
   {
     "id": "bud-030",
@@ -768,7 +797,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "setInterval without clearInterval runs forever, consuming unbounded API calls"
+    "rationale": "setInterval without clearInterval runs forever, consuming unbounded API calls",
+    "intent": "false_positive"
   },
   {
     "id": "bud-031",
@@ -789,7 +819,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "No pollingBudget in demo-app; fabricated predicate fails grounding"
+    "rationale": "No pollingBudget in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-032",
@@ -816,7 +847,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "Synchronous busy-wait consumes wall-clock time and blocks the entire event loop"
+    "rationale": "Synchronous busy-wait consumes wall-clock time and blocks the entire event loop",
+    "intent": "false_positive"
   },
   {
     "id": "bud-033",
@@ -843,7 +875,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "Naive recursive fibonacci is O(2^n), will exceed any wall-clock budget for large n"
+    "rationale": "Naive recursive fibonacci is O(2^n), will exceed any wall-clock budget for large n",
+    "intent": "false_positive"
   },
   {
     "id": "bud-034",
@@ -869,7 +902,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "AbortController with timeout ensures wall-clock budget is enforced"
+    "rationale": "AbortController with timeout ensures wall-clock budget is enforced",
+    "intent": "false_negative"
   },
   {
     "id": "bud-035",
@@ -896,7 +930,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "eval of user input has no time bound; can execute arbitrary infinite loops"
+    "rationale": "eval of user input has no time bound; can execute arbitrary infinite loops",
+    "intent": "false_positive"
   },
   {
     "id": "bud-036",
@@ -923,7 +958,8 @@
       "idle_time",
       "BUD-11"
     ],
-    "rationale": "5 sequential await calls waste 4x idle time vs parallel Promise.all"
+    "rationale": "5 sequential await calls waste 4x idle time vs parallel Promise.all",
+    "intent": "false_positive"
   },
   {
     "id": "bud-037",
@@ -949,7 +985,8 @@
       "idle_time",
       "BUD-11"
     ],
-    "rationale": "Promise.all eliminates idle time waste from sequential independent fetches"
+    "rationale": "Promise.all eliminates idle time waste from sequential independent fetches",
+    "intent": "false_negative"
   },
   {
     "id": "bud-038",
@@ -976,7 +1013,8 @@
       "idle_time",
       "BUD-11"
     ],
-    "rationale": "Sleep-based polling wastes wall-clock budget; should use event emitter or pub/sub"
+    "rationale": "Sleep-based polling wastes wall-clock budget; should use event emitter or pub/sub",
+    "intent": "false_positive"
   },
   {
     "id": "bud-039",
@@ -1003,7 +1041,8 @@
       "retry_time",
       "BUD-12"
     ],
-    "rationale": "10 retries * 5s delay = 50s consumed just in retry delays"
+    "rationale": "10 retries * 5s delay = 50s consumed just in retry delays",
+    "intent": "false_positive"
   },
   {
     "id": "bud-040",
@@ -1030,7 +1069,8 @@
       "retry_time",
       "BUD-12"
     ],
-    "rationale": "Retrying the same operation 20 times with no variation wastes 60s of time budget"
+    "rationale": "Retrying the same operation 20 times with no variation wastes 60s of time budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-041",
@@ -1056,7 +1096,8 @@
       "retry_time",
       "BUD-12"
     ],
-    "rationale": "Deadline-aware retry with exponential backoff respects overall time budget"
+    "rationale": "Deadline-aware retry with exponential backoff respects overall time budget",
+    "intent": "false_negative"
   },
   {
     "id": "bud-042",
@@ -1083,7 +1124,8 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "Unbounded recursive tree traversal can blow stack and exceed iteration budget"
+    "rationale": "Unbounded recursive tree traversal can blow stack and exceed iteration budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-043",
@@ -1110,7 +1152,8 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "consumeAll on infinite generator creates infinite iteration"
+    "rationale": "consumeAll on infinite generator creates infinite iteration",
+    "intent": "false_positive"
   },
   {
     "id": "bud-044",
@@ -1136,7 +1179,8 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "Explicit iteration counter with hard limit prevents budget overrun"
+    "rationale": "Explicit iteration counter with hard limit prevents budget overrun",
+    "intent": "false_negative"
   },
   {
     "id": "bud-045",
@@ -1162,7 +1206,8 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "Depth parameter with MAX_DEPTH guard prevents unbounded recursion"
+    "rationale": "Depth parameter with MAX_DEPTH guard prevents unbounded recursion",
+    "intent": "false_negative"
   },
   {
     "id": "bud-046",
@@ -1183,7 +1228,8 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "No iterationBudget in demo-app; fabricated predicate fails grounding"
+    "rationale": "No iterationBudget in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-047",
@@ -1210,7 +1256,8 @@
       "retry_same_failure",
       "BUD-14"
     ],
-    "rationale": "100 retries on same connection error without strategy change wastes entire retry budget"
+    "rationale": "100 retries on same connection error without strategy change wastes entire retry budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-048",
@@ -1237,7 +1284,8 @@
       "retry_same_failure",
       "BUD-14"
     ],
-    "rationale": "Generic catch without classifying 4xx vs 5xx wastes retries on non-retryable errors"
+    "rationale": "Generic catch without classifying 4xx vs 5xx wastes retries on non-retryable errors",
+    "intent": "false_positive"
   },
   {
     "id": "bud-049",
@@ -1263,7 +1311,8 @@
       "retry_same_failure",
       "BUD-14"
     ],
-    "rationale": "Per-error-class retry limits prevent one failure class from consuming entire budget"
+    "rationale": "Per-error-class retry limits prevent one failure class from consuming entire budget",
+    "intent": "false_negative"
   },
   {
     "id": "bud-050",
@@ -1290,7 +1339,8 @@
       "retry_same_failure",
       "BUD-14"
     ],
-    "rationale": "Retrying 401 responses 30 times wastes budget; auth errors are not transient"
+    "rationale": "Retrying 401 responses 30 times wastes budget; auth errors are not transient",
+    "intent": "false_positive"
   },
   {
     "id": "bud-051",
@@ -1317,7 +1367,8 @@
       "compound_budget",
       "BUD-15"
     ],
-    "rationale": "Compound violation: token cost (gpt-4) + API calls (unbounded) + time (no timeout)"
+    "rationale": "Compound violation: token cost (gpt-4) + API calls (unbounded) + time (no timeout)",
+    "intent": "false_positive"
   },
   {
     "id": "bud-052",
@@ -1344,7 +1395,8 @@
       "compound_budget",
       "BUD-15"
     ],
-    "rationale": "Compound: iterations (infinite poll) + API calls (N per iteration) + time (forever)"
+    "rationale": "Compound: iterations (infinite poll) + API calls (N per iteration) + time (forever)",
+    "intent": "false_positive"
   },
   {
     "id": "bud-053",
@@ -1370,7 +1422,8 @@
       "compound_budget",
       "BUD-15"
     ],
-    "rationale": "Circuit breaker pattern bounds calls, cost, time, and retries simultaneously"
+    "rationale": "Circuit breaker pattern bounds calls, cost, time, and retries simultaneously",
+    "intent": "false_negative"
   },
   {
     "id": "bud-054",
@@ -1391,7 +1444,8 @@
       "compound_budget",
       "BUD-15"
     ],
-    "rationale": "No CompoundBudgetManager in demo-app; fabricated predicate fails grounding"
+    "rationale": "No CompoundBudgetManager in demo-app; fabricated predicate fails grounding",
+    "intent": "false_positive"
   },
   {
     "id": "bud-055",
@@ -1416,7 +1470,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "Heavy synchronous computation will exceed 100ms response time threshold"
+    "rationale": "Heavy synchronous computation will exceed 100ms response time threshold",
+    "intent": "false_positive"
   },
   {
     "id": "bud-056",
@@ -1435,7 +1490,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "Static demo-app responses are fast, well under 5s threshold"
+    "rationale": "Static demo-app responses are fast, well under 5s threshold",
+    "intent": "false_negative"
   },
   {
     "id": "bud-057",
@@ -1453,7 +1509,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "Demo-app has no actual image files to check; passes by absence"
+    "rationale": "Demo-app has no actual image files to check; passes by absence",
+    "intent": "false_negative"
   },
   {
     "id": "bud-058",
@@ -1475,7 +1532,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "Health endpoint should respond 200 when not under excessive load"
+    "rationale": "Health endpoint should respond 200 when not under excessive load",
+    "intent": "false_negative"
   },
   {
     "id": "bud-059",
@@ -1498,7 +1556,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "Single API call within budget returns expected data"
+    "rationale": "Single API call within budget returns expected data",
+    "intent": "false_negative"
   },
   {
     "id": "bud-060",
@@ -1527,7 +1586,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "Rate limiter endpoint correctly returns 429 with Retry-After header"
+    "rationale": "Rate limiter endpoint correctly returns 429 with Retry-After header",
+    "intent": "false_negative"
   },
   {
     "id": "bud-061",
@@ -1556,7 +1616,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "Endpoint exposes rate limit headers allowing callers to self-throttle"
+    "rationale": "Endpoint exposes rate limit headers allowing callers to self-throttle",
+    "intent": "false_negative"
   },
   {
     "id": "bud-062",
@@ -1583,7 +1644,8 @@
       "token_cost",
       "BUD-01"
     ],
-    "rationale": "String concatenation in loop with no size check can produce multi-GB strings"
+    "rationale": "String concatenation in loop with no size check can produce multi-GB strings",
+    "intent": "false_positive"
   },
   {
     "id": "bud-063",
@@ -1610,7 +1672,8 @@
       "per_model_cost",
       "BUD-02"
     ],
-    "rationale": "Hardcoded selection of most expensive model regardless of task complexity"
+    "rationale": "Hardcoded selection of most expensive model regardless of task complexity",
+    "intent": "false_positive"
   },
   {
     "id": "bud-064",
@@ -1637,7 +1700,8 @@
       "cost_projection",
       "BUD-03"
     ],
-    "rationale": "Promise.all on unbounded collection with expensive per-item API calls has no cost projection"
+    "rationale": "Promise.all on unbounded collection with expensive per-item API calls has no cost projection",
+    "intent": "false_positive"
   },
   {
     "id": "bud-065",
@@ -1664,7 +1728,8 @@
       "hidden_cost",
       "BUD-04"
     ],
-    "rationale": "Each fallback step is more expensive; total cost hidden from caller"
+    "rationale": "Each fallback step is more expensive; total cost hidden from caller",
+    "intent": "false_positive"
   },
   {
     "id": "bud-066",
@@ -1691,7 +1756,8 @@
       "cost_attribution",
       "BUD-05"
     ],
-    "rationale": "Single global API key makes per-request cost attribution impossible"
+    "rationale": "Single global API key makes per-request cost attribution impossible",
+    "intent": "false_positive"
   },
   {
     "id": "bud-067",
@@ -1718,7 +1784,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "Nested GraphQL queries can cause exponential backend API calls with no depth limit"
+    "rationale": "Nested GraphQL queries can cause exponential backend API calls with no depth limit",
+    "intent": "false_positive"
   },
   {
     "id": "bud-068",
@@ -1745,7 +1812,8 @@
       "redundant_calls",
       "BUD-07"
     ],
-    "rationale": "Fetching config on every request instead of once at startup wastes API budget"
+    "rationale": "Fetching config on every request instead of once at startup wastes API budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-069",
@@ -1772,7 +1840,8 @@
       "cascading_calls",
       "BUD-08"
     ],
-    "rationale": "Webhook handler posting to its own endpoint creates infinite cascade"
+    "rationale": "Webhook handler posting to its own endpoint creates infinite cascade",
+    "intent": "false_positive"
   },
   {
     "id": "bud-070",
@@ -1799,7 +1868,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "Recursive long-polling without delay or timeout exhausts call stack and API budget"
+    "rationale": "Recursive long-polling without delay or timeout exhausts call stack and API budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-071",
@@ -1826,7 +1896,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "Nested quantifiers in regex cause exponential backtracking on crafted input"
+    "rationale": "Nested quantifiers in regex cause exponential backtracking on crafted input",
+    "intent": "false_positive"
   },
   {
     "id": "bud-072",
@@ -1853,7 +1924,8 @@
       "idle_time",
       "BUD-11"
     ],
-    "rationale": "FOR UPDATE lock wait can idle indefinitely if another transaction holds the lock"
+    "rationale": "FOR UPDATE lock wait can idle indefinitely if another transaction holds the lock",
+    "intent": "false_positive"
   },
   {
     "id": "bud-073",
@@ -1880,7 +1952,8 @@
       "idle_time",
       "BUD-11"
     ],
-    "rationale": "Connection acquired but never released; pool exhausts, all subsequent queries idle waiting"
+    "rationale": "Connection acquired but never released; pool exhausts, all subsequent queries idle waiting",
+    "intent": "false_positive"
   },
   {
     "id": "bud-074",
@@ -1907,7 +1980,8 @@
       "retry_time",
       "BUD-12"
     ],
-    "rationale": "Linear backoff (3s, 6s, ..., 30s) totals 165s of delay time across retries"
+    "rationale": "Linear backoff (3s, 6s, ..., 30s) totals 165s of delay time across retries",
+    "intent": "false_positive"
   },
   {
     "id": "bud-075",
@@ -1934,7 +2008,8 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "Recursive deep clone on user JSON with circular refs or extreme depth blows stack"
+    "rationale": "Recursive deep clone on user JSON with circular refs or extreme depth blows stack",
+    "intent": "false_positive"
   },
   {
     "id": "bud-076",
@@ -1961,7 +2036,8 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "Pagination loop depends on API returning empty; misbehaving API causes infinite iteration"
+    "rationale": "Pagination loop depends on API returning empty; misbehaving API causes infinite iteration",
+    "intent": "false_positive"
   },
   {
     "id": "bud-077",
@@ -1988,7 +2064,8 @@
       "retry_same_failure",
       "BUD-14"
     ],
-    "rationale": "400 is a client error; retrying the same malformed request 15 times wastes budget"
+    "rationale": "400 is a client error; retrying the same malformed request 15 times wastes budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-078",
@@ -2015,7 +2092,8 @@
       "compound_budget",
       "BUD-15"
     ],
-    "rationale": "Compound: time (no timeout) + memory (no size limit) + bandwidth (no backpressure)"
+    "rationale": "Compound: time (no timeout) + memory (no size limit) + bandwidth (no backpressure)",
+    "intent": "false_positive"
   },
   {
     "id": "bud-079",
@@ -2041,7 +2119,8 @@
       "compound_budget",
       "BUD-15"
     ],
-    "rationale": "BudgetGuard tracks calls, cost, and time with explicit limits and check-before-proceed"
+    "rationale": "BudgetGuard tracks calls, cost, and time with explicit limits and check-before-proceed",
+    "intent": "false_negative"
   },
   {
     "id": "bud-080",
@@ -2068,7 +2147,8 @@
       "wall_clock",
       "BUD-10"
     ],
-    "rationale": "new Function() from user input enables arbitrary computation with no time bound"
+    "rationale": "new Function() from user input enables arbitrary computation with no time bound",
+    "intent": "false_positive"
   },
   {
     "id": "bud-081",
@@ -2095,7 +2175,8 @@
       "cascading_calls",
       "BUD-08"
     ],
-    "rationale": "Following redirects without limit enables infinite redirect loops consuming API budget"
+    "rationale": "Following redirects without limit enables infinite redirect loops consuming API budget",
+    "intent": "false_positive"
   },
   {
     "id": "bud-082",
@@ -2135,7 +2216,8 @@
       "api_calls",
       "BUD-06"
     ],
-    "rationale": "Two-step sequence verifies budget tracking endpoint exists and health is accessible"
+    "rationale": "Two-step sequence verifies budget tracking endpoint exists and health is accessible",
+    "intent": "false_negative"
   },
   {
     "id": "bud-083",
@@ -2175,7 +2257,8 @@
       "polling_budget",
       "BUD-09"
     ],
-    "rationale": "Verifies rate limit response is properly returned and fallback endpoint works"
+    "rationale": "Verifies rate limit response is properly returned and fallback endpoint works",
+    "intent": "false_negative"
   },
   {
     "id": "bud-084",
@@ -2201,7 +2284,8 @@
       "hidden_cost",
       "BUD-04"
     ],
-    "rationale": "Fallback chain that logs cumulative cost at each step provides full cost visibility"
+    "rationale": "Fallback chain that logs cumulative cost at each step provides full cost visibility",
+    "intent": "false_negative"
   },
   {
     "id": "bud-085",
@@ -2227,7 +2311,8 @@
       "redundant_calls",
       "BUD-07"
     ],
-    "rationale": "Config cached with TTL-based refresh eliminates per-request redundant fetches"
+    "rationale": "Config cached with TTL-based refresh eliminates per-request redundant fetches",
+    "intent": "false_negative"
   },
   {
     "id": "bud-086",
@@ -2253,7 +2338,8 @@
       "cascading_calls",
       "BUD-08"
     ],
-    "rationale": "Idempotency key set prevents the same event from being processed twice, breaking loops"
+    "rationale": "Idempotency key set prevents the same event from being processed twice, breaking loops",
+    "intent": "false_negative"
   },
   {
     "id": "bud-087",
@@ -2279,7 +2365,8 @@
       "idle_time",
       "BUD-11"
     ],
-    "rationale": "Connection released in finally block prevents pool exhaustion and idle waiting"
+    "rationale": "Connection released in finally block prevents pool exhaustion and idle waiting",
+    "intent": "false_negative"
   },
   {
     "id": "bud-088",
@@ -2305,7 +2392,8 @@
       "retry_same_failure",
       "BUD-14"
     ],
-    "rationale": "Short-circuiting non-retryable errors preserves retry budget for transient failures"
+    "rationale": "Short-circuiting non-retryable errors preserves retry budget for transient failures",
+    "intent": "false_negative"
   },
   {
     "id": "bud-089",
@@ -2331,6 +2419,7 @@
       "max_iterations",
       "BUD-13"
     ],
-    "rationale": "MAX_PAGES constant prevents infinite pagination even with misbehaving APIs"
+    "rationale": "MAX_PAGES constant prevents infinite pagination even with misbehaving APIs",
+    "intent": "false_negative"
   }
 ]

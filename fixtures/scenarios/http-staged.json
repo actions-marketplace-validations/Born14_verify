@@ -18,7 +18,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-002",
@@ -39,7 +40,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-003",
@@ -60,7 +62,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-004",
@@ -81,7 +84,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-005",
@@ -102,7 +106,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-006",
@@ -123,7 +128,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-007",
@@ -144,7 +150,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-008",
@@ -165,7 +172,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-009",
@@ -186,7 +194,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-status-010",
@@ -207,7 +216,8 @@
       "http",
       "status_only",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-011",
@@ -229,7 +239,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-012",
@@ -251,7 +262,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-013",
@@ -273,7 +285,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-014",
@@ -295,7 +308,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-015",
@@ -317,7 +331,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-016",
@@ -339,7 +354,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-017",
@@ -361,7 +377,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-018",
@@ -383,7 +400,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-019",
@@ -405,7 +423,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-020",
@@ -427,7 +446,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-021",
@@ -449,7 +469,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-022",
@@ -471,7 +492,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-023",
@@ -493,7 +515,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-024",
@@ -515,7 +538,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-025",
@@ -537,7 +561,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-026",
@@ -559,7 +584,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-body-027",
@@ -581,7 +607,8 @@
       "http",
       "body_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-fab-028",
@@ -604,7 +631,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-029",
@@ -627,7 +655,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-030",
@@ -650,7 +679,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-031",
@@ -673,7 +703,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-032",
@@ -696,7 +727,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-033",
@@ -719,7 +751,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-034",
@@ -742,7 +775,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-035",
@@ -765,7 +799,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-036",
@@ -788,7 +823,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-037",
@@ -811,7 +847,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-038",
@@ -834,7 +871,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-039",
@@ -857,7 +895,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-040",
@@ -880,7 +919,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-041",
@@ -903,7 +943,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-042",
@@ -926,7 +967,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-043",
@@ -949,7 +991,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-044",
@@ -972,7 +1015,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-fab-045",
@@ -995,7 +1039,8 @@
       "http",
       "body_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-edit-046",
@@ -1023,7 +1068,8 @@
       "http",
       "body_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-edit-047",
@@ -1051,7 +1097,8 @@
       "http",
       "body_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-edit-048",
@@ -1079,7 +1126,8 @@
       "http",
       "body_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-regex-049",
@@ -1101,7 +1149,8 @@
       "http",
       "body_regex",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-regex-050",
@@ -1123,7 +1172,8 @@
       "http",
       "body_regex",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-post-051",
@@ -1148,7 +1198,8 @@
       "http",
       "post_echo",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-post-052",
@@ -1174,7 +1225,8 @@
       "http",
       "post_echo",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-path-053",
@@ -1196,7 +1248,8 @@
       "http",
       "wrong_path",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-seq-054",
@@ -1228,7 +1281,8 @@
       "http",
       "sequence_basic",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-seq-055",
@@ -1263,7 +1317,8 @@
       "http",
       "sequence_basic",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-arr-056",
@@ -1288,7 +1343,8 @@
       "http",
       "body_array",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-arr-057",
@@ -1314,7 +1370,8 @@
       "http",
       "body_array",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-arr-058",
@@ -1340,7 +1397,8 @@
       "http",
       "body_array",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-exp-059",
@@ -1359,7 +1417,8 @@
       "http",
       "expected_field",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-exp-060",
@@ -1379,7 +1438,8 @@
       "http",
       "expected_field",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-exp-061",
@@ -1398,7 +1458,8 @@
       "http",
       "expected_field",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-mix-062",
@@ -1427,7 +1488,8 @@
       "http",
       "mixed",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-mix-063",
@@ -1457,7 +1519,8 @@
       "http",
       "mixed",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "http-edge-064",
@@ -1479,7 +1542,8 @@
       "http",
       "edge_case",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-edge-065",
@@ -1497,7 +1561,8 @@
       "http",
       "edge_case",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "http-edge-066",
@@ -1518,6 +1583,7 @@
       "http",
       "edge_case",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   }
 ]

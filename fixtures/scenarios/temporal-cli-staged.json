@@ -23,7 +23,8 @@
       "restart_incomplete",
       "TC-01"
     ],
-    "rationale": "Config updated but server source still references old port — process not restarted"
+    "rationale": "Config updated but server source still references old port — process not restarted",
+    "intent": "false_positive"
   },
   {
     "id": "tc-restart-002",
@@ -49,7 +50,8 @@
       "restart_incomplete",
       "TC-01"
     ],
-    "rationale": "Env var changed but server.js has hardcoded default — restart would read env"
+    "rationale": "Env var changed but server.js has hardcoded default — restart would read env",
+    "intent": "false_positive"
   },
   {
     "id": "tc-restart-003",
@@ -75,7 +77,8 @@
       "restart_incomplete",
       "TC-01"
     ],
-    "rationale": "Env changed to development but Dockerfile has no such reference — infra not updated"
+    "rationale": "Env changed to development but Dockerfile has no such reference — infra not updated",
+    "intent": "false_positive"
   },
   {
     "id": "tc-restart-004",
@@ -102,7 +105,8 @@
       "TC-01",
       "control"
     ],
-    "rationale": "Config file itself reflects the change (file-level truth, not process-level)"
+    "rationale": "Config file itself reflects the change (file-level truth, not process-level)",
+    "intent": "false_negative"
   },
   {
     "id": "tc-reload-005",
@@ -128,7 +132,8 @@
       "config_reload",
       "TC-02"
     ],
-    "rationale": "Feature flag enabled in config but process code has no analytics implementation"
+    "rationale": "Feature flag enabled in config but process code has no analytics implementation",
+    "intent": "false_positive"
   },
   {
     "id": "tc-reload-006",
@@ -154,7 +159,8 @@
       "config_reload",
       "TC-02"
     ],
-    "rationale": "Config changed db host but .env DATABASE_URL still points to localhost"
+    "rationale": "Config changed db host but .env DATABASE_URL still points to localhost",
+    "intent": "false_positive"
   },
   {
     "id": "tc-reload-007",
@@ -180,7 +186,8 @@
       "config_reload",
       "TC-02"
     ],
-    "rationale": ".env DEBUG changed but config.json has no debug key — config sources desynchronized"
+    "rationale": ".env DEBUG changed but config.json has no debug key — config sources desynchronized",
+    "intent": "false_positive"
   },
   {
     "id": "tc-reload-008",
@@ -206,7 +213,8 @@
       "config_reload",
       "TC-02"
     ],
-    "rationale": "App name changed in config but server.js HTML templates reference \"Demo App\" directly"
+    "rationale": "App name changed in config but server.js HTML templates reference \"Demo App\" directly",
+    "intent": "false_positive"
   },
   {
     "id": "tc-reload-009",
@@ -232,7 +240,8 @@
       "config_reload",
       "TC-02"
     ],
-    "rationale": "Config db name changed but .env DATABASE_URL still references old db name"
+    "rationale": "Config db name changed but .env DATABASE_URL still references old db name",
+    "intent": "false_positive"
   },
   {
     "id": "tc-reload-010",
@@ -259,7 +268,8 @@
       "TC-02",
       "control"
     ],
-    "rationale": "Config gate reads file directly — file change is visible at gate level"
+    "rationale": "Config gate reads file directly — file change is visible at gate level",
+    "intent": "false_negative"
   },
   {
     "id": "tc-reload-011",
@@ -290,7 +300,8 @@
       "config_reload",
       "TC-02"
     ],
-    "rationale": "Both config sources changed but infrastructure (Dockerfile) still references old port"
+    "rationale": "Both config sources changed but infrastructure (Dockerfile) still references old port",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-100",
@@ -316,7 +327,8 @@
       "env_precedence",
       "TC-03"
     ],
-    "rationale": "Env var changed in one source, predicate checks different source — precedence gap"
+    "rationale": "Env var changed in one source, predicate checks different source — precedence gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-101",
@@ -342,7 +354,8 @@
       "env_precedence",
       "TC-03"
     ],
-    "rationale": "Env var changed in one source, predicate checks different source — precedence gap"
+    "rationale": "Env var changed in one source, predicate checks different source — precedence gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-102",
@@ -368,7 +381,8 @@
       "env_precedence",
       "TC-03"
     ],
-    "rationale": "Env var changed in one source, predicate checks different source — precedence gap"
+    "rationale": "Env var changed in one source, predicate checks different source — precedence gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-103",
@@ -394,7 +408,8 @@
       "env_precedence",
       "TC-03"
     ],
-    "rationale": "Env var changed in one source, predicate checks different source — precedence gap"
+    "rationale": "Env var changed in one source, predicate checks different source — precedence gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-104",
@@ -421,7 +436,8 @@
       "TC-03",
       "control"
     ],
-    "rationale": "Env var changed in one source, predicate checks different source — precedence gap"
+    "rationale": "Env var changed in one source, predicate checks different source — precedence gap",
+    "intent": "false_negative"
   },
   {
     "id": "tc-bolster-105",
@@ -447,7 +463,8 @@
       "version_drift",
       "TC-04"
     ],
-    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift"
+    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-106",
@@ -473,7 +490,8 @@
       "version_drift",
       "TC-04"
     ],
-    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift"
+    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-107",
@@ -499,7 +517,8 @@
       "version_drift",
       "TC-04"
     ],
-    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift"
+    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-108",
@@ -525,7 +544,8 @@
       "version_drift",
       "TC-04"
     ],
-    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift"
+    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-109",
@@ -552,7 +572,8 @@
       "TC-04",
       "control"
     ],
-    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift"
+    "rationale": "Infrastructure file changed but dependent file not updated — version/path drift",
+    "intent": "false_negative"
   },
   {
     "id": "tc-bolster-110",
@@ -578,7 +599,8 @@
       "compose_desync",
       "TC-05"
     ],
-    "rationale": "Compose file changed but dependent file not updated — orchestration drift"
+    "rationale": "Compose file changed but dependent file not updated — orchestration drift",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-111",
@@ -604,7 +626,8 @@
       "compose_desync",
       "TC-05"
     ],
-    "rationale": "Compose file changed but dependent file not updated — orchestration drift"
+    "rationale": "Compose file changed but dependent file not updated — orchestration drift",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-112",
@@ -631,7 +654,8 @@
       "TC-05",
       "control"
     ],
-    "rationale": "Compose file changed but dependent file not updated — orchestration drift"
+    "rationale": "Compose file changed but dependent file not updated — orchestration drift",
+    "intent": "false_negative"
   },
   {
     "id": "tc-bolster-113",
@@ -657,7 +681,8 @@
       "compose_desync",
       "TC-05"
     ],
-    "rationale": "Compose file changed but dependent file not updated — orchestration drift"
+    "rationale": "Compose file changed but dependent file not updated — orchestration drift",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-114",
@@ -683,7 +708,8 @@
       "runtime_config",
       "TC-06"
     ],
-    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap"
+    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-115",
@@ -709,7 +735,8 @@
       "runtime_config",
       "TC-06"
     ],
-    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap"
+    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-116",
@@ -735,7 +762,8 @@
       "runtime_config",
       "TC-06"
     ],
-    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap"
+    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap",
+    "intent": "false_positive"
   },
   {
     "id": "tc-bolster-117",
@@ -762,7 +790,8 @@
       "TC-06",
       "control"
     ],
-    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap"
+    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap",
+    "intent": "false_negative"
   },
   {
     "id": "tc-bolster-118",
@@ -788,6 +817,7 @@
       "runtime_config",
       "TC-06"
     ],
-    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap"
+    "rationale": "Runtime configuration disagrees with static config — cross-file temporal gap",
+    "intent": "false_positive"
   }
 ]

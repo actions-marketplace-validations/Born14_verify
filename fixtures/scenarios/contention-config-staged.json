@@ -28,7 +28,8 @@
       "env_collision",
       "JG-01"
     ],
-    "rationale": "Both edits target DATABASE_URL — second search gone after first changes to primary.internal"
+    "rationale": "Both edits target DATABASE_URL — second search gone after first changes to primary.internal",
+    "intent": "false_positive"
   },
   {
     "id": "jg-env-002",
@@ -59,7 +60,8 @@
       "env_collision",
       "JG-01"
     ],
-    "rationale": "Both edits change NODE_ENV — second search gone after first changes to staging"
+    "rationale": "Both edits change NODE_ENV — second search gone after first changes to staging",
+    "intent": "false_positive"
   },
   {
     "id": "jg-env-003",
@@ -90,7 +92,8 @@
       "env_collision",
       "JG-01"
     ],
-    "rationale": "Both secret rotations target same key — second search gone after first rotation applies"
+    "rationale": "Both secret rotations target same key — second search gone after first rotation applies",
+    "intent": "false_positive"
   },
   {
     "id": "jg-env-004",
@@ -121,7 +124,8 @@
       "env_collision",
       "JG-01"
     ],
-    "rationale": "Both edits target same staging DATABASE_URL — second search gone after first edit"
+    "rationale": "Both edits target same staging DATABASE_URL — second search gone after first edit",
+    "intent": "false_positive"
   },
   {
     "id": "jg-env-005",
@@ -152,7 +156,8 @@
       "env_collision",
       "JG-01"
     ],
-    "rationale": "Both edits append after DEBUG — second search gone after first adds LOG_LEVEL=info"
+    "rationale": "Both edits append after DEBUG — second search gone after first adds LOG_LEVEL=info",
+    "intent": "false_positive"
   },
   {
     "id": "jg-env-006",
@@ -189,7 +194,8 @@
       "JG-01",
       "control"
     ],
-    "rationale": "Different keys in same file — no collision, both apply cleanly"
+    "rationale": "Different keys in same file — no collision, both apply cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "jg-merge-007",
@@ -220,7 +226,8 @@
       "merge_conflict",
       "JG-02"
     ],
-    "rationale": "Both edits change database host — second search gone after first changes to primary"
+    "rationale": "Both edits change database host — second search gone after first changes to primary",
+    "intent": "false_positive"
   },
   {
     "id": "jg-merge-008",
@@ -251,7 +258,8 @@
       "merge_conflict",
       "JG-02"
     ],
-    "rationale": "Both edits change prod database name — second search gone after first renames to v2"
+    "rationale": "Both edits change prod database name — second search gone after first renames to v2",
+    "intent": "false_positive"
   },
   {
     "id": "jg-merge-009",
@@ -282,7 +290,8 @@
       "merge_conflict",
       "JG-02"
     ],
-    "rationale": "Both edits change staging app name — second search gone after first renames to Alpha"
+    "rationale": "Both edits change staging app name — second search gone after first renames to Alpha",
+    "intent": "false_positive"
   },
   {
     "id": "jg-merge-010",
@@ -313,7 +322,8 @@
       "merge_conflict",
       "JG-02"
     ],
-    "rationale": "Config port updated but .env still has PORT=3000 — cross-file merge conflict"
+    "rationale": "Config port updated but .env still has PORT=3000 — cross-file merge conflict",
+    "intent": "false_positive"
   },
   {
     "id": "jg-merge-011",
@@ -344,7 +354,8 @@
       "merge_conflict",
       "JG-02"
     ],
-    "rationale": "Config host updated to failover but .env.prod still has db-primary — cross-env merge conflict"
+    "rationale": "Config host updated to failover but .env.prod still has db-primary — cross-env merge conflict",
+    "intent": "false_positive"
   },
   {
     "id": "jg-merge-012",
@@ -381,7 +392,8 @@
       "JG-02",
       "control"
     ],
-    "rationale": "Different files, different keys — no merge conflict"
+    "rationale": "Different files, different keys — no merge conflict",
+    "intent": "false_negative"
   },
   {
     "id": "jg-flag-013",
@@ -412,7 +424,8 @@
       "feature_flag",
       "JG-03"
     ],
-    "rationale": "Both edits target darkMode line — second search gone after first toggles it off"
+    "rationale": "Both edits target darkMode line — second search gone after first toggles it off",
+    "intent": "false_positive"
   },
   {
     "id": "jg-flag-014",
@@ -443,7 +456,8 @@
       "feature_flag",
       "JG-03"
     ],
-    "rationale": "Both edits target analytics flag — second search gone after first disables analytics"
+    "rationale": "Both edits target analytics flag — second search gone after first disables analytics",
+    "intent": "false_positive"
   },
   {
     "id": "jg-flag-015",
@@ -474,7 +488,8 @@
       "feature_flag",
       "JG-03"
     ],
-    "rationale": "Both edits target betaSignup — second search gone after first disables it"
+    "rationale": "Both edits target betaSignup — second search gone after first disables it",
+    "intent": "false_positive"
   },
   {
     "id": "jg-flag-016",
@@ -505,7 +520,8 @@
       "feature_flag",
       "JG-03"
     ],
-    "rationale": "darkMode toggled but dependent DEBUG flag in .env still false — cross-file flag inconsistency"
+    "rationale": "darkMode toggled but dependent DEBUG flag in .env still false — cross-file flag inconsistency",
+    "intent": "false_positive"
   },
   {
     "id": "jg-flag-017",
@@ -536,7 +552,8 @@
       "feature_flag",
       "JG-03"
     ],
-    "rationale": "Prod betaSignup enabled but staging is still true, not false — predicate expects false in staging"
+    "rationale": "Prod betaSignup enabled but staging is still true, not false — predicate expects false in staging",
+    "intent": "false_positive"
   },
   {
     "id": "jg-flag-018",
@@ -573,7 +590,8 @@
       "JG-03",
       "control"
     ],
-    "rationale": "Independent flags in different files — no collision, both toggle cleanly"
+    "rationale": "Independent flags in different files — no collision, both toggle cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -603,7 +621,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -633,7 +652,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -663,7 +683,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -694,7 +715,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -719,7 +741,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -744,7 +767,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -769,7 +793,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -799,7 +824,8 @@
       "config",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -824,7 +850,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -849,7 +876,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -874,7 +902,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -904,6 +933,7 @@
       "config",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   }
 ]

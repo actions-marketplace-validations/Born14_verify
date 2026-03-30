@@ -22,7 +22,8 @@
       "probe_overhead",
       "FC-01"
     ],
-    "rationale": "Assumed: healthcheck is free. Actual: 5s interval means 12 HTTP requests/minute of overhead. server.js has no interval awareness."
+    "rationale": "Assumed: healthcheck is free. Actual: 5s interval means 12 HTTP requests/minute of overhead. server.js has no interval awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-overhead-002",
@@ -53,7 +54,8 @@
       "probe_overhead",
       "FC-01"
     ],
-    "rationale": "Assumed: probes are lightweight. Actual: 128M limit means each `docker stats` query consumes part of the budget. config.json has no memory awareness."
+    "rationale": "Assumed: probes are lightweight. Actual: 128M limit means each `docker stats` query consumes part of the budget. config.json has no memory awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-overhead-003",
@@ -78,7 +80,8 @@
       "probe_overhead",
       "FC-01"
     ],
-    "rationale": "Assumed: retry count is neutral. Actual: 3 retries × 5s interval = potential 15 probes/minute under failure. .env has no retry config."
+    "rationale": "Assumed: retry count is neutral. Actual: 3 retries × 5s interval = potential 15 probes/minute under failure. .env has no retry config.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-overhead-004",
@@ -103,7 +106,8 @@
       "probe_overhead",
       "FC-01"
     ],
-    "rationale": "Assumed: timeout just limits wait time. Actual: 3s timeout holds a TCP connection — under load, probes overlap with app traffic. Dockerfile timeout is different."
+    "rationale": "Assumed: timeout just limits wait time. Actual: 3s timeout holds a TCP connection — under load, probes overlap with app traffic. Dockerfile timeout is different.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-overhead-005",
@@ -124,7 +128,8 @@
       "FC-01",
       "control"
     ],
-    "rationale": "Static file check — reading docker-compose.yml doesn't run any probes."
+    "rationale": "Static file check — reading docker-compose.yml doesn't run any probes.",
+    "intent": "false_negative"
   },
   {
     "id": "fc-logs-006",
@@ -155,7 +160,8 @@
       "log_inflation",
       "FC-02"
     ],
-    "rationale": "Assumed: health probes are silent. Actual: request logging means 12 log lines/minute from healthchecks alone. .env has no LOG_LEVEL."
+    "rationale": "Assumed: health probes are silent. Actual: request logging means 12 log lines/minute from healthchecks alone. .env has no LOG_LEVEL.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-logs-007",
@@ -180,7 +186,8 @@
       "log_inflation",
       "FC-02"
     ],
-    "rationale": "Assumed: HEALTHCHECK is transparent. Actual: wget creates HTTP request → server access log. config.json has no log config."
+    "rationale": "Assumed: HEALTHCHECK is transparent. Actual: wget creates HTTP request → server access log. config.json has no log config.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-logs-008",
@@ -211,7 +218,8 @@
       "log_inflation",
       "FC-02"
     ],
-    "rationale": "Assumed: verbose health is just more data. Actual: each 5s probe now returns ~200 bytes instead of ~15. Log volume grows 13x. No env toggle."
+    "rationale": "Assumed: verbose health is just more data. Actual: each 5s probe now returns ~200 bytes instead of ~15. Log volume grows 13x. No env toggle.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-logs-009",
@@ -242,7 +250,8 @@
       "log_inflation",
       "FC-02"
     ],
-    "rationale": "Assumed: error counting is stateless. Actual: reading error count resets it (read-and-clear pattern). Observation destroys the data. config.json unaware."
+    "rationale": "Assumed: error counting is stateless. Actual: reading error count resets it (read-and-clear pattern). Observation destroys the data. config.json unaware.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-logs-010",
@@ -263,7 +272,8 @@
       "FC-02",
       "control"
     ],
-    "rationale": "Static file check — reading Dockerfile doesn't execute the healthcheck."
+    "rationale": "Static file check — reading Dockerfile doesn't execute the healthcheck.",
+    "intent": "false_negative"
   },
   {
     "id": "fc-disk-011",
@@ -294,7 +304,8 @@
       "disk_consumption",
       "FC-03"
     ],
-    "rationale": "Assumed: disk probe is read-only. Actual: writes /tmp/disk-check on every call. Observation creates artifacts. Dockerfile unaware."
+    "rationale": "Assumed: disk probe is read-only. Actual: writes /tmp/disk-check on every call. Observation creates artifacts. Dockerfile unaware.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-disk-012",
@@ -325,7 +336,8 @@
       "disk_consumption",
       "FC-03"
     ],
-    "rationale": "Assumed: debug endpoint is lightweight. Actual: appends to debug-dumps.log on every call — unbounded growth. config.json has no debug config."
+    "rationale": "Assumed: debug endpoint is lightweight. Actual: appends to debug-dumps.log on every call — unbounded growth. config.json has no debug config.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-disk-013",
@@ -345,7 +357,8 @@
       "disk_consumption",
       "FC-03"
     ],
-    "rationale": "Assumed: healthcheck output is discarded. Actual: no logging config means default json-file driver — all output goes to disk. No rotation."
+    "rationale": "Assumed: healthcheck output is discarded. Actual: no logging config means default json-file driver — all output goes to disk. No rotation.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-disk-014",
@@ -376,7 +389,8 @@
       "disk_consumption",
       "FC-03"
     ],
-    "rationale": "Assumed: wget -O /tmp is harmless. Actual: creates file on every 5s interval. On full disk, the probe itself fails. server.js unaware."
+    "rationale": "Assumed: wget -O /tmp is harmless. Actual: creates file on every 5s interval. On full disk, the probe itself fails. server.js unaware.",
+    "intent": "false_positive"
   },
   {
     "id": "fc-disk-015",
@@ -397,7 +411,8 @@
       "FC-03",
       "control"
     ],
-    "rationale": "wget -O- sends output to stdout, not disk. Observation doesn't consume disk (modulo docker log driver)."
+    "rationale": "wget -O- sends output to stdout, not disk. Observation doesn't consume disk (modulo docker log driver).",
+    "intent": "false_negative"
   },
   {
     "id": "fc-bolster-100",
@@ -422,7 +437,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-101",
@@ -447,7 +463,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-102",
@@ -472,7 +489,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-103",
@@ -497,7 +515,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-104",
@@ -522,7 +541,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-105",
@@ -547,7 +567,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-106",
@@ -572,7 +593,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-107",
@@ -597,7 +619,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-108",
@@ -623,7 +646,8 @@
       "fc-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "fc-bolster-109",
@@ -649,7 +673,8 @@
       "fc-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fc-bolster-110",
@@ -675,7 +700,8 @@
       "fc-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fc-bolster-111",
@@ -700,7 +726,8 @@
       "fc-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "fc-bolster-112",
@@ -718,7 +745,8 @@
       "cli",
       "fc-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "fc-bolster-113",
@@ -737,7 +765,8 @@
       "fc-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "fc-bolster-114",
@@ -757,6 +786,7 @@
       "fc-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

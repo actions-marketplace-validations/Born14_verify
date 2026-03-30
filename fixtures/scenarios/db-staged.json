@@ -15,7 +15,8 @@
       "db",
       "table_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-texist-002",
@@ -33,7 +34,8 @@
       "db",
       "table_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-texist-003",
@@ -51,7 +53,8 @@
       "db",
       "table_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-texist-004",
@@ -69,7 +72,8 @@
       "db",
       "table_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tfab-005",
@@ -88,7 +92,8 @@
       "db",
       "table_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tfab-006",
@@ -107,7 +112,8 @@
       "db",
       "table_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tfab-007",
@@ -126,7 +132,8 @@
       "db",
       "table_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tfab-008",
@@ -145,7 +152,8 @@
       "db",
       "table_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tfab-009",
@@ -164,7 +172,8 @@
       "db",
       "table_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tfab-010",
@@ -183,7 +192,8 @@
       "db",
       "table_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tfab-011",
@@ -202,7 +212,8 @@
       "db",
       "table_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-cexist-012",
@@ -221,7 +232,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-013",
@@ -240,7 +252,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-014",
@@ -259,7 +272,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-015",
@@ -278,7 +292,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-016",
@@ -297,7 +312,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-017",
@@ -316,7 +332,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-018",
@@ -335,7 +352,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-019",
@@ -354,7 +372,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-020",
@@ -373,7 +392,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-021",
@@ -392,7 +412,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-022",
@@ -411,7 +432,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-023",
@@ -430,7 +452,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-024",
@@ -449,7 +472,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-025",
@@ -468,7 +492,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-026",
@@ -487,7 +512,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-027",
@@ -506,7 +532,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-028",
@@ -525,7 +552,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-029",
@@ -544,7 +572,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-030",
@@ -563,7 +592,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-031",
@@ -582,7 +612,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cexist-032",
@@ -601,7 +632,8 @@
       "db",
       "column_exists",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cfab-033",
@@ -621,7 +653,8 @@
       "db",
       "column_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-cfab-034",
@@ -641,7 +674,8 @@
       "db",
       "column_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-cfab-035",
@@ -661,7 +695,8 @@
       "db",
       "column_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-cfab-036",
@@ -681,7 +716,8 @@
       "db",
       "column_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-cfab-037",
@@ -701,7 +737,8 @@
       "db",
       "column_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-cfab-038",
@@ -721,7 +758,8 @@
       "db",
       "column_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-ccase-039",
@@ -740,7 +778,8 @@
       "db",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cfab-040",
@@ -760,7 +799,8 @@
       "db",
       "column_fabricated",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tmatch-041",
@@ -780,7 +820,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-042",
@@ -800,7 +841,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-043",
@@ -820,7 +862,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-044",
@@ -840,7 +883,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-045",
@@ -860,7 +904,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-046",
@@ -880,7 +925,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-047",
@@ -900,7 +946,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-048",
@@ -920,7 +967,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-049",
@@ -940,7 +988,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-050",
@@ -960,7 +1009,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-051",
@@ -980,7 +1030,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-052",
@@ -1000,7 +1051,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-053",
@@ -1020,7 +1072,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-054",
@@ -1040,7 +1093,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-055",
@@ -1060,7 +1114,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-056",
@@ -1080,7 +1135,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-057",
@@ -1100,7 +1156,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-058",
@@ -1120,7 +1177,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-059",
@@ -1140,7 +1198,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-060",
@@ -1160,7 +1219,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmatch-061",
@@ -1180,7 +1240,8 @@
       "db",
       "column_type_match",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tmis-062",
@@ -1201,7 +1262,8 @@
       "db",
       "column_type_mismatch",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tmis-063",
@@ -1222,7 +1284,8 @@
       "db",
       "column_type_mismatch",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tmis-064",
@@ -1243,7 +1306,8 @@
       "db",
       "column_type_mismatch",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tmis-065",
@@ -1264,7 +1328,8 @@
       "db",
       "column_type_mismatch",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-tmis-066",
@@ -1285,7 +1350,8 @@
       "db",
       "column_type_mismatch",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-alias-067",
@@ -1305,7 +1371,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-068",
@@ -1325,7 +1392,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-069",
@@ -1345,7 +1413,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-070",
@@ -1365,7 +1434,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-071",
@@ -1385,7 +1455,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-072",
@@ -1405,7 +1476,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-073",
@@ -1425,7 +1497,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-074",
@@ -1445,7 +1518,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-075",
@@ -1465,7 +1539,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-alias-076",
@@ -1485,7 +1560,8 @@
       "db",
       "type_alias",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tedit-077",
@@ -1509,7 +1585,8 @@
       "db",
       "table_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-tedit-078",
@@ -1534,7 +1611,8 @@
       "db",
       "table_after_edit",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-cedit-079",
@@ -1559,7 +1637,8 @@
       "db",
       "column_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-cedit-080",
@@ -1584,7 +1663,8 @@
       "db",
       "column_after_edit",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-miss-081",
@@ -1601,7 +1681,8 @@
       "db",
       "missing_fields",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-miss-082",
@@ -1618,7 +1699,8 @@
       "db",
       "missing_fields",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-miss-083",
@@ -1636,7 +1718,8 @@
       "db",
       "missing_fields",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-miss-084",
@@ -1655,7 +1738,8 @@
       "db",
       "missing_fields",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-case-085",
@@ -1673,7 +1757,8 @@
       "db",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-case-086",
@@ -1691,7 +1776,8 @@
       "db",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-case-087",
@@ -1710,7 +1796,8 @@
       "db",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-case-088",
@@ -1729,7 +1816,8 @@
       "db",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-case-089",
@@ -1749,7 +1837,8 @@
       "db",
       "case_sensitivity",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-unk-090",
@@ -1768,7 +1857,8 @@
       "db",
       "unknown_assertion",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-unk-091",
@@ -1788,7 +1878,8 @@
       "db",
       "unknown_assertion",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-unk-092",
@@ -1807,7 +1898,8 @@
       "db",
       "unknown_assertion",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-size-093",
@@ -1827,7 +1919,8 @@
       "db",
       "type_size",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-size-094",
@@ -1847,7 +1940,8 @@
       "db",
       "type_size",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-size-095",
@@ -1867,7 +1961,8 @@
       "db",
       "type_size",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-multi-096",
@@ -1890,7 +1985,8 @@
       "db",
       "multi_predicate",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-multi-097",
@@ -1914,7 +2010,8 @@
       "db",
       "multi_predicate",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-multi-098",
@@ -1937,7 +2034,8 @@
       "db",
       "multi_predicate",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-multi-099",
@@ -1961,7 +2059,8 @@
       "db",
       "multi_predicate",
       "false_positive"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "db-parse-100",
@@ -1980,7 +2079,8 @@
       "db",
       "parser_validation",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-parse-101",
@@ -1999,7 +2099,8 @@
       "db",
       "parser_validation",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-parse-102",
@@ -2019,7 +2120,8 @@
       "db",
       "parser_validation",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "db-parse-103",
@@ -2039,6 +2141,7 @@
       "db",
       "parser_validation",
       "false_negative"
-    ]
+    ],
+    "intent": "false_negative"
   }
 ]

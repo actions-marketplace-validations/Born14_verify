@@ -28,7 +28,8 @@
       "reflow",
       "FB-01"
     ],
-    "rationale": "Assumed: getComputedStyle is a pure read. Actual: forces synchronous layout reflow. No \"reflow-safe\" marker in server.js."
+    "rationale": "Assumed: getComputedStyle is a pure read. Actual: forces synchronous layout reflow. No \"reflow-safe\" marker in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-reflow-002",
@@ -59,7 +60,8 @@
       "reflow",
       "FB-01"
     ],
-    "rationale": "Assumed: reading element bounds is side-effect-free. Actual: forces layout recalculation. config.json has no reference to this API."
+    "rationale": "Assumed: reading element bounds is side-effect-free. Actual: forces layout recalculation. config.json has no reference to this API.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-reflow-003",
@@ -90,7 +92,8 @@
       "reflow",
       "FB-01"
     ],
-    "rationale": "Assumed: reading offsetHeight is inert. Actual: triggers synchronous layout. No \"layout-observed\" comment in server.js."
+    "rationale": "Assumed: reading offsetHeight is inert. Actual: triggers synchronous layout. No \"layout-observed\" comment in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-reflow-004",
@@ -121,7 +124,8 @@
       "reflow",
       "FB-01"
     ],
-    "rationale": "Assumed: reading scrollTop is a pure getter. Actual: forces scroll layout computation on overflow container. config.json has no scroll config."
+    "rationale": "Assumed: reading scrollTop is a pure getter. Actual: forces scroll layout computation on overflow container. config.json has no scroll config.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-reflow-005",
@@ -142,7 +146,8 @@
       "FB-01",
       "control"
     ],
-    "rationale": "Static file check — reading CSS text in server.js does not trigger any browser reflow."
+    "rationale": "Static file check — reading CSS text in server.js does not trigger any browser reflow.",
+    "intent": "false_negative"
   },
   {
     "id": "fb-screenshot-006",
@@ -173,7 +178,8 @@
       "screenshot_sideeffect",
       "FB-02"
     ],
-    "rationale": "Assumed: screenshot observes current state. Actual: viewport expansion during screenshot triggers IntersectionObserver, loading lazy images. No eager loading in server.js."
+    "rationale": "Assumed: screenshot observes current state. Actual: viewport expansion during screenshot triggers IntersectionObserver, loading lazy images. No eager loading in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-screenshot-007",
@@ -204,7 +210,8 @@
       "screenshot_sideeffect",
       "FB-02"
     ],
-    "rationale": "Assumed: MutationObserver is passive. Actual: any DOM change (including verification tooling injections) fires callbacks. config.json has no reference."
+    "rationale": "Assumed: MutationObserver is passive. Actual: any DOM change (including verification tooling injections) fires callbacks. config.json has no reference.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-screenshot-008",
@@ -235,7 +242,8 @@
       "screenshot_sideeffect",
       "FB-02"
     ],
-    "rationale": "Assumed: ResizeObserver only fires on user actions. Actual: setting viewport for screenshot triggers resize. No \"resize-aware\" in server.js."
+    "rationale": "Assumed: ResizeObserver only fires on user actions. Actual: setting viewport for screenshot triggers resize. No \"resize-aware\" in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-screenshot-009",
@@ -266,7 +274,8 @@
       "screenshot_sideeffect",
       "FB-02"
     ],
-    "rationale": "Assumed: screenshot captures final state. Actual: captures mid-animation frame. No animation-fill-mode:none in server.js."
+    "rationale": "Assumed: screenshot captures final state. Actual: captures mid-animation frame. No animation-fill-mode:none in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-screenshot-010",
@@ -287,7 +296,8 @@
       "FB-02",
       "control"
     ],
-    "rationale": "Static HTML — screenshot of static content has no observer effects."
+    "rationale": "Static HTML — screenshot of static content has no observer effects.",
+    "intent": "false_negative"
   },
   {
     "id": "fb-thrash-011",
@@ -318,7 +328,8 @@
       "layout_thrash",
       "FB-03"
     ],
-    "rationale": "Assumed: scrollIntoView just checks visibility. Actual: physically scrolls the page, changing scroll position. No preservation marker in server.js."
+    "rationale": "Assumed: scrollIntoView just checks visibility. Actual: physically scrolls the page, changing scroll position. No preservation marker in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-thrash-012",
@@ -349,7 +360,8 @@
       "layout_thrash",
       "FB-03"
     ],
-    "rationale": "Assumed: measuring width is harmless. Actual: read-write-read forces two reflows. config.json has no layoutThrash awareness."
+    "rationale": "Assumed: measuring width is harmless. Actual: read-write-read forces two reflows. config.json has no layoutThrash awareness.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-thrash-013",
@@ -380,7 +392,8 @@
       "layout_thrash",
       "FB-03"
     ],
-    "rationale": "Assumed: calling focus() for verification is read-like. Actual: changes :focus-visible state, altering visual appearance. No focus-management in server.js."
+    "rationale": "Assumed: calling focus() for verification is read-like. Actual: changes :focus-visible state, altering visual appearance. No focus-management in server.js.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-thrash-014",
@@ -411,7 +424,8 @@
       "layout_thrash",
       "FB-03"
     ],
-    "rationale": "Assumed: getSelection is pure read. Actual: accessing selection can fire selectionchange event. config.json has no selection config."
+    "rationale": "Assumed: getSelection is pure read. Actual: accessing selection can fire selectionchange event. config.json has no selection config.",
+    "intent": "false_positive"
   },
   {
     "id": "fb-thrash-015",
@@ -432,7 +446,8 @@
       "FB-03",
       "control"
     ],
-    "rationale": "Static file check — reading CSS class names in source text causes no layout thrashing."
+    "rationale": "Static file check — reading CSS class names in source text causes no layout thrashing.",
+    "intent": "false_negative"
   },
   {
     "id": "fb-bolster-100",
@@ -457,7 +472,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-101",
@@ -482,7 +498,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-102",
@@ -507,7 +524,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-103",
@@ -532,7 +550,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-104",
@@ -557,7 +576,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-105",
@@ -582,7 +602,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-106",
@@ -607,7 +628,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-107",
@@ -632,7 +654,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-108",
@@ -658,7 +681,8 @@
       "fb-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "fb-bolster-109",
@@ -684,7 +708,8 @@
       "fb-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fb-bolster-110",
@@ -710,7 +735,8 @@
       "fb-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "fb-bolster-111",
@@ -735,7 +761,8 @@
       "fb-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "fb-bolster-112",
@@ -753,7 +780,8 @@
       "browser",
       "fb-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "fb-bolster-113",
@@ -772,7 +800,8 @@
       "fb-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "fb-bolster-114",
@@ -792,6 +821,7 @@
       "fb-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

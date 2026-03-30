@@ -17,7 +17,8 @@
       "schema_qualified",
       "D-23"
     ],
-    "rationale": "Grounding strips schema qualifiers; \"public.users\" is not a recognized table name in init.sql"
+    "rationale": "Grounding strips schema qualifiers; \"public.users\" is not a recognized table name in init.sql",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D23-002",
@@ -36,7 +37,8 @@
       "schema_qualified",
       "D-23"
     ],
-    "rationale": "Control: unqualified table name matches init.sql directly"
+    "rationale": "Control: unqualified table name matches init.sql directly",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D23-003",
@@ -57,7 +59,8 @@
       "schema_qualified",
       "D-23"
     ],
-    "rationale": "Schema-qualified table name not recognized by grounding gate"
+    "rationale": "Schema-qualified table name not recognized by grounding gate",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D24-004",
@@ -83,7 +86,8 @@
       "generated_columns",
       "D-24"
     ],
-    "rationale": "Migration adds a GENERATED ALWAYS column; predicate should find it in modified init.sql"
+    "rationale": "Migration adds a GENERATED ALWAYS column; predicate should find it in modified init.sql",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D24-005",
@@ -104,7 +108,8 @@
       "generated_columns",
       "D-24"
     ],
-    "rationale": "No GENERATED column exists — pure fabrication"
+    "rationale": "No GENERATED column exists — pure fabrication",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D25-006",
@@ -131,7 +136,8 @@
       "collation",
       "D-25"
     ],
-    "rationale": "COLLATE is a modifier, not a type change — column_type should still match VARCHAR(50)"
+    "rationale": "COLLATE is a modifier, not a type change — column_type should still match VARCHAR(50)",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D25-007",
@@ -158,7 +164,8 @@
       "collation",
       "D-25"
     ],
-    "rationale": "Column is still VARCHAR(50) despite collation annotation — TEXT assertion is wrong"
+    "rationale": "Column is still VARCHAR(50) despite collation annotation — TEXT assertion is wrong",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D26-008",
@@ -184,7 +191,8 @@
       "partial_index",
       "D-26"
     ],
-    "rationale": "Partial index on existing column — column_exists check passes independently"
+    "rationale": "Partial index on existing column — column_exists check passes independently",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D26-009",
@@ -211,7 +219,8 @@
       "partial_index",
       "D-26"
     ],
-    "rationale": "Expression index LOWER(email) does not create a column called lower_email"
+    "rationale": "Expression index LOWER(email) does not create a column called lower_email",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D27-010",
@@ -248,7 +257,8 @@
       "composite_key",
       "D-27"
     ],
-    "rationale": "Composite PK table added — both columns exist in the new table"
+    "rationale": "Composite PK table added — both columns exist in the new table",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D27-011",
@@ -269,7 +279,8 @@
       "composite_key",
       "D-27"
     ],
-    "rationale": "role_name does not exist on users table — confusing composite key table with parent"
+    "rationale": "role_name does not exist on users table — confusing composite key table with parent",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D28-012",
@@ -289,7 +300,8 @@
       "column_order",
       "D-28"
     ],
-    "rationale": "column_exists is order-independent — id is first but check does not depend on position"
+    "rationale": "column_exists is order-independent — id is first but check does not depend on position",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D28-013",
@@ -310,7 +322,8 @@
       "column_order",
       "D-28"
     ],
-    "rationale": "Type check is position-agnostic — created_at is last column but type matches"
+    "rationale": "Type check is position-agnostic — created_at is last column but type matches",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D28-014",
@@ -337,7 +350,8 @@
       "column_order",
       "D-28"
     ],
-    "rationale": "Column order changed but type is still correct — assertion is order-independent"
+    "rationale": "Column order changed but type is still correct — assertion is order-independent",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D29-015",
@@ -363,7 +377,8 @@
       "trigger",
       "D-29"
     ],
-    "rationale": "Trigger function added but updated_at column already exists — check passes"
+    "rationale": "Trigger function added but updated_at column already exists — check passes",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D29-016",
@@ -384,7 +399,8 @@
       "trigger",
       "D-29"
     ],
-    "rationale": "posts table has no updated_at column — trigger would not create it"
+    "rationale": "posts table has no updated_at column — trigger would not create it",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D30-017",
@@ -409,7 +425,8 @@
       "views",
       "D-30"
     ],
-    "rationale": "VIEW definition found by grounding in init.sql — table_exists matches CREATE VIEW"
+    "rationale": "VIEW definition found by grounding in init.sql — table_exists matches CREATE VIEW",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D30-018",
@@ -435,7 +452,8 @@
       "views",
       "D-30"
     ],
-    "rationale": "MATERIALIZED VIEW columns appear in the CREATE statement — grounding can parse them"
+    "rationale": "MATERIALIZED VIEW columns appear in the CREATE statement — grounding can parse them",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D30-019",
@@ -455,7 +473,8 @@
       "views",
       "D-30"
     ],
-    "rationale": "No view or table named user_summary exists in schema"
+    "rationale": "No view or table named user_summary exists in schema",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D31-020",
@@ -482,7 +501,8 @@
       "deferrable_fk",
       "D-31"
     ],
-    "rationale": "DEFERRABLE is a constraint modifier, not a type change — column is still INTEGER"
+    "rationale": "DEFERRABLE is a constraint modifier, not a type change — column is still INTEGER",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D31-021",
@@ -509,7 +529,8 @@
       "deferrable_fk",
       "D-31"
     ],
-    "rationale": "DEFERRABLE is not part of the column type — type is still INTEGER"
+    "rationale": "DEFERRABLE is not part of the column type — type is still INTEGER",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D32-022",
@@ -535,7 +556,8 @@
       "stale_cache",
       "D-32"
     ],
-    "rationale": "ALTER TABLE appended to init.sql — grounding should pick up the new column"
+    "rationale": "ALTER TABLE appended to init.sql — grounding should pick up the new column",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D32-023",
@@ -561,7 +583,8 @@
       "stale_cache",
       "D-32"
     ],
-    "rationale": "Grounding parses CREATE TABLE (is_active exists) but may not process ALTER TABLE DROP — stale cache scenario"
+    "rationale": "Grounding parses CREATE TABLE (is_active exists) but may not process ALTER TABLE DROP — stale cache scenario",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D32-024",
@@ -587,7 +610,8 @@
       "stale_cache",
       "D-32"
     ],
-    "rationale": "ALTER TABLE adds slug — grounding should detect it if it parses ALTER statements"
+    "rationale": "ALTER TABLE adds slug — grounding should detect it if it parses ALTER statements",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D13-025",
@@ -608,7 +632,8 @@
       "row_count",
       "D-13"
     ],
-    "rationale": "row_count is not a supported assertion type (only table_exists, column_exists, column_type)"
+    "rationale": "row_count is not a supported assertion type (only table_exists, column_exists, column_type)",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D13-026",
@@ -627,7 +652,8 @@
       "row_count",
       "D-13"
     ],
-    "rationale": "Control: table_exists is the supported way to verify schema presence"
+    "rationale": "Control: table_exists is the supported way to verify schema presence",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D14-027",
@@ -649,7 +675,8 @@
       "row_value",
       "D-14"
     ],
-    "rationale": "row_value is not a supported assertion — only schema-level checks supported"
+    "rationale": "row_value is not a supported assertion — only schema-level checks supported",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D14-028",
@@ -670,7 +697,8 @@
       "row_value",
       "D-14"
     ],
-    "rationale": "Control: column_type JSONB is the valid structural assertion"
+    "rationale": "Control: column_type JSONB is the valid structural assertion",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D15-029",
@@ -691,7 +719,8 @@
       "sequence",
       "D-15"
     ],
-    "rationale": "users.id is declared as SERIAL — type assertion matches"
+    "rationale": "users.id is declared as SERIAL — type assertion matches",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D15-030",
@@ -712,7 +741,8 @@
       "sequence",
       "D-15"
     ],
-    "rationale": "SERIAL is declared type in init.sql — grounding matches literal type string, not underlying INTEGER"
+    "rationale": "SERIAL is declared type in init.sql — grounding matches literal type string, not underlying INTEGER",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D15-031",
@@ -733,7 +763,8 @@
       "sequence",
       "D-15"
     ],
-    "rationale": "Column is SERIAL not BIGSERIAL — precision mismatch"
+    "rationale": "Column is SERIAL not BIGSERIAL — precision mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D17-032",
@@ -759,7 +790,8 @@
       "transaction_isolation",
       "D-17"
     ],
-    "rationale": "Optimistic locking column added — structural check passes regardless of isolation level"
+    "rationale": "Optimistic locking column added — structural check passes regardless of isolation level",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D17-033",
@@ -780,7 +812,8 @@
       "transaction_isolation",
       "D-17"
     ],
-    "rationale": "xmin is a PostgreSQL system column not declared in init.sql — grounding rejects"
+    "rationale": "xmin is a PostgreSQL system column not declared in init.sql — grounding rejects",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D33-034",
@@ -801,7 +834,8 @@
       "null_semantics",
       "D-33"
     ],
-    "rationale": "posts.body is TEXT and nullable — type assertion is about declared type, not null state"
+    "rationale": "posts.body is TEXT and nullable — type assertion is about declared type, not null state",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D33-035",
@@ -822,7 +856,8 @@
       "null_semantics",
       "D-33"
     ],
-    "rationale": "posts.body is TEXT without NOT NULL — \"TEXT NOT NULL\" does not match declared type"
+    "rationale": "posts.body is TEXT without NOT NULL — \"TEXT NOT NULL\" does not match declared type",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D33-036",
@@ -843,7 +878,8 @@
       "null_semantics",
       "D-33"
     ],
-    "rationale": "posts.title is VARCHAR(200) NOT NULL — type check ignores constraint modifiers"
+    "rationale": "posts.title is VARCHAR(200) NOT NULL — type check ignores constraint modifiers",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D34-037",
@@ -870,7 +906,8 @@
       "float_precision",
       "D-34"
     ],
-    "rationale": "NUMERIC(3,2) added — exact precision type match"
+    "rationale": "NUMERIC(3,2) added — exact precision type match",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D34-038",
@@ -897,7 +934,8 @@
       "float_precision",
       "D-34"
     ],
-    "rationale": "Column is NUMERIC(3,2) not FLOAT — precision type mismatch"
+    "rationale": "Column is NUMERIC(3,2) not FLOAT — precision type mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D34-039",
@@ -924,7 +962,8 @@
       "float_precision",
       "D-34"
     ],
-    "rationale": "DOUBLE PRECISION is not REAL — different precision levels"
+    "rationale": "DOUBLE PRECISION is not REAL — different precision levels",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D35-040",
@@ -945,7 +984,8 @@
       "timezone",
       "D-35"
     ],
-    "rationale": "users.created_at is declared as TIMESTAMP (without time zone)"
+    "rationale": "users.created_at is declared as TIMESTAMP (without time zone)",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D35-041",
@@ -966,7 +1006,8 @@
       "timezone",
       "D-35"
     ],
-    "rationale": "Column is TIMESTAMP not TIMESTAMPTZ — timezone awareness mismatch"
+    "rationale": "Column is TIMESTAMP not TIMESTAMPTZ — timezone awareness mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D35-042",
@@ -993,7 +1034,8 @@
       "timezone",
       "D-35"
     ],
-    "rationale": "Edit changes type to TIMESTAMPTZ — predicate now matches"
+    "rationale": "Edit changes type to TIMESTAMPTZ — predicate now matches",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D36-043",
@@ -1014,7 +1056,8 @@
       "defaults",
       "D-36"
     ],
-    "rationale": "DEFAULT is an insert-path behavior — column_type checks structural type only"
+    "rationale": "DEFAULT is an insert-path behavior — column_type checks structural type only",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D36-044",
@@ -1035,7 +1078,8 @@
       "defaults",
       "D-36"
     ],
-    "rationale": "DEFAULT is not part of column type — \"BOOLEAN DEFAULT true\" is not a valid type string"
+    "rationale": "DEFAULT is not part of column type — \"BOOLEAN DEFAULT true\" is not a valid type string",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D37-045",
@@ -1061,7 +1105,8 @@
       "soft_delete",
       "D-37"
     ],
-    "rationale": "Soft delete pattern: deleted_at column added successfully"
+    "rationale": "Soft delete pattern: deleted_at column added successfully",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D37-046",
@@ -1082,7 +1127,8 @@
       "soft_delete",
       "D-37"
     ],
-    "rationale": "No deleted_at column in schema — soft delete not implemented"
+    "rationale": "No deleted_at column in schema — soft delete not implemented",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D37-047",
@@ -1102,7 +1148,8 @@
       "soft_delete",
       "D-37"
     ],
-    "rationale": "is_active exists and could serve as soft delete flag — structural check passes"
+    "rationale": "is_active exists and could serve as soft delete flag — structural check passes",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D38-048",
@@ -1122,7 +1169,8 @@
       "phantom_rows",
       "D-38"
     ],
-    "rationale": "System catalog tables not declared in init.sql — grounding rejects"
+    "rationale": "System catalog tables not declared in init.sql — grounding rejects",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D38-049",
@@ -1149,7 +1197,8 @@
       "phantom_rows",
       "D-38"
     ],
-    "rationale": "Optimistic concurrency column added — type check is isolation-independent"
+    "rationale": "Optimistic concurrency column added — type check is isolation-independent",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D39-050",
@@ -1175,7 +1224,8 @@
       "ordering",
       "D-39"
     ],
-    "rationale": "Schema predicate order does not imply row ordering — structural checks"
+    "rationale": "Schema predicate order does not imply row ordering — structural checks",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D39-051",
@@ -1196,7 +1246,8 @@
       "ordering",
       "D-39"
     ],
-    "rationale": "No sort_order column — ordering assumptions fabricated"
+    "rationale": "No sort_order column — ordering assumptions fabricated",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D40-052",
@@ -1217,7 +1268,8 @@
       "sequence_gaps",
       "D-40"
     ],
-    "rationale": "posts.id is SERIAL — structural type check, gap behavior is runtime"
+    "rationale": "posts.id is SERIAL — structural type check, gap behavior is runtime",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D40-053",
@@ -1244,7 +1296,8 @@
       "sequence_gaps",
       "D-40"
     ],
-    "rationale": "Changed to BIGSERIAL — type assertion matches the new declaration"
+    "rationale": "Changed to BIGSERIAL — type assertion matches the new declaration",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D41-054",
@@ -1271,7 +1324,8 @@
       "trigger_mutated",
       "D-41"
     ],
-    "rationale": "Trigger target column added — structural type check passes regardless of trigger behavior"
+    "rationale": "Trigger target column added — structural type check passes regardless of trigger behavior",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D41-055",
@@ -1292,7 +1346,8 @@
       "trigger_mutated",
       "D-41"
     ],
-    "rationale": "auto_slug would be trigger-computed but column not declared in schema"
+    "rationale": "auto_slug would be trigger-computed but column not declared in schema",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D42-056",
@@ -1313,7 +1368,8 @@
       "referential_integrity",
       "D-42"
     ],
-    "rationale": "posts.user_id is INTEGER REFERENCES users(id) — type check is correct"
+    "rationale": "posts.user_id is INTEGER REFERENCES users(id) — type check is correct",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D42-057",
@@ -1334,7 +1390,8 @@
       "referential_integrity",
       "D-42"
     ],
-    "rationale": "sessions.user_id is INTEGER with FK — type check passes"
+    "rationale": "sessions.user_id is INTEGER with FK — type check passes",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D42-058",
@@ -1355,7 +1412,8 @@
       "referential_integrity",
       "D-42"
     ],
-    "rationale": "settings table has no user_id FK — fabricated referential relationship"
+    "rationale": "settings table has no user_id FK — fabricated referential relationship",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D19-059",
@@ -1375,7 +1433,8 @@
       "identifier_quoting",
       "D-19"
     ],
-    "rationale": "Grounding does not strip double quotes — literal '\"users\"' does not match 'users'"
+    "rationale": "Grounding does not strip double quotes — literal '\"users\"' does not match 'users'",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D19-060",
@@ -1395,7 +1454,8 @@
       "identifier_quoting",
       "D-19"
     ],
-    "rationale": "Backtick quoting is MySQL-style — grounding does not strip backticks"
+    "rationale": "Backtick quoting is MySQL-style — grounding does not strip backticks",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D19-061",
@@ -1414,7 +1474,8 @@
       "identifier_quoting",
       "D-19"
     ],
-    "rationale": "Control: unquoted identifier matches directly"
+    "rationale": "Control: unquoted identifier matches directly",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D21-062",
@@ -1435,7 +1496,8 @@
       "date_format",
       "D-21"
     ],
-    "rationale": "sessions.expires_at is TIMESTAMP — exact match"
+    "rationale": "sessions.expires_at is TIMESTAMP — exact match",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D21-063",
@@ -1456,7 +1518,8 @@
       "date_format",
       "D-21"
     ],
-    "rationale": "DATETIME is MySQL/SQLite — PostgreSQL uses TIMESTAMP"
+    "rationale": "DATETIME is MySQL/SQLite — PostgreSQL uses TIMESTAMP",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D21-064",
@@ -1477,7 +1540,8 @@
       "date_format",
       "D-21"
     ],
-    "rationale": "DATE is date-only — TIMESTAMP includes time component"
+    "rationale": "DATE is date-only — TIMESTAMP includes time component",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D22-065",
@@ -1497,7 +1561,8 @@
       "permissions",
       "D-22"
     ],
-    "rationale": "System catalog tables not in init.sql — grounding rejects"
+    "rationale": "System catalog tables not in init.sql — grounding rejects",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D22-066",
@@ -1522,7 +1587,8 @@
       "permissions",
       "D-22"
     ],
-    "rationale": "GRANT does not affect table existence — structural check passes"
+    "rationale": "GRANT does not affect table existence — structural check passes",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D43-067",
@@ -1543,7 +1609,8 @@
       "sqlite_vs_postgres",
       "D-43"
     ],
-    "rationale": "SQLite uses \"INTEGER PRIMARY KEY\" as type — PostgreSQL declares SERIAL separately"
+    "rationale": "SQLite uses \"INTEGER PRIMARY KEY\" as type — PostgreSQL declares SERIAL separately",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D43-068",
@@ -1564,7 +1631,8 @@
       "sqlite_vs_postgres",
       "D-43"
     ],
-    "rationale": "UUID is a Postgres type — sessions.id matches"
+    "rationale": "UUID is a Postgres type — sessions.id matches",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D43-069",
@@ -1585,7 +1653,8 @@
       "sqlite_vs_postgres",
       "D-43"
     ],
-    "rationale": "JSONB is Postgres-specific — exists in schema"
+    "rationale": "JSONB is Postgres-specific — exists in schema",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D43-070",
@@ -1606,7 +1675,8 @@
       "sqlite_vs_postgres",
       "D-43"
     ],
-    "rationale": "Column is JSONB not JSON — binary vs text JSON representation"
+    "rationale": "Column is JSONB not JSON — binary vs text JSON representation",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D44-071",
@@ -1626,7 +1696,8 @@
       "reserved_keywords",
       "D-44"
     ],
-    "rationale": "key is reserved in SQL but used in init.sql — grounding finds it"
+    "rationale": "key is reserved in SQL but used in init.sql — grounding finds it",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D44-072",
@@ -1652,7 +1723,8 @@
       "reserved_keywords",
       "D-44"
     ],
-    "rationale": "Column \"order\" declared with quotes in CREATE TABLE — grounding should match without quotes"
+    "rationale": "Column \"order\" declared with quotes in CREATE TABLE — grounding should match without quotes",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D44-073",
@@ -1672,7 +1744,8 @@
       "reserved_keywords",
       "D-44"
     ],
-    "rationale": "\"value\" is a column in settings, not a table — keyword/table confusion"
+    "rationale": "\"value\" is a column in settings, not a table — keyword/table confusion",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D45-074",
@@ -1693,7 +1766,8 @@
       "locale_collation",
       "D-45"
     ],
-    "rationale": "Column type is locale-independent — VARCHAR(50) matches regardless of database collation"
+    "rationale": "Column type is locale-independent — VARCHAR(50) matches regardless of database collation",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D45-075",
@@ -1720,7 +1794,8 @@
       "locale_collation",
       "D-45"
     ],
-    "rationale": "Index collation does not change column type — TEXT still matches"
+    "rationale": "Index collation does not change column type — TEXT still matches",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D46-076",
@@ -1740,7 +1815,8 @@
       "permission_model",
       "D-46"
     ],
-    "rationale": "information_schema is a system catalog — not declared in init.sql"
+    "rationale": "information_schema is a system catalog — not declared in init.sql",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D46-077",
@@ -1760,7 +1836,8 @@
       "permission_model",
       "D-46"
     ],
-    "rationale": "Control: user-defined table/column accessible via init.sql grounding"
+    "rationale": "Control: user-defined table/column accessible via init.sql grounding",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D47-078",
@@ -1786,7 +1863,8 @@
       "stored_proc",
       "D-47"
     ],
-    "rationale": "Function targets view_count column — column exists regardless of function presence"
+    "rationale": "Function targets view_count column — column exists regardless of function presence",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D47-079",
@@ -1812,7 +1890,8 @@
       "stored_proc",
       "D-47"
     ],
-    "rationale": "FUNCTION is not a TABLE — table_exists assertion fails for functions"
+    "rationale": "FUNCTION is not a TABLE — table_exists assertion fails for functions",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D48-080",
@@ -1839,7 +1918,8 @@
       "extensions",
       "D-48"
     ],
-    "rationale": "Extension added but does not change existing column types"
+    "rationale": "Extension added but does not change existing column types",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D48-081",
@@ -1861,7 +1941,8 @@
       "extensions",
       "D-48"
     ],
-    "rationale": "No PostGIS extension or GEOMETRY column — fabricated extension dependency"
+    "rationale": "No PostGIS extension or GEOMETRY column — fabricated extension dependency",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D48-082",
@@ -1888,7 +1969,8 @@
       "extensions",
       "D-48"
     ],
-    "rationale": "uuid-ossp extension added; sessions.id is already UUID — predicate passes"
+    "rationale": "uuid-ossp extension added; sessions.id is already UUID — predicate passes",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D49-083",
@@ -1913,7 +1995,8 @@
       "rls",
       "D-49"
     ],
-    "rationale": "RLS is access control — does not affect table existence or schema structure"
+    "rationale": "RLS is access control — does not affect table existence or schema structure",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D49-084",
@@ -1933,7 +2016,8 @@
       "rls",
       "D-49"
     ],
-    "rationale": "RLS policy name is not a table — conceptual confusion between policy and table"
+    "rationale": "RLS policy name is not a table — conceptual confusion between policy and table",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D50-085",
@@ -1964,7 +2048,8 @@
       "partitioning",
       "D-50"
     ],
-    "rationale": "Partitioned table CREATE parsed by grounding — columns exist on parent"
+    "rationale": "Partitioned table CREATE parsed by grounding — columns exist on parent",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D50-086",
@@ -1990,7 +2075,8 @@
       "partitioning",
       "D-50"
     ],
-    "rationale": "Partition child table not in CREATE — only parent declared"
+    "rationale": "Partition child table not in CREATE — only parent declared",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D51-087",
@@ -2010,7 +2096,8 @@
       "connection_pool",
       "D-51"
     ],
-    "rationale": "Connection pool exhaustion is runtime — schema grounding is file-based, not connection-based"
+    "rationale": "Connection pool exhaustion is runtime — schema grounding is file-based, not connection-based",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D51-088",
@@ -2030,7 +2117,8 @@
       "connection_pool",
       "D-51"
     ],
-    "rationale": "pg_stat_activity is a system view — not in init.sql"
+    "rationale": "pg_stat_activity is a system view — not in init.sql",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D52-089",
@@ -2051,7 +2139,8 @@
       "prepared_stmt",
       "D-52"
     ],
-    "rationale": "Type coercion is runtime behavior — structural type matches VARCHAR(50)"
+    "rationale": "Type coercion is runtime behavior — structural type matches VARCHAR(50)",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D52-090",
@@ -2072,7 +2161,8 @@
       "prepared_stmt",
       "D-52"
     ],
-    "rationale": "Declared type is VARCHAR(50) — \"VARCHAR\" without length does not match exactly"
+    "rationale": "Declared type is VARCHAR(50) — \"VARCHAR\" without length does not match exactly",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D52-091",
@@ -2093,7 +2183,8 @@
       "prepared_stmt",
       "D-52"
     ],
-    "rationale": "init.sql declares VARCHAR(255) — canonical form CHARACTER VARYING does not match literal"
+    "rationale": "init.sql declares VARCHAR(255) — canonical form CHARACTER VARYING does not match literal",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D53-092",
@@ -2114,7 +2205,8 @@
       "json_path",
       "D-53"
     ],
-    "rationale": "settings.value is JSONB — JSON path querying is runtime, type check is structural"
+    "rationale": "settings.value is JSONB — JSON path querying is runtime, type check is structural",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D53-093",
@@ -2135,7 +2227,8 @@
       "json_path",
       "D-53"
     ],
-    "rationale": "JSON path operator \"->\" is not a column name — grounding rejects"
+    "rationale": "JSON path operator \"->\" is not a column name — grounding rejects",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D53-094",
@@ -2162,7 +2255,8 @@
       "json_path",
       "D-53"
     ],
-    "rationale": "JSONB column added — type assertion matches"
+    "rationale": "JSONB column added — type assertion matches",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D54-095",
@@ -2182,7 +2276,8 @@
       "temp_tables",
       "D-54"
     ],
-    "rationale": "Temporary tables are session-scoped and not in init.sql"
+    "rationale": "Temporary tables are session-scoped and not in init.sql",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D54-096",
@@ -2207,7 +2302,8 @@
       "temp_tables",
       "D-54"
     ],
-    "rationale": "TEMPORARY TABLE declared in init.sql — grounding finds the CREATE statement"
+    "rationale": "TEMPORARY TABLE declared in init.sql — grounding finds the CREATE statement",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D54-097",
@@ -2234,7 +2330,8 @@
       "temp_tables",
       "D-54"
     ],
-    "rationale": "TEMP table column types parsed from init.sql like regular tables"
+    "rationale": "TEMP table column types parsed from init.sql like regular tables",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D55-098",
@@ -2255,7 +2352,8 @@
       "replication_lag",
       "D-55"
     ],
-    "rationale": "Replication lag affects data, not schema — structural type check is lag-independent"
+    "rationale": "Replication lag affects data, not schema — structural type check is lag-independent",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D55-099",
@@ -2275,7 +2373,8 @@
       "replication_lag",
       "D-55"
     ],
-    "rationale": "System catalog for replication not in init.sql"
+    "rationale": "System catalog for replication not in init.sql",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D56-100",
@@ -2302,7 +2401,8 @@
       "constraint_deferral",
       "D-56"
     ],
-    "rationale": "Constraint deferral mode does not change column type — TEXT still matches"
+    "rationale": "Constraint deferral mode does not change column type — TEXT still matches",
+    "intent": "false_negative"
   },
   {
     "id": "dadv-D56-101",
@@ -2329,7 +2429,8 @@
       "constraint_deferral",
       "D-56"
     ],
-    "rationale": "Constraint name is not a column — uq_token is a named constraint, not a column"
+    "rationale": "Constraint name is not a column — uq_token is a named constraint, not a column",
+    "intent": "false_positive"
   },
   {
     "id": "dadv-D56-102",
@@ -2355,6 +2456,7 @@
       "constraint_deferral",
       "D-56"
     ],
-    "rationale": "NOT DEFERRABLE is a FK modifier — column still exists"
+    "rationale": "NOT DEFERRABLE is a FK modifier — column still exists",
+    "intent": "false_negative"
   }
 ]

@@ -22,7 +22,8 @@
       "security",
       "sql_injection",
       "SEC-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "sec-adv-002",
@@ -46,7 +47,8 @@
       "security",
       "sql_injection",
       "SEC-02"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "sec-adv-003",
@@ -71,7 +73,8 @@
       "security",
       "sql_injection",
       "SEC-02"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "sec-adv-004",
@@ -95,7 +98,8 @@
       "security",
       "open_redirect",
       "SEC-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "sec-adv-005",
@@ -119,7 +123,8 @@
       "security",
       "open_redirect",
       "SEC-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "sec-adv-006",
@@ -138,7 +143,8 @@
       "security",
       "open_redirect",
       "SEC-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "sec-adv-007",
@@ -163,7 +169,8 @@
       "security",
       "secret_leaked",
       "SEC-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "sec-adv-008",
@@ -181,7 +188,8 @@
       "security",
       "secret_leaked",
       "SEC-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "sec-adv-009",
@@ -204,7 +212,8 @@
       "security",
       "secret_leaked",
       "SEC-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "sec-adv-010",
@@ -228,7 +237,8 @@
       "security",
       "missing_rate_limit",
       "SEC-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "sec-adv-011",
@@ -247,7 +257,8 @@
       "security",
       "missing_rate_limit",
       "SEC-07"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "sec-adv-012",
@@ -270,6 +281,7 @@
       "security",
       "missing_rate_limit",
       "SEC-07"
-    ]
+    ],
+    "intent": "false_positive"
   }
 ]

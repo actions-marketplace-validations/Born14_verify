@@ -29,7 +29,8 @@
       "db_api_shape",
       "PH-01"
     ],
-    "rationale": "Schema column added but API hardcoded — response shape doesn't include new field"
+    "rationale": "Schema column added but API hardcoded — response shape doesn't include new field",
+    "intent": "false_positive"
   },
   {
     "id": "ph-dbapi-002",
@@ -61,7 +62,8 @@
       "db_api_shape",
       "PH-01"
     ],
-    "rationale": "Schema adds timestamp column but API layer not updated — stale response shape"
+    "rationale": "Schema adds timestamp column but API layer not updated — stale response shape",
+    "intent": "false_positive"
   },
   {
     "id": "ph-dbapi-003",
@@ -88,7 +90,8 @@
       "PH-01",
       "pure"
     ],
-    "rationale": "Schema column added — server.js API has no code to serve it (pure structural check)"
+    "rationale": "Schema column added — server.js API has no code to serve it (pure structural check)",
+    "intent": "false_positive"
   },
   {
     "id": "ph-dbapi-004",
@@ -115,7 +118,8 @@
       "PH-01",
       "pure"
     ],
-    "rationale": "Column renamed in schema — server.js code still uses old column name"
+    "rationale": "Column renamed in schema — server.js code still uses old column name",
+    "intent": "false_positive"
   },
   {
     "id": "ph-apiui-005",
@@ -147,7 +151,8 @@
       "api_frontend",
       "PH-02"
     ],
-    "rationale": "API field renamed from \"name\" to \"title\" — response no longer contains \"name\" key"
+    "rationale": "API field renamed from \"name\" to \"title\" — response no longer contains \"name\" key",
+    "intent": "false_positive"
   },
   {
     "id": "ph-apiui-006",
@@ -183,7 +188,8 @@
       "PH-02",
       "control"
     ],
-    "rationale": "API response wrapped — check confirms new shape is served"
+    "rationale": "API response wrapped — check confirms new shape is served",
+    "intent": "false_negative"
   },
   {
     "id": "ph-apiui-007",
@@ -218,7 +224,8 @@
       "api_frontend",
       "PH-02"
     ],
-    "rationale": "API contract changed — old key \"echo\" no longer in response"
+    "rationale": "API contract changed — old key \"echo\" no longer in response",
+    "intent": "false_positive"
   },
   {
     "id": "ph-apiui-008",
@@ -245,7 +252,8 @@
       "PH-02",
       "pure"
     ],
-    "rationale": "API data changed but homepage HTML still hardcodes \"Item Alpha\" — the content predicate PASSES because Item Alpha IS still in the HTML template (it's the propagation gap that the API and HTML are inconsistent)"
+    "rationale": "API data changed but homepage HTML still hardcodes \"Item Alpha\" — the content predicate PASSES because Item Alpha IS still in the HTML template (it's the propagation gap that the API and HTML are inconsistent)",
+    "intent": "false_negative"
   },
   {
     "id": "ph-apiui-009",
@@ -272,7 +280,8 @@
       "PH-02",
       "pure"
     ],
-    "rationale": "Health response changed — old value no longer present"
+    "rationale": "Health response changed — old value no longer present",
+    "intent": "false_positive"
   },
   {
     "id": "ph-envproc-010",
@@ -303,7 +312,8 @@
       "env_process",
       "PH-03"
     ],
-    "rationale": ".env changed but process started with old port — still responds on 3000 (docker-compose overrides)"
+    "rationale": ".env changed but process started with old port — still responds on 3000 (docker-compose overrides)",
+    "intent": "false_negative"
   },
   {
     "id": "ph-envproc-011",
@@ -335,7 +345,8 @@
       "env_process",
       "PH-03"
     ],
-    "rationale": "Secret changed in .env but process doesn't expose secrets — env→API propagation gap"
+    "rationale": "Secret changed in .env but process doesn't expose secrets — env→API propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "ph-envproc-012",
@@ -367,7 +378,8 @@
       "env_process",
       "PH-03"
     ],
-    "rationale": "DEBUG flag enabled but server has no debug mode — env→behavior propagation gap"
+    "rationale": "DEBUG flag enabled but server has no debug mode — env→behavior propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "ph-envproc-013",
@@ -394,7 +406,8 @@
       "PH-03",
       "pure"
     ],
-    "rationale": "Config flag changed but .env has no corresponding variable — config→env propagation gap"
+    "rationale": "Config flag changed but .env has no corresponding variable — config→env propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "ph-envproc-014",
@@ -421,7 +434,8 @@
       "PH-03",
       "pure"
     ],
-    "rationale": "DB port changed in config but docker-compose has no DB service to update"
+    "rationale": "DB port changed in config but docker-compose has no DB service to update",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-100",
@@ -447,7 +461,8 @@
       "middleware_gap",
       "PH-04"
     ],
-    "rationale": "Middleware/utility added but not propagated to all consumers"
+    "rationale": "Middleware/utility added but not propagated to all consumers",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-101",
@@ -473,7 +488,8 @@
       "middleware_gap",
       "PH-04"
     ],
-    "rationale": "Middleware/utility added but not propagated to all consumers"
+    "rationale": "Middleware/utility added but not propagated to all consumers",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-102",
@@ -499,7 +515,8 @@
       "middleware_gap",
       "PH-04"
     ],
-    "rationale": "Middleware/utility added but not propagated to all consumers"
+    "rationale": "Middleware/utility added but not propagated to all consumers",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-103",
@@ -526,7 +543,8 @@
       "PH-04",
       "control"
     ],
-    "rationale": "Middleware/utility added but not propagated to all consumers"
+    "rationale": "Middleware/utility added but not propagated to all consumers",
+    "intent": "false_negative"
   },
   {
     "id": "ph-bolster-104",
@@ -553,7 +571,8 @@
       "PH-05",
       "control"
     ],
-    "rationale": "Error handling changed but not propagated to all layers"
+    "rationale": "Error handling changed but not propagated to all layers",
+    "intent": "false_negative"
   },
   {
     "id": "ph-bolster-105",
@@ -579,7 +598,8 @@
       "error_handling",
       "PH-05"
     ],
-    "rationale": "Error handling changed but not propagated to all layers"
+    "rationale": "Error handling changed but not propagated to all layers",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-106",
@@ -605,7 +625,8 @@
       "error_handling",
       "PH-05"
     ],
-    "rationale": "Error handling changed but not propagated to all layers"
+    "rationale": "Error handling changed but not propagated to all layers",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-107",
@@ -632,7 +653,8 @@
       "PH-05",
       "control"
     ],
-    "rationale": "Error handling changed but not propagated to all layers"
+    "rationale": "Error handling changed but not propagated to all layers",
+    "intent": "false_negative"
   },
   {
     "id": "ph-bolster-108",
@@ -658,7 +680,8 @@
       "schema_config",
       "PH-06"
     ],
-    "rationale": "Schema changed but application config not propagated"
+    "rationale": "Schema changed but application config not propagated",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-109",
@@ -684,7 +707,8 @@
       "schema_config",
       "PH-06"
     ],
-    "rationale": "Schema changed but application config not propagated"
+    "rationale": "Schema changed but application config not propagated",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-110",
@@ -710,7 +734,8 @@
       "schema_config",
       "PH-06"
     ],
-    "rationale": "Schema changed but application config not propagated"
+    "rationale": "Schema changed but application config not propagated",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-111",
@@ -737,7 +762,8 @@
       "PH-06",
       "control"
     ],
-    "rationale": "Schema changed but application config not propagated"
+    "rationale": "Schema changed but application config not propagated",
+    "intent": "false_negative"
   },
   {
     "id": "ph-bolster-112",
@@ -764,7 +790,8 @@
       "PH-07",
       "control"
     ],
-    "rationale": "Template/HTML and API contract out of sync — propagation gap"
+    "rationale": "Template/HTML and API contract out of sync — propagation gap",
+    "intent": "false_negative"
   },
   {
     "id": "ph-bolster-113",
@@ -790,7 +817,8 @@
       "template_api_gap",
       "PH-07"
     ],
-    "rationale": "Template/HTML and API contract out of sync — propagation gap"
+    "rationale": "Template/HTML and API contract out of sync — propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-114",
@@ -816,7 +844,8 @@
       "template_api_gap",
       "PH-07"
     ],
-    "rationale": "Template/HTML and API contract out of sync — propagation gap"
+    "rationale": "Template/HTML and API contract out of sync — propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "ph-bolster-115",
@@ -843,6 +872,7 @@
       "PH-07",
       "control"
     ],
-    "rationale": "Template/HTML and API contract out of sync — propagation gap"
+    "rationale": "Template/HTML and API contract out of sync — propagation gap",
+    "intent": "false_negative"
   }
 ]

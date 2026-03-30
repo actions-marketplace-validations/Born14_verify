@@ -23,7 +23,8 @@
       "dom_limit",
       "IB-01"
     ],
-    "rationale": "Content present but 500 DOM nodes in a single list degrades render performance"
+    "rationale": "Content present but 500 DOM nodes in a single list degrades render performance",
+    "intent": "false_negative"
   },
   {
     "id": "ib-dom-002",
@@ -49,7 +50,8 @@
       "dom_limit",
       "IB-01"
     ],
-    "rationale": "200-level nesting exceeds browser DOM depth recommendations — layout and style recalc blows up"
+    "rationale": "200-level nesting exceeds browser DOM depth recommendations — layout and style recalc blows up",
+    "intent": "false_negative"
   },
   {
     "id": "ib-dom-003",
@@ -75,7 +77,8 @@
       "dom_limit",
       "IB-01"
     ],
-    "rationale": "1000 table rows — content exists but table rendering becomes a performance bottleneck"
+    "rationale": "1000 table rows — content exists but table rendering becomes a performance bottleneck",
+    "intent": "false_negative"
   },
   {
     "id": "ib-dom-004",
@@ -101,7 +104,8 @@
       "dom_limit",
       "IB-01"
     ],
-    "rationale": "SVG with 300 elements — valid markup but headless browser render budget exceeded"
+    "rationale": "SVG with 300 elements — valid markup but headless browser render budget exceeded",
+    "intent": "false_negative"
   },
   {
     "id": "ib-dom-005",
@@ -128,7 +132,8 @@
       "IB-01",
       "control"
     ],
-    "rationale": "Single new item — well within DOM limits"
+    "rationale": "Single new item — well within DOM limits",
+    "intent": "false_negative"
   },
   {
     "id": "ib-storage-006",
@@ -154,7 +159,8 @@
       "storage_quota",
       "IB-02"
     ],
-    "rationale": "Script exists but 10MB exceeds typical 5MB localStorage quota — QuotaExceededError at runtime"
+    "rationale": "Script exists but 10MB exceeds typical 5MB localStorage quota — QuotaExceededError at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "ib-storage-007",
@@ -180,7 +186,8 @@
       "storage_quota",
       "IB-02"
     ],
-    "rationale": "10000 keys x 300 bytes each = ~3MB before overhead — nears quota limit"
+    "rationale": "10000 keys x 300 bytes each = ~3MB before overhead — nears quota limit",
+    "intent": "false_negative"
   },
   {
     "id": "ib-storage-008",
@@ -211,7 +218,8 @@
       "storage_quota",
       "IB-02"
     ],
-    "rationale": "Both storage APIs hit at 5MB each — combined quota likely exceeded"
+    "rationale": "Both storage APIs hit at 5MB each — combined quota likely exceeded",
+    "intent": "false_negative"
   },
   {
     "id": "ib-storage-009",
@@ -237,7 +245,8 @@
       "storage_quota",
       "IB-02"
     ],
-    "rationale": "50MB Blob to IndexedDB — exceeds typical ephemeral storage quota in headless browsers"
+    "rationale": "50MB Blob to IndexedDB — exceeds typical ephemeral storage quota in headless browsers",
+    "intent": "false_negative"
   },
   {
     "id": "ib-storage-010",
@@ -264,7 +273,8 @@
       "IB-02",
       "control"
     ],
-    "rationale": "Tiny localStorage write — well within any quota"
+    "rationale": "Tiny localStorage write — well within any quota",
+    "intent": "false_negative"
   },
   {
     "id": "ib-css-011",
@@ -290,7 +300,8 @@
       "css_limit",
       "IB-03"
     ],
-    "rationale": "5000 CSS rules — content exists but browsers may hit stylesheet parsing limits"
+    "rationale": "5000 CSS rules — content exists but browsers may hit stylesheet parsing limits",
+    "intent": "false_negative"
   },
   {
     "id": "ib-css-012",
@@ -316,7 +327,8 @@
       "css_limit",
       "IB-03"
     ],
-    "rationale": "30-level nested selector — browsers may refuse to match due to selector complexity limits"
+    "rationale": "30-level nested selector — browsers may refuse to match due to selector complexity limits",
+    "intent": "false_negative"
   },
   {
     "id": "ib-css-013",
@@ -342,7 +354,8 @@
       "css_limit",
       "IB-03"
     ],
-    "rationale": "40 @import rules — browsers limit stylesheet depth and @import chains"
+    "rationale": "40 @import rules — browsers limit stylesheet depth and @import chains",
+    "intent": "false_negative"
   },
   {
     "id": "ib-css-014",
@@ -368,7 +381,8 @@
       "css_limit",
       "IB-03"
     ],
-    "rationale": "2000 custom properties on :root — parsing overhead, possible CSSOM limit"
+    "rationale": "2000 custom properties on :root — parsing overhead, possible CSSOM limit",
+    "intent": "false_negative"
   },
   {
     "id": "ib-css-015",
@@ -395,7 +409,8 @@
       "IB-03",
       "control"
     ],
-    "rationale": "3 new CSS rules — far below any browser limit"
+    "rationale": "3 new CSS rules — far below any browser limit",
+    "intent": "false_negative"
   },
   {
     "id": "ib-bolster-100",
@@ -420,7 +435,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-101",
@@ -445,7 +461,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-102",
@@ -470,7 +487,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-103",
@@ -495,7 +513,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-104",
@@ -520,7 +539,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-105",
@@ -545,7 +565,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-106",
@@ -570,7 +591,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-107",
@@ -595,7 +617,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-108",
@@ -621,7 +644,8 @@
       "ib-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "ib-bolster-109",
@@ -647,7 +671,8 @@
       "ib-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "ib-bolster-110",
@@ -673,7 +698,8 @@
       "ib-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "ib-bolster-111",
@@ -698,7 +724,8 @@
       "ib-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "ib-bolster-112",
@@ -716,7 +743,8 @@
       "browser",
       "ib-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "ib-bolster-113",
@@ -735,7 +763,8 @@
       "ib-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "ib-bolster-114",
@@ -755,6 +784,7 @@
       "ib-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

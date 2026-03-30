@@ -28,7 +28,8 @@
       "concurrent_edit",
       "JF-01"
     ],
-    "rationale": "Second edit search string no longer exists after first edit applied — concurrent collision"
+    "rationale": "Second edit search string no longer exists after first edit applied — concurrent collision",
+    "intent": "false_positive"
   },
   {
     "id": "jf-conc-002",
@@ -59,7 +60,8 @@
       "concurrent_edit",
       "JF-01"
     ],
-    "rationale": "Second edit targets original name which was already replaced by first edit"
+    "rationale": "Second edit targets original name which was already replaced by first edit",
+    "intent": "false_positive"
   },
   {
     "id": "jf-conc-003",
@@ -90,7 +92,8 @@
       "concurrent_edit",
       "JF-01"
     ],
-    "rationale": "Second edit search string \"PORT=3000\" gone after first edit changed it to 8080"
+    "rationale": "Second edit search string \"PORT=3000\" gone after first edit changed it to 8080",
+    "intent": "false_positive"
   },
   {
     "id": "jf-conc-004",
@@ -121,7 +124,8 @@
       "concurrent_edit",
       "JF-01"
     ],
-    "rationale": "Both edits target same h1 rule — second edit search string gone after first applies"
+    "rationale": "Both edits target same h1 rule — second edit search string gone after first applies",
+    "intent": "false_positive"
   },
   {
     "id": "jf-conc-005",
@@ -152,7 +156,8 @@
       "concurrent_edit",
       "JF-01"
     ],
-    "rationale": "Second edit targets original CMD which first edit already changed"
+    "rationale": "Second edit targets original CMD which first edit already changed",
+    "intent": "false_positive"
   },
   {
     "id": "jf-conc-006",
@@ -183,7 +188,8 @@
       "concurrent_edit",
       "JF-01"
     ],
-    "rationale": "Second secret rotation fails — original secret was already replaced"
+    "rationale": "Second secret rotation fails — original secret was already replaced",
+    "intent": "false_positive"
   },
   {
     "id": "jf-conc-007",
@@ -220,7 +226,8 @@
       "JF-01",
       "control"
     ],
-    "rationale": "Non-overlapping edits in same file — both should apply cleanly"
+    "rationale": "Non-overlapping edits in same file — both should apply cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "jf-lock-008",
@@ -251,7 +258,8 @@
       "lock_conflict",
       "JF-02"
     ],
-    "rationale": "Config edit succeeds but .env still has DEBUG=false — locked state prevents full update"
+    "rationale": "Config edit succeeds but .env still has DEBUG=false — locked state prevents full update",
+    "intent": "false_positive"
   },
   {
     "id": "jf-lock-009",
@@ -282,7 +290,8 @@
       "lock_conflict",
       "JF-02"
     ],
-    "rationale": "Env switched to development but config.json feature flags not updated — locked by config state"
+    "rationale": "Env switched to development but config.json feature flags not updated — locked by config state",
+    "intent": "false_positive"
   },
   {
     "id": "jf-lock-010",
@@ -313,7 +322,8 @@
       "lock_conflict",
       "JF-02"
     ],
-    "rationale": "Port changed in compose but Dockerfile EXPOSE locked at 3000 — cross-file lock contention"
+    "rationale": "Port changed in compose but Dockerfile EXPOSE locked at 3000 — cross-file lock contention",
+    "intent": "false_positive"
   },
   {
     "id": "jf-lock-011",
@@ -344,7 +354,8 @@
       "lock_conflict",
       "JF-02"
     ],
-    "rationale": "Server.js port updated but .env still locked at PORT=3000"
+    "rationale": "Server.js port updated but .env still locked at PORT=3000",
+    "intent": "false_positive"
   },
   {
     "id": "jf-lock-012",
@@ -371,7 +382,8 @@
       "JF-02",
       "control"
     ],
-    "rationale": "Single file edit with same-file predicate — no lock contention possible"
+    "rationale": "Single file edit with same-file predicate — no lock contention possible",
+    "intent": "false_negative"
   },
   {
     "id": "jf-merge-013",
@@ -402,7 +414,8 @@
       "merge_conflict",
       "JF-03"
     ],
-    "rationale": "First edit replaced entire health block — second edit search string gone, merge conflict"
+    "rationale": "First edit replaced entire health block — second edit search string gone, merge conflict",
+    "intent": "false_positive"
   },
   {
     "id": "jf-merge-014",
@@ -433,7 +446,8 @@
       "merge_conflict",
       "JF-03"
     ],
-    "rationale": "First edit replaced whole body rule — second edit partial match gone, merge conflict"
+    "rationale": "First edit replaced whole body rule — second edit partial match gone, merge conflict",
+    "intent": "false_positive"
   },
   {
     "id": "jf-merge-015",
@@ -464,7 +478,8 @@
       "merge_conflict",
       "JF-03"
     ],
-    "rationale": "Nav block replaced and simplified — the specific link second edit targets was removed"
+    "rationale": "Nav block replaced and simplified — the specific link second edit targets was removed",
+    "intent": "false_positive"
   },
   {
     "id": "jf-merge-016",
@@ -495,7 +510,8 @@
       "merge_conflict",
       "JF-03"
     ],
-    "rationale": "First edit replaced entire healthcheck — second edit targets old interval value"
+    "rationale": "First edit replaced entire healthcheck — second edit targets old interval value",
+    "intent": "false_positive"
   },
   {
     "id": "jf-merge-017",
@@ -526,7 +542,8 @@
       "merge_conflict",
       "JF-03"
     ],
-    "rationale": "First edit replaced users table entirely — second edit line no longer exists"
+    "rationale": "First edit replaced users table entirely — second edit line no longer exists",
+    "intent": "false_positive"
   },
   {
     "id": "jf-merge-018",
@@ -563,7 +580,8 @@
       "JF-03",
       "control"
     ],
-    "rationale": "Edits target different files — no merge conflict, both apply cleanly"
+    "rationale": "Edits target different files — no merge conflict, both apply cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -593,7 +611,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -623,7 +642,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -653,7 +673,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -684,7 +705,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -709,7 +731,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -734,7 +757,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -759,7 +783,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -789,7 +814,8 @@
       "fs",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -814,7 +840,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -839,7 +866,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -864,7 +892,8 @@
       "fs",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -894,6 +923,7 @@
       "fs",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   }
 ]

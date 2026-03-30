@@ -23,7 +23,8 @@
       "stale_flush",
       "TF-01"
     ],
-    "rationale": "Edit modifies server.js so pre-edit hash should NOT match post-edit content"
+    "rationale": "Edit modifies server.js so pre-edit hash should NOT match post-edit content",
+    "intent": "false_positive"
   },
   {
     "id": "tf-flush-002",
@@ -49,7 +50,8 @@
       "stale_flush",
       "TF-01"
     ],
-    "rationale": "Edit modifies .env so pre-edit hash should NOT match"
+    "rationale": "Edit modifies .env so pre-edit hash should NOT match",
+    "intent": "false_positive"
   },
   {
     "id": "tf-flush-003",
@@ -75,7 +77,8 @@
       "stale_flush",
       "TF-01"
     ],
-    "rationale": "Edit modifies config.json so pre-edit hash should NOT match"
+    "rationale": "Edit modifies config.json so pre-edit hash should NOT match",
+    "intent": "false_positive"
   },
   {
     "id": "tf-flush-004",
@@ -96,7 +99,8 @@
       "TF-01",
       "control"
     ],
-    "rationale": "No edit applied — hash should still match (proves the gate works both ways)"
+    "rationale": "No edit applied — hash should still match (proves the gate works both ways)",
+    "intent": "false_negative"
   },
   {
     "id": "tf-flush-005",
@@ -117,7 +121,8 @@
       "TF-01",
       "control"
     ],
-    "rationale": "No edit — hash should match"
+    "rationale": "No edit — hash should match",
+    "intent": "false_negative"
   },
   {
     "id": "tf-stale-006",
@@ -143,7 +148,8 @@
       "stale_artifact",
       "TF-02"
     ],
-    "rationale": "Edit changes server.js but config.json still has 3000 — cross-file staleness"
+    "rationale": "Edit changes server.js but config.json still has 3000 — cross-file staleness",
+    "intent": "false_positive"
   },
   {
     "id": "tf-stale-007",
@@ -169,7 +175,8 @@
       "stale_artifact",
       "TF-02"
     ],
-    "rationale": "Edit changes .env but server.js hardcodes 3000 — build artifact stale pattern"
+    "rationale": "Edit changes .env but server.js hardcodes 3000 — build artifact stale pattern",
+    "intent": "false_positive"
   },
   {
     "id": "tf-stale-008",
@@ -195,7 +202,8 @@
       "stale_artifact",
       "TF-02"
     ],
-    "rationale": "Config name changed but server.js still has \"Demo App\" in HTML — stale build"
+    "rationale": "Config name changed but server.js still has \"Demo App\" in HTML — stale build",
+    "intent": "false_positive"
   },
   {
     "id": "tf-stale-009",
@@ -221,7 +229,8 @@
       "stale_artifact",
       "TF-02"
     ],
-    "rationale": "Title edit in server.js never propagates to Dockerfile"
+    "rationale": "Title edit in server.js never propagates to Dockerfile",
+    "intent": "false_positive"
   },
   {
     "id": "tf-stale-010",
@@ -248,7 +257,8 @@
       "TF-02",
       "control"
     ],
-    "rationale": "Same file edited and checked — content should be found (non-stale)"
+    "rationale": "Same file edited and checked — content should be found (non-stale)",
+    "intent": "false_negative"
   },
   {
     "id": "tf-mount-011",
@@ -274,7 +284,8 @@
       "mount_sync",
       "TF-03"
     ],
-    "rationale": "Route renamed from /api/items to /api/data — old pattern should not be found"
+    "rationale": "Route renamed from /api/items to /api/data — old pattern should not be found",
+    "intent": "false_positive"
   },
   {
     "id": "tf-mount-012",
@@ -300,7 +311,8 @@
       "mount_sync",
       "TF-03"
     ],
-    "rationale": "Dockerfile healthcheck still references /health — mount desync between source and infra"
+    "rationale": "Dockerfile healthcheck still references /health — mount desync between source and infra",
+    "intent": "false_negative"
   },
   {
     "id": "tf-mount-013",
@@ -326,7 +338,8 @@
       "mount_sync",
       "TF-03"
     ],
-    "rationale": "ANALYTICS added to server.js but .env has no such key — cross-file desync"
+    "rationale": "ANALYTICS added to server.js but .env has no such key — cross-file desync",
+    "intent": "false_positive"
   },
   {
     "id": "tf-mount-014",
@@ -352,7 +365,8 @@
       "mount_sync",
       "TF-03"
     ],
-    "rationale": "Dockerfile port changed but docker-compose.yml still maps 3000"
+    "rationale": "Dockerfile port changed but docker-compose.yml still maps 3000",
+    "intent": "false_positive"
   },
   {
     "id": "tf-mount-015",
@@ -378,7 +392,8 @@
       "mount_sync",
       "TF-03"
     ],
-    "rationale": "docker-compose port env changed but Dockerfile EXPOSE still says 3000"
+    "rationale": "docker-compose port env changed but Dockerfile EXPOSE still says 3000",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-100",
@@ -403,7 +418,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-101",
@@ -428,7 +444,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-102",
@@ -453,7 +470,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-103",
@@ -478,7 +496,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-104",
@@ -503,7 +522,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-105",
@@ -528,7 +548,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-106",
@@ -553,7 +574,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-107",
@@ -578,7 +600,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-108",
@@ -604,7 +627,8 @@
       "tf-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "tf-bolster-109",
@@ -630,7 +654,8 @@
       "tf-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "tf-bolster-110",
@@ -656,7 +681,8 @@
       "tf-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "tf-bolster-111",
@@ -681,7 +707,8 @@
       "tf-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "tf-bolster-112",
@@ -699,7 +726,8 @@
       "fs",
       "tf-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "tf-bolster-113",
@@ -718,7 +746,8 @@
       "tf-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "tf-bolster-114",
@@ -738,6 +767,7 @@
       "tf-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

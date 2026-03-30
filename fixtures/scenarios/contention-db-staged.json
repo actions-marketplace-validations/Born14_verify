@@ -28,7 +28,8 @@
       "deadlock",
       "JD-01"
     ],
-    "rationale": "Second edit targets original email line which first edit already modified — concurrent constraint collision"
+    "rationale": "Second edit targets original email line which first edit already modified — concurrent constraint collision",
+    "intent": "false_positive"
   },
   {
     "id": "jd-dead-002",
@@ -64,7 +65,8 @@
       "deadlock",
       "JD-01"
     ],
-    "rationale": "FK references sessions(id) as UUID but sessions table rewritten with SERIAL id — type mismatch deadlock"
+    "rationale": "FK references sessions(id) as UUID but sessions table rewritten with SERIAL id — type mismatch deadlock",
+    "intent": "false_positive"
   },
   {
     "id": "jd-dead-003",
@@ -95,7 +97,8 @@
       "deadlock",
       "JD-01"
     ],
-    "rationale": "Both edits target same column definition — second search string gone after first edit"
+    "rationale": "Both edits target same column definition — second search string gone after first edit",
+    "intent": "false_positive"
   },
   {
     "id": "jd-dead-004",
@@ -126,7 +129,8 @@
       "deadlock",
       "JD-01"
     ],
-    "rationale": "Both edits target same \"body TEXT,\" line — second edit search fails after first modifies it"
+    "rationale": "Both edits target same \"body TEXT,\" line — second edit search fails after first modifies it",
+    "intent": "false_positive"
   },
   {
     "id": "jd-dead-005",
@@ -157,7 +161,8 @@
       "deadlock",
       "JD-01"
     ],
-    "rationale": "Both edits target same key column definition — concurrent type change collision"
+    "rationale": "Both edits target same key column definition — concurrent type change collision",
+    "intent": "false_positive"
   },
   {
     "id": "jd-dead-006",
@@ -194,7 +199,8 @@
       "JD-01",
       "control"
     ],
-    "rationale": "Edits target different tables (users vs settings) — no deadlock possible"
+    "rationale": "Edits target different tables (users vs settings) — no deadlock possible",
+    "intent": "false_negative"
   },
   {
     "id": "jd-migr-007",
@@ -225,7 +231,8 @@
       "concurrent_migration",
       "JD-02"
     ],
-    "rationale": "Second edit search string gone after first edit appended its version of audit_log"
+    "rationale": "Second edit search string gone after first edit appended its version of audit_log",
+    "intent": "false_positive"
   },
   {
     "id": "jd-migr-008",
@@ -256,7 +263,8 @@
       "concurrent_migration",
       "JD-02"
     ],
-    "rationale": "Both edits target same CREATE INDEX statement — second search string gone after first"
+    "rationale": "Both edits target same CREATE INDEX statement — second search string gone after first",
+    "intent": "false_positive"
   },
   {
     "id": "jd-migr-009",
@@ -292,7 +300,8 @@
       "concurrent_migration",
       "JD-02"
     ],
-    "rationale": "Non-overlapping search strings — rename and column add both succeed but create semantic inconsistency (articles table with posts-era columns)"
+    "rationale": "Non-overlapping search strings — rename and column add both succeed but create semantic inconsistency (articles table with posts-era columns)",
+    "intent": "false_negative"
   },
   {
     "id": "jd-migr-010",
@@ -328,7 +337,8 @@
       "concurrent_migration",
       "JD-02"
     ],
-    "rationale": "Both edits apply (different search strings) but create FK type mismatch — VARCHAR(100) references UUID column"
+    "rationale": "Both edits apply (different search strings) but create FK type mismatch — VARCHAR(100) references UUID column",
+    "intent": "false_negative"
   },
   {
     "id": "jd-migr-011",
@@ -365,7 +375,8 @@
       "JD-02",
       "control"
     ],
-    "rationale": "Different tables added at different insertion points — no migration conflict"
+    "rationale": "Different tables added at different insertion points — no migration conflict",
+    "intent": "false_negative"
   },
   {
     "id": "jd-lock-012",
@@ -401,7 +412,8 @@
       "lock_timeout",
       "JD-03"
     ],
-    "rationale": "Config sets timeout but init.sql still has all tables — structural check passes even if runtime would timeout"
+    "rationale": "Config sets timeout but init.sql still has all tables — structural check passes even if runtime would timeout",
+    "intent": "false_negative"
   },
   {
     "id": "jd-lock-013",
@@ -437,7 +449,8 @@
       "lock_timeout",
       "JD-03"
     ],
-    "rationale": "Both edits apply (different files) but create runtime contention — advisory lock with 50ms timeout"
+    "rationale": "Both edits apply (different files) but create runtime contention — advisory lock with 50ms timeout",
+    "intent": "false_negative"
   },
   {
     "id": "jd-lock-014",
@@ -468,7 +481,8 @@
       "lock_timeout",
       "JD-03"
     ],
-    "rationale": "Edit adds exclusive lock on users but server.js has no SQL — predicate for concurrent SELECT fails"
+    "rationale": "Edit adds exclusive lock on users but server.js has no SQL — predicate for concurrent SELECT fails",
+    "intent": "false_positive"
   },
   {
     "id": "jd-lock-015",
@@ -499,7 +513,8 @@
       "lock_timeout",
       "JD-03"
     ],
-    "rationale": "DATABASE_URL points to \"production\" but init.sql has no reference — schema/connection contention"
+    "rationale": "DATABASE_URL points to \"production\" but init.sql has no reference — schema/connection contention",
+    "intent": "false_positive"
   },
   {
     "id": "jd-lock-016",
@@ -526,7 +541,8 @@
       "JD-03",
       "control"
     ],
-    "rationale": "Single file edit, same file predicate — no lock contention"
+    "rationale": "Single file edit, same file predicate — no lock contention",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -556,7 +572,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -586,7 +603,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -616,7 +634,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -647,7 +666,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -672,7 +692,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -697,7 +718,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -722,7 +744,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -752,7 +775,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -777,7 +801,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -802,7 +827,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -827,7 +853,8 @@
       "db",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -857,7 +884,8 @@
       "db",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-212",
@@ -884,7 +912,8 @@
       "db",
       "contention_gap"
     ],
-    "rationale": "Migration adds column that server.js doesnt reference"
+    "rationale": "Migration adds column that server.js doesnt reference",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-213",
@@ -903,6 +932,7 @@
       "db",
       "control"
     ],
-    "rationale": "Concurrent healthcheck: compose and Dockerfile both define, check agreement"
+    "rationale": "Concurrent healthcheck: compose and Dockerfile both define, check agreement",
+    "intent": "false_negative"
   }
 ]

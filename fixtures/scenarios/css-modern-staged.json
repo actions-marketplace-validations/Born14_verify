@@ -17,7 +17,8 @@
       "content-property",
       "C-31"
     ],
-    "rationale": "The .meta-test rule in /edge-cases has content: 'meta'. Predicate matches existing value."
+    "rationale": "The .meta-test rule in /edge-cases has content: 'meta'. Predicate matches existing value.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c31-002",
@@ -38,7 +39,8 @@
       "C-31"
     ],
     "rationale": "The .meta-test has content: 'meta' but predicate expects 'other'. Value mismatch at grounding.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c31-003",
@@ -64,7 +66,8 @@
       "content-property",
       "C-31"
     ],
-    "rationale": "Injecting a new rule with content property. Predicate verifies the edit was applied."
+    "rationale": "Injecting a new rule with content property. Predicate verifies the edit was applied.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c31-004",
@@ -85,7 +88,8 @@
       "C-31"
     ],
     "rationale": "Selector .nonexistent-content does not exist anywhere. Grounding gate rejects fabricated selector.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c63-005",
@@ -105,7 +109,8 @@
       "color-mix",
       "C-63"
     ],
-    "rationale": "The .color-mix-test rule has this exact color-mix value. Grounding finds it."
+    "rationale": "The .color-mix-test rule has this exact color-mix value. Grounding finds it.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c63-006",
@@ -126,7 +131,8 @@
       "C-63"
     ],
     "rationale": "Source uses \"in srgb\" but predicate expects \"in oklch\". Value mismatch.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c63-007",
@@ -152,7 +158,8 @@
       "color-mix",
       "C-63"
     ],
-    "rationale": "New color-mix rule injected via edit. Predicate verifies the new selector and value."
+    "rationale": "New color-mix rule injected via edit. Predicate verifies the new selector and value.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c63-008",
@@ -173,7 +180,8 @@
       "C-63"
     ],
     "rationale": "Selector .fancy-mix does not exist. Color-mix value is valid CSS but the selector is fabricated.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c64-009",
@@ -193,7 +201,8 @@
       "css-nesting",
       "C-64"
     ],
-    "rationale": "The .nested-rule parent has color: red. Nesting does not affect parent extraction."
+    "rationale": "The .nested-rule parent has color: red. Nesting does not affect parent extraction.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c64-010",
@@ -214,7 +223,8 @@
       "C-64"
     ],
     "rationale": "The nested & .child rule may not be extractable as .nested-rule .child by a flat CSS parser. Grounding depends on nesting support.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c64-011",
@@ -240,7 +250,8 @@
       "css-nesting",
       "C-64"
     ],
-    "rationale": "New nested rule injected. Parent-level property is extractable by any parser."
+    "rationale": "New nested rule injected. Parent-level property is extractable by any parser.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c64-012",
@@ -261,7 +272,8 @@
       "C-64"
     ],
     "rationale": "The .nested-rule has color: red but predicate expects green.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c65-013",
@@ -286,7 +298,8 @@
       "css-houdini",
       "C-65"
     ],
-    "rationale": "Injecting an @property declaration. Content predicate verifies it exists in the source."
+    "rationale": "Injecting an @property declaration. Content predicate verifies it exists in the source.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c65-014",
@@ -312,7 +325,8 @@
       "css-houdini",
       "C-65"
     ],
-    "rationale": "Custom property declared via @property and consumed with var(). Grounding sees the rule."
+    "rationale": "Custom property declared via @property and consumed with var(). Grounding sees the rule.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c65-015",
@@ -332,7 +346,8 @@
       "C-65"
     ],
     "rationale": "No @property --magic-var exists in source. Content predicate correctly fails.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c66-016",
@@ -358,7 +373,8 @@
       "subgrid",
       "C-66"
     ],
-    "rationale": "Injecting a child grid with subgrid value. Predicate verifies the new rule."
+    "rationale": "Injecting a child grid with subgrid value. Predicate verifies the new rule.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c66-017",
@@ -384,7 +400,8 @@
       "subgrid",
       "C-66"
     ],
-    "rationale": "Subgrid applied to columns axis. Predicate matches injected rule."
+    "rationale": "Subgrid applied to columns axis. Predicate matches injected rule.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c66-018",
@@ -405,7 +422,8 @@
       "C-66"
     ],
     "rationale": "Selector .subgrid-phantom does not exist. Grounding rejects fabricated selector.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c67-019",
@@ -425,7 +443,8 @@
       "css-math",
       "C-67"
     ],
-    "rationale": "Exact clamp() value matches the existing rule in /edge-cases."
+    "rationale": "Exact clamp() value matches the existing rule in /edge-cases.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c67-020",
@@ -446,7 +465,8 @@
       "C-67"
     ],
     "rationale": "Source has clamp(200px, 50%, 800px) but predicate expects different bounds.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c67-021",
@@ -472,7 +492,8 @@
       "css-math",
       "C-67"
     ],
-    "rationale": "Injecting a min() function rule. Predicate verifies the new selector."
+    "rationale": "Injecting a min() function rule. Predicate verifies the new selector.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c67-022",
@@ -498,7 +519,8 @@
       "css-math",
       "C-67"
     ],
-    "rationale": "Injecting a max() function rule. Predicate verifies the new selector."
+    "rationale": "Injecting a max() function rule. Predicate verifies the new selector.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c67-023",
@@ -524,7 +546,8 @@
       "css-math",
       "C-67"
     ],
-    "rationale": "Nested calc inside clamp — complex math function composition."
+    "rationale": "Nested calc inside clamp — complex math function composition.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c68-024",
@@ -549,7 +572,8 @@
       "css-scope",
       "C-68"
     ],
-    "rationale": "Injecting @scope rule. Content predicate verifies the at-rule exists in source."
+    "rationale": "Injecting @scope rule. Content predicate verifies the at-rule exists in source.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c68-025",
@@ -574,7 +598,8 @@
       "css-scope",
       "C-68"
     ],
-    "rationale": "Scoped rule with proximity boundary (to). Content predicate verifies the full at-rule syntax."
+    "rationale": "Scoped rule with proximity boundary (to). Content predicate verifies the full at-rule syntax.",
+    "intent": "false_negative"
   },
   {
     "id": "cmod-c68-026",
@@ -594,7 +619,8 @@
       "C-68"
     ],
     "rationale": "No @scope (.sidebar) exists in source. Fabricated content predicate fails grounding.",
-    "expectedFailedGate": "grounding"
+    "expectedFailedGate": "grounding",
+    "intent": "false_positive"
   },
   {
     "id": "cmod-c68-027",
@@ -619,6 +645,7 @@
       "css-scope",
       "C-68"
     ],
-    "rationale": "CSS rule inside @scope block. Content predicate verifies the inner rule text exists."
+    "rationale": "CSS rule inside @scope block. Content predicate verifies the inner rule text exists.",
+    "intent": "false_negative"
   }
 ]

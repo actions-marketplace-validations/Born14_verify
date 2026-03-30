@@ -38,7 +38,8 @@
       "config_deploy",
       "JM-01"
     ],
-    "rationale": "Deploy A step 2 changes .env to 4000, deploy B tries same line — search \"PORT=3000\" gone"
+    "rationale": "Deploy A step 2 changes .env to 4000, deploy B tries same line — search \"PORT=3000\" gone",
+    "intent": "false_positive"
   },
   {
     "id": "jm-deploy-002",
@@ -69,7 +70,8 @@
       "config_deploy",
       "JM-01"
     ],
-    "rationale": "Deploy A turns off darkMode, deploy B search for darkMode:true gone — interleaving conflict"
+    "rationale": "Deploy A turns off darkMode, deploy B search for darkMode:true gone — interleaving conflict",
+    "intent": "false_positive"
   },
   {
     "id": "jm-deploy-003",
@@ -100,7 +102,8 @@
       "config_deploy",
       "JM-01"
     ],
-    "rationale": "Both deploys rotate same secret — second search gone after first applies alpha rotation"
+    "rationale": "Both deploys rotate same secret — second search gone after first applies alpha rotation",
+    "intent": "false_positive"
   },
   {
     "id": "jm-deploy-004",
@@ -131,7 +134,8 @@
       "config_deploy",
       "JM-01"
     ],
-    "rationale": "Both deploys update base image — second search \"node:20-alpine\" gone after first edit"
+    "rationale": "Both deploys update base image — second search \"node:20-alpine\" gone after first edit",
+    "intent": "false_positive"
   },
   {
     "id": "jm-deploy-005",
@@ -162,7 +166,8 @@
       "config_deploy",
       "JM-01"
     ],
-    "rationale": "Both deploys change host port — second search gone after first changes to 4000"
+    "rationale": "Both deploys change host port — second search gone after first changes to 4000",
+    "intent": "false_positive"
   },
   {
     "id": "jm-deploy-006",
@@ -199,7 +204,8 @@
       "JM-01",
       "control"
     ],
-    "rationale": "Deploys touch different files — no interleaving conflict"
+    "rationale": "Deploys touch different files — no interleaving conflict",
+    "intent": "false_negative"
   },
   {
     "id": "jm-migrate-007",
@@ -230,7 +236,8 @@
       "migration_conflict",
       "JM-02"
     ],
-    "rationale": "Both migrations insert after is_active — second search gone after first adds last_login"
+    "rationale": "Both migrations insert after is_active — second search gone after first adds last_login",
+    "intent": "false_positive"
   },
   {
     "id": "jm-migrate-008",
@@ -261,7 +268,8 @@
       "migration_conflict",
       "JM-02"
     ],
-    "rationale": "Both migrations change token column — second search gone after first changes to VARCHAR"
+    "rationale": "Both migrations change token column — second search gone after first changes to VARCHAR",
+    "intent": "false_positive"
   },
   {
     "id": "jm-migrate-009",
@@ -292,7 +300,8 @@
       "migration_conflict",
       "JM-02"
     ],
-    "rationale": "Both migrations insert after expires index — second search gone after first adds user index"
+    "rationale": "Both migrations insert after expires index — second search gone after first adds user index",
+    "intent": "false_positive"
   },
   {
     "id": "jm-migrate-010",
@@ -323,7 +332,8 @@
       "migration_conflict",
       "JM-02"
     ],
-    "rationale": "Both migrations modify published column — second search gone after first changes default"
+    "rationale": "Both migrations modify published column — second search gone after first changes default",
+    "intent": "false_positive"
   },
   {
     "id": "jm-migrate-011",
@@ -354,7 +364,8 @@
       "migration_conflict",
       "JM-02"
     ],
-    "rationale": "Both migrations modify value column — second search gone after first adds default"
+    "rationale": "Both migrations modify value column — second search gone after first adds default",
+    "intent": "false_positive"
   },
   {
     "id": "jm-migrate-012",
@@ -391,7 +402,8 @@
       "JM-02",
       "control"
     ],
-    "rationale": "Different tables — no migration conflict, both additions apply cleanly"
+    "rationale": "Different tables — no migration conflict, both additions apply cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "jm-build-013",
@@ -422,7 +434,8 @@
       "build_conflict",
       "JM-03"
     ],
-    "rationale": "Both builds change WORKDIR — second search gone after first changes to /opt/app"
+    "rationale": "Both builds change WORKDIR — second search gone after first changes to /opt/app",
+    "intent": "false_positive"
   },
   {
     "id": "jm-build-014",
@@ -453,7 +466,8 @@
       "build_conflict",
       "JM-03"
     ],
-    "rationale": "Both builds change COPY source — second search gone after first changes to dist/"
+    "rationale": "Both builds change COPY source — second search gone after first changes to dist/",
+    "intent": "false_positive"
   },
   {
     "id": "jm-build-015",
@@ -484,7 +498,8 @@
       "build_conflict",
       "JM-03"
     ],
-    "rationale": "Both builds change HEALTHCHECK — second search gone after first changes to curl"
+    "rationale": "Both builds change HEALTHCHECK — second search gone after first changes to curl",
+    "intent": "false_positive"
   },
   {
     "id": "jm-build-016",
@@ -515,7 +530,8 @@
       "build_conflict",
       "JM-03"
     ],
-    "rationale": "Both builds change build context — second search gone after first restructures to multi-line"
+    "rationale": "Both builds change build context — second search gone after first restructures to multi-line",
+    "intent": "false_positive"
   },
   {
     "id": "jm-build-017",
@@ -546,7 +562,8 @@
       "build_conflict",
       "JM-03"
     ],
-    "rationale": "Both builds change EXPOSE — second search gone after first changes to 4000"
+    "rationale": "Both builds change EXPOSE — second search gone after first changes to 4000",
+    "intent": "false_positive"
   },
   {
     "id": "jm-build-018",
@@ -583,7 +600,8 @@
       "JM-03",
       "control"
     ],
-    "rationale": "Different files — no build output conflict, both apply cleanly"
+    "rationale": "Different files — no build output conflict, both apply cleanly",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-200",
@@ -613,7 +631,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Two edits to server.js, second overwrites first"
+    "rationale": "Two edits to server.js, second overwrites first",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-201",
@@ -643,7 +662,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Edit server.js and config.json with conflicting ports"
+    "rationale": "Edit server.js and config.json with conflicting ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-202",
@@ -673,7 +693,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Edit .env and compose with different ports"
+    "rationale": "Edit .env and compose with different ports",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-203",
@@ -704,7 +725,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Two migrations on same table"
+    "rationale": "Two migrations on same table",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-204",
@@ -729,7 +751,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Edit init.sql and server.js with mismatched column names"
+    "rationale": "Edit init.sql and server.js with mismatched column names",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-205",
@@ -754,7 +777,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Compose restart policy conflicts with Dockerfile CMD"
+    "rationale": "Compose restart policy conflicts with Dockerfile CMD",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-206",
@@ -779,7 +803,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Edit both health endpoint and healthcheck with different paths"
+    "rationale": "Edit both health endpoint and healthcheck with different paths",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-207",
@@ -809,7 +834,8 @@
       "multistep",
       "contention_gap"
     ],
-    "rationale": "Config.json and .env disagree on debug"
+    "rationale": "Config.json and .env disagree on debug",
+    "intent": "false_positive"
   },
   {
     "id": "co-bolster-208",
@@ -834,7 +860,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: single edit, consistent check"
+    "rationale": "Control: single edit, consistent check",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-209",
@@ -859,7 +886,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-210",
@@ -884,7 +912,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: edit config.json, check config.json"
+    "rationale": "Control: edit config.json, check config.json",
+    "intent": "false_negative"
   },
   {
     "id": "co-bolster-211",
@@ -914,6 +943,7 @@
       "multistep",
       "control"
     ],
-    "rationale": "Two edits to different routes, check both present"
+    "rationale": "Two edits to different routes, check both present",
+    "intent": "false_negative"
   }
 ]

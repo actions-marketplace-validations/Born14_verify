@@ -23,7 +23,8 @@
       "cached_process",
       "PE-01"
     ],
-    "rationale": "Env var changed but config.json (which app may read at startup) still has old port — cached process"
+    "rationale": "Env var changed but config.json (which app may read at startup) still has old port — cached process",
+    "intent": "false_positive"
   },
   {
     "id": "pe-cached-002",
@@ -49,7 +50,8 @@
       "cached_process",
       "PE-01"
     ],
-    "rationale": "Database URL changed in .env but config.json host is stale — env→config propagation gap"
+    "rationale": "Database URL changed in .env but config.json host is stale — env→config propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-cached-003",
@@ -75,7 +77,8 @@
       "cached_process",
       "PE-01"
     ],
-    "rationale": "NODE_ENV changed but server.js has no env-dependent behavior — config→process gap"
+    "rationale": "NODE_ENV changed but server.js has no env-dependent behavior — config→process gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-cached-004",
@@ -101,7 +104,8 @@
       "cached_process",
       "PE-01"
     ],
-    "rationale": "Secret rotated in .env but compose doesnt forward it to container — env→deploy cache gap"
+    "rationale": "Secret rotated in .env but compose doesnt forward it to container — env→deploy cache gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-cached-005",
@@ -127,7 +131,8 @@
       "cached_process",
       "PE-01"
     ],
-    "rationale": "Debug flag toggled but process code never reads it — env var→runtime propagation gap"
+    "rationale": "Debug flag toggled but process code never reads it — env var→runtime propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-cached-006",
@@ -154,7 +159,8 @@
       "PE-01",
       "control"
     ],
-    "rationale": "Same-file check — env var is present"
+    "rationale": "Same-file check — env var is present",
+    "intent": "false_negative"
   },
   {
     "id": "pe-source-007",
@@ -180,7 +186,8 @@
       "wrong_source",
       "PE-02"
     ],
-    "rationale": "Config port changed but app reads PORT from .env — wrong config source updated"
+    "rationale": "Config port changed but app reads PORT from .env — wrong config source updated",
+    "intent": "false_positive"
   },
   {
     "id": "pe-source-008",
@@ -206,7 +213,8 @@
       "wrong_source",
       "PE-02"
     ],
-    "rationale": "DB name changed in config.json but .env DATABASE_URL still has old name — source mismatch"
+    "rationale": "DB name changed in config.json but .env DATABASE_URL still has old name — source mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "pe-source-009",
@@ -232,7 +240,8 @@
       "wrong_source",
       "PE-02"
     ],
-    "rationale": "Config host changed but prod .env DATABASE_URL still points to old host — cross-source gap"
+    "rationale": "Config host changed but prod .env DATABASE_URL still points to old host — cross-source gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-source-010",
@@ -258,7 +267,8 @@
       "wrong_source",
       "PE-02"
     ],
-    "rationale": "Config name changed but server.js reads title from hardcoded HTML — config→code source mismatch"
+    "rationale": "Config name changed but server.js reads title from hardcoded HTML — config→code source mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "pe-source-011",
@@ -284,7 +294,8 @@
       "wrong_source",
       "PE-02"
     ],
-    "rationale": "Staging config host changed but staging .env still has localhost — parallel config source gap"
+    "rationale": "Staging config host changed but staging .env still has localhost — parallel config source gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-source-012",
@@ -311,7 +322,8 @@
       "PE-02",
       "control"
     ],
-    "rationale": "Same-file check — value is present"
+    "rationale": "Same-file check — value is present",
+    "intent": "false_negative"
   },
   {
     "id": "pe-behavior-013",
@@ -337,7 +349,8 @@
       "flag_behavior",
       "PE-03"
     ],
-    "rationale": "Analytics flag toggled but server has no analytics implementation — flag→behavior propagation gap"
+    "rationale": "Analytics flag toggled but server has no analytics implementation — flag→behavior propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-behavior-014",
@@ -363,7 +376,8 @@
       "flag_behavior",
       "PE-03"
     ],
-    "rationale": "Dark mode flag toggled but server.js has no CSS conditional for it — flag without behavior"
+    "rationale": "Dark mode flag toggled but server.js has no CSS conditional for it — flag without behavior",
+    "intent": "false_positive"
   },
   {
     "id": "pe-behavior-015",
@@ -389,7 +403,8 @@
       "flag_behavior",
       "PE-03"
     ],
-    "rationale": "Beta signup flag exists but server has no signup functionality — flag→route gap"
+    "rationale": "Beta signup flag exists but server has no signup functionality — flag→route gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-behavior-016",
@@ -415,7 +430,8 @@
       "flag_behavior",
       "PE-03"
     ],
-    "rationale": "Config db port changed but server reads port from env only — config→process propagation gap"
+    "rationale": "Config db port changed but server reads port from env only — config→process propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pe-behavior-017",
@@ -441,7 +457,8 @@
       "flag_behavior",
       "PE-03"
     ],
-    "rationale": "Debug flag toggled but test compose has no DEBUG env — flag doesnt propagate to test runtime"
+    "rationale": "Debug flag toggled but test compose has no DEBUG env — flag doesnt propagate to test runtime",
+    "intent": "false_positive"
   },
   {
     "id": "pe-behavior-018",
@@ -468,7 +485,8 @@
       "PE-03",
       "control"
     ],
-    "rationale": "Same-file check — flag value is present"
+    "rationale": "Same-file check — flag value is present",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-200",
@@ -493,7 +511,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Add column to init.sql, server.js unaware"
+    "rationale": "Add column to init.sql, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-201",
@@ -518,7 +537,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Change .env port, compose not updated"
+    "rationale": "Change .env port, compose not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-202",
@@ -543,7 +563,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Change config.json feature flag, server.js not updated"
+    "rationale": "Change config.json feature flag, server.js not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-203",
@@ -568,7 +589,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Rename column in init.sql, server.js uses old name"
+    "rationale": "Rename column in init.sql, server.js uses old name",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-204",
@@ -593,7 +615,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Add env var to .env, Dockerfile has no matching ENV"
+    "rationale": "Add env var to .env, Dockerfile has no matching ENV",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-205",
@@ -618,7 +641,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Change Dockerfile node version, compose image tag unchanged"
+    "rationale": "Change Dockerfile node version, compose image tag unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-206",
@@ -645,7 +669,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Add migration column, config.json has no reference"
+    "rationale": "Add migration column, config.json has no reference",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-207",
@@ -670,7 +695,8 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Change health response, Dockerfile healthcheck unchanged"
+    "rationale": "Change health response, Dockerfile healthcheck unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-208",
@@ -695,7 +721,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: edit server.js, check server.js"
+    "rationale": "Control: edit server.js, check server.js",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-209",
@@ -720,7 +747,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-210",
@@ -739,7 +767,8 @@
       "config",
       "control"
     ],
-    "rationale": "Control: init.sql has users table"
+    "rationale": "Control: init.sql has users table",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-211",
@@ -764,6 +793,7 @@
       "config",
       "propagation_gap"
     ],
-    "rationale": "Add table to init.sql, server.js has no API for it"
+    "rationale": "Add table to init.sql, server.js has no API for it",
+    "intent": "false_positive"
   }
 ]

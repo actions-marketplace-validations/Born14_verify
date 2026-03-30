@@ -23,7 +23,8 @@
       "api_consumer",
       "PM-01"
     ],
-    "rationale": "HTML still renders \"Item Alpha\" from hardcoded list — API field rename doesnt break static HTML (consumer unaffected)"
+    "rationale": "HTML still renders \"Item Alpha\" from hardcoded list — API field rename doesnt break static HTML (consumer unaffected)",
+    "intent": "false_negative"
   },
   {
     "id": "pm-api-002",
@@ -49,7 +50,8 @@
       "api_consumer",
       "PM-01"
     ],
-    "rationale": "API route renamed but homepage nav link still references /api/items — intra-file cascade gap"
+    "rationale": "API route renamed but homepage nav link still references /api/items — intra-file cascade gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-api-003",
@@ -75,7 +77,8 @@
       "api_consumer",
       "PM-01"
     ],
-    "rationale": "API schema expanded but config has no awareness of new field — API→config cascade gap"
+    "rationale": "API schema expanded but config has no awareness of new field — API→config cascade gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-api-004",
@@ -101,7 +104,8 @@
       "api_consumer",
       "PM-01"
     ],
-    "rationale": "Health response schema changed but Dockerfile CMD still expects old format — API→infra gap"
+    "rationale": "Health response schema changed but Dockerfile CMD still expects old format — API→infra gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-api-005",
@@ -127,7 +131,8 @@
       "api_consumer",
       "PM-01"
     ],
-    "rationale": "API returns Gamma but homepage HTML list is hardcoded — API→UI cascade gap"
+    "rationale": "API returns Gamma but homepage HTML list is hardcoded — API→UI cascade gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-api-006",
@@ -154,7 +159,8 @@
       "PM-01",
       "control"
     ],
-    "rationale": "Same-file check — Gamma is in the API response code"
+    "rationale": "Same-file check — Gamma is in the API response code",
+    "intent": "false_negative"
   },
   {
     "id": "pm-dbconfig-007",
@@ -180,7 +186,8 @@
       "db_config",
       "PM-02"
     ],
-    "rationale": "Schema adds FK relationship but config has no awareness of categories feature — DB→config gap"
+    "rationale": "Schema adds FK relationship but config has no awareness of categories feature — DB→config gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-dbconfig-008",
@@ -206,7 +213,8 @@
       "db_config",
       "PM-02"
     ],
-    "rationale": "Table renamed but app code still uses \"users\" — DB migration→app propagation gap"
+    "rationale": "Table renamed but app code still uses \"users\" — DB migration→app propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-dbconfig-009",
@@ -232,7 +240,8 @@
       "db_config",
       "PM-02"
     ],
-    "rationale": "Schema adds partial index but test compose has no awareness — DB→test config gap"
+    "rationale": "Schema adds partial index but test compose has no awareness — DB→test config gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-dbconfig-010",
@@ -258,7 +267,8 @@
       "db_config",
       "PM-02"
     ],
-    "rationale": "Column type changed from JSONB to TEXT but config implies JSON values — type migration gap"
+    "rationale": "Column type changed from JSONB to TEXT but config implies JSON values — type migration gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-dbconfig-011",
@@ -285,7 +295,8 @@
       "PM-02",
       "control"
     ],
-    "rationale": "Same-file check — table rename is present"
+    "rationale": "Same-file check — table rename is present",
+    "intent": "false_negative"
   },
   {
     "id": "pm-envdep-012",
@@ -311,7 +322,8 @@
       "env_dependent",
       "PM-03"
     ],
-    "rationale": "Dev port changed but prod env not updated — cross-environment propagation gap"
+    "rationale": "Dev port changed but prod env not updated — cross-environment propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-envdep-013",
@@ -337,7 +349,8 @@
       "env_dependent",
       "PM-03"
     ],
-    "rationale": "Dev DB host migrated but staging config still points to localhost — env cascade gap"
+    "rationale": "Dev DB host migrated but staging config still points to localhost — env cascade gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-envdep-014",
@@ -363,7 +376,8 @@
       "env_dependent",
       "PM-03"
     ],
-    "rationale": "Staging DB URL changed but test compose still has old connection — env→test cascade gap"
+    "rationale": "Staging DB URL changed but test compose still has old connection — env→test cascade gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-envdep-015",
@@ -389,7 +403,8 @@
       "env_dependent",
       "PM-03"
     ],
-    "rationale": "Prod config adds feature but base config has no awareness — prod→base propagation gap"
+    "rationale": "Prod config adds feature but base config has no awareness — prod→base propagation gap",
+    "intent": "false_positive"
   },
   {
     "id": "pm-envdep-016",
@@ -416,7 +431,8 @@
       "PM-03",
       "control"
     ],
-    "rationale": "Same-file check — env var is present (staging has different NODE_ENV by design)"
+    "rationale": "Same-file check — env var is present (staging has different NODE_ENV by design)",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-200",
@@ -441,7 +457,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Add column to init.sql, server.js unaware"
+    "rationale": "Add column to init.sql, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-201",
@@ -466,7 +483,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Change .env port, compose not updated"
+    "rationale": "Change .env port, compose not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-202",
@@ -491,7 +509,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Change config.json feature flag, server.js not updated"
+    "rationale": "Change config.json feature flag, server.js not updated",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-203",
@@ -516,7 +535,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Rename column in init.sql, server.js uses old name"
+    "rationale": "Rename column in init.sql, server.js uses old name",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-204",
@@ -541,7 +561,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Add env var to .env, Dockerfile has no matching ENV"
+    "rationale": "Add env var to .env, Dockerfile has no matching ENV",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-205",
@@ -566,7 +587,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Change Dockerfile node version, compose image tag unchanged"
+    "rationale": "Change Dockerfile node version, compose image tag unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-206",
@@ -593,7 +615,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Add migration column, config.json has no reference"
+    "rationale": "Add migration column, config.json has no reference",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-207",
@@ -618,7 +641,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Change health response, Dockerfile healthcheck unchanged"
+    "rationale": "Change health response, Dockerfile healthcheck unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-208",
@@ -643,7 +667,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: edit server.js, check server.js"
+    "rationale": "Control: edit server.js, check server.js",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-209",
@@ -668,7 +693,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: edit .env, check .env"
+    "rationale": "Control: edit .env, check .env",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-210",
@@ -687,7 +713,8 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: init.sql has users table"
+    "rationale": "Control: init.sql has users table",
+    "intent": "false_negative"
   },
   {
     "id": "pr-bolster-211",
@@ -712,7 +739,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Add table to init.sql, server.js has no API for it"
+    "rationale": "Add table to init.sql, server.js has no API for it",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-212",
@@ -737,7 +765,8 @@
       "multistep",
       "propagation_gap"
     ],
-    "rationale": "Change compose service name, Dockerfile unchanged"
+    "rationale": "Change compose service name, Dockerfile unchanged",
+    "intent": "false_positive"
   },
   {
     "id": "pr-bolster-213",
@@ -756,6 +785,7 @@
       "multistep",
       "control"
     ],
-    "rationale": "Control: compose has app service"
+    "rationale": "Control: compose has app service",
+    "intent": "false_negative"
   }
 ]

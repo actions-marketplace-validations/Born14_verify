@@ -23,7 +23,8 @@
       "disk_full",
       "IF-01"
     ],
-    "rationale": "Edit adds massive inline data — content predicate finds BULK_DATA but file is now unreasonably large"
+    "rationale": "Edit adds massive inline data — content predicate finds BULK_DATA but file is now unreasonably large",
+    "intent": "false_negative"
   },
   {
     "id": "if-disk-002",
@@ -49,7 +50,8 @@
       "disk_full",
       "IF-01"
     ],
-    "rationale": "Edit adds 200 CSS rules — content exists but file size balloons"
+    "rationale": "Edit adds 200 CSS rules — content exists but file size balloons",
+    "intent": "false_negative"
   },
   {
     "id": "if-disk-003",
@@ -75,7 +77,8 @@
       "disk_full",
       "IF-01"
     ],
-    "rationale": "Config file bloated with 100 large settings — content present but config is unreasonably large"
+    "rationale": "Config file bloated with 100 large settings — content present but config is unreasonably large",
+    "intent": "false_negative"
   },
   {
     "id": "if-disk-004",
@@ -101,7 +104,8 @@
       "disk_full",
       "IF-01"
     ],
-    "rationale": ".env file grows massively — last variable present but file is enormous"
+    "rationale": ".env file grows massively — last variable present but file is enormous",
+    "intent": "false_negative"
   },
   {
     "id": "if-disk-005",
@@ -127,7 +131,8 @@
       "disk_full",
       "IF-01"
     ],
-    "rationale": "Dockerfile layers bloated — last COPY present but image build will be enormous"
+    "rationale": "Dockerfile layers bloated — last COPY present but image build will be enormous",
+    "intent": "false_negative"
   },
   {
     "id": "if-disk-006",
@@ -154,7 +159,8 @@
       "IF-01",
       "control"
     ],
-    "rationale": "Small edit — no capacity issue, content should be found"
+    "rationale": "Small edit — no capacity issue, content should be found",
+    "intent": "false_negative"
   },
   {
     "id": "if-inode-007",
@@ -180,7 +186,8 @@
       "inode_exhaustion",
       "IF-02"
     ],
-    "rationale": "Edit references 20 module files — none exist, inode exhaustion pattern"
+    "rationale": "Edit references 20 module files — none exist, inode exhaustion pattern",
+    "intent": "false_positive"
   },
   {
     "id": "if-inode-008",
@@ -206,7 +213,8 @@
       "inode_exhaustion",
       "IF-02"
     ],
-    "rationale": "10 services added to compose but config.json knows nothing about them"
+    "rationale": "10 services added to compose but config.json knows nothing about them",
+    "intent": "false_positive"
   },
   {
     "id": "if-inode-009",
@@ -232,7 +240,8 @@
       "inode_exhaustion",
       "IF-02"
     ],
-    "rationale": "Router import implies many route files — none exist, directory would need many inodes"
+    "rationale": "Router import implies many route files — none exist, directory would need many inodes",
+    "intent": "false_positive"
   },
   {
     "id": "if-inode-010",
@@ -258,7 +267,8 @@
       "inode_exhaustion",
       "IF-02"
     ],
-    "rationale": "Dockerfile references 8 directories — none exist in fixture"
+    "rationale": "Dockerfile references 8 directories — none exist in fixture",
+    "intent": "false_positive"
   },
   {
     "id": "if-inode-011",
@@ -279,7 +289,8 @@
       "IF-02",
       "control"
     ],
-    "rationale": "No edit — existing require found, no inode pressure"
+    "rationale": "No edit — existing require found, no inode pressure",
+    "intent": "false_negative"
   },
   {
     "id": "if-size-012",
@@ -315,7 +326,8 @@
       "file_size_limit",
       "IF-03"
     ],
-    "rationale": "tmpfs limited to 1MB but server.js cache data could exceed it at runtime"
+    "rationale": "tmpfs limited to 1MB but server.js cache data could exceed it at runtime",
+    "intent": "false_negative"
   },
   {
     "id": "if-size-013",
@@ -346,7 +358,8 @@
       "file_size_limit",
       "IF-03"
     ],
-    "rationale": "Logging added but no log rotation configured in compose — disk will fill"
+    "rationale": "Logging added but no log rotation configured in compose — disk will fill",
+    "intent": "false_positive"
   },
   {
     "id": "if-size-014",
@@ -372,7 +385,8 @@
       "file_size_limit",
       "IF-03"
     ],
-    "rationale": "COPY . . without .dockerignore means node_modules and all artifacts get copied — image bloat"
+    "rationale": "COPY . . without .dockerignore means node_modules and all artifacts get copied — image bloat",
+    "intent": "false_positive"
   },
   {
     "id": "if-size-015",
@@ -403,7 +417,8 @@
       "file_size_limit",
       "IF-03"
     ],
-    "rationale": "Static file serving added but no compression — large files served uncompressed"
+    "rationale": "Static file serving added but no compression — large files served uncompressed",
+    "intent": "false_positive"
   },
   {
     "id": "if-size-016",
@@ -439,7 +454,8 @@
       "file_size_limit",
       "IF-03"
     ],
-    "rationale": "Volume mounted with no size limit and unlimited upload size — disk capacity unbounded"
+    "rationale": "Volume mounted with no size limit and unlimited upload size — disk capacity unbounded",
+    "intent": "false_negative"
   },
   {
     "id": "if-size-017",
@@ -465,7 +481,8 @@
       "IF-03",
       "control"
     ],
-    "rationale": "No bloat — minimal Dockerfile with single file copy on alpine image"
+    "rationale": "No bloat — minimal Dockerfile with single file copy on alpine image",
+    "intent": "false_negative"
   },
   {
     "id": "cf-bolster-200",
@@ -484,7 +501,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-201",
@@ -503,7 +521,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-202",
@@ -522,7 +541,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-203",
@@ -541,7 +561,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-204",
@@ -560,7 +581,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-205",
@@ -579,7 +601,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "config.json references database but .env has no such reference"
+    "rationale": "config.json references database but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-206",
@@ -598,7 +621,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "config.json references port but docker-compose.yml has no such reference"
+    "rationale": "config.json references port but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-207",
@@ -617,7 +641,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-208",
@@ -636,7 +661,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": ".env references PORT but docker-compose.yml has no such reference"
+    "rationale": ".env references PORT but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-209",
@@ -655,7 +681,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "init.sql references users but server.js has no such reference"
+    "rationale": "init.sql references users but server.js has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-210",
@@ -674,7 +701,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "init.sql references sessions but config.json has no such reference"
+    "rationale": "init.sql references sessions but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-211",
@@ -693,7 +721,8 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference"
+    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "cf-bolster-212",
@@ -712,6 +741,7 @@
       "fs",
       "cross_file"
     ],
-    "rationale": "server.js references /health but config.json has no such reference"
+    "rationale": "server.js references /health but config.json has no such reference",
+    "intent": "false_positive"
   }
 ]

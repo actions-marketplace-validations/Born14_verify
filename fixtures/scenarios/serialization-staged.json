@@ -14,7 +14,8 @@
       "serialization",
       "valid_json"
     ],
-    "rationale": "valid.json is well-formed JSON, no schema or expected = just parse check"
+    "rationale": "valid.json is well-formed JSON, no schema or expected = just parse check",
+    "intent": "false_negative"
   },
   {
     "id": "ser-002",
@@ -31,7 +32,8 @@
       "serialization",
       "valid_json"
     ],
-    "rationale": "config.json is well-formed JSON"
+    "rationale": "config.json is well-formed JSON",
+    "intent": "false_negative"
   },
   {
     "id": "ser-003",
@@ -48,7 +50,8 @@
       "serialization",
       "invalid_json"
     ],
-    "rationale": "invalid.json is malformed, should fail"
+    "rationale": "invalid.json is malformed, should fail",
+    "intent": "false_positive"
   },
   {
     "id": "ser-004",
@@ -71,7 +74,8 @@
       "serialization",
       "invalid_json"
     ],
-    "rationale": "Serialization gate reads ctx.config.appDir (original), not stageDir — edit in staging has no effect on validation, original config.json is valid JSON"
+    "rationale": "Serialization gate reads ctx.config.appDir (original), not stageDir — edit in staging has no effect on validation, original config.json is valid JSON",
+    "intent": "false_negative"
   },
   {
     "id": "ser-005",
@@ -90,7 +94,8 @@
       "serialization",
       "strict"
     ],
-    "rationale": "Exact match of config.json content"
+    "rationale": "Exact match of config.json content",
+    "intent": "false_negative"
   },
   {
     "id": "ser-006",
@@ -109,7 +114,8 @@
       "serialization",
       "strict"
     ],
-    "rationale": "Expected has different app.name, strict comparison fails"
+    "rationale": "Expected has different app.name, strict comparison fails",
+    "intent": "false_positive"
   },
   {
     "id": "ser-007",
@@ -128,7 +134,8 @@
       "serialization",
       "structural"
     ],
-    "rationale": "Same keys and types, different values — structural pass"
+    "rationale": "Same keys and types, different values — structural pass",
+    "intent": "false_negative"
   },
   {
     "id": "ser-008",
@@ -147,7 +154,8 @@
       "serialization",
       "structural"
     ],
-    "rationale": "compareStructure is top-level only — checks expected keys exist in actual at root level, not recursively. features exists in actual so it passes even if features.newFeature is absent."
+    "rationale": "compareStructure is top-level only — checks expected keys exist in actual at root level, not recursively. features exists in actual so it passes even if features.newFeature is absent.",
+    "intent": "false_negative"
   },
   {
     "id": "ser-009",
@@ -166,7 +174,8 @@
       "serialization",
       "subset"
     ],
-    "rationale": "Actual contains all expected fields as a subset"
+    "rationale": "Actual contains all expected fields as a subset",
+    "intent": "false_negative"
   },
   {
     "id": "ser-010",
@@ -185,7 +194,8 @@
       "serialization",
       "subset"
     ],
-    "rationale": "Expected has missing_section which actual lacks"
+    "rationale": "Expected has missing_section which actual lacks",
+    "intent": "false_positive"
   },
   {
     "id": "ser-011",
@@ -217,7 +227,8 @@
       "serialization",
       "schema"
     ],
-    "rationale": "config.json has app and database objects"
+    "rationale": "config.json has app and database objects",
+    "intent": "false_negative"
   },
   {
     "id": "ser-012",
@@ -237,7 +248,8 @@
       "serialization",
       "schema"
     ],
-    "rationale": "config.json is an object, not an array"
+    "rationale": "config.json is an object, not an array",
+    "intent": "false_positive"
   },
   {
     "id": "ser-013",
@@ -262,7 +274,8 @@
       "serialization",
       "schema"
     ],
-    "rationale": "config.json lacks nonexistent field required by schema"
+    "rationale": "config.json lacks nonexistent field required by schema",
+    "intent": "false_positive"
   },
   {
     "id": "ser-014",
@@ -298,7 +311,8 @@
       "serialization",
       "schema"
     ],
-    "rationale": "valid.json has name (string), version (string), users (array)"
+    "rationale": "valid.json has name (string), version (string), users (array)",
+    "intent": "false_negative"
   },
   {
     "id": "ser-015",
@@ -323,7 +337,8 @@
       "serialization",
       "edit_then_validate"
     ],
-    "rationale": "Serialization gate reads ctx.config.appDir (original), not stageDir. Original config.json has app.name=Demo App, so subset check for Demo App passes."
+    "rationale": "Serialization gate reads ctx.config.appDir (original), not stageDir. Original config.json has app.name=Demo App, so subset check for Demo App passes.",
+    "intent": "false_negative"
   },
   {
     "id": "ser-016",
@@ -340,7 +355,8 @@
       "serialization",
       "missing_file"
     ],
-    "rationale": "File does not exist, serialization gate should fail"
+    "rationale": "File does not exist, serialization gate should fail",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-200",
@@ -359,7 +375,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-201",
@@ -378,7 +395,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-202",
@@ -397,7 +415,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-203",
@@ -416,7 +435,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-204",
@@ -435,7 +455,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-205",
@@ -454,7 +475,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references database but .env has no such reference"
+    "rationale": "config.json references database but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-206",
@@ -473,7 +495,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references port but docker-compose.yml has no such reference"
+    "rationale": "config.json references port but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-207",
@@ -492,7 +515,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-208",
@@ -511,7 +535,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references PORT but docker-compose.yml has no such reference"
+    "rationale": ".env references PORT but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-209",
@@ -530,7 +555,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "init.sql references users but server.js has no such reference"
+    "rationale": "init.sql references users but server.js has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-210",
@@ -549,7 +575,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "init.sql references sessions but config.json has no such reference"
+    "rationale": "init.sql references sessions but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-211",
@@ -568,7 +595,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference"
+    "rationale": "Dockerfile references EXPOSE but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-212",
@@ -587,7 +615,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references /health but config.json has no such reference"
+    "rationale": "server.js references /health but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "s-bolster-213",
@@ -606,6 +635,7 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references /api/echo but config.json has no such reference"
+    "rationale": "server.js references /api/echo but config.json has no such reference",
+    "intent": "false_positive"
   }
 ]

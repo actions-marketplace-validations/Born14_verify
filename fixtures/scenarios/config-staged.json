@@ -15,7 +15,8 @@
       "config",
       "env_exists"
     ],
-    "rationale": "NODE_ENV is defined in demo-app .env"
+    "rationale": "NODE_ENV is defined in demo-app .env",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-002",
@@ -33,7 +34,8 @@
       "config",
       "env_exists"
     ],
-    "rationale": "PORT is defined in demo-app .env"
+    "rationale": "PORT is defined in demo-app .env",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-003",
@@ -51,7 +53,8 @@
       "config",
       "env_exists"
     ],
-    "rationale": "DATABASE_URL is defined in demo-app .env"
+    "rationale": "DATABASE_URL is defined in demo-app .env",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-004",
@@ -69,7 +72,8 @@
       "config",
       "env_exists"
     ],
-    "rationale": "SECRET_KEY is defined in demo-app .env"
+    "rationale": "SECRET_KEY is defined in demo-app .env",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-005",
@@ -87,7 +91,8 @@
       "config",
       "env_exists"
     ],
-    "rationale": "DEBUG is defined in demo-app .env"
+    "rationale": "DEBUG is defined in demo-app .env",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-006",
@@ -105,7 +110,8 @@
       "config",
       "env_exists_fail"
     ],
-    "rationale": "NONEXISTENT_KEY is not in any config file"
+    "rationale": "NONEXISTENT_KEY is not in any config file",
+    "intent": "false_positive"
   },
   {
     "id": "cfg-007",
@@ -123,7 +129,8 @@
       "config",
       "env_value"
     ],
-    "rationale": ".env has NODE_ENV=production"
+    "rationale": ".env has NODE_ENV=production",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-008",
@@ -141,7 +148,8 @@
       "config",
       "env_value"
     ],
-    "rationale": ".env has PORT=3000"
+    "rationale": ".env has PORT=3000",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-009",
@@ -159,7 +167,8 @@
       "config",
       "env_value"
     ],
-    "rationale": ".env has DEBUG=false"
+    "rationale": ".env has DEBUG=false",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-010",
@@ -177,7 +186,8 @@
       "config",
       "env_value_fail"
     ],
-    "rationale": "PORT is 3000, not 8080"
+    "rationale": "PORT is 3000, not 8080",
+    "intent": "false_positive"
   },
   {
     "id": "cfg-011",
@@ -196,7 +206,8 @@
       "config",
       "env_source"
     ],
-    "rationale": "Scoping to dotenv still finds NODE_ENV in .env"
+    "rationale": "Scoping to dotenv still finds NODE_ENV in .env",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-012",
@@ -214,7 +225,8 @@
       "config",
       "json_exists"
     ],
-    "rationale": "config.json has app.name = \"Demo App\""
+    "rationale": "config.json has app.name = \"Demo App\"",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-013",
@@ -232,7 +244,8 @@
       "config",
       "json_exists"
     ],
-    "rationale": "config.json has database.port = 5432"
+    "rationale": "config.json has database.port = 5432",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-014",
@@ -250,7 +263,8 @@
       "config",
       "json_exists"
     ],
-    "rationale": "config.json has features.darkMode = true"
+    "rationale": "config.json has features.darkMode = true",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-015",
@@ -268,7 +282,8 @@
       "config",
       "json_exists_fail"
     ],
-    "rationale": "app.nonexistent is not in config.json"
+    "rationale": "app.nonexistent is not in config.json",
+    "intent": "false_positive"
   },
   {
     "id": "cfg-016",
@@ -286,7 +301,8 @@
       "config",
       "json_value"
     ],
-    "rationale": "config.json has app.name = \"Demo App\""
+    "rationale": "config.json has app.name = \"Demo App\"",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-017",
@@ -304,7 +320,8 @@
       "config",
       "json_value"
     ],
-    "rationale": "config.json has database.host = \"localhost\""
+    "rationale": "config.json has database.host = \"localhost\"",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-018",
@@ -322,7 +339,8 @@
       "config",
       "json_value"
     ],
-    "rationale": "config.json has features.darkMode = true (boolean, compared as string)"
+    "rationale": "config.json has features.darkMode = true (boolean, compared as string)",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-019",
@@ -340,7 +358,8 @@
       "config",
       "json_value_fail"
     ],
-    "rationale": "app.name is \"Demo App\" not \"Wrong App\""
+    "rationale": "app.name is \"Demo App\" not \"Wrong App\"",
+    "intent": "false_positive"
   },
   {
     "id": "cfg-020",
@@ -359,7 +378,8 @@
       "config",
       "json_source"
     ],
-    "rationale": "Scoping to json source finds app.name in config.json"
+    "rationale": "Scoping to json source finds app.name in config.json",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-021",
@@ -382,7 +402,8 @@
       "config",
       "multi"
     ],
-    "rationale": "Both env and json predicates pass"
+    "rationale": "Both env and json predicates pass",
+    "intent": "false_negative"
   },
   {
     "id": "cfg-022",
@@ -405,7 +426,8 @@
       "config",
       "multi"
     ],
-    "rationale": "Second predicate fails, entire gate fails"
+    "rationale": "Second predicate fails, entire gate fails",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-200",
@@ -424,7 +446,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references 3000 but config.json has no such reference"
+    "rationale": "server.js references 3000 but config.json has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-201",
@@ -443,7 +466,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references http.createServer but .env has no such reference"
+    "rationale": "server.js references http.createServer but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-202",
@@ -462,7 +486,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references api/items but init.sql has no such reference"
+    "rationale": "server.js references api/items but init.sql has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-203",
@@ -481,7 +506,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references listen but Dockerfile has no such reference"
+    "rationale": "server.js references listen but Dockerfile has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-204",
@@ -500,7 +526,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "server.js references health but docker-compose.yml has no such reference"
+    "rationale": "server.js references health but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-205",
@@ -519,7 +546,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references database but .env has no such reference"
+    "rationale": "config.json references database but .env has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-206",
@@ -538,7 +566,8 @@
       "general",
       "cross_file"
     ],
-    "rationale": "config.json references port but docker-compose.yml has no such reference"
+    "rationale": "config.json references port but docker-compose.yml has no such reference",
+    "intent": "false_positive"
   },
   {
     "id": "c-bolster-207",
@@ -557,6 +586,7 @@
       "general",
       "cross_file"
     ],
-    "rationale": ".env references NODE_ENV but Dockerfile has no such reference"
+    "rationale": ".env references NODE_ENV but Dockerfile has no such reference",
+    "intent": "false_positive"
   }
 ]

@@ -28,7 +28,8 @@
       "rate_limit",
       "IH-01"
     ],
-    "rationale": "Rate limiter added to server but config.json has no rateLimit key — config/code mismatch"
+    "rationale": "Rate limiter added to server but config.json has no rateLimit key — config/code mismatch",
+    "intent": "false_positive"
   },
   {
     "id": "ih-rate-002",
@@ -59,7 +60,8 @@
       "rate_limit",
       "IH-01"
     ],
-    "rationale": "Config says 100 but .env says 5 — env override means effective rate limit is 5, not 100"
+    "rationale": "Config says 100 but .env says 5 — env override means effective rate limit is 5, not 100",
+    "intent": "false_negative"
   },
   {
     "id": "ih-rate-003",
@@ -90,7 +92,8 @@
       "rate_limit",
       "IH-01"
     ],
-    "rationale": "IP throttle in code but staging config has no throttle section — staging tests will hit limits"
+    "rationale": "IP throttle in code but staging config has no throttle section — staging tests will hit limits",
+    "intent": "false_positive"
   },
   {
     "id": "ih-rate-004",
@@ -126,7 +129,8 @@
       "rate_limit",
       "IH-01"
     ],
-    "rationale": "Rate limit set in .env (50) and read in code (default 1000) but config.json has no record"
+    "rationale": "Rate limit set in .env (50) and read in code (default 1000) but config.json has no record",
+    "intent": "false_positive"
   },
   {
     "id": "ih-rate-005",
@@ -163,7 +167,8 @@
       "IH-01",
       "control"
     ],
-    "rationale": "Rate limit consistent in both server.js and config.json — no capacity conflict"
+    "rationale": "Rate limit consistent in both server.js and config.json — no capacity conflict",
+    "intent": "false_negative"
   },
   {
     "id": "ih-pool-006",
@@ -199,7 +204,8 @@
       "pool_exhaustion",
       "IH-02"
     ],
-    "rationale": "5 connections shared across 3 replicas = ~1.6 per replica — pool exhaustion under load"
+    "rationale": "5 connections shared across 3 replicas = ~1.6 per replica — pool exhaustion under load",
+    "intent": "false_negative"
   },
   {
     "id": "ih-pool-007",
@@ -235,7 +241,8 @@
       "pool_exhaustion",
       "IH-02"
     ],
-    "rationale": ".env limits pool to 3 but config.json claims 20 — effective pool is 3, capacity illusion"
+    "rationale": ".env limits pool to 3 but config.json claims 20 — effective pool is 3, capacity illusion",
+    "intent": "false_negative"
   },
   {
     "id": "ih-pool-008",
@@ -266,7 +273,8 @@
       "pool_exhaustion",
       "IH-02"
     ],
-    "rationale": "Pool config in code but not in prod config — prod deployment may use different (wrong) pool size"
+    "rationale": "Pool config in code but not in prod config — prod deployment may use different (wrong) pool size",
+    "intent": "false_positive"
   },
   {
     "id": "ih-pool-009",
@@ -297,7 +305,8 @@
       "pool_exhaustion",
       "IH-02"
     ],
-    "rationale": "Production compose limits pool to 2 but test compose has no such limit — test/prod disparity"
+    "rationale": "Production compose limits pool to 2 but test compose has no such limit — test/prod disparity",
+    "intent": "false_positive"
   },
   {
     "id": "ih-pool-010",
@@ -334,7 +343,8 @@
       "IH-02",
       "control"
     ],
-    "rationale": "Pool size matches across config.json and .env — no capacity conflict"
+    "rationale": "Pool size matches across config.json and .env — no capacity conflict",
+    "intent": "false_negative"
   },
   {
     "id": "ih-payload-011",
@@ -365,7 +375,8 @@
       "payload_limit",
       "IH-03"
     ],
-    "rationale": "1KB limit but form has textarea for messages — realistic message will exceed 1KB"
+    "rationale": "1KB limit but form has textarea for messages — realistic message will exceed 1KB",
+    "intent": "false_negative"
   },
   {
     "id": "ih-payload-012",
@@ -401,7 +412,8 @@
       "payload_limit",
       "IH-03"
     ],
-    "rationale": ".env says 10mb but code hardcodes 100kb — env config is capacity fiction"
+    "rationale": ".env says 10mb but code hardcodes 100kb — env config is capacity fiction",
+    "intent": "false_negative"
   },
   {
     "id": "ih-payload-013",
@@ -432,7 +444,8 @@
       "payload_limit",
       "IH-03"
     ],
-    "rationale": "Dev config has upload limit but prod config does not — prod may have no limit or wrong default"
+    "rationale": "Dev config has upload limit but prod config does not — prod may have no limit or wrong default",
+    "intent": "false_positive"
   },
   {
     "id": "ih-payload-014",
@@ -463,7 +476,8 @@
       "payload_limit",
       "IH-03"
     ],
-    "rationale": "Body size set in compose env but server.js never reads it — limit is cosmetic"
+    "rationale": "Body size set in compose env but server.js never reads it — limit is cosmetic",
+    "intent": "false_positive"
   },
   {
     "id": "ih-payload-015",
@@ -500,7 +514,8 @@
       "IH-03",
       "control"
     ],
-    "rationale": "Body limit set in env and read by code — consistent capacity configuration"
+    "rationale": "Body limit set in env and read by code — consistent capacity configuration",
+    "intent": "false_negative"
   },
   {
     "id": "ih-bolster-100",
@@ -525,7 +540,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-101",
@@ -550,7 +566,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-102",
@@ -575,7 +592,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-103",
@@ -600,7 +618,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-104",
@@ -625,7 +644,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-105",
@@ -650,7 +670,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-106",
@@ -675,7 +696,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-107",
@@ -700,7 +722,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-108",
@@ -726,7 +749,8 @@
       "ih-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "ih-bolster-109",
@@ -752,7 +776,8 @@
       "ih-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "ih-bolster-110",
@@ -778,7 +803,8 @@
       "ih-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "ih-bolster-111",
@@ -803,7 +829,8 @@
       "ih-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "ih-bolster-112",
@@ -821,7 +848,8 @@
       "http",
       "ih-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "ih-bolster-113",
@@ -840,7 +868,8 @@
       "ih-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "ih-bolster-114",
@@ -860,6 +889,7 @@
       "ih-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

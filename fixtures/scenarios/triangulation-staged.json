@@ -14,7 +14,8 @@
       "triangulation",
       "deterministic_only"
     ],
-    "rationale": "Filesystem predicate passes, no browser/vision → success (triangulation may not run with <2 authorities)"
+    "rationale": "Filesystem predicate passes, no browser/vision → success (triangulation may not run with <2 authorities)",
+    "intent": "false_negative"
   },
   {
     "id": "tri-002",
@@ -31,7 +32,8 @@
       "triangulation",
       "deterministic_fail"
     ],
-    "rationale": "Filesystem predicate fails → deterministic=false, but gate catches failure earlier"
+    "rationale": "Filesystem predicate fails → deterministic=false, but gate catches failure earlier",
+    "intent": "false_positive"
   },
   {
     "id": "tri-003",
@@ -53,7 +55,8 @@
       "triangulation",
       "mixed_predicates"
     ],
-    "rationale": "Multiple deterministic predicates all pass"
+    "rationale": "Multiple deterministic predicates all pass",
+    "intent": "false_negative"
   },
   {
     "id": "tri-004",
@@ -75,7 +78,8 @@
       "triangulation",
       "mixed_predicates"
     ],
-    "rationale": "Config predicate fails → overall failure, deterministic=false"
+    "rationale": "Config predicate fails → overall failure, deterministic=false",
+    "intent": "false_positive"
   },
   {
     "id": "tri-005",
@@ -93,7 +97,8 @@
       "triangulation",
       "no_tri_predicates"
     ],
-    "rationale": "Content predicate passes through grounding gate, no triangulation-specific gates"
+    "rationale": "Content predicate passes through grounding gate, no triangulation-specific gates",
+    "intent": "false_negative"
   },
   {
     "id": "tri-006",
@@ -121,7 +126,8 @@
       "triangulation",
       "all_pass"
     ],
-    "rationale": "Edit changes port, content predicate finds new value, filesystem confirms file exists"
+    "rationale": "Edit changes port, content predicate finds new value, filesystem confirms file exists",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-100",
@@ -139,7 +145,8 @@
       "single_pass",
       "filesystem_exists"
     ],
-    "rationale": "Single filesystem_exists predicate passes — triangulation with 1 authority"
+    "rationale": "Single filesystem_exists predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-101",
@@ -157,7 +164,8 @@
       "single_fail",
       "filesystem_exists"
     ],
-    "rationale": "Single filesystem_exists predicate fails — triangulation with 1 authority"
+    "rationale": "Single filesystem_exists predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-102",
@@ -176,7 +184,8 @@
       "single_pass",
       "content"
     ],
-    "rationale": "Single content predicate passes — triangulation with 1 authority"
+    "rationale": "Single content predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-103",
@@ -195,7 +204,8 @@
       "single_fail",
       "content"
     ],
-    "rationale": "Single content predicate fails — triangulation with 1 authority"
+    "rationale": "Single content predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-104",
@@ -214,7 +224,8 @@
       "single_pass",
       "content"
     ],
-    "rationale": "Single content predicate passes — triangulation with 1 authority"
+    "rationale": "Single content predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-105",
@@ -233,7 +244,8 @@
       "single_fail",
       "content"
     ],
-    "rationale": "Single content predicate fails — triangulation with 1 authority"
+    "rationale": "Single content predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-106",
@@ -252,7 +264,8 @@
       "single_pass",
       "config"
     ],
-    "rationale": "Single config predicate passes — triangulation with 1 authority"
+    "rationale": "Single config predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-107",
@@ -271,7 +284,8 @@
       "single_fail",
       "config"
     ],
-    "rationale": "Single config predicate fails — triangulation with 1 authority"
+    "rationale": "Single config predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-108",
@@ -290,7 +304,8 @@
       "single_pass",
       "config"
     ],
-    "rationale": "Single config predicate passes — triangulation with 1 authority"
+    "rationale": "Single config predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-109",
@@ -309,7 +324,8 @@
       "single_fail",
       "config"
     ],
-    "rationale": "Single config predicate fails — triangulation with 1 authority"
+    "rationale": "Single config predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-110",
@@ -327,7 +343,8 @@
       "single_pass",
       "filesystem_exists"
     ],
-    "rationale": "Single filesystem_exists predicate passes — triangulation with 1 authority"
+    "rationale": "Single filesystem_exists predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-111",
@@ -345,7 +362,8 @@
       "single_fail",
       "filesystem_exists"
     ],
-    "rationale": "Single filesystem_exists predicate fails — triangulation with 1 authority"
+    "rationale": "Single filesystem_exists predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-112",
@@ -364,7 +382,8 @@
       "single_pass",
       "content"
     ],
-    "rationale": "Single content predicate passes — triangulation with 1 authority"
+    "rationale": "Single content predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-113",
@@ -383,7 +402,8 @@
       "single_fail",
       "content"
     ],
-    "rationale": "Single content predicate fails — triangulation with 1 authority"
+    "rationale": "Single content predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-114",
@@ -402,7 +422,8 @@
       "single_pass",
       "config"
     ],
-    "rationale": "Single config predicate passes — triangulation with 1 authority"
+    "rationale": "Single config predicate passes — triangulation with 1 authority",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-115",
@@ -421,7 +442,8 @@
       "single_fail",
       "config"
     ],
-    "rationale": "Single config predicate fails — triangulation with 1 authority"
+    "rationale": "Single config predicate fails — triangulation with 1 authority",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-116",
@@ -444,7 +466,8 @@
       "dual",
       "both_pass"
     ],
-    "rationale": "Two authorities: pass + pass"
+    "rationale": "Two authorities: pass + pass",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-117",
@@ -467,7 +490,8 @@
       "dual",
       "mixed_or_fail"
     ],
-    "rationale": "Two authorities: pass + fail"
+    "rationale": "Two authorities: pass + fail",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-118",
@@ -490,7 +514,8 @@
       "dual",
       "mixed_or_fail"
     ],
-    "rationale": "Two authorities: fail + fail"
+    "rationale": "Two authorities: fail + fail",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-119",
@@ -514,7 +539,8 @@
       "dual",
       "both_pass"
     ],
-    "rationale": "Two authorities: pass + pass"
+    "rationale": "Two authorities: pass + pass",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-120",
@@ -538,7 +564,8 @@
       "dual",
       "mixed_or_fail"
     ],
-    "rationale": "Two authorities: fail + fail"
+    "rationale": "Two authorities: fail + fail",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-121",
@@ -562,7 +589,8 @@
       "dual",
       "mixed_or_fail"
     ],
-    "rationale": "Two authorities: pass + fail"
+    "rationale": "Two authorities: pass + fail",
+    "intent": "false_positive"
   },
   {
     "id": "tri-bolster-122",
@@ -585,7 +613,8 @@
       "dual",
       "both_pass"
     ],
-    "rationale": "Two authorities: pass + pass"
+    "rationale": "Two authorities: pass + pass",
+    "intent": "false_negative"
   },
   {
     "id": "tri-bolster-123",
@@ -608,6 +637,7 @@
       "dual",
       "mixed_or_fail"
     ],
-    "rationale": "Two authorities: fail + fail"
+    "rationale": "Two authorities: fail + fail",
+    "intent": "false_positive"
   }
 ]

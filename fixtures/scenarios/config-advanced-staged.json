@@ -15,7 +15,8 @@
       "config",
       "feature_flag_env_diff",
       "CFG-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cfg-adv-002",
@@ -34,7 +35,8 @@
       "config",
       "feature_flag_env_diff",
       "CFG-03"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cfg-adv-003",
@@ -54,7 +56,8 @@
       "config",
       "feature_flag_env_diff",
       "CFG-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-004",
@@ -73,7 +76,8 @@
       "config",
       "feature_flag_env_diff",
       "CFG-03"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-005",
@@ -91,7 +95,8 @@
       "config",
       "secret_in_plaintext",
       "CFG-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cfg-adv-006",
@@ -110,7 +115,8 @@
       "config",
       "secret_in_plaintext",
       "CFG-05"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cfg-adv-007",
@@ -129,7 +135,8 @@
       "config",
       "secret_in_plaintext",
       "CFG-05"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-008",
@@ -147,7 +154,8 @@
       "config",
       "hot_reload_partial",
       "CFG-06"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cfg-adv-009",
@@ -167,7 +175,8 @@
       "config",
       "hot_reload_partial",
       "CFG-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-010",
@@ -186,7 +195,8 @@
       "config",
       "hot_reload_partial",
       "CFG-06"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-011",
@@ -204,7 +214,8 @@
       "config",
       "default_hides_missing",
       "CFG-07"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cfg-adv-012",
@@ -224,7 +235,8 @@
       "config",
       "default_hides_missing",
       "CFG-07"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-013",
@@ -243,7 +255,8 @@
       "config",
       "default_hides_missing",
       "CFG-07"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-014",
@@ -262,7 +275,8 @@
       "config",
       "precedence_unpredictable",
       "CFG-08"
-    ]
+    ],
+    "intent": "false_negative"
   },
   {
     "id": "cfg-adv-015",
@@ -282,7 +296,8 @@
       "config",
       "precedence_unpredictable",
       "CFG-08"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-016",
@@ -301,7 +316,8 @@
       "config",
       "precedence_unpredictable",
       "CFG-08"
-    ]
+    ],
+    "intent": "false_positive"
   },
   {
     "id": "cfg-adv-017",
@@ -320,6 +336,7 @@
       "config",
       "precedence_unpredictable",
       "CFG-08"
-    ]
+    ],
+    "intent": "false_negative"
   }
 ]

@@ -24,7 +24,8 @@
       "class_renamed",
       "SB-01"
     ],
-    "rationale": "Assumed: .nav-link class exists. Actual: renamed to .menu-link. Selector finds nothing."
+    "rationale": "Assumed: .nav-link class exists. Actual: renamed to .menu-link. Selector finds nothing.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-class-002",
@@ -51,7 +52,8 @@
       "class_renamed",
       "SB-01"
     ],
-    "rationale": "Assumed: .subtitle class exists with color. Actual: renamed to .tagline. Old selector is dead."
+    "rationale": "Assumed: .subtitle class exists with color. Actual: renamed to .tagline. Old selector is dead.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-class-003",
@@ -78,7 +80,8 @@
       "class_renamed",
       "SB-01"
     ],
-    "rationale": "Assumed: .hero class exists on about page. Actual: renamed to .banner. CSS rule orphaned."
+    "rationale": "Assumed: .hero class exists on about page. Actual: renamed to .banner. CSS rule orphaned.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-class-004",
@@ -105,7 +108,8 @@
       "class_renamed",
       "SB-01"
     ],
-    "rationale": "Assumed: .items class exists. Actual: renamed to .item-list. Agent's selector references a ghost class."
+    "rationale": "Assumed: .items class exists. Actual: renamed to .item-list. Agent's selector references a ghost class.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-class-005",
@@ -138,7 +142,8 @@
       "SB-01",
       "control"
     ],
-    "rationale": "CSS and HTML both renamed consistently — new selector matches. No state mismatch."
+    "rationale": "CSS and HTML both renamed consistently — new selector matches. No state mismatch.",
+    "intent": "false_negative"
   },
   {
     "id": "sb-dom-006",
@@ -164,7 +169,8 @@
       "element_moved",
       "SB-02"
     ],
-    "rationale": "Assumed: footer has text content. Actual: footer emptied (content moved). Selector finds empty element."
+    "rationale": "Assumed: footer has text content. Actual: footer emptied (content moved). Selector finds empty element.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-dom-007",
@@ -190,7 +196,8 @@
       "element_moved",
       "SB-02"
     ],
-    "rationale": "Assumed: nav is direct child of body. Actual: moved inside .hero div. Selector body > nav finds nothing."
+    "rationale": "Assumed: nav is direct child of body. Actual: moved inside .hero div. Selector body > nav finds nothing.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-dom-008",
@@ -216,7 +223,8 @@
       "element_moved",
       "SB-02"
     ],
-    "rationale": "Assumed: h1 is direct child of body. Actual: wrapped in <header>. Direct-child selector fails."
+    "rationale": "Assumed: h1 is direct child of body. Actual: wrapped in <header>. Direct-child selector fails.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-dom-009",
@@ -243,7 +251,8 @@
       "element_moved",
       "SB-02"
     ],
-    "rationale": "Assumed: .badge is inside .card. Actual: moved outside. Descendant selector .card .badge finds nothing."
+    "rationale": "Assumed: .badge is inside .card. Actual: moved outside. Descendant selector .card .badge finds nothing.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-dom-010",
@@ -265,7 +274,8 @@
       "SB-02",
       "control"
     ],
-    "rationale": ".hero-title is still inside .hero — DOM structure matches selector. No move."
+    "rationale": ".hero-title is still inside .hero — DOM structure matches selector. No move.",
+    "intent": "false_negative"
   },
   {
     "id": "sb-responsive-011",
@@ -292,7 +302,8 @@
       "responsive_breakpoint",
       "SB-03"
     ],
-    "rationale": "Assumed: h1 is 1rem (mobile). Actual: base rule is 2rem, 1rem only in @media. File-level CSS extraction sees base rule."
+    "rationale": "Assumed: h1 is 1rem (mobile). Actual: base rule is 2rem, 1rem only in @media. File-level CSS extraction sees base rule.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-responsive-012",
@@ -319,7 +330,8 @@
       "responsive_breakpoint",
       "SB-03"
     ],
-    "rationale": "Assumed: body background is #1a1a2e. Actual: only in dark mode media query. Base rule has #ffffff."
+    "rationale": "Assumed: body background is #1a1a2e. Actual: only in dark mode media query. Base rule has #ffffff.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-responsive-013",
@@ -340,7 +352,8 @@
       "responsive_breakpoint",
       "SB-03"
     ],
-    "rationale": "Assumed: .responsive-only has color #27ae60 at any viewport. Actual: only inside @media — no base rule exists."
+    "rationale": "Assumed: .responsive-only has color #27ae60 at any viewport. Actual: only inside @media — no base rule exists.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-responsive-014",
@@ -361,7 +374,8 @@
       "responsive_breakpoint",
       "SB-03"
     ],
-    "rationale": "Assumed: .edge-hero font-size is 1rem. Actual: base rule is 1.5rem, 1rem only in @media block."
+    "rationale": "Assumed: .edge-hero font-size is 1rem. Actual: base rule is 1.5rem, 1rem only in @media block.",
+    "intent": "false_positive"
   },
   {
     "id": "sb-responsive-015",
@@ -383,7 +397,8 @@
       "SB-03",
       "control"
     ],
-    "rationale": "Base rule is 1.5rem — not inside any media query. Predicate matches reality."
+    "rationale": "Base rule is 1.5rem — not inside any media query. Predicate matches reality.",
+    "intent": "false_negative"
   },
   {
     "id": "sb-bolster-100",
@@ -408,7 +423,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "server.js port changed, config.json unaware"
+    "rationale": "server.js port changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-101",
@@ -433,7 +449,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "config.json port changed, server.js unaware"
+    "rationale": "config.json port changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-102",
@@ -458,7 +475,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": ".env port changed, Dockerfile unaware"
+    "rationale": ".env port changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-103",
@@ -483,7 +501,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "Dockerfile EXPOSE changed, .env unaware"
+    "rationale": "Dockerfile EXPOSE changed, .env unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-104",
@@ -508,7 +527,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "health response changed, Dockerfile unaware"
+    "rationale": "health response changed, Dockerfile unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-105",
@@ -533,7 +553,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "app name changed in config, server.js unaware"
+    "rationale": "app name changed in config, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-106",
@@ -558,7 +579,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "NODE_ENV changed, server.js unaware"
+    "rationale": "NODE_ENV changed, server.js unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-107",
@@ -583,7 +605,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "SECRET_KEY changed, config.json unaware"
+    "rationale": "SECRET_KEY changed, config.json unaware",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-108",
@@ -609,7 +632,8 @@
       "sb-bolster",
       "control"
     ],
-    "rationale": "control: server.js port changed, verify in server.js"
+    "rationale": "control: server.js port changed, verify in server.js",
+    "intent": "false_negative"
   },
   {
     "id": "sb-bolster-109",
@@ -635,7 +659,8 @@
       "sb-bolster",
       "control"
     ],
-    "rationale": "control: config.json port changed, config gate reads it"
+    "rationale": "control: config.json port changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "sb-bolster-110",
@@ -661,7 +686,8 @@
       "sb-bolster",
       "control"
     ],
-    "rationale": "control: .env PORT changed, config gate reads it"
+    "rationale": "control: .env PORT changed, config gate reads it",
+    "intent": "false_negative"
   },
   {
     "id": "sb-bolster-111",
@@ -686,7 +712,8 @@
       "sb-bolster",
       "control"
     ],
-    "rationale": "control: server.js still exists after edit"
+    "rationale": "control: server.js still exists after edit",
+    "intent": "false_negative"
   },
   {
     "id": "sb-bolster-112",
@@ -704,7 +731,8 @@
       "browser",
       "sb-bolster"
     ],
-    "rationale": "fabricated: package.json does not exist"
+    "rationale": "fabricated: package.json does not exist",
+    "intent": "false_positive"
   },
   {
     "id": "sb-bolster-113",
@@ -723,7 +751,8 @@
       "sb-bolster",
       "control"
     ],
-    "rationale": "control: server.js exists without edits"
+    "rationale": "control: server.js exists without edits",
+    "intent": "false_negative"
   },
   {
     "id": "sb-bolster-114",
@@ -743,6 +772,7 @@
       "sb-bolster",
       "control"
     ],
-    "rationale": "control: server.js has createServer"
+    "rationale": "control: server.js has createServer",
+    "intent": "false_negative"
   }
 ]

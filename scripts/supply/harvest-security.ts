@@ -229,7 +229,7 @@ function collectTextFiles(dir: string): string[] {
         walk(full);
       } else {
         const ext = extname(entry.name).toLowerCase();
-        if (['.txt', '.md', '.lst', '.csv', '.dat'].includes(ext)) {
+        if (['.txt', '.md', '.lst', '.csv', '.dat', '.mjs', '.js'].includes(ext)) {
           result.push(full);
         }
       }
@@ -238,6 +238,142 @@ function collectTextFiles(dir: string): string[] {
 
   walk(dir);
   return result;
+}
+
+// ────────────────────────────────────��────────────────────────────────────────
+// DOMPurify fixture parser
+// ──────���────────────────���──────────────────────────────────��──────────────────
+
+interface DOMPurifyVector {
+  payload: string;
+  expected: string;
+  title?: string;
+}
+
+/**
+ * Parse DOMPurify test fixtures from .mjs/.js files.
+ * The expect.mjs file uses JSON-style objects with "payload" and "expected" fields.
+ * We parse it as JSON after stripping the ESM export wrapper.
+ */
+function parseDOMPurifyFixtures(content: string): DOMPurifyVector[] {
+  // Strip ESM export: "export default [...]" → "[...]"
+  let jsonStr = content
+    .replace(/^export\s+default\s+/, '')
+    .trim();
+  // Remove trailing semicolons
+  if (jsonStr.endsWith(';')) jsonStr = jsonStr.slice(0, -1);
+
+  try {
+    const arr = JSON.parse(jsonStr);
+    if (!Array.isArray(arr)) return [];
+    return arr.filter((item: any) =>
+      typeof item === 'object' && item !== null && typeof item.payload === 'string'
+    ).map((item: any) => ({
+      payload: item.payload,
+      expected: item.expected ?? '',
+      title: item.title,
+    }));
+  } catch {
+    // Fallback: regex extraction for non-standard formats
+    const vectors: DOMPurifyVector[] = [];
+    const entryRegex = /"payload"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"expected"\s*:\s*"((?:[^"\\]|\\.)*)"/g;
+    let match: RegExpExecArray | null;
+    while ((match = entryRegex.exec(content)) !== null) {
+      vectors.push({
+        payload: match[1].replace(/\\"/g, '"'),
+        expected: match[2].replace(/\\"/g, '"'),
+      });
+    }
+    return vectors;
+  }
+}
+
+/**
+ * Generate security scenarios from DOMPurify sanitization vectors.
+ */
+function harvestDOMPurify(
+  files: string[],
+  maxScenarios: number,
+  startCounter: number,
+  seen: Set<string>,
+): { scenarios: VerifyScenario[], counter: number } {
+  const scenarios: VerifyScenario[] = [];
+  let counter = startCounter;
+
+  const mjsFiles = files.filter(f => {
+    const ext = extname(f).toLowerCase();
+    return ext === '.mjs' || ext === '.js';
+  });
+
+  for (const filePath of mjsFiles) {
+    if (scenarios.length >= maxScenarios) break;
+
+    let content: string;
+    try {
+      const stats = statSync(filePath);
+      if (stats.size > 5 * 1024 * 1024) continue;
+      content = readFileSync(filePath, 'utf-8');
+    } catch { continue; }
+
+    // Only process files that look like DOMPurify fixtures (have payload and expected)
+    if (!content.includes('payload') || !content.includes('expected')) continue;
+
+    const vectors = parseDOMPurifyFixtures(content);
+    if (vectors.length === 0) continue;
+
+    const sourceFile = basename(filePath);
+
+    for (const vec of vectors) {
+      if (scenarios.length >= maxScenarios) break;
+
+      // Dedup
+      const dedupKey = vec.payload.substring(0, 50);
+      if (seen.has(dedupKey)) continue;
+      seen.add(dedupKey);
+
+      counter++;
+
+      // If payload !== expected, DOMPurify strips something — the input is dangerous
+      const wasSanitized = vec.payload !== vec.expected;
+      const payloadClassification = classifyPayload(vec.payload);
+      const isDangerous = wasSanitized || payloadClassification === 'dangerous';
+
+      if (payloadClassification === 'skip') continue;
+
+      const payloadType = classifyPayloadType(vec.payload);
+      const escapedPayload = escapePayloadForEmbed(vec.payload);
+
+      scenarios.push({
+        id: `rw-sec-dp-${String(counter).padStart(4, '0')}`,
+        description: `DOMPurify: ${vec.title || truncatePayload(vec.payload, 60)} (${sourceFile})`,
+        edits: [{
+          file: 'server.js',
+          search: '<p>Additional details appear here.</p>',
+          replace: `<p>Additional details appear here.</p>\n    <div class="user-content">${escapedPayload}</div>`,
+        }],
+        predicates: [{
+          type: 'security',
+          check: 'xss',
+          target: 'server.js',
+          assertion: 'no_findings',
+        }],
+        expectedSuccess: !isDangerous,
+        tags: [
+          'security',
+          'real-world',
+          'dompurify',
+          payloadType,
+          isDangerous ? 'dangerous' : 'benign',
+        ],
+        rationale: isDangerous
+          ? `DOMPurify sanitization vector (${sourceFile}): input was ${wasSanitized ? 'stripped' : 'flagged'} — ${payloadType}. Input: ${truncatePayload(vec.payload, 80)}`
+          : `DOMPurify safe vector (${sourceFile}): input unchanged after sanitization. Input: ${truncatePayload(vec.payload, 80)}`,
+        source: 'real-world',
+      });
+    }
+  }
+
+  return { scenarios, counter };
 }
 
 /**
@@ -255,8 +391,25 @@ export function harvestSecurity(files: string[], maxScenarios: number): VerifySc
   // Deduplicate payloads by first 50 characters
   const seen = new Set<string>();
 
+  // ── DOMPurify fixtures (.mjs/.js) ──────────────────────────────────────
+  const mjsFiles = files.filter(f => {
+    const ext = extname(f).toLowerCase();
+    return ext === '.mjs' || ext === '.js';
+  });
+  if (mjsFiles.length > 0) {
+    const dpBudget = Math.min(Math.floor(maxScenarios * 0.3), maxScenarios);
+    const dp = harvestDOMPurify(mjsFiles, dpBudget, counter, seen);
+    scenarios.push(...dp.scenarios);
+    counter = dp.counter;
+  }
+
+  // ── PayloadsAllTheThings (.txt/.md) ────────────────────────────────────
   for (const filePath of files) {
     if (scenarios.length >= maxScenarios) break;
+
+    // Skip .mjs/.js files (handled by DOMPurify branch above)
+    const fileExt = extname(filePath).toLowerCase();
+    if (fileExt === '.mjs' || fileExt === '.js') continue;
 
     let content: string;
     try {
@@ -342,7 +495,8 @@ export function harvestSecurity(files: string[], maxScenarios: number): VerifySc
   // Count dangerous vs benign for logging
   const dangerousCount = scenarios.filter(s => !s.expectedSuccess).length;
   const benignCount = scenarios.filter(s => s.expectedSuccess).length;
-  console.log(`  harvest-security: parsed ${files.length} payload files, generated ${scenarios.length} scenarios (${dangerousCount} dangerous, ${benignCount} benign)`);
+  const dpCount = scenarios.filter(s => s.tags.includes('dompurify')).length;
+  console.log(`  harvest-security: ${files.length} files (${dpCount} dompurify), generated ${scenarios.length} scenarios (${dangerousCount} dangerous, ${benignCount} benign)`);
 
   return scenarios;
 }

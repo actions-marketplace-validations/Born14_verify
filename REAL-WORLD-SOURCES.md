@@ -1,8 +1,8 @@
 # Real-World Data Sources for Verify Harvesters
 
 **Purpose:** Complement synthetic generators with real external data sources for discovery-grade testing.
-**Date:** 2026-03-28 (scoping) / 2026-03-29 (Phase 1 implemented)
-**Status:** Phase 1 complete — 8 sources live, 908+ scenarios from real data.
+**Date:** 2026-03-28 (scoping) / 2026-03-29 (Phase 1) / 2026-03-30 (Phase 2 partial)
+**Status:** Phase 2 in progress — 13 sources live, 6,432 scenarios from real data.
 
 ---
 
@@ -22,20 +22,30 @@ bun run self-test --source=all           # both
 bun scripts/supply/harvest-real.ts       # fetch + generate real-world scenarios
 ```
 
-### Phase 1 (implemented)
+### Phase 1 (implemented — March 29)
 
 | Source | Harvester | Real Data | Scenarios |
 |--------|-----------|-----------|-----------|
-| SchemaPile | harvest-db | 22,989 PostgreSQL schemas | 200 |
-| JSON Schema Test Suite | harvest-http | 83 validation test files | 200 |
-| MDN Compat Data | harvest-css | Full browser compat DB | 100 |
+| SchemaPile | harvest-db | 22,989 PostgreSQL schemas | 2,000 |
+| JSON Schema Test Suite | harvest-http | 83 validation test files | 1,000 |
+| MDN Compat Data | harvest-css | Full browser compat DB | 101 |
 | Can I Use | harvest-css | CSS feature support matrix | 33 |
-| PostCSS Parser Tests | harvest-css | 24 CSS edge cases | 33 |
-| Mustache Spec | harvest-html | 203 template tests | 200 |
+| PostCSS Parser Tests | harvest-css | 24 CSS edge cases | 20 |
+| Mustache Spec | harvest-html | 203 template tests | 228 |
 | PayloadsAllTheThings | harvest-security | 2,708 XSS vectors | 95 |
 | Heroku Error Codes | harvest-infra | 36 error codes | 47 |
 
-### Remaining addressable sources: 90+
+### Phase 2 (implemented — March 30)
+
+| Source | Harvester | Real Data | Scenarios |
+|--------|-----------|-----------|-----------|
+| html5lib-tests | harvest-html | 59 `.dat` parser conformance files | 1,200 |
+| DOMPurify | harvest-security | 98 sanitization vectors (`.mjs`) | 500 |
+| PostgreSQL regression | harvest-db | 10 SQL regression test files | 448 |
+| HTTPWG structured fields | harvest-http | 8 RFC test vector files | 500 |
+| docker/awesome-compose | harvest-infra | 40+ real compose files (YAML) | 260 |
+
+### Remaining addressable sources: 85+
 ### Remaining fetchable test artifacts: 600,000+
 
 ---

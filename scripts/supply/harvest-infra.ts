@@ -15,8 +15,8 @@
  * Output: VerifyScenario[] with source: 'real-world'
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
+import { join, basename } from 'path';
 
 interface ErrorCode {
   code: string;
@@ -80,8 +80,276 @@ const HEROKU_ERRORS: ErrorCode[] = [
   { code: 'L15', name: 'Tail connection error', description: 'An error occurred in the log tail connection.', category: 'limit', editPattern: 'tail_disconnect', predicateType: 'infra_attribute' },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Docker Compose Parser (lightweight, no YAML dependency)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ComposeService {
+  name: string;
+  image?: string;
+  ports: string[];
+  volumes: string[];
+  hasHealthcheck: boolean;
+  dependsOn: string[];
+  environment: string[];
+}
+
+interface ComposeFile {
+  path: string;
+  projectName: string;
+  services: ComposeService[];
+}
+
 /**
- * Convert real infrastructure error catalogs into verify scenarios.
+ * Parse a docker-compose YAML file using line-indent scanning.
+ * Handles the 90% case: services with image, ports, volumes, healthcheck, depends_on.
+ */
+function parseComposeYAML(content: string, filePath: string): ComposeFile | null {
+  const lines = content.split('\n');
+  const services: ComposeService[] = [];
+  let inServices = false;
+  let currentService: ComposeService | null = null;
+  let currentKey = '';
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\r$/, '');
+    const indent = line.length - line.trimStart().length;
+    const trimmed = line.trim();
+
+    // Skip comments and empty lines
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    // Top-level `services:` section
+    if (indent === 0 && trimmed === 'services:') {
+      inServices = true;
+      continue;
+    }
+    // Any other top-level key exits services
+    if (indent === 0 && trimmed.endsWith(':') && trimmed !== 'services:') {
+      inServices = false;
+      continue;
+    }
+
+    if (!inServices) continue;
+
+    // Service name (indent 2)
+    if (indent === 2 && trimmed.endsWith(':') && !trimmed.startsWith('-')) {
+      if (currentService) services.push(currentService);
+      currentService = {
+        name: trimmed.replace(':', '').trim(),
+        ports: [],
+        volumes: [],
+        hasHealthcheck: false,
+        dependsOn: [],
+        environment: [],
+      };
+      currentKey = '';
+      continue;
+    }
+
+    if (!currentService) continue;
+
+    // Service properties (indent 4+)
+    if (indent >= 4) {
+      // Key: value at indent 4
+      if (indent === 4 && trimmed.includes(':') && !trimmed.startsWith('-')) {
+        const [key, ...rest] = trimmed.split(':');
+        const value = rest.join(':').trim();
+        currentKey = key.trim();
+
+        if (currentKey === 'image' && value) currentService.image = value;
+        if (currentKey === 'healthcheck') currentService.hasHealthcheck = true;
+      }
+
+      // List items (indent 6+ starting with -)
+      if (trimmed.startsWith('-')) {
+        const item = trimmed.substring(1).trim();
+        if (currentKey === 'ports') currentService.ports.push(item);
+        if (currentKey === 'volumes') currentService.volumes.push(item);
+        if (currentKey === 'depends_on') currentService.dependsOn.push(item);
+        if (currentKey === 'environment') currentService.environment.push(item);
+      }
+    }
+  }
+
+  if (currentService) services.push(currentService);
+  if (services.length === 0) return null;
+
+  // Derive project name from directory
+  const parts = filePath.replace(/\\/g, '/').split('/');
+  const dirIdx = parts.findIndex(p => p === 'repo');
+  const projectName = dirIdx >= 0 && dirIdx + 1 < parts.length
+    ? parts[dirIdx + 1]
+    : basename(filePath, '.yaml').replace('compose', 'project');
+
+  return { path: filePath, projectName, services };
+}
+
+/**
+ * Find all compose YAML files in a directory tree.
+ */
+function findComposeFiles(dir: string): string[] {
+  const result: string[] = [];
+  if (!existsSync(dir)) return result;
+
+  function walk(d: string) {
+    let entries;
+    try { entries = readdirSync(d, { withFileTypes: true }); } catch { return; }
+    for (const entry of entries) {
+      if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+      const full = join(d, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (
+        entry.name === 'compose.yaml' || entry.name === 'compose.yml' ||
+        entry.name === 'docker-compose.yaml' || entry.name === 'docker-compose.yml'
+      ) {
+        result.push(full);
+      }
+    }
+  }
+
+  walk(dir);
+  return result;
+}
+
+/**
+ * Harvest docker-compose files into infra verify scenarios.
+ */
+function harvestCompose(files: string[], maxScenarios: number, startCounter: number): { scenarios: VerifyScenario[], counter: number } {
+  const scenarios: VerifyScenario[] = [];
+  let counter = startCounter;
+
+  // Find compose files from the file list
+  const composeFiles = files.filter(f => {
+    const name = basename(f);
+    return name === 'compose.yaml' || name === 'compose.yml' ||
+      name === 'docker-compose.yaml' || name === 'docker-compose.yml';
+  });
+
+  // If no direct matches, search directories in the file list
+  const searchDirs = new Set<string>();
+  for (const f of files) {
+    const dir = f.replace(/[/\\][^/\\]+$/, '');
+    if (existsSync(dir)) searchDirs.add(dir);
+  }
+  const discovered = [...searchDirs].flatMap(d => findComposeFiles(d));
+  const allComposeFiles = [...new Set([...composeFiles, ...discovered])];
+
+  for (const filePath of allComposeFiles) {
+    if (scenarios.length >= maxScenarios) break;
+
+    let content: string;
+    try { content = readFileSync(filePath, 'utf-8'); } catch { continue; }
+
+    const parsed = parseComposeYAML(content, filePath);
+    if (!parsed || parsed.services.length === 0) continue;
+
+    // Scenario 1: Service count check (structure is valid)
+    counter++;
+    scenarios.push({
+      id: `rw-infra-compose-${String(counter).padStart(3, '0')}`,
+      description: `Compose: ${parsed.projectName} — ${parsed.services.length} services defined`,
+      edits: [{
+        file: 'docker-compose.yml',
+        search: 'services:',
+        replace: `# Real compose pattern from ${parsed.projectName}\nservices:`,
+      }],
+      predicates: [{
+        type: 'infra_attribute',
+        resource: 'compose',
+        attribute: 'service_count',
+        expected: String(parsed.services.length),
+      }],
+      expectedSuccess: true,
+      tags: ['infra', 'real-world', 'docker-compose', parsed.projectName],
+      rationale: `Real docker-compose from awesome-compose/${parsed.projectName}: ${parsed.services.map(s => s.name).join(', ')}`,
+      source: 'real-world',
+    });
+
+    // Scenario 2: Port mapping (if services expose ports)
+    for (const svc of parsed.services) {
+      if (scenarios.length >= maxScenarios) break;
+
+      if (svc.ports.length > 0) {
+        counter++;
+        const portStr = svc.ports[0].replace(/['"]/g, '');
+        scenarios.push({
+          id: `rw-infra-compose-${String(counter).padStart(3, '0')}`,
+          description: `Compose: ${parsed.projectName}/${svc.name} — port mapping ${portStr}`,
+          edits: [{
+            file: 'docker-compose.yml',
+            search: 'services:',
+            replace: `services:\n  ${svc.name}:\n    image: ${svc.image || 'app'}\n    ports:\n      - "${portStr}"`,
+          }],
+          predicates: [{
+            type: 'infra_attribute',
+            resource: 'compose',
+            attribute: 'port_exposed',
+            expected: portStr,
+          }],
+          expectedSuccess: true,
+          tags: ['infra', 'real-world', 'docker-compose', parsed.projectName, 'port-mapping'],
+          rationale: `Port mapping from ${parsed.projectName}/${svc.name}: ${portStr}`,
+          source: 'real-world',
+        });
+      }
+
+      // Scenario 3: Healthcheck present/absent
+      if (scenarios.length >= maxScenarios) break;
+      counter++;
+      scenarios.push({
+        id: `rw-infra-compose-${String(counter).padStart(3, '0')}`,
+        description: `Compose: ${parsed.projectName}/${svc.name} — healthcheck ${svc.hasHealthcheck ? 'present' : 'absent'}`,
+        edits: [{
+          file: 'docker-compose.yml',
+          search: 'services:',
+          replace: `services:\n  ${svc.name}:\n    image: ${svc.image || 'app'}${svc.hasHealthcheck ? '\n    healthcheck:\n      test: ["CMD", "true"]' : ''}`,
+        }],
+        predicates: [{
+          type: 'infra_attribute',
+          resource: 'compose',
+          attribute: 'healthcheck',
+          expected: svc.hasHealthcheck ? 'present' : 'absent',
+        }],
+        expectedSuccess: true,
+        tags: ['infra', 'real-world', 'docker-compose', parsed.projectName, svc.hasHealthcheck ? 'healthcheck' : 'no-healthcheck'],
+        rationale: `Service ${svc.name} in ${parsed.projectName} ${svc.hasHealthcheck ? 'has' : 'lacks'} a healthcheck definition`,
+        source: 'real-world',
+      });
+
+      // Scenario 4: Volume mount patterns
+      if (svc.volumes.length > 0 && scenarios.length < maxScenarios) {
+        counter++;
+        const volStr = svc.volumes[0].replace(/['"]/g, '');
+        scenarios.push({
+          id: `rw-infra-compose-${String(counter).padStart(3, '0')}`,
+          description: `Compose: ${parsed.projectName}/${svc.name} — volume ${volStr}`,
+          edits: [{
+            file: 'docker-compose.yml',
+            search: 'services:',
+            replace: `services:\n  ${svc.name}:\n    image: ${svc.image || 'app'}\n    volumes:\n      - "${volStr}"`,
+          }],
+          predicates: [{
+            type: 'infra_attribute',
+            resource: 'compose',
+            attribute: 'volume_mount',
+            expected: volStr,
+          }],
+          expectedSuccess: true,
+          tags: ['infra', 'real-world', 'docker-compose', parsed.projectName, 'volume'],
+          rationale: `Volume mount from ${parsed.projectName}/${svc.name}: ${volStr}`,
+          source: 'real-world',
+        });
+      }
+    }
+  }
+
+  return { scenarios, counter };
+}
+
+/**
+ * Convert real infrastructure error catalogs and compose files into verify scenarios.
  */
 export function harvestInfra(files: string[], maxScenarios: number): VerifyScenario[] {
   const scenarios: VerifyScenario[] = [];
@@ -140,7 +408,19 @@ export function harvestInfra(files: string[], maxScenarios: number): VerifyScena
     }
   }
 
-  console.log(`  harvest-infra: ${HEROKU_ERRORS.length} error codes, generated ${scenarios.length} scenarios`);
+  // ── Docker Compose files ──────────────────────────────────────────────────
+  if (files.length > 0) {
+    const remaining = maxScenarios - scenarios.length;
+    if (remaining > 0) {
+      const compose = harvestCompose(files, remaining, counter);
+      scenarios.push(...compose.scenarios);
+      counter = compose.counter;
+    }
+  }
+
+  const composeCount = scenarios.filter(s => s.tags.includes('docker-compose')).length;
+  const herokuCount = scenarios.filter(s => s.tags.includes('heroku')).length;
+  console.log(`  harvest-infra: ${herokuCount} heroku + ${composeCount} compose scenarios, generated ${scenarios.length} total`);
   return scenarios;
 }
 

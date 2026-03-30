@@ -83,6 +83,164 @@ function bestPatternFromExpected(expected: string): string | null {
   return lines[0];
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// html5lib .dat format parser
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface Html5libTest {
+  data: string;
+  errors: string[];
+  document: string;
+  documentFragment?: string;
+}
+
+/**
+ * Parse html5lib tree-construction .dat files.
+ * Format: sections delimited by #data, #errors, #document[-fragment], separated by blank lines.
+ */
+function parseHtml5libDat(content: string): Html5libTest[] {
+  const tests: Html5libTest[] = [];
+  // Split into test blocks by double-newline before #data
+  const blocks = content.split(/\n(?=#data\n)/);
+
+  for (const block of blocks) {
+    const trimmed = block.trim();
+    if (!trimmed.startsWith('#data')) continue;
+
+    const sections: Record<string, string> = {};
+    let currentSection = '';
+    const lines = trimmed.split('\n');
+
+    for (const line of lines) {
+      if (line.startsWith('#')) {
+        currentSection = line.substring(1).trim().toLowerCase();
+        sections[currentSection] = '';
+      } else if (currentSection) {
+        sections[currentSection] += (sections[currentSection] ? '\n' : '') + line;
+      }
+    }
+
+    const data = (sections['data'] || '').trim();
+    if (!data) continue;
+
+    tests.push({
+      data,
+      errors: (sections['errors'] || '').split('\n').filter(l => l.trim()),
+      document: (sections['document'] || sections['document-fragment'] || '').trim(),
+      documentFragment: sections['document-fragment'] ? sections['document-fragment'].trim() : undefined,
+    });
+  }
+
+  return tests;
+}
+
+/**
+ * Extract a meaningful text fragment from html5lib test data for content predicates.
+ * Returns the first tag name or text content that's distinctive enough.
+ */
+function extractHtml5libPattern(data: string): string | null {
+  // Try to find a distinctive tag or text
+  const tagMatch = data.match(/<(\w+)(?:\s[^>]*)?>([^<]{3,})/);
+  if (tagMatch && tagMatch[2].trim().length >= 3) {
+    return escapeRegex(tagMatch[2].trim().substring(0, 60));
+  }
+  // Use the opening tag itself if it's distinctive
+  const openTag = data.match(/<(\w+)(?:\s[^>]*)?>/);
+  if (openTag && !['html', 'head', 'body', 'p', 'div', 'span'].includes(openTag[1].toLowerCase())) {
+    return escapeRegex(openTag[0].substring(0, 60));
+  }
+  // Fall back to first non-empty line
+  const firstLine = data.split('\n').map(l => l.trim()).find(l => l.length >= 4);
+  if (firstLine) return escapeRegex(firstLine.substring(0, 60));
+  return null;
+}
+
+/**
+ * Harvest html5lib tree-construction tests into verify scenarios.
+ */
+function harvestHtml5lib(files: string[], maxScenarios: number, startCounter: number): { scenarios: VerifyScenario[], counter: number } {
+  const scenarios: VerifyScenario[] = [];
+  let counter = startCounter;
+
+  const datFiles = files.filter(f => f.endsWith('.dat'));
+
+  for (const filePath of datFiles) {
+    if (scenarios.length >= maxScenarios) break;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, 'utf-8');
+    } catch { continue; }
+
+    const category = basename(filePath, '.dat');
+    const tests = parseHtml5libDat(content);
+
+    for (const test of tests) {
+      if (scenarios.length >= maxScenarios) break;
+
+      const pattern = extractHtml5libPattern(test.data);
+      if (!pattern || pattern.length < 3) continue;
+
+      counter++;
+      const escapedData = escapeForEmbed(test.data.substring(0, 500));
+      const hasErrors = test.errors.length > 0;
+
+      // Scenario: inject HTML fragment, check content is present in source
+      scenarios.push({
+        id: `rw-html-h5l-${String(counter).padStart(4, '0')}`,
+        description: `html5lib: ${category} — ${truncate(test.data, 60)}`,
+        edits: [{
+          file: 'server.js',
+          search: '<footer>About page footer</footer>',
+          replace: `<footer>About page footer</footer>\n  <div class="h5l-test">${escapedData}</div>`,
+        }],
+        predicates: [{
+          type: 'content',
+          file: 'server.js',
+          pattern,
+        }],
+        expectedSuccess: true,
+        tags: ['html', 'real-world', 'html5lib', category, hasErrors ? 'parse-error' : 'valid'],
+        rationale: `html5lib tree-construction test (${category}): parser ${hasErrors ? 'error' : 'conformance'} case. Input: ${truncate(test.data, 80)}`,
+        source: 'real-world',
+      });
+
+      if (scenarios.length >= maxScenarios) break;
+
+      // If there are parse errors, also create a scenario where we check for
+      // content that would only exist after error recovery (from #document section)
+      if (hasErrors && test.document) {
+        const docPattern = extractHtml5libPattern(test.document);
+        if (docPattern && docPattern !== pattern && docPattern.length >= 3) {
+          counter++;
+          scenarios.push({
+            id: `rw-html-h5l-${String(counter).padStart(4, '0')}e`,
+            description: `html5lib: ${category} — error recovery output check`,
+            edits: [{
+              file: 'server.js',
+              search: '<footer>About page footer</footer>',
+              replace: `<footer>About page footer</footer>\n  <div class="h5l-test">${escapedData}</div>`,
+            }],
+            predicates: [{
+              type: 'content',
+              file: 'server.js',
+              // The #document section shows what the parser produces after error recovery.
+              // This content is NOT in the source — it's a render artifact.
+              pattern: docPattern,
+            }],
+            expectedSuccess: false,
+            tags: ['html', 'real-world', 'html5lib', category, 'error-recovery', 'expected-fail'],
+            rationale: `html5lib error recovery: expected parse output "${truncate(test.document, 60)}" differs from source input, so content predicate on source should fail.`,
+            source: 'real-world',
+          });
+        }
+      }
+    }
+  }
+
+  return { scenarios, counter };
+}
+
 /**
  * Convert Mustache spec test suite files into HTML content verify scenarios.
  *
@@ -96,6 +254,22 @@ export function harvestHTML(files: string[], maxScenarios: number): VerifyScenar
   const scenarios: VerifyScenario[] = [];
   let counter = 0;
 
+  // ── html5lib .dat files ──────────────────────────────────────────────────
+  const datFiles = files.filter(f => f.endsWith('.dat'));
+  if (datFiles.length > 0) {
+    const h5lBudget = Math.min(Math.floor(maxScenarios * 0.6), maxScenarios);
+    const h5l = harvestHtml5lib(datFiles, h5lBudget, counter);
+    scenarios.push(...h5l.scenarios);
+    counter = h5l.counter;
+  }
+
+  const remaining = maxScenarios - scenarios.length;
+  if (remaining <= 0) {
+    console.log(`  harvest-html: ${datFiles.length} dat files + 0 spec files, generated ${scenarios.length} scenarios`);
+    return scenarios;
+  }
+
+  // ── Mustache JSON spec files ─────────────────────────────────────────────
   // Filter to JSON spec files, skip lambdas
   const specFiles = files.filter(f => {
     const name = basename(f);
@@ -215,7 +389,7 @@ export function harvestHTML(files: string[], maxScenarios: number): VerifyScenar
     }
   }
 
-  console.log(`  harvest-html: parsed ${specFiles.length} spec files, generated ${scenarios.length} scenarios`);
+  console.log(`  harvest-html: ${datFiles.length} dat files + ${specFiles.length} spec files, generated ${scenarios.length} scenarios`);
   return scenarios;
 }
 

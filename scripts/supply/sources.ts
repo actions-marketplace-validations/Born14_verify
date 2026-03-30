@@ -34,7 +34,7 @@ export interface FetchSpec {
   /** For 'github-raw': list of file paths relative to repo root. */
   files?: string[];
   /** Expected format of the fetched data. */
-  format: 'json' | 'jsonl' | 'text' | 'css' | 'sql' | 'html' | 'dat';
+  format: 'json' | 'jsonl' | 'text' | 'css' | 'sql' | 'html' | 'dat' | 'yaml' | 'mjs';
 }
 
 export interface RealWorldSource {
@@ -172,6 +172,100 @@ export const SOURCES: Record<string, RealWorldSource> = {
     maxScenarios: 1000,
     tags: ['security', 'real-world', 'xss'],
     license: 'MIT',
+  },
+
+  // ── HTML Sources (additional) ───────────────────────────────────────────
+
+  'html5lib-tests': {
+    id: 'html5lib-tests',
+    name: 'html5lib Parser Conformance Tests',
+    harvester: 'html',
+    fetch: {
+      type: 'git',
+      url: 'https://github.com/html5lib/html5lib-tests.git',
+      sparse: ['tree-construction'],
+      format: 'dat',
+    },
+    maxScenarios: 2000,
+    tags: ['html', 'real-world', 'html5lib', 'parser-conformance'],
+    license: 'MIT',
+  },
+
+  // ── Security Sources (additional) ─────────────────────────────────────
+
+  'dompurify': {
+    id: 'dompurify',
+    name: 'DOMPurify Sanitization Tests',
+    harvester: 'security',
+    fetch: {
+      type: 'git',
+      url: 'https://github.com/cure53/DOMPurify.git',
+      sparse: ['test'],
+      format: 'mjs',
+    },
+    maxScenarios: 500,
+    tags: ['security', 'real-world', 'dompurify', 'xss'],
+    license: 'Apache-2.0',
+  },
+
+  // ── DB Sources (additional) ───────────────────────────────────────────
+
+  'pg-regress': {
+    id: 'pg-regress',
+    name: 'PostgreSQL Regression Tests',
+    harvester: 'db',
+    fetch: {
+      type: 'github-raw',
+      url: 'https://raw.githubusercontent.com',
+      files: [
+        'postgres/postgres/master/src/test/regress/sql/create_table.sql',
+        'postgres/postgres/master/src/test/regress/sql/foreign_key.sql',
+        'postgres/postgres/master/src/test/regress/sql/alter_table.sql',
+        'postgres/postgres/master/src/test/regress/sql/create_index.sql',
+        'postgres/postgres/master/src/test/regress/sql/constraints.sql',
+        'postgres/postgres/master/src/test/regress/sql/create_type.sql',
+        'postgres/postgres/master/src/test/regress/sql/create_view.sql',
+        'postgres/postgres/master/src/test/regress/sql/inherit.sql',
+        'postgres/postgres/master/src/test/regress/sql/partition_info.sql',
+        'postgres/postgres/master/src/test/regress/sql/triggers.sql',
+      ],
+      format: 'sql',
+    },
+    maxScenarios: 500,
+    tags: ['db', 'real-world', 'pg-regress'],
+    license: 'PostgreSQL',
+  },
+
+  // ── HTTP Sources (additional) ─────────────────────────────────────────
+
+  'httpwg-sf-tests': {
+    id: 'httpwg-sf-tests',
+    name: 'HTTPWG Structured Field Tests',
+    harvester: 'http',
+    fetch: {
+      type: 'git',
+      url: 'https://github.com/httpwg/structured-field-tests.git',
+      format: 'json',
+    },
+    maxScenarios: 500,
+    tags: ['http', 'real-world', 'structured-fields', 'rfc'],
+    license: 'BSD-3-Clause',
+  },
+
+  // ── Infra Sources (additional) ────────────────────────────────────────
+
+  'awesome-compose': {
+    id: 'awesome-compose',
+    name: 'Docker Awesome Compose',
+    harvester: 'infra',
+    fetch: {
+      type: 'git',
+      url: 'https://github.com/docker/awesome-compose.git',
+      format: 'yaml',
+    },
+    maxScenarios: 500,
+    tags: ['infra', 'real-world', 'docker-compose'],
+    license: 'Apache-2.0',
   },
 
   // ── HTTP Sources ──────────────────────────────────────────────────────────

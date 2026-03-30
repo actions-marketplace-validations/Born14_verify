@@ -36,29 +36,125 @@ interface VerifyScenario {
   source: 'real-world';
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HTTPWG Structured Field Tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface SFTestCase {
+  name: string;
+  raw?: string[];
+  header_type?: string;
+  expected?: any;
+  must_fail?: boolean;
+  can_fail?: boolean;
+}
+
 /**
- * Convert JSON Schema test suite files into HTTP/serialization verify scenarios.
+ * Detect if a parsed JSON file is an HTTPWG structured-fields test file.
+ * These files are arrays of test objects with `name`, `raw`, and optionally `must_fail`.
+ */
+function isSFTestFile(data: unknown): data is SFTestCase[] {
+  if (!Array.isArray(data)) return false;
+  if (data.length === 0) return false;
+  const first = data[0];
+  return typeof first === 'object' && first !== null && 'name' in first && ('raw' in first || 'must_fail' in first);
+}
+
+/**
+ * Harvest HTTPWG structured field test cases into verify scenarios.
+ */
+function harvestStructuredFields(
+  tests: SFTestCase[],
+  headerType: string,
+  maxScenarios: number,
+  startCounter: number,
+): { scenarios: VerifyScenario[], counter: number } {
+  const scenarios: VerifyScenario[] = [];
+  let counter = startCounter;
+
+  for (const test of tests) {
+    if (scenarios.length >= maxScenarios) break;
+
+    const rawValues = test.raw || [];
+    if (rawValues.length === 0 && !test.must_fail) continue;
+
+    counter++;
+    const rawStr = rawValues.join(', ');
+    const rawSnippet = rawStr.length > 80 ? rawStr.substring(0, 80) + '...' : rawStr;
+    const shouldFail = test.must_fail === true;
+
+    // Inject a header-setting line into server.js
+    const headerLine = rawStr.length > 0
+      ? `res.setHeader('X-SF-Test', ${JSON.stringify(rawStr)});`
+      : `// ${test.name}: must_fail test (no raw value)`;
+
+    scenarios.push({
+      id: `rw-http-sf-${String(counter).padStart(4, '0')}`,
+      description: `Structured Fields ${headerType}: ${test.name}${shouldFail ? ' (must_fail)' : ''}`,
+      edits: [{
+        file: 'server.js',
+        search: "res.end(JSON.stringify({ status: 'ok' }));",
+        replace: `${headerLine}\n    res.end(JSON.stringify({ status: 'ok', sf_type: '${headerType}', sf_raw: ${JSON.stringify(rawStr)}, sf_valid: ${!shouldFail} }));`,
+      }],
+      predicates: [{
+        type: 'serialization',
+        file: 'server.js',
+        headerType,
+        raw: rawStr,
+        expected: test.expected,
+        assertion: shouldFail ? 'invalid' : 'valid',
+      }],
+      expectedSuccess: true, // gate should correctly classify valid/invalid
+      tags: ['http', 'real-world', 'structured-fields', headerType, shouldFail ? 'must_fail' : 'valid'],
+      rationale: `HTTPWG structured field test (${headerType}): ${test.name}. Raw: "${rawSnippet}". ${shouldFail ? 'Parser must reject.' : 'Parser must accept.'}`,
+      source: 'real-world',
+    });
+  }
+
+  return { scenarios, counter };
+}
+
+/**
+ * Convert JSON Schema test suite and HTTPWG structured field test files
+ * into HTTP/serialization verify scenarios.
  */
 export function harvestHTTP(files: string[], maxScenarios: number): VerifyScenario[] {
   const scenarios: VerifyScenario[] = [];
   let counter = 0;
 
-  // Find JSON Schema test suite files
-  const jsonSchemaFiles = files.filter(f => f.endsWith('.json') && !f.includes('_meta'));
+  // Find JSON test files
+  const jsonFiles = files.filter(f => f.endsWith('.json') && !f.includes('_meta'));
+  let jsonSchemaCount = 0;
+  let sfCount = 0;
 
-  for (const filePath of jsonSchemaFiles) {
+  for (const filePath of jsonFiles) {
     if (scenarios.length >= maxScenarios) break;
 
-    let groups: JSONSchemaTestGroup[];
+    let data: unknown;
     try {
       const content = readFileSync(filePath, 'utf-8');
-      groups = JSON.parse(content);
-      if (!Array.isArray(groups)) continue;
+      data = JSON.parse(content);
     } catch {
       continue;
     }
 
     const category = basename(filePath, '.json');
+
+    // ── HTTPWG Structured Field Tests ─────────────────────────────────────
+    if (isSFTestFile(data)) {
+      sfCount++;
+      const headerType = (data[0] as SFTestCase).header_type || category;
+      const remaining = maxScenarios - scenarios.length;
+      const sf = harvestStructuredFields(data, headerType, remaining, counter);
+      scenarios.push(...sf.scenarios);
+      counter = sf.counter;
+      continue;
+    }
+
+    // ── JSON Schema Test Suite ────────────────────────────────────────────
+    if (!Array.isArray(data)) continue;
+    const groups = data as JSONSchemaTestGroup[];
+    jsonSchemaCount++;
 
     for (const group of groups) {
       if (scenarios.length >= maxScenarios) break;
@@ -70,9 +166,6 @@ export function harvestHTTP(files: string[], maxScenarios: number): VerifyScenar
 
         const schemaStr = JSON.stringify(group.schema);
         const dataStr = JSON.stringify(test.data);
-
-        // Create a scenario that injects a JSON schema validation endpoint
-        // and tests whether the data conforms
         const schemaSnippet = schemaStr.length > 100 ? schemaStr.substring(0, 100) + '...' : schemaStr;
 
         scenarios.push({
@@ -90,7 +183,7 @@ export function harvestHTTP(files: string[], maxScenarios: number): VerifyScenar
             data: test.data,
             assertion: test.valid ? 'valid' : 'invalid',
           }],
-          expectedSuccess: true, // the gate should correctly classify valid/invalid
+          expectedSuccess: true,
           tags: ['http', 'real-world', 'json-schema', category, test.valid ? 'valid' : 'invalid'],
           rationale: `Real JSON Schema test: ${group.description}. Data ${test.valid ? 'conforms to' : 'violates'} schema. Schema: ${schemaSnippet}`,
           source: 'real-world',
@@ -99,7 +192,7 @@ export function harvestHTTP(files: string[], maxScenarios: number): VerifyScenar
     }
   }
 
-  console.log(`  harvest-http: parsed ${jsonSchemaFiles.length} test files, generated ${scenarios.length} scenarios`);
+  console.log(`  harvest-http: ${jsonSchemaCount} JSON Schema + ${sfCount} structured-field files, generated ${scenarios.length} scenarios`);
   return scenarios;
 }
 

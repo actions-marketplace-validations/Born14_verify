@@ -1,6 +1,6 @@
 # @sovereign-labs/verify — Implementation Roadmap
 
-**Date:** 2026-03-29
+**Date:** 2026-03-30
 **Version:** 0.5.2 → targeting 0.6.0
 **Author:** McCarty + Claude (system analysis session)
 **For:** Any Claude instance picking up this work
@@ -169,7 +169,7 @@ Run, collect dirty results, feed to improve loop. Each dirty scenario = a gate f
 
 ---
 
-### P2: Build the Hallucination Gate
+### P2: Build the Hallucination Gate — DONE (March 30)
 **Effort:** 2-3 days
 **Unblocks:** The strategic expansion from "execution trust" to "information trust"
 
@@ -257,6 +257,18 @@ bun run self-test --families=G  # New hallucination scenarios pass
 - Unit tests prove the gate catches fabricated claims and accepts grounded ones
 - FAILURE-TAXONOMY.md updated: Hallucination coverage 15/15 (100%)
 - Total failure shape coverage: 611/647 (94%)
+
+#### Result
+
+**Gate:** `src/gates/hallucination.ts` (~340 LOC). Deterministic claim verification against 6 source types: schema (via `parseInitSQL`), routes (regex extraction), CSS (style block parsing), config (JSON key path resolution), files (existence check), content (full-text search).
+
+**Scenarios:** 30 in `fixtures/scenarios/hallucination-staged.json` (2 per HAL shape: one grounded, one fabricated). All 30 pass through full `verify()` pipeline.
+
+**Unit tests:** 47 tests, 55 assertions in `tests/unit/hallucination-gate.test.ts`. Covers all 15 HAL shapes, edge cases (missing fields, multiple predicates, case insensitivity, stageDir precedence, empty dirs, dot-notation schema access, descendant CSS selectors).
+
+**Gate position:** After G5 containment, before Access gate (gate 5 of 25).
+
+**Full test suite:** 388 pass, 0 fail, 13 skip (Docker/Gemini), 21,397 assertions.
 
 ---
 
@@ -388,29 +400,39 @@ No video needed. No website. Ships with the npm package. First thing anyone runs
 
 ---
 
-### P4: Expand Real-World Sources (Phase 2)
-**Effort:** 1-2 days per source
+### P4: Expand Real-World Sources (Phase 2) — DONE (March 30)
+**Effort:** 1 session
 **Unblocks:** Richer discovery fuel for the improve loop
 
-#### Priority Sources
+#### Result
 
-| Source | Harvester | Format | Est. Scenarios |
-|--------|-----------|--------|---------------|
-| html5lib-tests | harvest-html | .dat custom format | 2,000 |
-| APIs.guru | harvest-http | OpenAPI JSON | 1,000 |
-| DOMPurify | harvest-security | JSON/HTML fixtures | 200 |
-| axe-core | harvest-html | JSON rules + HTML | 300 |
-| PostgreSQL regression | harvest-db | SQL files | 500 |
+5 new sources added, 13 total. **6,432 real-world scenarios** (up from 908 — 7x increase).
 
-#### Implementation Pattern (same for each)
-1. Add source to `scripts/supply/sources.ts` registry
-2. Add fetch spec (URL, format, sparse checkout paths)
-3. Extend the appropriate harvester to handle the new format
-4. Run `bun scripts/supply/harvest-real.ts --sources=<new-source>` to test
-5. Verify scenarios load and pass: `bun run self-test --source=real-world`
+| Source | Harvester | Format | Scenarios | New? |
+|--------|-----------|--------|-----------|------|
+| SchemaPile | harvest-db | JSONL | 2,000 | |
+| JSON Schema Test Suite | harvest-http | JSON | 1,000 | |
+| MDN Compat Data | harvest-css | JSON | 101 | |
+| Mustache Spec | harvest-html | JSON | 228 | |
+| PayloadsAllTheThings | harvest-security | text | 95 | |
+| Can I Use | harvest-css | JSON | 33 | |
+| PostCSS Parser Tests | harvest-css | CSS | 20 | |
+| Heroku Error Codes | harvest-infra | hardcoded | 47 | |
+| **html5lib-tests** | harvest-html | **.dat** | **1,200** | **NEW** |
+| **DOMPurify** | harvest-security | **.mjs** | **500** | **NEW** |
+| **PostgreSQL regression** | harvest-db | **SQL** | **448** | **NEW** |
+| **HTTPWG structured fields** | harvest-http | **JSON** | **500** | **NEW** |
+| **docker/awesome-compose** | harvest-infra | **YAML** | **260** | **NEW** |
+
+#### What Was Built
+- **html5lib .dat parser**: Section-delimited format (`#data`, `#errors`, `#document`) → content scenarios with error-recovery detection
+- **HTTPWG structured field handler**: Detects `{ name, raw, header_type, must_fail }` JSON format alongside existing JSON Schema format
+- **Docker Compose YAML parser**: Lightweight indent-based parser (no YAML dependency) extracts services, ports, volumes, healthchecks
+- **DOMPurify fixture parser**: Strips ESM `export default` wrapper, JSON-parses `{ payload, expected }` vectors, classifies sanitized vs safe
+- **PostgreSQL regression**: Zero harvester changes needed — harvest-db's `parseCreateTable()` handles raw SQL files from GitHub
 
 #### Done When
-5+ new sources live, 3,000+ real-world scenarios total.
+5+ new sources live, 3,000+ real-world scenarios total. ✓ (6,432 scenarios from 13 sources)
 
 ---
 

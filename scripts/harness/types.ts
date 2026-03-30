@@ -211,6 +211,8 @@ export interface EvidenceBundle {
     violation: string;
     severity: Severity;
     family: ScenarioFamily;
+    scenarioDescription?: string;
+    gatesFailed?: string[];
   }>;
   triage: {
     targetFunction: string | null;
@@ -222,8 +224,9 @@ export interface EvidenceBundle {
 
 export interface ProposedEdit {
   file: string;
-  search: string;
+  search?: string;
   replace: string;
+  line?: number;  // 1-based line number — preferred over search for reliability
 }
 
 export interface FixCandidate {

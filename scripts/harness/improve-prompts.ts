@@ -55,15 +55,34 @@ export async function diagnoseBundleWithLLM(
   usage: LLMUsage,
 ): Promise<string | null> {
   const violations = bundle.violations
-    .map(v => `  - [${v.family}] ${v.invariant}: ${v.violation}`)
+    .map(v => {
+      let line = `  - [${v.family}] ${v.invariant}: ${v.violation}`;
+      if (v.scenarioDescription) line += `\n    Scenario: "${v.scenarioDescription}"`;
+      if (v.gatesFailed?.length) line += `\n    Failed gates: ${v.gatesFailed.join(', ')}`;
+      return line;
+    })
     .join('\n');
+
+  // Read the target file source if available — helps LLM spot the bug
+  let targetSource = '';
+  if (bundle.triage.targetFile) {
+    try {
+      const content = readFileSync(join(packageRoot, bundle.triage.targetFile), 'utf-8');
+      const lines = content.split('\n');
+      targetSource = `\n\nTARGET FILE (${bundle.triage.targetFile}, ${lines.length} lines):\n` +
+        (lines.length > 200
+          ? lines.slice(0, 200).join('\n') + '\n// ... truncated ...'
+          : content);
+    } catch { /* file not found — skip */ }
+  }
 
   const userPrompt = `FAILURE EVIDENCE:
 ${violations}
 
 Scenario IDs: ${bundle.violations.map(v => v.scenarioId).join(', ')}
+${targetSource}
 
-What function and file is the most likely root cause? Why?`;
+Look at the target file source code. What regex pattern, condition, or function is broken? Be specific — name the exact line or pattern that needs to change.`;
 
   const result = await callLLMWithRetry(callLLM, DIAGNOSIS_SYSTEM, userPrompt, usage);
   if (!result) return null;
@@ -75,13 +94,18 @@ What function and file is the most likely root cause? Why?`;
 // =============================================================================
 
 const FIX_SYSTEM = `You are fixing a bug in @sovereign-labs/verify, a TypeScript verification library.
-You will receive failure evidence and the target source code.
+You will receive failure evidence and the target source code with line numbers.
 
 RULES:
 - Propose exactly {NUM_CANDIDATES} DISTINCT fix strategies
-- Each strategy: JSON array of {file, search, replace} edits
+- STRONGLY PREFER minimal fixes: change the fewest lines possible. If one line fixes the bug, that's the best strategy.
+- Strategy 1 MUST be the most minimal fix (1-2 lines). Strategies 2-3 can be alternatives.
+- Do NOT add new functions, new check types, or architectural changes if a regex/value fix works.
+- Each strategy: JSON array of edits
 - Max {MAX_LINES} changed lines per strategy
-- The "search" string must appear EXACTLY as-is in the source file (copy verbatim)
+- Use line-based edits: { "file": "path", "line": NUMBER, "replace": "full replacement line" }
+  The "line" number must match the line numbers shown in the source code (1-based).
+  The "replace" is the ENTIRE new line content (not a partial match).
 - The "file" field must match the TARGET file path shown in the evidence
 - Must not break existing passing scenarios
 - Output ONLY valid JSON — no markdown, no explanation outside the JSON
@@ -92,7 +116,7 @@ OUTPUT FORMAT (JSON):
     "strategy": "short name for the approach",
     "rationale": "one sentence why this works",
     "edits": [
-      { "file": "TARGET_FILE_PATH_HERE", "search": "exact old code from source", "replace": "exact new code" }
+      { "file": "TARGET_FILE_PATH_HERE", "line": 77, "replace": "    { regex: /eval\\\\s*\\\\(/g, detail: 'eval() usage' }," }
     ]
   }
 ]`;
@@ -135,19 +159,24 @@ export async function generateFixCandidates(
       const start = Math.max(0, funcIdx - 20);
       const end = Math.min(sourceLines.length, funcIdx + 150);
       truncated = `// ... lines 1-${start} omitted ...\n`
-        + sourceLines.slice(start, end).map((l, i) => `/* ${start + i + 1} */ ${l}`).join('\n')
+        + sourceLines.slice(start, end).map((l, i) => `${start + i + 1}: ${l}`).join('\n')
         + `\n// ... lines ${end + 1}-${sourceLines.length} omitted ...`;
     } else {
-      truncated = sourceLines.slice(0, 300).join('\n') + '\n// ... truncated ...';
+      truncated = sourceLines.slice(0, 300).map((l, i) => `${i + 1}: ${l}`).join('\n') + '\n// ... truncated ...';
     }
   } else {
     truncated = sourceLines.length > 300
-      ? sourceLines.slice(0, 300).join('\n') + '\n// ... truncated ...'
-      : sourceContent;
+      ? sourceLines.slice(0, 300).map((l, i) => `${i + 1}: ${l}`).join('\n') + '\n// ... truncated ...'
+      : sourceLines.map((l, i) => `${i + 1}: ${l}`).join('\n');
   }
 
   const violations = bundle.violations
-    .map(v => `  - [${v.family}] ${v.invariant}: ${v.violation}`)
+    .map(v => {
+      let line = `  - [${v.family}] ${v.invariant}: ${v.violation}`;
+      if (v.scenarioDescription) line += `\n    Scenario: "${v.scenarioDescription}"`;
+      if (v.gatesFailed?.length) line += `\n    Failed gates: ${v.gatesFailed.join(', ')}`;
+      return line;
+    })
     .join('\n');
 
   const diagnosisBlock = diagnosis
@@ -175,21 +204,37 @@ Generate ${maxCandidates} distinct fix strategies as JSON.`;
 
   // Debug: show raw LLM response
   console.log(`        [LLM RAW] ${result.text.length} chars, ${result.outputTokens} tokens`);
-  if (result.text.length < 500) {
-    console.log(`        [LLM RAW] ${result.text}`);
-  } else {
-    console.log(`        [LLM RAW] ${result.text.substring(0, 300)}...`);
-  }
+  console.log(`        [LLM RAW] ${result.text.substring(0, 2000)}`);
 
   // Parse JSON from response
-  return parseFixCandidates(result.text, bundle.id);
+  const candidates = parseFixCandidates(result.text, bundle.id);
+
+  // Post-process: for line-based edits, read the actual line from the file
+  // so the search string is guaranteed to match (LLM diagnoses, code verifies)
+  for (const c of candidates) {
+    for (const e of c.edits) {
+      if (e.line != null && !e.search) {
+        try {
+          const fileContent = readFileSync(join(packageRoot, e.file), 'utf-8');
+          const lines = fileContent.split('\n');
+          const idx = e.line - 1;
+          if (idx >= 0 && idx < lines.length) {
+            e.search = lines[idx];
+            console.log(`        [LINE→SEARCH] ${e.file}:${e.line} → "${e.search.substring(0, 80)}"`);
+          }
+        } catch { /* file not found — skip */ }
+      }
+      console.log(`        [EDIT] ${c.strategy}: file=${e.file} line=${e.line ?? 'N/A'} search=${e.search ? `"${e.search.substring(0,60)}"` : 'N/A'}`);
+    }
+  }
+  return candidates;
 }
 
 function parseFixCandidates(text: string, bundleId: string): FixCandidate[] {
   const parsed = extractJSON<Array<{
     strategy?: string;
     rationale?: string;
-    edits?: Array<{ file?: string; search?: string; replace?: string }>;
+    edits?: Array<{ file?: string; search?: string; replace?: string; line?: number }>;
   }>>(text);
 
   if (!parsed || !Array.isArray(parsed)) {
@@ -204,11 +249,11 @@ function parseFixCandidates(text: string, bundleId: string): FixCandidate[] {
       strategy: p.strategy ?? `strategy_${i + 1}`,
       rationale: p.rationale ?? '',
       edits: (p.edits ?? [])
-        .filter(e => e.file && e.search && e.replace)
+        .filter(e => e.file && e.replace && (e.search || e.line != null))
         .map(e => ({
           file: e.file!,
-          search: e.search!,
           replace: e.replace!,
+          ...(e.line != null ? { line: e.line } : { search: e.search! }),
         })),
     }))
     .filter(c => c.edits.length > 0);

@@ -43,7 +43,7 @@ export function printImprovementReport(entries: ImprovementEntry[], usage: LLMUs
         console.log('\n     ACCEPTED EDITS:');
         for (const edit of winner.edits) {
           console.log(`       ${edit.file}:`);
-          const searchPreview = edit.search.substring(0, 60).replace(/\n/g, '\\n');
+          const searchPreview = edit.line != null ? `line:${edit.line}` : (edit.search ?? '').substring(0, 60).replace(/\n/g, '\\n');
           const replacePreview = edit.replace.substring(0, 60).replace(/\n/g, '\\n');
           console.log(`         - "${searchPreview}"`);
           console.log(`         + "${replacePreview}"`);

@@ -134,6 +134,9 @@ function scanUnboundedQueries(
     if (/\bEXISTS\s*\(\s*SELECT\b/i.test(fullStmt)) continue;
     if (/\bSELECT\s+1\b/i.test(fullStmt)) continue;
 
+    // Skip if WHERE clause present — query is row-bounded, not a full table scan
+    if (/\bWHERE\b/i.test(fullStmt)) continue;
+
     // Compute line number
     const linesBefore = content.slice(0, matchStart).split('\n');
     const lineNum = linesBefore.length;

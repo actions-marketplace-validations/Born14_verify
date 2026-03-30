@@ -84,6 +84,34 @@ export function extractJSON<T = unknown>(raw: string): T | null {
     }
   }
 
+  // Strategy 4: truncated array recovery — find last complete object, close the array
+  const arrayStart = raw.indexOf('[');
+  if (arrayStart !== -1) {
+    // Find all complete top-level objects in the array
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+    let lastObjEnd = -1;
+    for (let i = arrayStart + 1; i < raw.length; i++) {
+      const ch = raw[i];
+      if (esc) { esc = false; continue; }
+      if (ch === '\\' && inStr) { esc = true; continue; }
+      if (ch === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if (ch === '{') depth++;
+      if (ch === '}') {
+        depth--;
+        if (depth === 0) lastObjEnd = i;
+      }
+    }
+    if (lastObjEnd > arrayStart) {
+      const recovered = raw.substring(arrayStart, lastObjEnd + 1) + ']';
+      try {
+        return JSON.parse(recovered) as T;
+      } catch { /* continue */ }
+    }
+  }
+
   return null;
 }
 
@@ -97,7 +125,7 @@ export function extractJSON<T = unknown>(raw: string): T | null {
  */
 export function hashEdits(edits: ProposedEdit[]): string {
   const normalized = edits
-    .map(e => `${e.file}::${e.search}::${e.replace}`)
+    .map(e => `${e.file}::${e.line ?? e.search}::${e.replace}`)
     .sort()
     .join('\n');
   return createHash('sha256').update(normalized).digest('hex').substring(0, 16);

@@ -296,6 +296,8 @@ export function bundleViolations(entries: LedgerEntry[]): EvidenceBundle[] {
         violation: inv.violation ?? 'unknown',
         severity: (inv.severity ?? 'bug') as Severity,
         family: entry.scenario.family as any,
+        scenarioDescription: entry.scenario.description,
+        gatesFailed: entry.result.gatesFailed,
       });
     }
   }

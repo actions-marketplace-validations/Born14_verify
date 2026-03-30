@@ -326,7 +326,7 @@ async function processBundle(
     attempts.push({
       hash: h,
       strategy: candidate.strategy,
-      edits: candidate.edits.map(e => ({ file: e.file, searchPreview: e.search.substring(0, 60) })),
+      edits: candidate.edits.map(e => ({ file: e.file, searchPreview: e.line != null ? `line:${e.line}` : (e.search ?? '').substring(0, 60) })),
       passed: result.score > 0 && result.regressions.length === 0,
       failedScenarios: result.regressions,
     });

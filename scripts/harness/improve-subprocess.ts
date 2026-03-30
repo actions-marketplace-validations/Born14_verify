@@ -123,6 +123,7 @@ export async function validateCandidate(
     // 2. Overlay edits (partial application — proceed if ≥1 edit applies)
     const editResult = overlayEdits(edits, tempDir);
     if (editResult.applied === 0) {
+      console.log(`          0/${edits.length} edits applied: ${editResult.errors.join('; ')}`);
       return {
         candidateId,
         strategy,
@@ -178,7 +179,7 @@ export async function validateCandidate(
 
     // Score: improvements minus regressions (scaled by set size), capped minimal patch bias
     const totalChangedLines = edits.reduce((sum, e) => {
-      const searchLines = e.search.split('\n').length;
+      const searchLines = e.line != null ? 1 : (e.search?.split('\n').length ?? 1);
       const replaceLines = e.replace.split('\n').length;
       return sum + Math.abs(replaceLines - searchLines) + Math.min(searchLines, replaceLines);
     }, 0);
@@ -320,14 +321,32 @@ function overlayEdits(edits: ProposedEdit[], packageRoot: string): OverlayResult
     const filePath = join(packageRoot, edit.file);
     try {
       const content = readFileSync(filePath, 'utf-8');
-      if (!content.includes(edit.search)) {
-        errors.push(`Search string not found in ${edit.file}`);
-        skipped++;
+
+      // Line-based edit (preferred — no string matching fragility)
+      if (edit.line != null) {
+        const lines = content.split('\n');
+        const idx = edit.line - 1; // 1-based → 0-based
+        if (idx < 0 || idx >= lines.length) {
+          errors.push(`Line ${edit.line} out of range in ${edit.file} (${lines.length} lines)`);
+          skipped++;
+          continue;
+        }
+        lines[idx] = edit.replace;
+        writeFileSync(filePath, lines.join('\n'));
+        applied++;
         continue;
       }
-      const updated = content.replace(edit.search, edit.replace);
-      writeFileSync(filePath, updated);
-      applied++;
+
+      // Search/replace fallback
+      if (edit.search && content.includes(edit.search)) {
+        const updated = content.replace(edit.search, edit.replace);
+        writeFileSync(filePath, updated);
+        applied++;
+      } else {
+        const searchPreview = (edit.search || '').substring(0, 80).replace(/\n/g, '\\n');
+        errors.push(`Search string not found in ${edit.file}: "${searchPreview}"`);
+        skipped++;
+      }
     } catch (err: any) {
       errors.push(`Failed to edit ${edit.file}: ${err.message}`);
       skipped++;

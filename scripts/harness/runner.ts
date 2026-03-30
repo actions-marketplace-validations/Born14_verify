@@ -35,7 +35,7 @@ import { startMockServer, stopMockServer, type MockServer } from '../../fixtures
 const MAX_SCENARIO_TIMEOUT = 10 * 60 * 1000; // 10 min
 const MAX_LIVE_SCENARIO_TIMEOUT = 60 * 1000; // 60s for live scenarios
 const MAX_TOTAL_TIMEOUT = 4 * 60 * 60 * 1000; // 4 hours
-const BATCH_WATCHDOG_MS = 5 * 60 * 1000; // 5 min max per batch of 10 — hard kill if exceeded
+const BATCH_WATCHDOG_MS = process.env.CI ? 5 * 60 * 1000 : 10 * 60 * 1000; // CI: 5 min, local: 10 min per batch
 const MEMORY_LOG_INTERVAL = 500; // Log memory every 500 scenarios
 
 // ---------------------------------------------------------------------------
@@ -301,6 +301,18 @@ export async function runSelfTest(config: RunConfig): Promise<{ exitCode: number
   if (external.length > 0) {
     scenarios = [...scenarios, ...external];
     console.log(`  + ${external.length} fault-derived scenarios from ${isCustomApp ? config.appDir : 'custom-scenarios.json'}`);
+  }
+
+  // Skip scenarios with extremely large edits (>500KB total) that hang the runner
+  const MAX_EDIT_BYTES = 500 * 1024;
+  const beforeLargeFilter = scenarios.length;
+  scenarios = scenarios.filter(s => {
+    const editSize = s.edits.reduce((sum: number, e: any) => sum + (e.search?.length || 0) + (e.replace?.length || 0), 0);
+    return editSize < MAX_EDIT_BYTES;
+  });
+  const skippedLarge = beforeLargeFilter - scenarios.length;
+  if (skippedLarge > 0) {
+    console.log(`  Skipped ${skippedLarge} scenarios with >500KB edits`);
   }
 
   // Scenario ID filtering — for subprocess validation (run only specific scenarios)

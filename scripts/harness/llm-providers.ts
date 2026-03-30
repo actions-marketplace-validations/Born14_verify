@@ -68,8 +68,9 @@ export function createLLMProvider(config: ImproveConfig): LLMCallFn | null {
 }
 
 function createGeminiProvider(apiKey: string): LLMCallFn {
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
   return async (systemPrompt, userPrompt) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

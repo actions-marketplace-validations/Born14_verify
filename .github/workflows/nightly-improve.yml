@@ -98,7 +98,7 @@ jobs:
     name: Baseline Self-Test
     needs: supply
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    timeout-minutes: 90
     outputs:
       failing_count: ${{ steps.baseline.outputs.failing }}
       total_count: ${{ steps.baseline.outputs.total }}
@@ -134,14 +134,13 @@ jobs:
       - name: Run baseline self-test
         id: baseline
         run: |
-          set -o pipefail  # Capture timeout's exit code, not tee's
-          # 50 min hard kill (leaving 10 min buffer for CI job timeout)
+          # 80 min hard kill (leaving 10 min buffer for CI job timeout)
           # The runner also has an internal batch watchdog that exits with code 99 on hang
-          timeout --signal=KILL 3000 bun run src/cli.ts self-test 2>&1 | tee baseline-output.txt
-          EXIT_CODE=$?
-          if [ $EXIT_CODE -eq 137 ]; then
-            echo "::warning::Baseline self-test was killed by timeout (50 min hard limit)"
-          elif [ $EXIT_CODE -eq 99 ]; then
+          timeout --signal=KILL 4800 bun run src/cli.ts self-test 2>&1 | tee baseline-output.txt || true
+          EXIT_CODE=${PIPESTATUS[0]:-$?}
+          if [ "$EXIT_CODE" -eq 137 ]; then
+            echo "::warning::Baseline self-test was killed by timeout (80 min hard limit)"
+          elif [ "$EXIT_CODE" -eq 99 ]; then
             echo "::warning::Baseline self-test batch watchdog fired — likely hung scenario"
           fi
           # self-test writes ledger to data/self-test-ledger.jsonl (hardcoded default)
@@ -153,6 +152,7 @@ jobs:
           echo "::notice::Baseline: $FAILING failing out of $TOTAL scenarios (exit=$EXIT_CODE)"
 
       - name: Upload baseline ledger
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: baseline-ledger

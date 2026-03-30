@@ -1646,9 +1646,9 @@ Failures where cumulative resource consumption across a workflow exceeds declare
 | Injection | 14 | 14 | 0 | **100%** | +14 (INJ-01–INJ-14) |
 | Hallucination | 15 | 0 | 15 | 0% | — (gate not built yet) |
 | Budget | 15 | 15 | 0 | **100%** | +15 (BUD-01–BUD-15) |
-| **Total** | **647** | **596** | **51** | **92%** | **+271 shapes this session** |
+| **Total** | **647** | **611** | **36** | **94%** | **+271 (Mar 29) +15 hallucination (Mar 30)** |
 
-### The numbers (updated March 29, 2026)
+### The numbers (updated March 30, 2026)
 
 - **647 known failure shapes** across 30 domains (27 original + injection + hallucination + budget)
 - **596 covered** (92%) — up from 376 (+220 shapes in March 29 session)

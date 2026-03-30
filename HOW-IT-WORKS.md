@@ -27,7 +27,7 @@ An agent proposes a change: "I edited server.js to change the background color t
 
 Each question is a "gate." Every gate votes pass or fail. If any gate fails, the change is blocked and the agent gets specific feedback: "The grounding gate failed because `.sidebar-nav` doesn't exist in your CSS — the actual class is `.nav-link`."
 
-That's `verify()` — one call, 25 gates, a verdict.
+That's `verify()` — one call, 26 gates, a verdict.
 
 ---
 
@@ -35,7 +35,7 @@ That's `verify()` — one call, 25 gates, a verdict.
 
 A single pass is useful. But the real power is the loop.
 
-`govern()` wraps verify in a convergence cycle. When the agent's first attempt fails, govern remembers what went wrong and prevents the agent from trying the same bad approach again. The agent submits a revised plan, verify checks it again, and the cycle continues until the change passes all 25 gates — or the agent runs out of options.
+`govern()` wraps verify in a convergence cycle. When the agent's first attempt fails, govern remembers what went wrong and prevents the agent from trying the same bad approach again. The agent submits a revised plan, verify checks it again, and the cycle continues until the change passes all 26 gates — or the agent runs out of options.
 
 ```
 Agent: "Change the link color to green"
@@ -47,7 +47,7 @@ Agent: "OK, use .nav-link instead"
   → constraint: use rgb format for colors
 
 Agent: "Use .nav-link with color rgb(0,128,0)"
-  → verify: PASS — all 25 gates clear
+  → verify: PASS — all 26 gates clear
   → change deployed
 ```
 
@@ -63,7 +63,7 @@ This is where it gets interesting. Verify verifies agents. But who verifies veri
 
 If verify says "pass" when the answer should be "fail" — we found a bug in a gate. If it says "fail" when the answer should be "pass" — same thing. Either way, we now know which gate has a problem and can fix it.
 
-We have **12,775 scenarios** today. They come from two independent sources.
+We have **18,391 scenarios** today. They come from two independent sources.
 
 ---
 
@@ -116,7 +116,7 @@ npx @sovereign-labs/verify self-test --source=all
 Every night at 3 AM UTC, a CI pipeline runs:
 
 1. **Fetch** real-world data from all 8 sources
-2. **Run** all 12,775 scenarios through verify
+2. **Run** all 18,391 scenarios through verify
 3. **Find** any scenarios where verify gives the wrong answer ("dirty" scenarios)
 4. **Diagnose** which gate is broken, using an LLM to read the gate source code
 5. **Propose** a fix — the LLM generates candidate code changes
@@ -159,7 +159,7 @@ A key architectural insight emerged: the LLM diagnoses which line to fix, but th
             │  Runner      │
             │  (per scenario:)
             │  apply edit  │
-            │  → verify()  │  ← 25 gates
+            │  → verify()  │  ← 26 gates
             │  → check     │
             │    verdict   │
             └──────┬───────┘
@@ -191,7 +191,7 @@ A key architectural insight emerged: the LLM diagnoses which line to fix, but th
 ```
 Layer 5: Curriculum Agent         — generates new scenarios from the taxonomy
 Layer 4: Improve Loop             — finds gate bugs, proposes fixes, validates via holdout
-Layer 3: Self-Test Harness        — runs 12,775 scenarios, checks verdicts against oracles
+Layer 3: Self-Test Harness        — runs 18,391 scenarios, checks verdicts against oracles
 Layer 2: Verification Pipeline    — verify() and govern(), the 25-gate product
 Layer 1: Governance Kernel        — 7 invariants as pure functions (honesty, non-repetition, etc.)
 ```
@@ -302,20 +302,20 @@ Verify was extracted from Sovereign, a self-hosted app platform where AI agents 
 The extraction produced three packages:
 - **@sovereign-labs/kernel** — the 7 governance invariants as pure functions
 - **@sovereign-labs/mcp-proxy** — governed transport for MCP tool servers
-- **@sovereign-labs/verify** — the 25-gate verification pipeline (this package)
+- **@sovereign-labs/verify** — the 26-gate verification pipeline (this package)
 
 ---
 
-## Current State (March 29, 2026)
+## Current State (March 30, 2026)
 
 | Metric | Value |
 |--------|-------|
-| Gates | 25 |
-| Synthetic scenarios | 11,867 |
-| Real-world scenarios | 908 |
-| Failure shapes covered | 596 / 647 (92%) |
-| Unit tests | 354 (21,342 assertions) |
-| Real-world sources | 8 |
+| Gates | 26 |
+| Synthetic scenarios | 11,959 |
+| Real-world scenarios | 6,432 |
+| Failure shapes covered | 611 / 647 (94%) |
+| Unit tests | 388 (21,397 assertions) |
+| Real-world sources | 13 |
 | Package size | ~23K LOC (src) |
 | Runtime dependencies | 0 |
 | Self-test (synthetic) | ~5 min |
@@ -343,7 +343,7 @@ For each new domain, what changes is minimal:
 
 | Component | Changes? |
 |-----------|----------|
-| Gate sequence (25 gates) | No |
+| Gate sequence (26 gates) | No |
 | K5 constraints | No |
 | G5 containment | No |
 | Narrowing | No |

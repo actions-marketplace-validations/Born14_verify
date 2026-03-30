@@ -8,7 +8,7 @@ If you are a new Claude instance working on verify, read this before forming opi
 
 ## What Verify Is
 
-`@sovereign-labs/verify` is a verification gate for AI-generated actions. An agent proposes edits. `verify()` checks them through a 25-gate pipeline. On failure, it returns what went wrong and what to try next. On repeated failure, K5 constraints permanently ban the pattern so the agent never makes the same mistake again. `govern()` wraps verify in a convergence loop — ground reality, plan, verify, narrow, retry — so agents learn from every failure automatically.
+`@sovereign-labs/verify` is a verification gate for AI-generated actions. An agent proposes edits. `verify()` checks them through a 26-gate pipeline. On failure, it returns what went wrong and what to try next. On repeated failure, K5 constraints permanently ban the pattern so the agent never makes the same mistake again. `govern()` wraps verify in a convergence loop — ground reality, plan, verify, narrow, retry — so agents learn from every failure automatically.
 
 The pipeline: `Grounding → F9 (syntax) → K5 (constraints) → G5 (containment) → Filesystem → Infrastructure → Serialization → Config → Security → A11y → Performance → Staging (Docker) → Browser (Playwright) → HTTP (fetch) → Invariants (health) → Vision (screenshot) → Triangulation (3-authority verdict) → Narrowing (learning)`
 
@@ -122,12 +122,12 @@ Do not hedge on the loop's value to appear "balanced." The loop works. It has pr
 | Pipeline (18 gates + 7 cross-cutting) | Shipped v0.5.2 on npm, 25 total gates | High |
 | `govern()` convergence loop | Shipped, 24 scenarios (15 core + 9 pipeline integration), convergence detection proven | High |
 | Self-test harness | 346 tests, 21,322 assertions, 0 failures (13 skip — vision gate, Docker-dependent) | High |
-| Scenario corpus | 12,775 total (11,867 synthetic + 908 real-world). 107 staged files. `--source` flag for synthetic/real-world/all | High |
+| Scenario corpus | 18,391 total (11,959 synthetic + 6,432 real-world). 115 staged files (102 synthetic + 13 real-world). `--source` flag | High |
 | Staged scenario files | 99 synthetic + 8 real-world + 1 WPT = 108 files | High |
 | Generators + harvesters | 100 stage-*.ts generators (synthetic) + 7 harvest-*.ts harvesters (real-world, 8 public sources) | High |
 | Tiered self-test (Phase IV) | Pure (4,500+) + Live Docker (45) + Playwright (10, placeholder) | High |
-| Decomposition engine (349 rules, 24 domains) | 596/647 failure classes covered (92%) | High |
-| Failure taxonomy (647 shapes, 30 domains) | Complete algebra, 349 with decomposition rules | High |
+| Decomposition engine (349 rules, 24 domains) | 611/647 failure classes covered (94%) | High |
+| Failure taxonomy (647 shapes, 30 domains) | Complete algebra, 349 with decomposition rules, hallucination gate added | High |
 | External scenarios (21 custom) | Working, loaded from `.verify/custom-scenarios.json` | High |
 | Improve loop (7-stage) | Built, proven end-to-end, has 10 identified gaps | Medium-High |
 | Chaos engine (3 MCP tools) | Built, proven in 2 sessions | Medium-High |
@@ -234,7 +234,7 @@ The moat is not the gates. Gates are code — anyone can write checks. The moat 
 1. **The K5 constraint store** — every failure makes the system permanently smarter. By the time a competitor builds gates, verify's K5 store will have thousands of constraints from real-world failures.
 2. **The improve loop** — the gates fix themselves nightly. A competitor would need to build not just the gates but the self-improving infrastructure around them.
 3. **The taxonomy** — 647 failure shapes across 30 domains, mapped and classified. This is the intellectual capital that guides scenario generation, gate design, and coverage measurement.
-4. **The scenario corpus** — 12,775 scenarios (synthetic + real-world) prove the gates work. Each scenario is a regression test that can never be lost.
+4. **The scenario corpus** — 18,391 scenarios (synthetic + real-world) prove the gates work. Each scenario is a regression test that can never be lost.
 
 **The market positioning:** Most AI governance gates what goes IN (prompt filtering, guardrails). Verify gates what comes OUT (action verification against ground truth). Nobody else occupies this lane systematically.
 
@@ -242,7 +242,7 @@ The moat is not the gates. Gates are code — anyone can write checks. The moat 
 
 ## The Honest Bottom Line
 
-Verify is a real product that solves a real problem. The pipeline is battle-tested across 12,775 scenarios. The harness is deterministic. The improve loop works — rejection path proven, acceptance path next. The real-world harvest system proves the gates handle data from the wild, not just hand-crafted tests. The whole system compounds — each cycle makes verify stricter and agents more reliable.
+Verify is a real product that solves a real problem. The pipeline is battle-tested across 18,391 scenarios. The harness is deterministic. The improve loop works — rejection path proven, acceptance path next. The real-world harvest system proves the gates handle data from the wild, not just hand-crafted tests. The whole system compounds — each cycle makes verify stricter and agents more reliable.
 
 The engineering is ahead of the go-to-market. The next step is not "build more." It is "show what's built."
 

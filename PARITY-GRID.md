@@ -85,8 +85,8 @@ That requires Access, Capacity, and Contention coverage.
 
 **Current parity: 100% cell coverage (80/80 cells, 0 blind spots)**
 **Strong cells: 80/80 | Partial cells: 0/80**
-**Total scenarios: 12,775 (11,867 synthetic + 908 real-world) | Staged files: 107 (99 synthetic + 8 real-world) | Min depth: 30/file**
-**Total gates: 25 (18 original + 7 cross-cutting failure class gates)**
+**Total scenarios: 18,391 (11,959 synthetic + 6,432 real-world) | Staged files: 115 (102 synthetic + 13 real-world) | Min depth: 30/file**
+**Total gates: 26 (18 original + 7 cross-cutting failure class gates + hallucination)**
 
 ---
 

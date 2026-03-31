@@ -31,6 +31,8 @@ Each question is a "gate." Every gate votes pass or fail. If any gate fails, the
 
 That's `verify()` — one call, 26 gates, a verdict.
 
+For multi-agent setups, `verifyBatch()` runs agents in sequence. Each agent sees the real filesystem the previous agent left behind. If Agent A changes a file, Agent B's edits are verified against Agent A's result — not the original. Edit conflicts are caught by the syntax gate. Predicate conflicts are caught by grounding. No coordination layer needed — the gates handle it.
+
 ---
 
 ## Learning From Failure

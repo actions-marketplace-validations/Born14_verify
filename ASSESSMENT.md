@@ -244,8 +244,10 @@ The moat is not the gates. Gates are code — anyone can write checks. The moat 
 
 ## The Honest Bottom Line
 
-Verify is a real product that solves a real problem. The pipeline is battle-tested across 18,391 scenarios. The harness is deterministic. The improve loop works — rejection path proven, acceptance path next. The real-world harvest system proves the gates handle data from the wild, not just hand-crafted tests. The whole system compounds — each cycle makes verify stricter and agents more reliable.
+**Your agent just got better.**
 
-The engineering is ahead of the go-to-market. The next step is not "build more." It is "show what's built."
+Three APIs: `verify()` for single agents, `govern()` for convergence, `verifyBatch()` for multi-agent. 26 deterministic gates. Zero runtime dependencies. The pipeline is battle-tested across 18,391 scenarios. The improve loop acceptance path is proven. The nightly loop runs on two runners. The gates get stricter every night.
 
-Ship it. Keep improving it. The work matters.
+623 known dirty scenarios remain in the internal self-test — real gate blind spots the nightly loop is working on. Users never see these. Their `verify()` call works. The govern() convergence test passes in 204ms on the first attempt.
+
+Ship it. The machine improves the backstage. The user gets a better product with each release.

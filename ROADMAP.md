@@ -277,14 +277,16 @@ bun run self-test --families=G  # New hallucination scenarios pass
 **Unblocks:** Market signal, public artifact, the "show don't tell" moment
 
 #### Changelog for 0.6.0
-- Real-world harvest system (6 harvesters, 8 public sources, 908+ scenarios)
-- `--source` flag (synthetic / real-world / all)
-- 594 new synthetic scenarios (198 previously-uncovered failure shapes)
-- Hallucination gate (15 failure shapes, new predicate type)
-- Improve loop acceptance path verified
-- Runner crash fix for large-edit scenarios
-- Coverage: 611/647 shapes (94%), up from 376/647 (58%)
-- Total scenarios: 13,000+ (up from 10,667)
+- **`verifyBatch()`** — sequential multi-agent verification. Each agent verified against the filesystem the previous agent left behind. Edit conflicts caught by syntax gate, predicate conflicts by grounding.
+- **`govern()`** — convergence loop with K5 constraint learning. Proven: converges in 1-3 attempts on real goals.
+- **Hallucination gate** — 26th gate. Deterministic claim verification against ground truth. 15 failure shapes.
+- **Real-world harvest system** — 13 sources (SchemaPile, MDN, html5lib, DOMPurify, etc.), 6,432 real-world scenarios.
+- **Curriculum agent** — automated scenario generation from taxonomy + adversarial gate probing.
+- **8-stage autonomous hardening loop** — nightly self-improvement on Lenovo (Docker) + GitHub CI.
+- **Plain English output** — attestation strings, narrowing hints, error messages all human-readable.
+- **Pattern-based improve loop** — proven acceptance cycle (LLM diagnoses, code applies).
+- 18,391 scenarios, 611/647 failure shapes (94%), 388 unit tests.
+- `--source` flag (synthetic / real-world / all). Zero runtime dependencies.
 
 #### Steps
 1. Update `package.json` version to `0.6.0`

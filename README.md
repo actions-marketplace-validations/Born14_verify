@@ -29,6 +29,25 @@ Your agent says "change the color to red." Verify checks:
 On **failure**: returns the problem + what to try next.
 On **repeat failure**: learns from mistakes — attempt N+1 won't repeat attempt N's error.
 
+## Multi-agent
+
+Multiple agents editing the same codebase? Verify them in sequence — each agent sees the filesystem the previous agent left behind.
+
+```typescript
+import { verifyBatch } from '@sovereign-labs/verify';
+
+const result = await verifyBatch([
+  { agent: 'planner', edits: [...], predicates: [...] },
+  { agent: 'coder', edits: [...], predicates: [...] },
+], { appDir: './my-app', stopOnFailure: true });
+
+// result.success → all agents passed
+// result.agentResults[0].agent → 'planner'
+// result.agentResults[1].result.success → false if coder's edits conflict
+```
+
+If Agent A changes a file and Agent B tries to edit the same region, the syntax gate catches the conflict. If Agent A's changes invalidate Agent B's predicates, the grounding gate catches it. No new infrastructure — the existing 26 gates handle multi-agent conflicts naturally.
+
 ## Beyond code edits
 
 The checks are domain-agnostic. Today it verifies code edits, but the same pipeline works for:

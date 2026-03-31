@@ -1,6 +1,6 @@
 {
   "name": "@sovereign-labs/verify",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Verification gate for AI agent actions. Deterministic predicates, browser-level visual checks, constraint learning from failures. Every edit gets a fair trial before it touches your users.",
   "type": "module",
   "main": "./dist/index.js",

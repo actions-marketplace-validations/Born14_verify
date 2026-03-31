@@ -2,7 +2,7 @@
 
 **Your agent just got better.**
 
-Every mistake makes it smarter. Every failure narrows the search. And the system checking your agent improves itself overnight.
+26 gates check your agent's work. On failure, it learns what went wrong and doesn't repeat it. On success, you have proof it worked. The gates themselves improve every night — automatically.
 
 ---
 

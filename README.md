@@ -2,9 +2,7 @@
 
 **Your agent just got better.**
 
-Every mistake makes it smarter. Every failure makes the next attempt smaller and more focused. And the system that checks your agent? It got smarter while you slept.
-
-26 gates check your agent's work — syntax, security, accessibility, performance, and more. On failure, your agent learns what went wrong and doesn't repeat it. On success, you have proof it worked.
+26 gates check your agent's work. On failure, it learns what went wrong and doesn't repeat it. On success, you have proof it worked.
 
 Works with any agent. Coding agents, file system agents, infrastructure agents, or your own.
 

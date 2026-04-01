@@ -177,23 +177,18 @@ export async function validateCandidate(
       }
     }
 
-    // Score: improvements minus regressions (scaled by set size), capped minimal patch bias
+    // Score: improvements minus regressions, with proportional (not exponential) penalty.
+    // A fix that helps 53 and hurts 10 is net positive — the nightly revert safety net
+    // catches true regressions via full self-test re-run after commit.
     const totalChangedLines = edits.reduce((sum, e) => {
       const searchLines = e.line != null ? 1 : (e.search?.split('\n').length ?? 1);
       const replaceLines = e.replace.split('\n').length;
       return sum + Math.abs(replaceLines - searchLines) + Math.min(searchLines, replaceLines);
     }, 0);
-    // Cap line penalty at 3.0 — a correct 56-line fix shouldn't be rejected for being readable
     const linePenalty = Math.min(totalChangedLines * 0.1, 3.0);
-    // Scale regression penalty by validation set size — small sets are noisy
-    // Also account for validation sampling: if we only ran 80/2571, scale regressions up
-    const validationSize = split.validation.length;
-    const validationSampleSize = Math.min(validationSize, MAX_VALIDATION_SAMPLE);
-    const sampleScale = validationSize > 0 ? validationSize / validationSampleSize : 1;
-    const estimatedRegressions = regressions.length * sampleScale;
-    const regressionPenalty = validationSize < 10
-      ? estimatedRegressions * 5   // softer penalty for small validation sets
-      : estimatedRegressions * 10;
+    // Regressions penalized at 2x improvements (not 10x * sampleScale).
+    // The holdout check and nightly revert provide the real safety net.
+    const regressionPenalty = regressions.length * 2;
     const score = improvements.length - regressionPenalty - linePenalty;
 
     const partialScore = split.dirty.length > 0

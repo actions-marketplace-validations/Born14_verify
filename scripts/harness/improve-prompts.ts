@@ -143,12 +143,10 @@ export async function generateFixCandidates(
     return [];
   }
 
-  // Focus on the target function if file is large
+  // Focus on the target function if file is large — show 500 lines centered on function
   const sourceLines = sourceContent.split('\n');
   let truncated: string;
-  if (sourceLines.length > 300 && bundle.triage.targetFunction) {
-    // Find the target function and include surrounding context
-    // Handles: function foo(), export function foo(), const foo =, export const foo =, foo(, class method foo()
+  if (sourceLines.length > 500 && bundle.triage.targetFunction) {
     const funcName = bundle.triage.targetFunction.replace(/\(\)$/, '');
     const funcIdx = sourceLines.findIndex(l =>
       l.includes(`function ${funcName}`) ||
@@ -158,17 +156,18 @@ export async function generateFixCandidates(
       new RegExp(`^\\s*(?:export\\s+)?(?:async\\s+)?${funcName}\\s*[(<]`).test(l)
     );
     if (funcIdx >= 0) {
-      const start = Math.max(0, funcIdx - 20);
-      const end = Math.min(sourceLines.length, funcIdx + 150);
+      // Center 500 lines around the target function
+      const start = Math.max(0, funcIdx - 100);
+      const end = Math.min(sourceLines.length, funcIdx + 400);
       truncated = `// ... lines 1-${start} omitted ...\n`
         + sourceLines.slice(start, end).map((l, i) => `${start + i + 1}: ${l}`).join('\n')
         + `\n// ... lines ${end + 1}-${sourceLines.length} omitted ...`;
     } else {
-      truncated = sourceLines.slice(0, 300).map((l, i) => `${i + 1}: ${l}`).join('\n') + '\n// ... truncated ...';
+      truncated = sourceLines.slice(0, 500).map((l, i) => `${i + 1}: ${l}`).join('\n') + '\n// ... truncated ...';
     }
   } else {
-    truncated = sourceLines.length > 300
-      ? sourceLines.slice(0, 300).map((l, i) => `${i + 1}: ${l}`).join('\n') + '\n// ... truncated ...'
+    truncated = sourceLines.length > 500
+      ? sourceLines.slice(0, 500).map((l, i) => `${i + 1}: ${l}`).join('\n') + '\n// ... truncated ...'
       : sourceLines.map((l, i) => `${i + 1}: ${l}`).join('\n');
   }
 

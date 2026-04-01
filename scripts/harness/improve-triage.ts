@@ -283,12 +283,16 @@ export function bundleViolations(entries: LedgerEntry[]): EvidenceBundle[] {
   const dirty = entries.filter(e => !e.clean);
   if (dirty.length === 0) return [];
 
-  // Group by invariant name prefix (e.g., "fingerprint_distinct_*" → "fingerprint_distinct")
+  // Group by invariant prefix + first failed gate (so grounding bugs and security bugs
+  // don't land in the same bundle even if they share an invariant category)
+  const MAX_BUNDLE_SIZE = 20;
   const groups = new Map<string, EvidenceBundle['violations']>();
   for (const entry of dirty) {
     for (const inv of entry.invariants) {
       if (inv.passed) continue;
-      const key = invariantGroupKey(inv.name);
+      const invariantKey = invariantGroupKey(inv.name);
+      const gate = entry.result.gatesFailed[0] ?? 'invariant';
+      const key = `${invariantKey}::${gate}`;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push({
         scenarioId: entry.id,
@@ -302,19 +306,22 @@ export function bundleViolations(entries: LedgerEntry[]): EvidenceBundle[] {
     }
   }
 
-  // Convert to bundles with triage
+  // Convert to bundles with triage, splitting oversized groups
   const bundles: EvidenceBundle[] = [];
   let bundleCounter = 0;
   for (const [key, violations] of groups) {
-    const triage = triageByInvariantKey(key);
-    const bundle: EvidenceBundle = {
-      id: `bundle_${++bundleCounter}`,
-      violations,
-      triage,
-    };
-    // Refine: extract gate from violation text when triage rule has no target
-    refineTriage(bundle);
-    bundles.push(bundle);
+    // Split groups larger than MAX_BUNDLE_SIZE into chunks
+    for (let i = 0; i < violations.length; i += MAX_BUNDLE_SIZE) {
+      const chunk = violations.slice(i, i + MAX_BUNDLE_SIZE);
+      const triage = triageByInvariantKey(key.split('::')[0]);
+      const bundle: EvidenceBundle = {
+        id: `bundle_${++bundleCounter}`,
+        violations: chunk,
+        triage,
+      };
+      refineTriage(bundle);
+      bundles.push(bundle);
+    }
   }
 
   return bundles;

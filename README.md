@@ -2,9 +2,69 @@
 
 **Your agent just got better.**
 
-26 gates check your agent's work. On failure, it learns what went wrong and doesn't repeat it. On success, you have proof it worked.
+Your agent says "done." But did it actually work? Verify checks reality, not status messages.
 
-Works with any agent. Coding agents, file system agents, infrastructure agents, or your own.
+## See it in action
+
+```bash
+npx @sovereign-labs/verify demo
+```
+
+Three failure modes your current stack misses:
+
+### The Agent Said Done
+
+The agent claims it saved a file. It didn't. Verify checks the filesystem.
+
+```
+Without verify:
+  Agent says: "Report saved successfully."
+  $ ls reports/weekly.md
+  ls: cannot access 'reports/weekly.md': No such file or directory
+
+With verify:
+  Trace 1: Agent claims completion without creating the file.
+  [FAIL] Filesystem gate: reports/weekly.md does not exist.
+  Trace 2: Injecting constraints and re-running. Agent creates the file.
+  [PASS] All gates passed (12 checks)
+```
+
+### Wrong World Model
+
+The agent writes valid CSS targeting a selector that doesn't exist. Verify knows what's actually in your code.
+
+```
+Without verify:
+  $ grep '.profile-nav' server.js     # CSS rule exists
+  $ grep -c 'class="profile-nav"'     # 0 — element doesn't exist
+
+With verify:
+  Trace 1: Agent uses selector .profile-nav
+  [FAIL] Grounding: .profile-nav does not exist in source
+  Trace 2: Agent uses a.nav-link — exists in reality.
+  [PASS] All gates passed (12 checks)
+```
+
+### The Silent Drift
+
+The agent completed the task. But it also quietly changed your config. Verify catches the undeclared mutation.
+
+```
+Without verify:
+  $ diff config.json.orig config.json
+  - "darkMode": true
+  + "darkMode": false
+  - "analytics": false
+  + "analytics": true
+
+With verify:
+  Trace 1: Agent edits server.js and config.json.
+  [FAIL] Containment: 2 undeclared file mutations detected
+  Trace 2: Agent edits server.js only.
+  [PASS] All gates passed (11 checks)
+```
+
+Run all three: `npx @sovereign-labs/verify demo --scenario=liar|world|drift`
 
 ## What it does
 
@@ -17,46 +77,15 @@ const result = await verify(edits, predicates, { appDir: './my-app' });
 // result.narrowing → what to try next (on failure)
 ```
 
-Your agent says "change the color to red." Verify checks:
+26 checks run in sequence. First failure stops the pipeline and tells you exactly what went wrong.
 
 1. **Can the edit be applied?** Does the search string exist in the file?
 2. **Is the edit safe?** No XSS, no SQL injection, no leaked secrets, no broken accessibility.
-3. **Did the edit work?** CSS selector has the right value. HTTP endpoint returns 200. Database column exists.
+3. **Did the edit work?** CSS selector has the right value. HTTP endpoint returns 200. Database column exists. File was created.
 4. **Did the edit break anything else?** Health checks pass. File integrity holds. Config is consistent.
-
-26 checks run in sequence. First failure stops the pipeline and tells you exactly what went wrong.
 
 On **failure**: returns the problem + what to try next.
 On **repeat failure**: learns from mistakes — attempt N+1 won't repeat attempt N's error.
-
-## Multi-agent
-
-Multiple agents editing the same codebase? Verify them in sequence — each agent sees the filesystem the previous agent left behind.
-
-```typescript
-import { verifyBatch } from '@sovereign-labs/verify';
-
-const result = await verifyBatch([
-  { agent: 'planner', edits: [...], predicates: [...] },
-  { agent: 'coder', edits: [...], predicates: [...] },
-], { appDir: './my-app', stopOnFailure: true });
-
-// result.success → all agents passed
-// result.agentResults[0].agent → 'planner'
-// result.agentResults[1].result.success → false if coder's edits conflict
-```
-
-If Agent A changes a file and Agent B tries to edit the same region, the syntax gate catches the conflict. If Agent A's changes invalidate Agent B's predicates, the grounding gate catches it. No new infrastructure — the existing 26 gates handle multi-agent conflicts naturally.
-
-## Beyond code edits
-
-The checks are domain-agnostic. Today it verifies code edits, but the same pipeline works for:
-- **File system agents** — move, rename, organize files
-- **Infrastructure agents** — don't delete the production database
-- **Communication agents** — message the right channel, no forbidden content
-- **Document agents** — don't overwrite the wrong cells
-
-**Built-in checks:** CSS, HTML, content patterns, HTTP endpoints, database schema, file existence, infrastructure state, JSON structure, config values, security scans, accessibility, performance budgets, hallucination detection, and more.
 
 ## Install
 
@@ -91,11 +120,8 @@ const result = await verify(
 
 if (result.success) {
   console.log(result.attestation);
-  // VERIFY PASSED
-  // Gates: F9✓ K5✓ G5✓ Staging✓ Browser✓ HTTP✓
 } else {
-  console.log(result.narrowing);
-  // { resolutionHint: "...", constraints: [...], bannedFingerprints: [...] }
+  console.log(result.narrowing.resolutionHint);
 }
 ```
 
@@ -114,10 +140,9 @@ const result = await govern({
   // Your agent — one method: plan
   agent: {
     plan: async (goal, context) => {
-      // context.grounding: CSS, HTML, routes, DB schema — the app's ground truth
-      // context.narrowing: what failed last time and why
-      // context.failureShapes: taxonomy IDs (e.g., 'C-05', 'F9-02')
-      // context.convergence: is the loop making progress?
+      // context.grounding — CSS, HTML, routes, DB schema
+      // context.narrowing — what failed last time and why
+      // context.constraints — what's banned and why (K5)
 
       return {
         edits: [{ file: 'style.css', search: 'blue', replace: 'orange' }],
@@ -125,74 +150,28 @@ const result = await govern({
       };
     },
   },
-
-  // Optional: human approval before each verify() run
-  onApproval: async (plan, context) => {
-    console.log(`Attempt ${context.attempt}: ${plan.edits.length} edits`);
-    return true; // false to abort
-  },
-
-  // Optional: observe progress without blocking
-  onAttempt: (attempt, result) => {
-    console.log(`Attempt ${attempt}: ${result.success ? 'PASS' : 'FAIL'}`);
-  },
 });
 
 if (result.success) {
   console.log(`Converged in ${result.attempts} attempt(s)`);
-  console.log(result.receipt.attestation);
 } else {
   console.log(`Stopped: ${result.stopReason}`);
-  // 'exhausted' — all attempts used, was making progress
-  // 'stuck' — shape repetition or gate cycles detected
-  // 'empty_plan_stall' — agent returned empty edits 3x
-  // 'approval_aborted' — human rejected the plan
+  // 'exhausted' | 'stuck' | 'empty_plan_stall' | 'approval_aborted'
 }
 ```
-
-**Three exit paths:**
-- **converged** — goal succeeded, edits verified
-- **exhausted** — max attempts used but was making progress (more attempts might help)
-- **stuck** — loop detected no progress (same shapes repeating, same gates failing, constraints growing but not helping)
-
-**What the agent sees on retry** (`GovernContext`):
-- `grounding` — CSS rules, HTML elements, routes, DB schema from the app
-- `priorResult` — the previous `verify()` result (gates, narrowing, attestation)
-- `narrowing` — resolution hints, banned fingerprints, pattern recall
-- `failureShapes` — taxonomy shape IDs from `decomposeFailure()` (e.g., `C-05: named color vs computed RGB`)
-- `constraints` — active K5 constraints (what's banned and why)
-- `convergence` — shape progression, gate progression, empty plan count, progress summary
-
-**Convergence detection** (ported from Sovereign's battle-tested agent loop):
-- Shape repetition — same failure shapes across attempts means no new information
-- Gate cycles — same gates failing the same way
-- Empty plan stall — agent returning 0 edits repeatedly
-- Constraint saturation — constraints growing but shapes unchanged (narrowing isn't helping)
-
-**Fault ledger:** Every failure is automatically recorded to `.verify/faults.jsonl`. Unclassified failures (where the taxonomy has no matching shape) are flagged on `result.receipt.unclassifiedFailures`. Run `npx @sovereign-labs/verify faults` to inspect gaps.
 
 ### 3. As a CLI
 
 ```bash
-# Initialize config
-npx @sovereign-labs/verify init
-
-# Run verification from a spec file
-npx @sovereign-labs/verify check
-
-# Pipe git diff directly
-git diff | npx @sovereign-labs/verify check --diff
-
-# Scan grounding context (what CSS/HTML/routes exist)
-npx @sovereign-labs/verify ground
-
-# Check Docker + Playwright availability
-npx @sovereign-labs/verify doctor
+npx @sovereign-labs/verify init          # Create .verify/check.json
+npx @sovereign-labs/verify check         # Run verification
+npx @sovereign-labs/verify demo          # See what it catches
+npx @sovereign-labs/verify ground        # Scan CSS/HTML/routes
+npx @sovereign-labs/verify self-test     # Run 9,000+ scenario harness
+git diff | npx @sovereign-labs/verify check --diff   # Pipe git diff
 ```
 
 ### 4. As an MCP server
-
-Add to your agent's MCP config:
 
 ```json
 {
@@ -205,18 +184,36 @@ Add to your agent's MCP config:
 }
 ```
 
-16 tools exposed across 4 categories:
+Tools: `verify_ground`, `verify_read`, `verify_submit`
 
-- `verify_ground` — Scan app for CSS rules, HTML elements, routes, schema
-- `verify_read` — Read a source file
-- `verify_submit` — Submit edits + predicates through the full gate pipeline
+## Multi-agent
+
+Multiple agents editing the same codebase? Verify them in sequence — each agent sees the filesystem the previous agent left behind.
+
+```typescript
+import { verifyBatch } from '@sovereign-labs/verify';
+
+const result = await verifyBatch([
+  { agent: 'planner', edits: [...], predicates: [...] },
+  { agent: 'coder', edits: [...], predicates: [...] },
+], { appDir: './my-app', stopOnFailure: true });
+```
+
+If Agent A's changes invalidate Agent B's predicates, the grounding gate catches it. No new infrastructure — the existing gates handle multi-agent conflicts naturally.
+
+## Beyond code edits
+
+The checks are domain-agnostic:
+- **File system agents** — move, rename, organize files
+- **Infrastructure agents** — don't delete the production database
+- **Communication agents** — message the right channel, no forbidden content
+- **Document agents** — don't overwrite the wrong cells
 
 ## Full Documentation
 
-- **[REFERENCE.md](REFERENCE.md)** — Gates, predicates, configuration, CLI, fault management, scenario authoring
-- **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — System architecture, the 8-stage autonomous loop, design decisions
+- **[REFERENCE.md](REFERENCE.md)** — Gates, predicates, configuration, CLI, fault management
+- **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — Architecture, the 8-stage autonomous loop
 - **[GLOSSARY.md](GLOSSARY.md)** — Terms and definitions
-
 
 ## License
 

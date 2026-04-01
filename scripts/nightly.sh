@@ -69,6 +69,12 @@ echo "" | tee -a "$LOG"
 echo "[Stage 3] Improve loop..." | tee -a "$LOG"
 bun run src/cli.ts improve --llm=gemini --max-candidates=3 2>&1 | tee -a "$LOG" || true
 
+# ─── Auto-commit accepted fixes ─────────────────────────────────────────────
+
+echo "" | tee -a "$LOG"
+echo "[Commit] Applying accepted improvements..." | tee -a "$LOG"
+bun scripts/harness/auto-commit.ts 2>&1 | tee -a "$LOG" || true
+
 # ─── Stage 8: DISCOVER + CONFIRM — find new shapes (uses decomposition) ────
 
 echo "" | tee -a "$LOG"

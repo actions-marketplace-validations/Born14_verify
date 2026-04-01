@@ -38,8 +38,8 @@ echo "[Audit] Fixture gaps..." | tee -a "$LOG"
 bun scripts/harness/fixture-auditor.ts 2>&1 | tee -a "$LOG" || true
 
 echo "" | tee -a "$LOG"
-echo "[Audit] Scenario quality..." | tee -a "$LOG"
-bun scripts/harness/scenario-quality.ts 2>&1 | tee -a "$LOG" || true
+echo "[Audit] Scenario quality (auto-fixing stale expectations)..." | tee -a "$LOG"
+bun scripts/harness/scenario-quality.ts --fix 2>&1 | tee -a "$LOG" || true
 
 # ─── Stage 1: SUPPLY — generate new scenario fuel ───────────────────────────
 

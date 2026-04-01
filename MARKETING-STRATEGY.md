@@ -170,24 +170,108 @@ Level 1 and Level 2. The README already does Level 3-5 well.
 
 ---
 
-## Priority Order
+## Strategy Zero: The Benchmark (Before Everything Else)
 
-1. **The Receipts** -- Start this week. Low effort, high frequency. Use
-   existing scenario corpus. One post per day across Twitter/X, LinkedIn,
-   dev communities.
+Nothing in this document matters until you have numbers. Real numbers.
+Not internal test scenarios. Not synthetic passes. A head-to-head
+comparison that anyone can reproduce.
 
-2. **The Postmortem That Didn't Happen** -- Write 3 of these. Publish on
-   your blog and cross-post to dev.to / Hacker News. These have long
-   shelf life.
+### The Benchmark
+
+Same LLM. Same coding tasks. Two paths:
+- **Path A (Raw):** Agent produces edits, apply them directly, check if the goal was achieved
+- **Path B (Governed):** Agent runs through verify's govern() loop, check if the goal was achieved
+
+The judge is **independent of verify** — it checks ground truth by reading
+files, running syntax checks, and validating content predicates. No verify
+gate code in the evaluation. This prevents circular reasoning.
+
+### What It Measures
+
+```
+                          Raw Agent    With Verify
+Goals achieved:             12            18
+Goals failed:                6             2
+Success rate:             60.0%         90.0%
+Avg attempts:              1.0            2.1
+```
+
+And the head-to-head breakdown:
+- **verify_saved**: Raw failed, governed succeeded (verify made the difference)
+- **both_succeeded**: Both worked (verify didn't hurt)
+- **both_failed**: Neither worked (verify didn't help here)
+- **verify_regression**: Raw worked, governed failed (verify made it worse)
+
+### How To Run It
+
+```bash
+# With Gemini (cheapest)
+GEMINI_API_KEY=... npx tsx scripts/benchmark/benchmark.ts \
+  --app=fixtures/demo-app --tasks=20 --llm=gemini --verbose
+
+# With Claude
+ANTHROPIC_API_KEY=... npx tsx scripts/benchmark/benchmark.ts \
+  --app=fixtures/demo-app --tasks=20 --llm=claude --verbose
+
+# With your own app
+npx tsx scripts/benchmark/benchmark.ts \
+  --app=/path/to/your/app --tasks=30 --llm=gemini --verbose
+
+# Reuse same tasks for fair comparison across models
+npx tsx scripts/benchmark/benchmark.ts \
+  --tasks-file=.verify/benchmark/tasks-xxx.json --llm=claude
+```
+
+### Why This Comes First
+
+1. **For yourself**: You said it — without proof, this is a research project.
+   Run the benchmark. If the numbers are good, you know. If they're not,
+   you know what to fix before going public.
+
+2. **For credibility**: "Verify improved agent success rate by 34% across
+   20 coding tasks" is worth more than any demo, receipt, or postmortem.
+   It's reproducible. Anyone can run it.
+
+3. **For content**: The benchmark results BECOME the content. The numbers
+   are the receipts. The per-task breakdown is the demo. The regressions
+   (if any) are the honesty that builds trust.
+
+4. **For iteration**: Run it weekly. Track the numbers over time. When you
+   improve verify, the benchmark proves the improvement is real.
+
+### The Honest Outcomes
+
+If the numbers are good: lead with them everywhere. "34% improvement."
+That's the tweet, the README badge, the conference talk title.
+
+If the numbers are mixed: that's still honest. "Verify helped on 8/20 tasks,
+was neutral on 10, regressed on 2. Here's what we're fixing." Developers
+respect transparency more than perfection.
+
+If the numbers are bad: you saved yourself from shipping marketing for a
+product that doesn't work yet. Fix verify first. Run the benchmark again.
+
+---
+
+## Priority Order (Updated)
+
+0. **The Benchmark** -- Run it NOW. Before any content, any posts, any
+   marketing. Get the numbers. Everything else depends on what they say.
+
+1. **The Receipts** -- Start after the benchmark. Use REAL benchmark
+   results, not internal scenarios. "Task 7: agent said done, file didn't
+   exist. Verify caught it, agent retried, goal achieved."
+
+2. **The Postmortem That Didn't Happen** -- Write 3, using real benchmark
+   failures as source material.
 
 3. **CI/CD GitHub Action + Badge** -- Build the distribution channel.
-   Every repo using verify becomes a billboard.
+   The badge shows the benchmark improvement number.
 
-4. **The Live Gauntlet** -- Schedule one. Stream it. Record it. The
-   recording becomes permanent content.
+4. **The Live Gauntlet** -- Schedule one. The benchmark gives you
+   confidence to do this live because you've already seen the numbers.
 
-5. **The Silent Scoreboard** -- Build after you have enough usage data
-   to make the numbers meaningful.
+5. **The Silent Scoreboard** -- Build after you have enough usage data.
 
 ---
 

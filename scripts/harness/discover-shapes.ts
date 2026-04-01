@@ -25,6 +25,8 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, resolve } from 'path';
+import { decomposeFailure } from '../../src/store/decompose.js';
+import type { VerifyResult, GateResult } from '../../src/types.js';
 
 const PKG_ROOT = resolve(import.meta.dir, '..', '..');
 
@@ -485,8 +487,51 @@ function main() {
     return;
   }
 
-  // Cluster by gate + error signature
-  const clusters = clusterFailures(unclassified);
+  // Layer 0: Run decomposeFailure() on each entry before clustering.
+  // Known shapes skip clustering. Only genuinely unclassified failures get proposed.
+  const knownShapeHits: Record<string, number> = {};
+  const genuinelyUnclassified: LedgerEntry[] = [];
+
+  for (const entry of unclassified) {
+    // Build minimal VerifyResult from ledger entry for decomposition
+    const gates: GateResult[] = entry.result.gatesFailed.map(g => ({
+      gate: g as any,
+      passed: false,
+      detail: entry.result.error ?? '',
+      durationMs: 0,
+    }));
+    const minimalResult: VerifyResult = {
+      success: entry.result.success ?? false,
+      gates,
+      attestation: '',
+      timing: { totalMs: 0, perGate: {} },
+    };
+
+    const decomposed = decomposeFailure(minimalResult);
+    if (decomposed.shapes.length > 0) {
+      const shapeId = decomposed.shapes[0].id;
+      knownShapeHits[shapeId] = (knownShapeHits[shapeId] || 0) + 1;
+    } else {
+      genuinelyUnclassified.push(entry);
+    }
+  }
+
+  console.log(`  Decomposition: ${Object.keys(knownShapeHits).length} known shapes matched, ${genuinelyUnclassified.length} genuinely unclassified`);
+  if (Object.keys(knownShapeHits).length > 0) {
+    const top5 = Object.entries(knownShapeHits).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    for (const [id, count] of top5) {
+      console.log(`    ${count}x ${id}`);
+    }
+  }
+  console.log('');
+
+  if (genuinelyUnclassified.length === 0) {
+    console.log('All unclassified failures match known shapes via decomposition. Nothing to discover.');
+    return;
+  }
+
+  // Cluster only genuinely unclassified (not already matched by decomposition)
+  const clusters = clusterFailures(genuinelyUnclassified);
   console.log(`  Clusters found: ${clusters.length}`);
   for (const c of clusters.slice(0, 10)) {
     console.log(`    ${c.count}x — ${c.key.gate}: ${c.key.errorSignature.substring(0, 80)}`);

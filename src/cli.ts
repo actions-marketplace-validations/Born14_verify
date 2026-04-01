@@ -42,6 +42,8 @@ async function main() {
       return runFaults();
     case 'campaign':
       return runCampaignCommand();
+    case 'demo':
+      return runDemoCommand();
     case 'improve':
       return runImproveCommand();
     case 'scenario-health':
@@ -566,6 +568,20 @@ function runFaults() {
   }
 }
 
+async function runDemoCommand() {
+  const { runDemo } = await import('./demo.js');
+  const scenarioArg = args.find(a => a.startsWith('--scenario='))?.split('=')[1];
+  const scenario = (scenarioArg ?? 'liar') as 'liar' | 'world' | 'drift';
+
+  if (!['liar', 'world', 'drift'].includes(scenario)) {
+    console.error(`Unknown demo scenario: ${scenario}`);
+    console.error('Available: liar, world, drift');
+    process.exit(1);
+  }
+
+  await runDemo(scenario);
+}
+
 async function runCampaignCommand() {
   await runCampaignCLI(args.slice(1));
 }
@@ -842,6 +858,7 @@ Commands:
   check [file]      Run verification (default: .verify/check.json)
   ground [dir]      Print grounding context (CSS, HTML, routes)
   doctor            Check Docker + Playwright availability
+  demo              Run interactive demo (--scenario=liar|world|drift)
   self-test         Run the verification harness (753+ scenarios, 9 families)
   faults            Manage the gate fault ledger (discovered verify bugs)
   campaign          Run autonomous fault discovery campaign
@@ -875,7 +892,14 @@ Fault ledger subcommands:
   faults classify   Reclassify a fault (faults classify <id> --class=X --reason=Y)
   faults link       Link fault to scenario (faults link <id> --scenario=A11)
 
+Demo options:
+  --scenario=liar   The Agent Said Done — false completion claims (default)
+  --scenario=world  Wrong World Model — fabricated selectors
+  --scenario=drift  The Silent Drift — undeclared mutations
+
 Examples:
+  npx @sovereign-labs/verify demo
+  npx @sovereign-labs/verify demo --scenario=drift
   npx @sovereign-labs/verify init
   npx @sovereign-labs/verify check
   npx @sovereign-labs/verify check my-check.json --json

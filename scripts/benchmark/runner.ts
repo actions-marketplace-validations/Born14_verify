@@ -299,6 +299,26 @@ async function runGoverned(
       },
     });
 
+    // Apply winning edits to the copy so ground truth can verify them.
+    // govern() applies edits in a temp staging dir (not appDir), so copyDir is unmodified.
+    if (result.success && lastEdits.length > 0) {
+      for (const edit of lastEdits) {
+        const filePath = join(copyDir, edit.file);
+        if (existsSync(filePath) && edit.search) {
+          let content = readFileSync(filePath, 'utf-8');
+          if (content.includes(edit.search)) {
+            content = content.replace(edit.search, edit.replace);
+            writeFileSync(filePath, content);
+          }
+        } else if (!edit.search && edit.replace) {
+          // File creation
+          const dir = join(copyDir, edit.file, '..');
+          mkdirSync(dir, { recursive: true });
+          writeFileSync(join(copyDir, edit.file), edit.replace);
+        }
+      }
+    }
+
     // Check ground truth on the final state of the copy
     const groundTruth = validateGroundTruth(copyDir, lastEdits, lastPredicates);
 

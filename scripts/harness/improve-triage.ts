@@ -289,7 +289,7 @@ export function bundleViolations(entries: LedgerEntry[]): EvidenceBundle[] {
   // For false-positive scenarios (verify passed, gatesFailed is empty), infer
   // the gate from the scenario description so they land in domain-specific
   // bundles instead of one giant "should_detect_problem::invariant" bucket.
-  const MAX_BUNDLE_SIZE = 20;
+  const MAX_BUNDLE_SIZE = 5;
   const groups = new Map<string, EvidenceBundle['violations']>();
   for (const entry of dirty) {
     for (const inv of entry.invariants) {
@@ -581,7 +581,8 @@ function refineTriage(bundle: EvidenceBundle): void {
  * Looks for common prefixes and keywords.
  */
 function inferGateFromDescription(desc: string): string | null {
-  const d = desc.toLowerCase();
+  // Strip fuzz mutation prefixes like "[FUZZ:type_swap]", "[FUZZ:boundary]", "[FUZZ:pred_flip]"
+  let d = desc.replace(/^\[FUZZ:\w+\]\s*/i, '').toLowerCase();
   // Explicit prefixes from scenario generators
   if (d.startsWith('sec-') || d.startsWith('sec:') || d.includes('injection') || d.includes('xss') || d.includes('csrf') || d.includes('secret'))
     return 'security';
@@ -620,6 +621,12 @@ function inferGateFromDescription(desc: string): string | null {
     return 'containment';
   if (d.includes('syntax') || d.includes('f9'))
     return 'syntax';
+  // DB/schema patterns — map to grounding (which handles DB predicates)
+  if (d.includes('init.sql') || d.includes('table') || d.includes('column') || d.includes('migration') || d.includes('alter table') || d.includes('schema'))
+    return 'grounding';
+  // Attestation / hint quality — these are verify.ts bugs legitimately
+  if (d.includes('attestation') || d.includes('resolution hint'))
+    return null; // let it fall through to verify.ts (legitimate target)
   return null;
 }
 

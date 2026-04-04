@@ -27,137 +27,11 @@ import {
   CLAUDE_DIAGNOSIS_SYSTEM,
   CLAUDE_FIX_SYSTEM,
 } from '../campaign/claude-brain.js';
+import { getCoreTypes, getTaxonomyForViolations, RELATED_FILES, getRelatedContext } from './improve-context.js';
 
-// =============================================================================
-// RELATED FILE GRAPH — files that are coupled to each target
-// =============================================================================
-
-/**
- * When Claude reads a target file to generate fixes, it also gets
- * the files that are architecturally coupled. A generic LLM gets
- * the target function in isolation. Claude gets the context.
- */
-export const RELATED_FILES: Record<string, string[]> = {
-  // ── Core orchestrator ──
-  'src/verify.ts': [
-    'src/types.ts',                     // All gate interfaces and types
-    'src/store/constraint-store.ts',    // K5 constraint state
-  ],
-  'src/govern.ts': [
-    'src/verify.ts',                    // Govern wraps verify pipeline
-    'src/store/constraint-store.ts',    // Constraint seeding
-    'src/store/decompose.ts',           // Feature decomposition
-    'src/store/fault-ledger.ts',        // Fault tracking
-  ],
-
-  // ── Store layer ──
-  'src/store/constraint-store.ts': [
-    'src/gates/constraints.ts',         // K5 enforcement uses constraint store
-    'src/types.ts',                     // Predicate/Constraint types
-  ],
-  'src/store/decompose.ts': [
-    'src/store/constraint-store.ts',    // Decompose references constraints
-    'src/types.ts',                     // Scenario/Predicate types
-  ],
-  'src/store/fault-ledger.ts': [
-    'src/store/constraint-store.ts',    // Fault → constraint seeding
-    'src/types.ts',                     // FaultEntry types
-  ],
-  'src/store/external-scenarios.ts': [
-    'src/types.ts',                     // Scenario type
-  ],
-
-  // ── Governance gates ──
-  'src/gates/constraints.ts': [
-    'src/store/constraint-store.ts',    // K5 store that constraints.ts queries
-    'src/types.ts',                     // Constraint types
-  ],
-  'src/gates/containment.ts': [
-    'src/types.ts',                     // Mutation/Attribution types
-  ],
-  'src/gates/grounding.ts': [
-    'src/gates/browser.ts',             // Browser gate uses grounding output
-    'src/types.ts',                     // GroundingContext type
-  ],
-  'src/gates/browser.ts': [
-    'src/gates/grounding.ts',           // Browser gate validates grounded selectors
-    'src/types.ts',                     // BrowserGateResult types
-  ],
-  'src/gates/http.ts': [
-    'src/types.ts',                     // Predicate types for HTTP
-  ],
-  'src/gates/syntax.ts': [
-    'src/types.ts',                     // Edit type
-  ],
-  'src/gates/vision.ts': [
-    'src/gates/triangulation.ts',       // Triangulation consumes vision verdict
-    'src/types.ts',                     // GateResult, VisionConfig types
-  ],
-  'src/gates/triangulation.ts': [
-    'src/gates/vision.ts',              // Vision gate feeds triangulation
-    'src/gates/browser.ts',             // Browser gate feeds triangulation
-    'src/types.ts',                     // GateResult type
-  ],
-  'src/gates/staging.ts': [
-    'src/types.ts',                     // StagingResult types
-    'src/runners/docker-runner.ts',     // Staging uses Docker runner
-  ],
-  'src/gates/invariants.ts': [
-    'src/types.ts',                     // InvariantResult types
-  ],
-
-  // ── Domain gates (all share same pattern: types.ts only) ──
-  'src/gates/a11y.ts':            ['src/types.ts'],
-  'src/gates/access.ts':          ['src/types.ts'],
-  'src/gates/capacity.ts':        ['src/types.ts'],
-  'src/gates/config.ts':          ['src/types.ts'],
-  'src/gates/contention.ts':      ['src/types.ts'],
-  'src/gates/filesystem.ts':      ['src/types.ts'],
-  'src/gates/infrastructure.ts':  ['src/types.ts'],
-  'src/gates/message.ts':         ['src/types.ts'],
-  'src/gates/observation.ts':     ['src/types.ts'],
-  'src/gates/performance.ts':     ['src/types.ts'],
-  'src/gates/propagation.ts':     ['src/types.ts'],
-  'src/gates/security.ts':        ['src/types.ts'],
-  'src/gates/serialization.ts':   ['src/types.ts'],
-  'src/gates/state.ts':           ['src/types.ts'],
-  'src/gates/temporal.ts':        ['src/types.ts'],
-
-  // ── Runners / Parsers ──
-  'src/runners/docker-runner.ts': ['src/types.ts'],
-  'src/parsers/git-diff.ts':     ['src/types.ts'],
-
-  // ── Types (the root — when fixing types, show the main consumer) ──
-  'src/types.ts': [
-    'src/verify.ts',                    // Main consumer of all types
-  ],
-};
-
-/**
- * Read related files for context enrichment.
- * Returns a formatted string with file contents, truncated to keep prompt reasonable.
- */
-function getRelatedContext(targetFile: string, packageRoot: string, maxBytesPerFile: number = 8000): string {
-  const related = RELATED_FILES[targetFile];
-  if (!related || related.length === 0) return '';
-
-  const sections: string[] = [];
-  for (const relPath of related) {
-    const fullPath = join(packageRoot, relPath);
-    if (!existsSync(fullPath)) continue;
-
-    try {
-      let content = readFileSync(fullPath, 'utf-8');
-      if (content.length > maxBytesPerFile) {
-        // Truncate but include the type definitions (usually at top)
-        content = content.substring(0, maxBytesPerFile) + '\n// ... truncated ...';
-      }
-      sections.push(`\n--- Related: ${relPath} ---\n${content}`);
-    } catch { /* skip */ }
-  }
-
-  return sections.join('\n');
-}
+// RELATED_FILES and getRelatedContext are imported from improve-context.ts
+// Re-export for any downstream consumers
+export { RELATED_FILES };
 
 // =============================================================================
 // CLAUDE-ENHANCED DIAGNOSIS
@@ -195,8 +69,16 @@ export async function diagnoseWithClaude(
       } catch { /* skip */ }
     }
     // Add related files for architectural context
-    sourceContext += getRelatedContext(bundle.triage.targetFile, packageRoot);
+    sourceContext += getRelatedContext(bundle.triage.targetFile, packageRoot, 8000);
   }
+
+  // Surgical context: type interfaces + failure taxonomy
+  const coreTypes = getCoreTypes(packageRoot);
+  const taxonomy = getTaxonomyForViolations(bundle.violations, packageRoot);
+  const contextBlock = [
+    coreTypes ? `\nTYPE CONTRACTS:\n\`\`\`typescript\n${coreTypes}\n\`\`\`` : '',
+    taxonomy ? `\nFAILURE SEMANTICS (what these failure shapes catch):\n${taxonomy}` : '',
+  ].filter(Boolean).join('\n');
 
   const userPrompt = `FAILURE EVIDENCE:
 ${violations}
@@ -205,6 +87,7 @@ Scenario IDs: ${bundle.violations.map(v => v.scenarioId).join(', ')}
 Triage confidence: ${bundle.triage.confidence}
 Target: ${bundle.triage.targetFunction ?? 'unknown'} in ${bundle.triage.targetFile ?? 'unknown'}
 ${sourceContext}
+${contextBlock}
 
 What is the root cause? Name the exact function, file, and explain WHY the invariant fails.`;
 
@@ -269,7 +152,7 @@ export async function generateFixesWithClaude(
   }
 
   // Get related files for architectural reasoning
-  const relatedContext = getRelatedContext(targetFile, packageRoot);
+  const relatedContext = getRelatedContext(targetFile, packageRoot, 8000);
 
   const violations = bundle.violations
     .map(v => `  - [${v.family}] ${v.invariant}: ${v.violation}`)
@@ -283,6 +166,14 @@ export async function generateFixesWithClaude(
     .replace('{NUM_CANDIDATES}', String(maxCandidates))
     .replace('{MAX_LINES}', String(maxLines));
 
+  // Surgical context: type interfaces + failure taxonomy
+  const coreTypes = getCoreTypes(packageRoot);
+  const taxonomy = getTaxonomyForViolations(bundle.violations, packageRoot);
+  const contextBlock = [
+    coreTypes ? `\nTYPE CONTRACTS:\n\`\`\`typescript\n${coreTypes}\n\`\`\`` : '',
+    taxonomy ? `\nFAILURE SEMANTICS (what these failure shapes catch):\n${taxonomy}` : '',
+  ].filter(Boolean).join('\n');
+
   const userPrompt = `FAILURE EVIDENCE:
 ${violations}
 
@@ -293,6 +184,7 @@ SOURCE CODE (${targetFile}):
 ${truncated}
 \`\`\`
 ${relatedContext ? `\nRELATED CONTEXT (architecturally coupled files):${relatedContext}` : ''}
+${contextBlock}
 
 Generate ${maxCandidates} distinct fix strategies as JSON.
 Remember: the holdout check will catch any regressions. Your fix must not break passing scenarios.`;

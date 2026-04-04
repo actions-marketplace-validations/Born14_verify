@@ -11,6 +11,7 @@ import type { EvidenceBundle, FixCandidate, LLMCallFn, LLMUsage } from './types.
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { extractJSON, callLLMWithRetry } from './improve-utils.js';
+import { getCoreTypes, getTaxonomyForViolations, getRelatedContext } from './improve-context.js';
 
 // =============================================================================
 // DIAGNOSIS (only for needs_llm bundles)
@@ -76,11 +77,21 @@ export async function diagnoseBundleWithLLM(
     } catch { /* file not found — skip */ }
   }
 
+  // Surgical context: type interfaces + failure taxonomy for the failing gates
+  const coreTypes = getCoreTypes(packageRoot);
+  const taxonomy = getTaxonomyForViolations(bundle.violations, packageRoot);
+
+  const contextBlock = [
+    coreTypes ? `\nTYPE CONTRACTS:\n\`\`\`typescript\n${coreTypes}\n\`\`\`` : '',
+    taxonomy ? `\nFAILURE SEMANTICS (what these failure shapes catch):\n${taxonomy}` : '',
+  ].filter(Boolean).join('\n');
+
   const userPrompt = `FAILURE EVIDENCE:
 ${violations}
 
 Scenario IDs: ${bundle.violations.map(v => v.scenarioId).join(', ')}
 ${targetSource}
+${contextBlock}
 
 Look at the target file source code. What regex pattern, condition, or function is broken? Be specific — name the exact line or pattern that needs to change.`;
 
@@ -188,6 +199,17 @@ export async function generateFixCandidates(
     .replace('{NUM_CANDIDATES}', String(maxCandidates))
     .replace('{MAX_LINES}', String(maxLines));
 
+  // Surgical context: type interfaces, failure taxonomy, related files
+  const coreTypes = getCoreTypes(packageRoot);
+  const taxonomy = getTaxonomyForViolations(bundle.violations, packageRoot);
+  const relatedContext = getRelatedContext(targetFile, packageRoot);
+
+  const contextBlock = [
+    coreTypes ? `\nTYPE CONTRACTS:\n\`\`\`typescript\n${coreTypes}\n\`\`\`` : '',
+    taxonomy ? `\nFAILURE SEMANTICS (what these failure shapes catch):\n${taxonomy}` : '',
+    relatedContext ? `\nRELATED CONTEXT (architecturally coupled files):\n${relatedContext}` : '',
+  ].filter(Boolean).join('\n');
+
   const userPrompt = `FAILURE EVIDENCE:
 ${violations}
 
@@ -197,6 +219,7 @@ SOURCE CODE (${targetFile}):
 \`\`\`typescript
 ${truncated}
 \`\`\`
+${contextBlock}
 
 Generate ${maxCandidates} distinct fix strategies as JSON.`;
 

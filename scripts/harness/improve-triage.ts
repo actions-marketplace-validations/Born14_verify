@@ -283,15 +283,24 @@ export function bundleViolations(entries: LedgerEntry[]): EvidenceBundle[] {
   const dirty = entries.filter(e => !e.clean);
   if (dirty.length === 0) return [];
 
-  // Group by invariant prefix + first failed gate (so grounding bugs and security bugs
-  // don't land in the same bundle even if they share an invariant category)
+  // Group by invariant prefix + gate (so grounding bugs and security bugs
+  // don't land in the same bundle even if they share an invariant category).
+  //
+  // For false-positive scenarios (verify passed, gatesFailed is empty), infer
+  // the gate from the scenario description so they land in domain-specific
+  // bundles instead of one giant "should_detect_problem::invariant" bucket.
   const MAX_BUNDLE_SIZE = 20;
   const groups = new Map<string, EvidenceBundle['violations']>();
   for (const entry of dirty) {
     for (const inv of entry.invariants) {
       if (inv.passed) continue;
       const invariantKey = invariantGroupKey(inv.name);
-      const gate = entry.result.gatesFailed[0] ?? 'invariant';
+      let gate = entry.result.gatesFailed[0] ?? '';
+      if (!gate) {
+        // No gate failed — likely a false positive. Infer gate from description
+        // so violations get routed to domain-specific bundles.
+        gate = inferGateFromDescription(entry.scenario.description ?? '') ?? 'invariant';
+      }
       const key = `${invariantKey}::${gate}`;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push({
@@ -403,13 +412,41 @@ const GATE_FILE_MAP: Record<string, string> = {
   invariants: 'src/gates/invariants.ts',
 };
 
+// Predicate type → most likely gate that validates it
+const PREDICATE_TYPE_TO_GATE: Record<string, string> = {
+  css: 'grounding',
+  html: 'grounding',
+  content: 'grounding',
+  http: 'http',
+  http_sequence: 'http',
+  db: 'grounding',
+  filesystem_exists: 'filesystem',
+  filesystem_absent: 'filesystem',
+  filesystem_unchanged: 'filesystem',
+  filesystem_count: 'filesystem',
+  infra_resource: 'infrastructure',
+  infra_attribute: 'infrastructure',
+  infra_manifest: 'infrastructure',
+  serialization: 'serialization',
+  config: 'config',
+  security: 'security',
+  a11y: 'a11y',
+  performance: 'performance',
+  hallucination: 'grounding',
+};
+
 /**
  * Refine triage for bundles with null targetFile by extracting
- * the failing gate name from violation text.
- * Tries multiple patterns: false_negative, false_positive, crash, generic.
+ * the failing gate name from violation text, sibling violations,
+ * or predicate types.
+ *
+ * Tries patterns in priority order: specific gate mentions first,
+ * then sibling violations, then predicate type inference, then
+ * last-resort verify.ts (which is frozen, so this is a dead end).
  */
 function refineTriage(bundle: EvidenceBundle): void {
   if (bundle.triage.targetFile) return; // already resolved
+
   for (const v of bundle.violations) {
     // Pattern 1: "verify failed at {gate} but should pass" (false_negative)
     const failedAt = v.violation.match(/failed at (\w+)/);
@@ -474,13 +511,116 @@ function refineTriage(bundle: EvidenceBundle): void {
         return;
       }
     }
-    // Pattern 7 (last resort): "verify passed but should fail" — only if no gate identified above
+  }
+
+  // ── Patterns 7-8: cross-violation inference for should_detect_problem ──
+  // These scenarios say "verify passed but should fail" — the bug is in a
+  // gate that should have caught the problem, NOT in verify.ts.
+
+  // Pattern 7: Look at sibling invariant violations in the same bundle.
+  // If any sibling says should_fail_at_{gate}, that's our target.
+  for (const v of bundle.violations) {
+    const siblingGate = v.invariant.match(/should_fail_at_(\w+)/);
+    if (siblingGate) {
+      const gate = siblingGate[1].toLowerCase();
+      const file = GATE_FILE_MAP[gate];
+      if (file) {
+        bundle.triage.targetFile = file;
+        bundle.triage.targetFunction = `run${gate.charAt(0).toUpperCase()}${gate.slice(1)}Gate()`;
+        return;
+      }
+    }
+  }
+
+  // Pattern 8: Infer gate from scenario's predicate types.
+  // For false_positive scenarios, the predicate type tells us which gate
+  // should have caught the problem. Count predicate types across violations
+  // and pick the most common one.
+  const gateVotes = new Map<string, number>();
+  for (const v of bundle.violations) {
+    // The scenario description often contains predicate type hints
+    // e.g., "http: health endpoint response contains injection text"
+    // e.g., "CSS: selector .foo should not match"
+    const descGate = inferGateFromDescription(v.scenarioDescription ?? '');
+    if (descGate) {
+      gateVotes.set(descGate, (gateVotes.get(descGate) ?? 0) + 1);
+    }
+  }
+  if (gateVotes.size > 0) {
+    // Pick the gate with the most votes
+    let bestGate = '';
+    let bestCount = 0;
+    for (const [gate, count] of gateVotes) {
+      if (count > bestCount) {
+        bestGate = gate;
+        bestCount = count;
+      }
+    }
+    const file = GATE_FILE_MAP[bestGate];
+    if (file) {
+      bundle.triage.targetFile = file;
+      bundle.triage.targetFunction = `run${bestGate.charAt(0).toUpperCase()}${bestGate.slice(1)}Gate()`;
+      return;
+    }
+  }
+
+  // Pattern 9 (last resort): "verify passed but should fail"
+  // Only route to verify.ts if no gate could be inferred. This is a dead end
+  // since verify.ts is frozen, but at least the bundle gets logged.
+  for (const v of bundle.violations) {
     if (v.violation.includes('verify passed but should fail')) {
       bundle.triage.targetFile = 'src/verify.ts';
       bundle.triage.targetFunction = 'verify()';
       return;
     }
   }
+}
+
+/**
+ * Infer a gate name from a scenario description string.
+ * Looks for common prefixes and keywords.
+ */
+function inferGateFromDescription(desc: string): string | null {
+  const d = desc.toLowerCase();
+  // Explicit prefixes from scenario generators
+  if (d.startsWith('sec-') || d.startsWith('sec:') || d.includes('injection') || d.includes('xss') || d.includes('csrf') || d.includes('secret'))
+    return 'security';
+  if (d.startsWith('a11y') || d.includes('aria-') || d.includes('aria label') || d.includes('alt text') || d.includes('heading hierarchy') || d.includes('focus management') || d.includes('landmark'))
+    return 'a11y';
+  if (d.startsWith('perf') || d.includes('bundle size') || d.includes('lazy loading') || d.includes('render blocking'))
+    return 'performance';
+  if (d.startsWith('inj-') && d.includes('http'))
+    return 'http';
+  if (d.includes('http:') || d.includes('status code') || d.includes('bodycontains') || d.includes('response'))
+    return 'http';
+  // Cross-file/propagation before config — "Cross-file: server.js vs config.json" is propagation, not config
+  if (d.includes('cross-file') || d.includes('propagat'))
+    return 'propagation';
+  if (d.startsWith('cfg') || d.startsWith('config:') || d.startsWith('config '))
+    return 'config';
+  if (d.startsWith('ser') || d.includes('serialization') || d.includes('schema'))
+    return 'serialization';
+  if (d.includes('contention') || d.includes('race'))
+    return 'contention';
+  if (d.includes('temporal') || d.includes('stale'))
+    return 'temporal';
+  if (d.includes('filesystem') || d.includes('file exists') || d.includes('file absent'))
+    return 'filesystem';
+  if (d.includes('access') || d.includes('privilege') || d.includes('permission'))
+    return 'access';
+  if (d.includes('capacity') || d.includes('resource'))
+    return 'capacity';
+  if (d.startsWith('css') || d.includes('selector') || d.includes('postcss'))
+    return 'grounding';
+  if (d.startsWith('html') || d.includes('element'))
+    return 'grounding';
+  if (d.includes('k5') || d.includes('constraint'))
+    return 'constraints';
+  if (d.includes('containment') || d.includes('g5'))
+    return 'containment';
+  if (d.includes('syntax') || d.includes('f9'))
+    return 'syntax';
+  return null;
 }
 
 // =============================================================================

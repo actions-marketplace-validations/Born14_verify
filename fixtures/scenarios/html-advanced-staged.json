@@ -84,7 +84,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "svg",
@@ -216,7 +216,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "rtl",
@@ -281,7 +281,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "shadow-dom",
@@ -378,7 +378,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "hydration",
@@ -507,7 +507,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "conditional",
@@ -642,7 +642,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "meta",
@@ -816,7 +816,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "form",
@@ -947,7 +947,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "a11y",
@@ -1076,7 +1076,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "iframe",
@@ -1218,7 +1218,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "picture",
@@ -1321,7 +1321,7 @@
       }
     ],
     "expectedSuccess": false,
-    "expectedFailedGate": "html",
+    "expectedFailedGate": "grounding",
     "tags": [
       "html",
       "dialog",

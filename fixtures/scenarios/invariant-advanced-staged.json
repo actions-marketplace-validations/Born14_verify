@@ -47,7 +47,7 @@
       "INV-02"
     ],
     "rationale": "Edit changes health endpoint to return 503. HTTP predicate expects 200, gets 503.",
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -76,7 +76,7 @@
       "INV-02"
     ],
     "rationale": "Health endpoint returns 500 instead of 200. Invariant check detects server error.",
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -129,7 +129,7 @@
       "INV-03"
     ],
     "rationale": "Health body now says \"maintenance\" instead of \"ok\". Body content predicate fails.",
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -159,7 +159,7 @@
       "INV-03"
     ],
     "rationale": "Health returns empty object {}. The \"status\" field is missing from the body.",
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {

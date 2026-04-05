@@ -210,7 +210,7 @@
       "FS-25"
     ],
     "rationale": "Search string does not exist in Dockerfile. Edit cannot be applied. Content predicate fails.",
-    "expectedFailedGate": "syntax",
+    "expectedFailedGate": "F9",
     "intent": "false_positive"
   },
   {

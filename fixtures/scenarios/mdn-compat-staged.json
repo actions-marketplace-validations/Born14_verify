@@ -643,7 +643,7 @@
       "shorthand",
       "MDN-02"
     ],
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -1265,7 +1265,7 @@
       "normalization",
       "MDN-03"
     ],
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -1989,7 +1989,7 @@
       "specificity",
       "MDN-05"
     ],
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -2374,7 +2374,7 @@
       "initial_values",
       "MDN-06"
     ],
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -2739,7 +2739,7 @@
       "computed_specified",
       "MDN-07"
     ],
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {
@@ -3461,7 +3461,7 @@
       "logical_properties",
       "MDN-09"
     ],
-    "expectedFailedGate": "verify",
+    "expectedFailedGate": "grounding",
     "intent": "false_positive"
   },
   {

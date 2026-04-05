@@ -169,7 +169,8 @@
     "tags": [
       "a11y",
       "semantic_replaced_div",
-      "A11Y-06"
+      "A11Y-06",
+      "aspirational"
     ],
     "intent": "false_negative"
   },

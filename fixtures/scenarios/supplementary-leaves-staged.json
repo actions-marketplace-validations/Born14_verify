@@ -149,7 +149,8 @@
       "performance",
       "cls",
       "PERF-03",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Logo image has explicit dimensions — no layout shift",
     "intent": "false_negative"
@@ -175,7 +176,8 @@
     "tags": [
       "performance",
       "memory_leak",
-      "PERF-05"
+      "PERF-05",
+      "aspirational"
     ],
     "rationale": "Unbounded global array — structural check passes, runtime will OOM",
     "intent": "false_negative"
@@ -227,7 +229,8 @@
     "tags": [
       "performance",
       "n_plus_1",
-      "PERF-06"
+      "PERF-06",
+      "aspirational"
     ],
     "rationale": "Comment documents N+1 pattern — structural check passes, performance is runtime",
     "intent": "false_negative"
@@ -253,7 +256,8 @@
     "tags": [
       "performance",
       "n_plus_1",
-      "PERF-06"
+      "PERF-06",
+      "aspirational"
     ],
     "rationale": "Quadratic query pattern documented in code — structural check only",
     "intent": "false_negative"
@@ -574,7 +578,8 @@
     "tags": [
       "interaction",
       "grounding_browser",
-      "I-13"
+      "I-13",
+      "aspirational"
     ],
     "rationale": "Element in source (grounding passes) but marked async — browser may not see it at check time",
     "intent": "false_negative"

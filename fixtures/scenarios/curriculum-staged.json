@@ -38,7 +38,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-22"
+      "C-22",
+      "aspirational"
     ],
     "rationale": "The 'flex' shorthand is correctly expanded into its longhand properties, and the original shorthand is removed.",
     "intent": "false_negative"
@@ -132,7 +133,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-23"
+      "C-23",
+      "aspirational"
     ],
     "rationale": "The 'grid-template' shorthand is correctly expanded into its longhand properties, and the original shorthand is removed.",
     "intent": "false_negative"
@@ -232,7 +234,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-26"
+      "C-26",
+      "aspirational"
     ],
     "rationale": "The 'list-style' shorthand is correctly expanded into its longhand properties, including implicit default values.",
     "intent": "false_negative"
@@ -469,7 +472,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-29"
+      "C-29",
+      "aspirational"
     ],
     "rationale": "The 'overflow' shorthand is correctly expanded into its 'overflow-x' and 'overflow-y' longhand properties.",
     "intent": "false_negative"
@@ -507,7 +511,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-29"
+      "C-29",
+      "aspirational"
     ],
     "rationale": "The 'overflow' shorthand with two values is correctly expanded into its 'overflow-x' and 'overflow-y' longhand properties.",
     "intent": "false_negative"
@@ -582,7 +587,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-63"
+      "C-63",
+      "aspirational"
     ],
     "rationale": "The color-mix(in srgb, red 50%, blue) should resolve to an sRGB color that is 50% red and 50% blue, which is rgb(128, 0, 128).",
     "intent": "false_negative"
@@ -626,7 +632,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-63"
+      "C-63",
+      "aspirational"
     ],
     "rationale": "color-mix(in srgb, green 25%, yellow) should resolve to 25% green (rgb(0,255,0)) and 75% yellow (rgb(255,255,0)), resulting in rgb(64, 255, 0).",
     "intent": "false_negative"
@@ -695,7 +702,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-64"
+      "C-64",
+      "aspirational"
     ],
     "rationale": "After the edit, the nested rule for '.child' should apply 'color: green;'.",
     "intent": "false_negative"
@@ -720,7 +728,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-64"
+      "C-64",
+      "aspirational"
     ],
     "rationale": "Even if the parent's color changes, the child's explicitly set color should remain 'blue' due to higher specificity.",
     "intent": "false_negative"
@@ -979,7 +988,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-67"
+      "C-67",
+      "aspirational"
     ],
     "rationale": "Assuming a 1000px viewport, clamp(200px, 50%, 800px) resolves to 500px (50% of 1000px is 500px, which is between 200px and 800px).",
     "intent": "false_negative"
@@ -1091,7 +1101,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-68"
+      "C-68",
+      "aspirational"
     ],
     "rationale": "This scenario confirms that the 'p' element within '.hero' correctly receives the scoped style, while 'p' elements outside this scope (e.g., within '.card') retain their original styles, demonstrating correct @scope boundary enforcement.",
     "intent": "false_negative"
@@ -1159,7 +1170,8 @@
     ],
     "expectedSuccess": true,
     "tags": [
-      "C-68"
+      "C-68",
+      "aspirational"
     ],
     "rationale": "This scenario tests the 'to' clause of @scope, ensuring that the style for 'p' elements is applied only within '.hero' and stops before the first '.card' element, as intended. The predicates confirm both the application within the scope and the non-application outside the upper boundary.",
     "intent": "false_negative"

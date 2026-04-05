@@ -194,7 +194,8 @@
       "concurrency",
       "read_write_race",
       "CO-03",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Frozen snapshot is immutable — concurrent writes create new snapshots, readers always get consistent state.",
     "intent": "false_negative"
@@ -384,7 +385,8 @@
       "concurrency",
       "deadlock",
       "CO-05",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Consistent alphabetical lock ordering with SHARE MODE — no circular wait possible.",
     "intent": "false_negative"
@@ -481,7 +483,8 @@
       "concurrency",
       "lost_update",
       "CO-06",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "SQL-level atomic increment — database handles concurrency, no lost updates regardless of concurrent request count.",
     "intent": "false_negative"
@@ -687,7 +690,8 @@
       "concurrency",
       "concurrent_migration",
       "CO-08",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Advisory lock prevents concurrent execution, CONCURRENTLY prevents write blocking — safe concurrent migration.",
     "intent": "false_negative"
@@ -793,7 +797,8 @@
       "concurrency",
       "session_corruption",
       "CO-10",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Single atomic UPDATE with WHERE clause — concurrent requests extend same session without corruption.",
     "intent": "false_negative"
@@ -900,7 +905,8 @@
       "concurrency",
       "event_ordering",
       "CO-11",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Events carry monotonic sequence number, consumer sorts by seq before processing — correct ordering guaranteed.",
     "intent": "false_negative"

@@ -423,7 +423,8 @@
     "tags": [
       "db",
       "views",
-      "D-30"
+      "D-30",
+      "aspirational"
     ],
     "rationale": "VIEW definition found by grounding in init.sql — table_exists matches CREATE VIEW",
     "intent": "false_negative"
@@ -450,7 +451,8 @@
     "tags": [
       "db",
       "views",
-      "D-30"
+      "D-30",
+      "aspirational"
     ],
     "rationale": "MATERIALIZED VIEW columns appear in the CREATE statement — grounding can parse them",
     "intent": "false_negative"
@@ -2300,7 +2302,8 @@
     "tags": [
       "db",
       "temp_tables",
-      "D-54"
+      "D-54",
+      "aspirational"
     ],
     "rationale": "TEMPORARY TABLE declared in init.sql — grounding finds the CREATE statement",
     "intent": "false_negative"
@@ -2328,7 +2331,8 @@
     "tags": [
       "db",
       "temp_tables",
-      "D-54"
+      "D-54",
+      "aspirational"
     ],
     "rationale": "TEMP table column types parsed from init.sql like regular tables",
     "intent": "false_negative"

@@ -88,7 +88,8 @@
       "observer_effect",
       "log_overhead",
       "OE-02",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Single character to stdout is non-blocking and negligible overhead — observation does not perturb the system.",
     "intent": "false_negative"
@@ -193,7 +194,8 @@
       "observer_effect",
       "debug_mode_side_effect",
       "OE-03",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Debug flag only controls logging verbosity — functional behavior identical in debug and production.",
     "intent": "false_negative"
@@ -384,7 +386,8 @@
       "observer_effect",
       "cache_warming",
       "OE-05",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Health check reads process uptime only — no global state mutation, no cache warming.",
     "intent": "false_negative"
@@ -469,7 +472,8 @@
       "observer_effect",
       "env_initialization",
       "OE-07",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Reading PORT env var with fallback — pure read, no initialization side effect.",
     "intent": "false_negative"
@@ -563,7 +567,8 @@
       "observer_effect",
       "introspection_lock",
       "OE-08",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "information_schema queries use only ACCESS SHARE lock (compatible with all writes) — safe observation.",
     "intent": "false_negative"
@@ -769,7 +774,8 @@
       "observer_effect",
       "atime_mutation",
       "OE-10",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Health check reads only in-memory timestamp — no filesystem access, no atime mutation.",
     "intent": "false_negative"

@@ -119,7 +119,8 @@
     "tags": [
       "postcss",
       "escaping",
-      "PCSS-02"
+      "PCSS-02",
+      "aspirational"
     ],
     "intent": "false_negative"
   },
@@ -144,7 +145,8 @@
     "tags": [
       "postcss",
       "escaping",
-      "PCSS-02"
+      "PCSS-02",
+      "aspirational"
     ],
     "intent": "false_negative"
   },
@@ -169,7 +171,8 @@
     "tags": [
       "postcss",
       "escaping",
-      "PCSS-02"
+      "PCSS-02",
+      "aspirational"
     ],
     "intent": "false_negative"
   },

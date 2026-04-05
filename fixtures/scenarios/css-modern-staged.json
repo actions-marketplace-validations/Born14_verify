@@ -199,7 +199,8 @@
     "tags": [
       "css-modern",
       "css-nesting",
-      "C-64"
+      "C-64",
+      "aspirational"
     ],
     "rationale": "The .nested-rule parent has color: red. Nesting does not affect parent extraction.",
     "intent": "false_negative"

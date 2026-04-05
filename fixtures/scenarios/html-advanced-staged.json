@@ -717,7 +717,8 @@
       "html",
       "form",
       "validation",
-      "H-44"
+      "H-44",
+      "aspirational"
     ],
     "rationale": "Contact form has required name and email inputs — attribute selectors match.",
     "intent": "false_negative"
@@ -1124,7 +1125,8 @@
       "picture",
       "responsive",
       "srcset",
-      "H-47"
+      "H-47",
+      "aspirational"
     ],
     "rationale": "Picture element with WebP/AVIF sources and PNG fallback — all queryable.",
     "intent": "false_negative"
@@ -1298,7 +1300,8 @@
       "dialog",
       "modal",
       "form",
-      "H-48"
+      "H-48",
+      "aspirational"
     ],
     "rationale": "Closed dialog with form method=dialog pattern — host and contents queryable.",
     "intent": "false_negative"
@@ -1364,7 +1367,8 @@
       "dialog",
       "autofocus",
       "a11y",
-      "H-48"
+      "H-48",
+      "aspirational"
     ],
     "rationale": "Open dialog with autofocus select and label association — a11y aware dialog.",
     "intent": "false_negative"

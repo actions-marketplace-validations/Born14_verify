@@ -419,7 +419,8 @@
       "scope",
       "port_cascading",
       "SC-05",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Port 3000 consistent across .env, Dockerfile, and server.js — no cascading mismatch.",
     "intent": "false_negative"
@@ -513,7 +514,8 @@
       "scope",
       "global_state_leak",
       "SC-07",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Spread into local copy — mutations affect only the local variable, global singleton untouched.",
     "intent": "false_negative"
@@ -598,7 +600,8 @@
       "scope",
       "package_cascade",
       "SC-08",
-      "control"
+      "control",
+      "aspirational"
     ],
     "rationale": "Patch version pin within same major — backward compatible, no native module rebuild needed.",
     "intent": "false_negative"

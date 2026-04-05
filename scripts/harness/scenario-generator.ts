@@ -2482,7 +2482,7 @@ function generateFamilyD(appDir: string): VerifyScenario[] {
           // The hint should say "search string does not exist" — this is correct
           // but generic. It doesn't say WHICH search string or suggest alternatives.
           const hint = result.narrowing.resolutionHint;
-          if (!hint.includes('not exist') && !hint.includes('exact match')) {
+          if (!hint.includes('not exist') && !hint.includes("n't exist") && !hint.includes('exact match') && !hint.includes('doesn\'t exist')) {
             return { passed: false, violation: `Expected F9 hint about search string, got: "${hint}"`, severity: 'bug' as const };
           }
           return { passed: true, severity: 'info' as const };

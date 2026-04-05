@@ -1411,7 +1411,11 @@ export function narrowingHintContains(expected: string): InvariantCheck {
       if (!result.narrowing?.resolutionHint) {
         return { passed: false, violation: 'No resolution hint in narrowing', severity: 'unexpected' };
       }
-      if (!result.narrowing.resolutionHint.includes(expected)) {
+      const hint = result.narrowing.resolutionHint.toLowerCase();
+      const exp = expected.toLowerCase();
+      // Also match contractions: "not" matches "n't" (doesn't, can't, won't, etc.)
+      const found = hint.includes(exp) || (exp === 'not' && hint.includes("n't"));
+      if (!found) {
         return { passed: false, violation: `Hint "${result.narrowing.resolutionHint}" missing "${expected}"`, severity: 'unexpected' };
       }
       return { passed: true, severity: 'info' };

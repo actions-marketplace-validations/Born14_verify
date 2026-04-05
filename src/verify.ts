@@ -239,7 +239,7 @@ export async function verify(
     // =========================================================================
     // ACCESS: Privilege Boundary Analysis
     // =========================================================================
-    {
+    if ((gateConfig as any).access !== false) {
       log('[access] Checking privilege boundaries...');
       const accessResult = runAccessGate(ctx);
       gates.push(accessResult);
@@ -256,7 +256,7 @@ export async function verify(
     // =========================================================================
     // TEMPORAL: Cross-Surface Staleness Detection
     // =========================================================================
-    {
+    if ((gateConfig as any).temporal !== false) {
       log('[temporal] Checking for temporal drift...');
       const temporalResult = runTemporalGate(ctx);
       gates.push(temporalResult);
@@ -273,7 +273,7 @@ export async function verify(
     // =========================================================================
     // PROPAGATION: Cross-Surface Cascade Analysis
     // =========================================================================
-    {
+    if ((gateConfig as any).propagation !== false) {
       log('[propagation] Checking for propagation breaks...');
       const propagationResult = runPropagationGate(ctx);
       gates.push(propagationResult);
@@ -290,7 +290,7 @@ export async function verify(
     // =========================================================================
     // STATE: State Assumption Verification
     // =========================================================================
-    {
+    if ((gateConfig as any).state !== false) {
       log('[state] Checking state assumptions...');
       const stateResult = runStateGate(ctx);
       gates.push(stateResult);
@@ -307,7 +307,7 @@ export async function verify(
     // =========================================================================
     // CAPACITY: Resource Exhaustion Detection
     // =========================================================================
-    {
+    if ((gateConfig as any).capacity !== false) {
       log('[capacity] Checking for capacity issues...');
       const capacityResult = runCapacityGate(ctx);
       gates.push(capacityResult);
@@ -324,7 +324,7 @@ export async function verify(
     // =========================================================================
     // CONTENTION: Race Condition & Resource Conflict Detection
     // =========================================================================
-    {
+    if ((gateConfig as any).contention !== false) {
       log('[contention] Checking for contention issues...');
       const contentionResult = runContentionGate(ctx);
       gates.push(contentionResult);

@@ -44,7 +44,8 @@
     "tags": [
       "invariant-advanced",
       "health-status",
-      "INV-02"
+      "INV-02",
+      "aspirational"
     ],
     "rationale": "Edit changes health endpoint to return 503. HTTP predicate expects 200, gets 503.",
     "expectedFailedGate": "grounding",
@@ -73,7 +74,8 @@
     "tags": [
       "invariant-advanced",
       "health-status",
-      "INV-02"
+      "INV-02",
+      "aspirational"
     ],
     "rationale": "Health endpoint returns 500 instead of 200. Invariant check detects server error.",
     "expectedFailedGate": "grounding",
@@ -156,7 +158,8 @@
     "tags": [
       "invariant-advanced",
       "health-body",
-      "INV-03"
+      "INV-03",
+      "aspirational"
     ],
     "rationale": "Health returns empty object {}. The \"status\" field is missing from the body.",
     "expectedFailedGate": "grounding",
@@ -224,7 +227,8 @@
     "tags": [
       "invariant-advanced",
       "db-connectivity",
-      "INV-05"
+      "INV-05",
+      "aspirational"
     ],
     "rationale": "Settings table removed from init.sql. DB predicate for table_exists fails.",
     "expectedFailedGate": "grounding",
@@ -271,7 +275,8 @@
     "tags": [
       "invariant-advanced",
       "container-running",
-      "INV-06"
+      "INV-06",
+      "aspirational"
     ],
     "rationale": "Dockerfile HEALTHCHECK directive removed. Container has no built-in health monitoring.",
     "expectedFailedGate": "grounding",
@@ -298,7 +303,8 @@
     "tags": [
       "invariant-advanced",
       "container-running",
-      "INV-06"
+      "INV-06",
+      "aspirational"
     ],
     "rationale": "Dockerfile CMD points to nonexistent.js. Container will fail to start.",
     "expectedFailedGate": "grounding",
@@ -585,7 +591,8 @@
     "tags": [
       "invariant-advanced",
       "network",
-      "INV-14"
+      "INV-14",
+      "aspirational"
     ],
     "rationale": "Port mapping removed from docker-compose. Container has no external network access.",
     "expectedFailedGate": "grounding",

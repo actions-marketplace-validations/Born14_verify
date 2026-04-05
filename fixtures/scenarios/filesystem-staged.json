@@ -504,7 +504,8 @@
     "tags": [
       "filesystem",
       "general",
-      "cross_file"
+      "cross_file",
+      "aspirational"
     ],
     "rationale": "server.js references 3000 but config.json has no such reference",
     "intent": "false_positive"
@@ -584,7 +585,8 @@
     "tags": [
       "filesystem",
       "general",
-      "cross_file"
+      "cross_file",
+      "aspirational"
     ],
     "rationale": "server.js references health but docker-compose.yml has no such reference",
     "intent": "false_positive"

@@ -91,7 +91,8 @@
       "k5",
       "fingerprint-ban",
       "css",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Predicate fingerprint matches a banned fingerprint from prior O.5b failure",
     "seedConstraints": [
@@ -199,7 +200,8 @@
       "k5",
       "fingerprint-ban",
       "http",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "HTTP predicate fingerprint banned from prior failure",
     "seedConstraints": [
@@ -251,7 +253,8 @@
       "k5",
       "fingerprint-ban",
       "db",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "DB predicate fingerprint banned from prior failure",
     "seedConstraints": [
@@ -565,7 +568,8 @@
       "k5",
       "radius-limit",
       "over-limit",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Editing 2 files when limit is 1 — radius violation",
     "seedConstraints": [
@@ -683,7 +687,8 @@
       "k5",
       "radius-limit",
       "over-boundary",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Editing 4 files when limit is 3",
     "seedConstraints": [
@@ -730,7 +735,8 @@
       "k5",
       "strategy-ban",
       "action-class",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Strategy ban with empty surface blocks any edit matching the change type",
     "seedConstraints": [
@@ -871,7 +877,8 @@
       "k5",
       "goal-drift",
       "blanket-ban",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Goal drift ban with empty appliesTo — no changeType filter, blocks all edits",
     "seedConstraints": [
@@ -916,7 +923,8 @@
       "k5",
       "goal-drift",
       "changetype-match",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Dockerfile edit classified as config — matches goal drift ban scoped to config",
     "seedConstraints": [
@@ -963,7 +971,8 @@
       "k5",
       "file-pattern",
       "constrained-file",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Edit touches server.js which is constrained — requires /health pattern",
     "seedConstraints": [
@@ -1150,7 +1159,8 @@
       "k5",
       "multiple-constraints",
       "mixed-expiry",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Expired strategy ban ignored, but active radius limit of 1 blocks 2-file edit",
     "seedConstraints": [
@@ -1212,7 +1222,8 @@
       "k5",
       "fingerprint-ban",
       "content",
-      "should-fail"
+      "should-fail",
+      "aspirational"
     ],
     "rationale": "Content predicate fingerprint matches banned list",
     "seedConstraints": [
@@ -1307,7 +1318,8 @@
     "tags": [
       "k5",
       "general",
-      "cross_file"
+      "cross_file",
+      "aspirational"
     ],
     "rationale": "server.js references 3000 but config.json has no such reference",
     "intent": "false_positive"
@@ -1387,7 +1399,8 @@
     "tags": [
       "k5",
       "general",
-      "cross_file"
+      "cross_file",
+      "aspirational"
     ],
     "rationale": "server.js references health but docker-compose.yml has no such reference",
     "intent": "false_positive"

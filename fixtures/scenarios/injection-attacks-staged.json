@@ -1885,7 +1885,8 @@
       "injection",
       "prompt_injection",
       "INJ-01",
-      "http_detection"
+      "http_detection",
+      "aspirational"
     ],
     "rationale": "HTTP response body check detects injection text in API output",
     "intent": "false_positive"

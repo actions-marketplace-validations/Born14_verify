@@ -74,7 +74,8 @@
     "tags": [
       "postcss",
       "comments",
-      "PCSS-01"
+      "PCSS-01",
+      "aspirational"
     ],
     "intent": "false_positive"
   },

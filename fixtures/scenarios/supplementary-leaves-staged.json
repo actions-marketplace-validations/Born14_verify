@@ -317,7 +317,8 @@
     "tags": [
       "serialization",
       "circular_reference",
-      "SER-07"
+      "SER-07",
+      "aspirational"
     ],
     "rationale": "Uncaught circular ref throws TypeError — endpoint crashes, no response",
     "intent": "false_positive"
@@ -380,7 +381,8 @@
     "tags": [
       "interaction",
       "http_db",
-      "I-04"
+      "I-04",
+      "aspirational"
     ],
     "rationale": "HTTP returns hardcoded items (passes), but DB column renamed (fails) — stale response masks schema change",
     "intent": "false_positive"
@@ -416,7 +418,8 @@
     "tags": [
       "interaction",
       "http_db",
-      "I-04"
+      "I-04",
+      "aspirational"
     ],
     "rationale": "HTTP still serves data (cached/hardcoded), DB column renamed — cross-surface divergence",
     "intent": "false_positive"
@@ -651,7 +654,8 @@
     "tags": [
       "interaction",
       "http_db_timing",
-      "I-14"
+      "I-14",
+      "aspirational"
     ],
     "rationale": "HTTP passes (health unaffected), DB fails (column renamed from value to payload)",
     "intent": "false_positive"
@@ -683,7 +687,8 @@
     "tags": [
       "interaction",
       "css_invariant",
-      "I-15"
+      "I-15",
+      "aspirational"
     ],
     "rationale": "CSS predicate passes (display: block), but content predicate expects display: none — side effect of CSS change",
     "intent": "false_positive"

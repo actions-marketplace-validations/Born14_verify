@@ -218,7 +218,8 @@
     "tags": [
       "db",
       "partial_index",
-      "D-26"
+      "D-26",
+      "aspirational"
     ],
     "rationale": "Expression index LOWER(email) does not create a column called lower_email",
     "intent": "false_positive"
@@ -633,7 +634,8 @@
     "tags": [
       "db",
       "row_count",
-      "D-13"
+      "D-13",
+      "aspirational"
     ],
     "rationale": "row_count is not a supported assertion type (only table_exists, column_exists, column_type)",
     "intent": "false_positive"
@@ -676,7 +678,8 @@
     "tags": [
       "db",
       "row_value",
-      "D-14"
+      "D-14",
+      "aspirational"
     ],
     "rationale": "row_value is not a supported assertion — only schema-level checks supported",
     "intent": "false_positive"
@@ -742,7 +745,8 @@
     "tags": [
       "db",
       "sequence",
-      "D-15"
+      "D-15",
+      "aspirational"
     ],
     "rationale": "SERIAL is declared type in init.sql — grounding matches literal type string, not underlying INTEGER",
     "intent": "false_positive"
@@ -935,7 +939,8 @@
     "tags": [
       "db",
       "float_precision",
-      "D-34"
+      "D-34",
+      "aspirational"
     ],
     "rationale": "Column is NUMERIC(3,2) not FLOAT — precision type mismatch",
     "intent": "false_positive"
@@ -963,7 +968,8 @@
     "tags": [
       "db",
       "float_precision",
-      "D-34"
+      "D-34",
+      "aspirational"
     ],
     "rationale": "DOUBLE PRECISION is not REAL — different precision levels",
     "intent": "false_positive"
@@ -2163,7 +2169,8 @@
     "tags": [
       "db",
       "prepared_stmt",
-      "D-52"
+      "D-52",
+      "aspirational"
     ],
     "rationale": "Declared type is VARCHAR(50) — \"VARCHAR\" without length does not match exactly",
     "intent": "false_positive"
@@ -2185,7 +2192,8 @@
     "tags": [
       "db",
       "prepared_stmt",
-      "D-52"
+      "D-52",
+      "aspirational"
     ],
     "rationale": "init.sql declares VARCHAR(255) — canonical form CHARACTER VARYING does not match literal",
     "intent": "false_positive"
@@ -2433,7 +2441,8 @@
     "tags": [
       "db",
       "constraint_deferral",
-      "D-56"
+      "D-56",
+      "aspirational"
     ],
     "rationale": "Constraint name is not a column — uq_token is a named constraint, not a column",
     "intent": "false_positive"

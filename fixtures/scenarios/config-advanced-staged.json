@@ -56,7 +56,8 @@
     "tags": [
       "config",
       "feature_flag_env_diff",
-      "CFG-03"
+      "CFG-03",
+      "aspirational"
     ],
     "intent": "false_positive"
   },

@@ -147,7 +147,8 @@
     "tags": [
       "http",
       "cookie_handling",
-      "P-14"
+      "P-14",
+      "aspirational"
     ],
     "rationale": "Step 2 expects cookie-dependent body; \"session_cookie_value\" not in source",
     "intent": "false_positive"
@@ -218,7 +219,8 @@
     "tags": [
       "http",
       "step_dependency_leakage",
-      "P-31"
+      "P-31",
+      "aspirational"
     ],
     "rationale": "\"planted_data\" only exists in step 1 POST body; items endpoint never returns it",
     "intent": "false_positive"
@@ -302,7 +304,8 @@
     "tags": [
       "http",
       "step_dependency_leakage",
-      "P-31"
+      "P-31",
+      "aspirational"
     ],
     "rationale": "Items endpoint is static; \"create_item\" never appears — leaked assumption from step 1",
     "intent": "false_positive"
@@ -378,7 +381,8 @@
     "tags": [
       "http",
       "variable_collision",
-      "P-32"
+      "P-32",
+      "aspirational"
     ],
     "rationale": "Counter value 5 is runtime-dependent; literal \"5\" not deterministically in source",
     "intent": "false_positive"
@@ -516,7 +520,8 @@
     "tags": [
       "http",
       "auth_state_leakage",
-      "P-33"
+      "P-33",
+      "aspirational"
     ],
     "rationale": "Source computes auth dynamically; literal \"authed\":true not in source string",
     "intent": "false_positive"
@@ -1959,7 +1964,8 @@
     "tags": [
       "http",
       "truncated_stream",
-      "P-47"
+      "P-47",
+      "aspirational"
     ],
     "rationale": "Edit removes Beta from response; \"Beta\" no longer in replace content",
     "intent": "false_positive"
@@ -2700,7 +2706,8 @@
       "http",
       "sequence",
       "cross_cutting",
-      "P-27"
+      "P-27",
+      "aspirational"
     ],
     "rationale": "\"secret_data\" not in source — step 2 body claim fabricated",
     "intent": "false_positive"
@@ -2775,7 +2782,8 @@
     "tags": [
       "http",
       "regex_validation",
-      "P-28"
+      "P-28",
+      "aspirational"
     ],
     "rationale": "Health has no timestamp field; regex cannot match source",
     "intent": "false_positive"

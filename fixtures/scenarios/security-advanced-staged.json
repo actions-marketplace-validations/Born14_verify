@@ -72,7 +72,8 @@
     "tags": [
       "security",
       "sql_injection",
-      "SEC-02"
+      "SEC-02",
+      "aspirational"
     ],
     "intent": "false_positive"
   },

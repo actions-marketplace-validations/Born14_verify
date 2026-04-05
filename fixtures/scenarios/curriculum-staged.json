@@ -70,7 +70,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-22"
+      "C-22",
+      "aspirational"
     ],
     "rationale": "The 'flex-basis' property is implicitly '0' when omitted after 'flex-shrink', but the original 'auto' was expected. This is a subtle failure where the predicate expects the original implicit value, but the edit changes it.",
     "intent": "false_positive"
@@ -95,7 +96,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-22"
+      "C-22",
+      "aspirational"
     ],
     "rationale": "The 'flex-basis' property was incorrectly changed from 'auto' to '0', leading to a mismatch with the expected value.",
     "intent": "false_positive"
@@ -190,7 +192,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-23"
+      "C-23",
+      "aspirational"
     ],
     "rationale": "The 'grid-template-columns' property was incorrectly changed from 'auto auto' to '100px', leading to a mismatch with the expected value.",
     "intent": "false_positive"
@@ -328,7 +331,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-26"
+      "C-26",
+      "aspirational"
     ],
     "rationale": "The 'list-style-type' property was incorrectly changed from 'square' to 'circle', leading to a mismatch with the expected value.",
     "intent": "false_positive"
@@ -434,7 +438,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-27"
+      "C-27",
+      "aspirational"
     ],
     "rationale": "The 'text-decoration-style' property was incorrectly changed from 'wavy' to 'solid', leading to a mismatch with the expected value.",
     "intent": "false_positive"
@@ -543,7 +548,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-29"
+      "C-29",
+      "aspirational"
     ],
     "rationale": "The 'overflow-y' property is missing after the edit, leading to a default value that does not match the original shorthand's implied value.",
     "intent": "false_positive"
@@ -568,7 +574,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-29"
+      "C-29",
+      "aspirational"
     ],
     "rationale": "The 'overflow-y' property was incorrectly changed from 'hidden' to 'scroll', leading to a mismatch with the expected value.",
     "intent": "false_positive"
@@ -789,7 +796,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-65"
+      "C-65",
+      "aspirational"
     ],
     "rationale": "A custom property with <color> syntax should not accept '100px' as a valid value. The property should fall back to its initial value or be invalid.",
     "intent": "false_positive"
@@ -909,7 +917,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-66"
+      "C-66",
+      "aspirational"
     ],
     "rationale": "The 'subgrid' keyword is a transformation instruction; the computed value should be the actual track definition, not the keyword itself.",
     "intent": "false_positive"
@@ -969,7 +978,8 @@
     ],
     "expectedSuccess": false,
     "tags": [
-      "C-66"
+      "C-66",
+      "aspirational"
     ],
     "rationale": "The child's 'subgrid' should update, so it should not match the previous parent's track definition.",
     "intent": "false_positive"

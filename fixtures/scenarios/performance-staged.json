@@ -365,7 +365,8 @@
     "tags": [
       "performance",
       "dom_depth",
-      "threshold_fail"
+      "threshold_fail",
+      "aspirational"
     ],
     "rationale": "strict 3-level depth threshold fails",
     "intent": "false_positive"

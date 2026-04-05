@@ -128,7 +128,8 @@
     "tags": [
       "observer_effect",
       "debug_mode_side_effect",
-      "OE-03"
+      "OE-03",
+      "aspirational"
     ],
     "rationale": "DEBUG=true changes response shape (array vs object wrapper) — tests written in debug mode silently fail in production.",
     "intent": "false_positive"
@@ -501,7 +502,8 @@
     "tags": [
       "observer_effect",
       "introspection_lock",
-      "OE-08"
+      "OE-08",
+      "aspirational"
     ],
     "rationale": "Schema introspection acquires ACCESS EXCLUSIVE lock — all concurrent INSERTs/UPDATEs block until observation completes.",
     "intent": "false_positive"
@@ -529,7 +531,8 @@
     "tags": [
       "observer_effect",
       "introspection_lock",
-      "OE-08"
+      "OE-08",
+      "aspirational"
     ],
     "rationale": "ANALYZE in health probe updates table statistics — observation changes query planner decisions for subsequent queries.",
     "intent": "false_positive"
@@ -630,7 +633,8 @@
     "tags": [
       "observer_effect",
       "pool_exhaustion",
-      "OE-09"
+      "OE-09",
+      "aspirational"
     ],
     "rationale": "New connection per health check with no close — monitoring probe accumulates connections until OS limit hit.",
     "intent": "false_positive"
@@ -840,7 +844,8 @@
     "tags": [
       "observer_effect",
       "versioning_header",
-      "OE-11"
+      "OE-11",
+      "aspirational"
     ],
     "rationale": "Monitoring tool without X-API-Version header hits v1, while frontend sends v2 — probe validates different business logic than users experience.",
     "intent": "false_positive"

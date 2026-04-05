@@ -122,7 +122,8 @@
     "tags": [
       "concurrency",
       "read_write_race",
-      "CO-03"
+      "CO-03",
+      "aspirational"
     ],
     "rationale": "Shared mutable counter without atomic increment — concurrent requests read stale value, counter under-counts.",
     "intent": "false_positive"
@@ -518,7 +519,8 @@
     "tags": [
       "concurrency",
       "double_submit",
-      "CO-07"
+      "CO-07",
+      "aspirational"
     ],
     "rationale": "No idempotency key on POST — network retry or user double-click creates duplicate posts with identical content.",
     "intent": "false_positive"
@@ -546,7 +548,8 @@
     "tags": [
       "concurrency",
       "double_submit",
-      "CO-07"
+      "CO-07",
+      "aspirational"
     ],
     "rationale": "No CSRF token and no idempotency key — replayed form submission charges customer twice.",
     "intent": "false_positive"
@@ -621,7 +624,8 @@
     "tags": [
       "concurrency",
       "concurrent_migration",
-      "CO-08"
+      "CO-08",
+      "aspirational"
     ],
     "rationale": "No advisory lock on migration — two daemon instances apply same DDL concurrently, risking partial schema state or constraint errors.",
     "intent": "false_positive"
@@ -655,7 +659,8 @@
     "tags": [
       "concurrency",
       "concurrent_migration",
-      "CO-08"
+      "CO-08",
+      "aspirational"
     ],
     "rationale": "CREATE INDEX without CONCURRENTLY acquires SHARE lock — all INSERTs/UPDATEs to posts table block during index build.",
     "intent": "false_positive"
@@ -759,7 +764,8 @@
     "tags": [
       "concurrency",
       "session_corruption",
-      "CO-10"
+      "CO-10",
+      "aspirational"
     ],
     "rationale": "Removed UNIQUE on token — token rotation during concurrent request means two requests authenticate with different tokens for same session, one gets rejected.",
     "intent": "false_positive"
@@ -832,7 +838,8 @@
     "tags": [
       "concurrency",
       "event_ordering",
-      "CO-11"
+      "CO-11",
+      "aspirational"
     ],
     "rationale": "Events use SERIAL id and TIMESTAMP — concurrent inserts can produce id=5 at t=100ms and id=4 at t=101ms. Consumers sorting by id or timestamp get wrong order.",
     "intent": "false_positive"
@@ -866,7 +873,8 @@
     "tags": [
       "concurrency",
       "event_ordering",
-      "CO-11"
+      "CO-11",
+      "aspirational"
     ],
     "rationale": "Concurrent webhook delivery reorders events — consumer processes \"updated\" before \"created\", applying update to non-existent entity.",
     "intent": "false_positive"

@@ -48,7 +48,8 @@
     "tags": [
       "a11y",
       "missing_label",
-      "A11Y-01"
+      "A11Y-01",
+      "aspirational"
     ],
     "intent": "false_positive"
   },

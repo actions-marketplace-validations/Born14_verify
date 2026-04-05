@@ -221,7 +221,8 @@
       "html",
       "rtl",
       "bidi",
-      "H-28"
+      "H-28",
+      "aspirational"
     ],
     "rationale": "Arabic text added but dir attribute missing — attribute selector fails.",
     "intent": "false_positive"
@@ -286,7 +287,8 @@
       "html",
       "shadow-dom",
       "web-components",
-      "H-33"
+      "H-33",
+      "aspirational"
     ],
     "rationale": "Shadow-internal .inner-badge is not queryable from light DOM — html gate fails.",
     "intent": "false_positive"
@@ -383,7 +385,8 @@
       "html",
       "hydration",
       "ssr",
-      "H-41"
+      "H-41",
+      "aspirational"
     ],
     "rationale": "SSR sends data-hydrate=\"v2\" but predicate expects v1 — attribute mismatch.",
     "intent": "false_positive"
@@ -512,7 +515,8 @@
       "html",
       "conditional",
       "rendering",
-      "H-42"
+      "H-42",
+      "aspirational"
     ],
     "rationale": "Admin panel only injected when hash is #admin — not in static HTML.",
     "intent": "false_positive"
@@ -647,7 +651,8 @@
       "html",
       "meta",
       "og",
-      "H-43"
+      "H-43",
+      "aspirational"
     ],
     "rationale": "og:type is \"website\" but predicate expects \"article\" — attribute mismatch.",
     "intent": "false_positive"
@@ -953,7 +958,8 @@
       "html",
       "a11y",
       "aria",
-      "H-45"
+      "H-45",
+      "aspirational"
     ],
     "rationale": "Button has no aria-expanded attribute — attribute selector fails.",
     "intent": "false_positive"
@@ -1082,7 +1088,8 @@
       "html",
       "iframe",
       "cross-origin",
-      "H-46"
+      "H-46",
+      "aspirational"
     ],
     "rationale": "Iframe src is about:blank but predicate expects https://example.com.",
     "intent": "false_positive"
@@ -1225,7 +1232,8 @@
       "html",
       "picture",
       "srcset",
-      "H-47"
+      "H-47",
+      "aspirational"
     ],
     "rationale": "Logo img has no srcset attribute — attribute selector fails.",
     "intent": "false_positive"
@@ -1329,7 +1337,8 @@
       "html",
       "dialog",
       "state",
-      "H-48"
+      "H-48",
+      "aspirational"
     ],
     "rationale": "Dialog has no open attribute — open state assertion fails.",
     "intent": "false_positive"

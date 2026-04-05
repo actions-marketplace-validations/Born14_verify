@@ -129,7 +129,8 @@
       "harvest",
       "edit_failure",
       "partial",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Truncated search matches but replacement corrupts the line",
     "intent": "false_positive"
@@ -563,7 +564,8 @@
       "harvest",
       "build_failure",
       "base_image",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Base image does not exist in registry — docker build fails at FROM",
     "intent": "false_positive"
@@ -590,7 +592,8 @@
       "harvest",
       "build_failure",
       "base_image",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Empty FROM directive — Dockerfile parse error",
     "intent": "false_positive"
@@ -617,7 +620,8 @@
       "harvest",
       "build_failure",
       "base_image",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "scratch has no node binary — CMD [\"node\", \"server.js\"] will fail",
     "intent": "false_positive"
@@ -644,7 +648,8 @@
       "harvest",
       "build_failure",
       "copy",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "app.js does not exist in build context — COPY fails",
     "intent": "false_positive"
@@ -671,7 +676,8 @@
       "harvest",
       "build_failure",
       "copy",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Cannot COPY directory onto a file path",
     "intent": "false_positive"
@@ -725,7 +731,8 @@
       "harvest",
       "build_failure",
       "syntax",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "EXPOS is not a valid Dockerfile instruction",
     "intent": "false_positive"
@@ -752,7 +759,8 @@
       "harvest",
       "build_failure",
       "syntax",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Shell syntax error in RUN — build fails",
     "intent": "false_positive"
@@ -779,7 +787,8 @@
       "harvest",
       "build_failure",
       "healthcheck",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "App listens on 3000 but healthcheck probes 9999 — health fails",
     "intent": "false_positive"
@@ -806,7 +815,8 @@
       "harvest",
       "build_failure",
       "healthcheck",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "No /nonexistent endpoint — healthcheck fails",
     "intent": "false_positive"
@@ -860,7 +870,8 @@
       "harvest",
       "build_failure",
       "entrypoint",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "app.js does not exist — container starts but crashes immediately",
     "intent": "false_positive"
@@ -887,7 +898,8 @@
       "harvest",
       "build_failure",
       "entrypoint",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "python3 not installed in node:alpine — container crashes",
     "intent": "false_positive"
@@ -941,7 +953,8 @@
       "harvest",
       "build_failure",
       "compose",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Build context directory does not exist — compose build fails",
     "intent": "false_positive"
@@ -968,7 +981,8 @@
       "harvest",
       "build_failure",
       "compose",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Duplicate key \"app\" in YAML — compose parse error",
     "intent": "false_positive"
@@ -995,7 +1009,8 @@
       "harvest",
       "build_failure",
       "compose",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Port 80 may be in use or require privileges — bind failure",
     "intent": "false_positive"
@@ -1022,7 +1037,8 @@
       "harvest",
       "build_failure",
       "multistage",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "No \"builder\" stage defined — COPY --from fails",
     "intent": "false_positive"
@@ -1049,7 +1065,8 @@
       "harvest",
       "build_failure",
       "dependency",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "No package.json in build context — npm install fails",
     "intent": "false_positive"
@@ -1255,7 +1272,8 @@
       "harvest",
       "health_check",
       "crash",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Uncaught exception on health check — process crashes or returns 500",
     "intent": "false_positive"
@@ -1315,7 +1333,8 @@
       "harvest",
       "health_check",
       "port",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "App listens on 9999 but compose maps 3000 — connection refused",
     "intent": "false_positive"
@@ -1372,7 +1391,8 @@
       "harvest",
       "health_check",
       "config",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "1ms timeout — no HTTP request can complete in time",
     "intent": "false_positive"
@@ -1399,7 +1419,8 @@
       "harvest",
       "health_check",
       "config",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "node:alpine has wget not curl — healthcheck command fails",
     "intent": "false_positive"
@@ -1426,7 +1447,8 @@
       "harvest",
       "health_check",
       "config",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Zero retries — first failure marks container as unhealthy permanently",
     "intent": "false_positive"
@@ -1483,7 +1505,8 @@
       "harvest",
       "health_check",
       "partial",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Health fine, homepage h1 emptied — HTML content predicate fails",
     "intent": "false_positive"
@@ -1747,7 +1770,8 @@
       "harvest",
       "cascade_failure",
       "shared_state",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "PORT renamed to SERVER_PORT but server.listen(PORT) still references old name — crash",
     "intent": "false_positive"
@@ -1774,7 +1798,8 @@
       "harvest",
       "cascade_failure",
       "html_structure",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "Unclosed <div> may swallow the nav element depending on parser behavior",
     "intent": "false_positive"
@@ -1863,7 +1888,8 @@
       "harvest",
       "cascade_failure",
       "dependency_chain",
-      "should_fail"
+      "should_fail",
+      "aspirational"
     ],
     "rationale": "http module not imported — http.createServer throws ReferenceError, app crashes",
     "intent": "false_positive"

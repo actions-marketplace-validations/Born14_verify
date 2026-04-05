@@ -20,7 +20,8 @@
     "tags": [
       "filesystem-advanced",
       "empty-file",
-      "FS-06"
+      "FS-06",
+      "aspirational"
     ],
     "rationale": "Removing the first line leaves server.js missing the require. The content pattern no longer matches.",
     "expectedFailedGate": "grounding",
@@ -47,7 +48,8 @@
     "tags": [
       "filesystem-advanced",
       "empty-file",
-      "FS-06"
+      "FS-06",
+      "aspirational"
     ],
     "rationale": "Config truncated to just \"{\". The pattern \"Demo App\" no longer exists in the file.",
     "expectedFailedGate": "grounding",
@@ -363,7 +365,8 @@
     "tags": [
       "filesystem-advanced",
       "timestamp",
-      "FS-28"
+      "FS-28",
+      "aspirational"
     ],
     "rationale": "Port changed from 3000 to 8080 via edit. Old content pattern no longer matches.",
     "expectedFailedGate": "grounding",
@@ -416,7 +419,8 @@
     "tags": [
       "filesystem-advanced",
       "truncated",
-      "FS-29"
+      "FS-29",
+      "aspirational"
     ],
     "rationale": "HTML output truncated — </body></html> removed. Content predicate for </html> fails.",
     "expectedFailedGate": "grounding",
@@ -443,7 +447,8 @@
     "tags": [
       "filesystem-advanced",
       "truncated",
-      "FS-29"
+      "FS-29",
+      "aspirational"
     ],
     "rationale": "Settings table definition truncated mid-way. The JSONB column no longer exists in source.",
     "expectedFailedGate": "grounding",
@@ -531,7 +536,8 @@
     "tags": [
       "filesystem-advanced",
       "race-condition",
-      "FS-31"
+      "FS-31",
+      "aspirational"
     ],
     "rationale": "Edit changes port from 3000 to 4000. Predicate expects the old value — race between intent and state.",
     "expectedFailedGate": "grounding",
@@ -610,7 +616,8 @@
     "tags": [
       "filesystem-advanced",
       "file-identity",
-      "FS-33"
+      "FS-33",
+      "aspirational"
     ],
     "rationale": "File fully replaced. Old \"darkMode\" key no longer exists in the new content.",
     "expectedFailedGate": "grounding",
@@ -657,7 +664,8 @@
     "tags": [
       "filesystem-advanced",
       "build-mismatch",
-      "FS-35"
+      "FS-35",
+      "aspirational"
     ],
     "rationale": "Dockerfile now references app.js instead of server.js. Predicate expects old COPY target.",
     "expectedFailedGate": "grounding",
@@ -710,7 +718,8 @@
     "tags": [
       "filesystem-advanced",
       "stale-generated",
-      "FS-36"
+      "FS-36",
+      "aspirational"
     ],
     "rationale": "Source title changed to \"Updated App\". Predicate expects old \"Demo App\" title — stale expectation.",
     "expectedFailedGate": "grounding",
@@ -763,7 +772,8 @@
     "tags": [
       "filesystem-advanced",
       "stale-generated",
-      "FS-36"
+      "FS-36",
+      "aspirational"
     ],
     "rationale": "Dockerfile CMD changed from server.js to app.js. Predicate expects old CMD.",
     "expectedFailedGate": "grounding",

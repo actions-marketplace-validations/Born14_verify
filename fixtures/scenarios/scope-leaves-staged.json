@@ -171,7 +171,8 @@
     "tags": [
       "scope",
       "migration_collateral",
-      "SC-03"
+      "SC-03",
+      "aspirational"
     ],
     "rationale": "Renaming username->user_name and email->email_address breaks all app queries, views, and indexes referencing the old column names — blast radius extends to entire codebase.",
     "intent": "false_positive"
@@ -234,7 +235,8 @@
     "tags": [
       "scope",
       "env_cascading",
-      "SC-04"
+      "SC-04",
+      "aspirational"
     ],
     "rationale": "Changing DATABASE_URL host/port/dbname — affects app server, migration runner, backup scheduler, and any service reading this variable.",
     "intent": "false_positive"
@@ -262,7 +264,8 @@
     "tags": [
       "scope",
       "env_cascading",
-      "SC-04"
+      "SC-04",
+      "aspirational"
     ],
     "rationale": "Rotating SECRET_KEY without session migration — all existing signed sessions/tokens become invalid, every logged-in user force-logged-out.",
     "intent": "false_positive"
@@ -336,7 +339,8 @@
     "tags": [
       "scope",
       "port_cascading",
-      "SC-05"
+      "SC-05",
+      "aspirational"
     ],
     "rationale": "Port changed to 4000 in .env and server.js but Dockerfile still EXPOSE 3000 and healthcheck still hits :3000 — container fails health check, Docker restarts it indefinitely.",
     "intent": "false_positive"
@@ -375,7 +379,8 @@
     "tags": [
       "scope",
       "port_cascading",
-      "SC-05"
+      "SC-05",
+      "aspirational"
     ],
     "rationale": "App listens on 8080 but compose maps host:3000->container:3000 — incoming traffic hits empty port, app unreachable.",
     "intent": "false_positive"
@@ -543,7 +548,8 @@
     "tags": [
       "scope",
       "package_cascade",
-      "SC-08"
+      "SC-08",
+      "aspirational"
     ],
     "rationale": "Upgrading from Node 20 to 22 in Dockerfile — native modules (bcrypt, canvas, etc.) require rebuild, may not support new V8 ABI, cascading build failures.",
     "intent": "false_positive"
@@ -571,7 +577,8 @@
     "tags": [
       "scope",
       "package_cascade",
-      "SC-08"
+      "SC-08",
+      "aspirational"
     ],
     "rationale": "Switching from Alpine (musl) to Bookworm (glibc) — all pre-compiled binaries in node_modules are musl-linked, fail to load on glibc runtime.",
     "intent": "false_positive"
@@ -826,7 +833,8 @@
     "tags": [
       "scope",
       "config_rename_break",
-      "SC-12"
+      "SC-12",
+      "aspirational"
     ],
     "rationale": "Renaming \"port\" to \"listenPort\" — any code reading config.app.port gets undefined, falls back to wrong default or crashes.",
     "intent": "false_positive"
@@ -860,7 +868,8 @@
     "tags": [
       "scope",
       "config_rename_break",
-      "SC-12"
+      "SC-12",
+      "aspirational"
     ],
     "rationale": "camelCase to snake_case rename — all JavaScript code reading features.darkMode gets undefined, feature silently disabled for all users.",
     "intent": "false_positive"

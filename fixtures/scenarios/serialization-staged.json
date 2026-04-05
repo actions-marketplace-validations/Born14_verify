@@ -72,7 +72,8 @@
     "expectedSuccess": true,
     "tags": [
       "serialization",
-      "invalid_json"
+      "invalid_json",
+      "aspirational"
     ],
     "rationale": "Serialization gate reads ctx.config.appDir (original), not stageDir — edit in staging has no effect on validation, original config.json is valid JSON",
     "intent": "false_negative"
@@ -335,7 +336,8 @@
     "expectedSuccess": true,
     "tags": [
       "serialization",
-      "edit_then_validate"
+      "edit_then_validate",
+      "aspirational"
     ],
     "rationale": "Serialization gate reads ctx.config.appDir (original), not stageDir. Original config.json has app.name=Demo App, so subset check for Demo App passes.",
     "intent": "false_negative"

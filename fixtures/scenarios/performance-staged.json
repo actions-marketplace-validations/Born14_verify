@@ -284,7 +284,8 @@
     "tags": [
       "performance",
       "bundle_size",
-      "threshold_pass"
+      "threshold_pass",
+      "aspirational"
     ],
     "rationale": "generous 1KB threshold passes",
     "intent": "false_negative"
@@ -646,7 +647,8 @@
     "tags": [
       "performance",
       "unminified_assets",
-      "edge_case"
+      "edge_case",
+      "aspirational"
     ],
     "rationale": "inline CSS is not externally minifiable",
     "intent": "false_negative"

@@ -97,6 +97,17 @@ export function classifyFinding(finding: ScanFinding): FindingClassification {
     return { confidence: 'low', reason: 'GC-652: access gate on type definition', shape: 'GC-652' };
   }
 
+  // GC-653: Access gate on config/infra files — not runtime code
+  // .gitignore, .dockerignore, package.json, workflow files
+  if (gate === 'access' && (
+    file.endsWith('.gitignore') || file.endsWith('.dockerignore') ||
+    file === 'package.json' || file.endsWith('/package.json') ||
+    file.includes('.github/workflows/') ||
+    file.endsWith('.yml') && file.includes('.github/')
+  )) {
+    return { confidence: 'low', reason: 'GC-653: access gate on config/infra file', shape: 'GC-653' };
+  }
+
   // Doc files rarely have real issues (docs show examples, not production code)
   if (isDocFile(file)) {
     return { confidence: 'low', reason: 'finding in documentation file — likely example code' };

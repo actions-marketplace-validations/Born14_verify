@@ -202,7 +202,7 @@ function deserialize(s: SerializedScenario, appDir: string): VerifyScenario {
     config: {
       appDir,
       gates,
-      ...(s.seedConstraints ? { constraints: s.seedConstraints } : {}),
+      ...((s as any).seedConstraints ? { constraints: (s as any).seedConstraints } : {}),
     },
     invariants,
     requiresDocker: s.requiresDocker,

@@ -538,6 +538,13 @@ export function validateAgainstGrounding<T extends {
           if (!editCreatesFile) {
             return { ...p, groundingMiss: true, groundingReason: `File "${p.file}" does not exist in app directory` };
           }
+          // File will be created by edit — check if post-edit content contains the pattern
+          const normalizedPattern = p.pattern.replace(/\r\n/g, '\n');
+          const fileEdits = opts.edits?.filter(e => e.file === p.file) ?? [];
+          const postEditContent = fileEdits.map(e => e.replace.replace(/\r\n/g, '\n')).join('\n');
+          if (postEditContent && !postEditContent.includes(normalizedPattern)) {
+            return { ...p, groundingMiss: true, groundingReason: `New file "${p.file}" will not contain pattern "${p.pattern}" after edit` };
+          }
         }
       } catch { /* read error — don't reject */ }
     }

@@ -23,6 +23,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "build:action": "esbuild src/action/index.ts --bundle --platform=node --target=node20 --outfile=dist/action/index.js --external:fs --external:path --external:os --external:child_process --external:zlib --external:url --external:crypto",
     "prepublishOnly": "npm run build",
     "test": "bun test tests/",
     "test:unit": "bun test tests/unit/",
@@ -79,6 +80,7 @@
   ],
   "devDependencies": {
     "@types/bun": "latest",
+    "esbuild": "^0.28.0",
     "typescript": "^5.9.3"
   }
 }

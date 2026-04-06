@@ -139,11 +139,29 @@ function scanSQLInjection(files: Array<{ relativePath: string; content: string }
 function scanSecrets(files: Array<{ relativePath: string; content: string }>): SecurityFinding[] {
   const findings: SecurityFinding[] = [];
   const patterns = [
+    // 649a: Variable name patterns (SCREAMING_SNAKE + camelCase)
     { regex: /(?:password|passwd|pwd)\s*[:=]\s*['"][^'"]{4,}['"]/gi, detail: 'Hardcoded password' },
-    { regex: /(?:api_key|apikey|api_secret)\s*[:=]\s*['"][^'"]{8,}['"]/gi, detail: 'Hardcoded API key' },
-    { regex: /(?:secret|token)\s*[:=]\s*['"][A-Za-z0-9+/=]{20,}['"]/gi, detail: 'Hardcoded secret/token' },
+    { regex: /(?:api_key|apikey|api_secret|API_KEY|API_SECRET)\s*[:=]\s*['"][^'"]{8,}['"]/gi, detail: 'Hardcoded API key' },
+    { regex: /(?:secret|token|SECRET|TOKEN)\s*[:=]\s*['"][A-Za-z0-9+/=_-]{20,}['"]/gi, detail: 'Hardcoded secret/token' },
     { regex: /(?:AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)\s*=\s*['"]?[A-Z0-9]{16,}['"]?/g, detail: 'Hardcoded AWS credential' },
-    { regex: /-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----/g, detail: 'Private key in source code' },
+    { regex: /(?:secretKey|apiKey|privateKey|accessToken|authToken|dbPassword|masterKey|signingKey)\s*[:=]\s*['"][^'"]{4,}['"]/g, detail: 'Hardcoded secret (camelCase name)' },
+    { regex: /(?:OPENAI_API_KEY|STRIPE_SECRET|STRIPE_KEY|GITHUB_TOKEN|SLACK_TOKEN|ANTHROPIC_API_KEY|GEMINI_API_KEY)\s*[:=]\s*['"][^'"]{4,}['"]/g, detail: 'Hardcoded provider API key' },
+
+    // 649b: Value prefix patterns (catches secrets regardless of variable name)
+    { regex: /['"]sk-[A-Za-z0-9]{20,}['"]/g, detail: 'OpenAI API key prefix (sk-)' },
+    { regex: /['"]sk_(?:live|test)_[A-Za-z0-9]{20,}['"]/g, detail: 'Stripe API key prefix (sk_live_/sk_test_)' },
+    { regex: /['"]AIzaSy[A-Za-z0-9_-]{30,}['"]/g, detail: 'Google API key prefix (AIzaSy)' },
+    { regex: /['"]ghp_[A-Za-z0-9]{30,}['"]/g, detail: 'GitHub personal access token (ghp_)' },
+    { regex: /['"]gho_[A-Za-z0-9]{30,}['"]/g, detail: 'GitHub OAuth token (gho_)' },
+    { regex: /['"]github_pat_[A-Za-z0-9_]{30,}['"]/g, detail: 'GitHub fine-grained token (github_pat_)' },
+    { regex: /['"]AKIA[A-Z0-9]{12,}['"]/g, detail: 'AWS access key ID prefix (AKIA)' },
+    { regex: /['"]xoxb-[A-Za-z0-9-]{20,}['"]/g, detail: 'Slack bot token (xoxb-)' },
+    { regex: /['"]xoxp-[A-Za-z0-9-]{20,}['"]/g, detail: 'Slack user token (xoxp-)' },
+    { regex: /['"]sk-ant-[A-Za-z0-9-]{20,}['"]/g, detail: 'Anthropic API key prefix (sk-ant-)' },
+
+    // 649c: Structural value patterns
+    { regex: /-----BEGIN\s+(?:RSA\s+)?(?:PRIVATE|EC)\s+KEY-----/g, detail: 'Private key in source code' },
+    { regex: /['"]eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}['"]/g, detail: 'JWT token in source code (eyJ prefix)' },
     { regex: /process\.env\.(?:SECRET|KEY|TOKEN|PASSWORD|PRIVATE)/gi, detail: 'Sensitive env var accessed in code (potential exposure)' },
   ];
 

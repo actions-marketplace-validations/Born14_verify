@@ -4476,7 +4476,11 @@ function runSecurityGate(ctx) {
     };
   }
   const scanDir = ctx.stageDir ?? ctx.config.appDir;
-  const sourceFiles = readSourceFiles(scanDir);
+  let sourceFiles = readSourceFiles(scanDir);
+  if (ctx.edits.length > 0) {
+    const editedFiles = new Set(ctx.edits.map((e) => e.file));
+    sourceFiles = sourceFiles.filter((f) => editedFiles.has(f.relativePath));
+  }
   const results = [];
   let allPassed = true;
   const details = [];

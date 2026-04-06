@@ -398,7 +398,14 @@ export function runSecurityGate(ctx: GateContext): GateResult & { predicateResul
   }
 
   const scanDir = ctx.stageDir ?? ctx.config.appDir;
-  const sourceFiles = readSourceFiles(scanDir);
+  let sourceFiles = readSourceFiles(scanDir);
+
+  // Scope scan to edited files only — avoids flagging pre-existing issues
+  // in files the PR didn't touch. If no edits, scan everything (full audit mode).
+  if (ctx.edits.length > 0) {
+    const editedFiles = new Set(ctx.edits.map(e => e.file));
+    sourceFiles = sourceFiles.filter(f => editedFiles.has(f.relativePath));
+  }
   const results: PredicateResult[] = [];
   let allPassed = true;
   const details: string[] = [];

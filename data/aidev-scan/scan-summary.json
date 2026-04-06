@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-04-06T22:35:51.708Z",
+  "prsScanned": 100,
+  "prsWithFindings": 14,
+  "findingRate": "14.0%",
+  "gateFireRates": [
+    {
+      "gate": "K5",
+      "ran": 100,
+      "failed": 0,
+      "failRate": "0.0%"
+    },
+    {
+      "gate": "G5",
+      "ran": 100,
+      "failed": 0,
+      "failRate": "0.0%"
+    },
+    {
+      "gate": "access",
+      "ran": 100,
+      "failed": 3,
+      "failRate": "3.0%"
+    },
+    {
+      "gate": "temporal",
+      "ran": 97,
+      "failed": 0,
+      "failRate": "0.0%"
+    },
+    {
+      "gate": "propagation",
+      "ran": 97,
+      "failed": 0,
+      "failRate": "0.0%"
+    },
+    {
+      "gate": "state",
+      "ran": 97,
+      "failed": 0,
+      "failRate": "0.0%"
+    },
+    {
+      "gate": "capacity",
+      "ran": 97,
+      "failed": 6,
+      "failRate": "6.2%"
+    },
+    {
+      "gate": "contention",
+      "ran": 91,
+      "failed": 5,
+      "failRate": "5.5%"
+    },
+    {
+      "gate": "observation",
+      "ran": 86,
+      "failed": 0,
+      "failRate": "0.0%"
+    },
+    {
+      "gate": "triangulation",
+      "ran": 86,
+      "failed": 0,
+      "failRate": "0.0%"
+    }
+  ],
+  "perAgent": {
+    "Devin": {
+      "total": 100,
+      "withFindings": 14
+    }
+  }
+}

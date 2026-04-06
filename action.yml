@@ -1,0 +1,46 @@
+name: 'Verify Agent PR'
+description: 'Deterministic verification of AI agent edits. 26 gates check structural correctness, security, cross-file consistency.'
+author: 'sovereign-labs'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  app-dir:
+    description: 'Path to the application directory (default: repo root)'
+    required: false
+    default: '.'
+  intent:
+    description: 'Enable intent checking — extracts predicates from PR title/description (requires api-key)'
+    required: false
+    default: 'false'
+  api-key:
+    description: 'Gemini API key for intent-level predicate extraction (Tier 3b)'
+    required: false
+  staging:
+    description: 'Enable Docker staging gate (builds and runs the app)'
+    required: false
+    default: 'false'
+  fail-on:
+    description: 'Which severity fails the check: "error" (default), "warning", or "none"'
+    required: false
+    default: 'error'
+  comment:
+    description: 'Post results as a PR comment (default: true)'
+    required: false
+    default: 'true'
+
+outputs:
+  success:
+    description: 'Whether all gates passed (true/false)'
+  gates-passed:
+    description: 'Comma-separated list of passed gate names'
+  gates-failed:
+    description: 'Comma-separated list of failed gate names'
+  summary:
+    description: 'One-line summary of results'
+
+runs:
+  using: 'node20'
+  main: 'dist/action/index.js'

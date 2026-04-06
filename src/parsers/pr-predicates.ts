@@ -109,6 +109,32 @@ export function extractDiffPredicates(edits: Edit[]): Predicate[] {
     }
   }
 
+  // Auto-generate security predicates for code files
+  // This ensures the security gate always scans edited code files
+  const codeExts = new Set(['.js', '.ts', '.jsx', '.tsx', '.mjs', '.cjs', '.py', '.rb', '.php']);
+  const codeFiles = [...new Set(edits.map(e => e.file))].filter(f => codeExts.has('.' + f.split('.').pop()));
+  if (codeFiles.length > 0) {
+    // Add a broad security scan predicate — the gate will scan all files
+    predicates.push({
+      type: 'security' as any,
+      securityCheck: 'secrets_in_code',
+      expected: 'no_findings',
+      description: 'Auto-scan: no hardcoded secrets in edited code files',
+    } as any);
+    predicates.push({
+      type: 'security' as any,
+      securityCheck: 'xss',
+      expected: 'no_findings',
+      description: 'Auto-scan: no XSS patterns in edited code files',
+    } as any);
+    predicates.push({
+      type: 'security' as any,
+      securityCheck: 'sql_injection',
+      expected: 'no_findings',
+      description: 'Auto-scan: no SQL injection patterns in edited code files',
+    } as any);
+  }
+
   return predicates;
 }
 

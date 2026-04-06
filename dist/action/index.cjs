@@ -574,6 +574,28 @@ function extractDiffPredicates(edits) {
       }
     }
   }
+  const codeExts = /* @__PURE__ */ new Set([".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs", ".py", ".rb", ".php"]);
+  const codeFiles = [...new Set(edits.map((e) => e.file))].filter((f) => codeExts.has("." + f.split(".").pop()));
+  if (codeFiles.length > 0) {
+    predicates.push({
+      type: "security",
+      securityCheck: "secrets_in_code",
+      expected: "no_findings",
+      description: "Auto-scan: no hardcoded secrets in edited code files"
+    });
+    predicates.push({
+      type: "security",
+      securityCheck: "xss",
+      expected: "no_findings",
+      description: "Auto-scan: no XSS patterns in edited code files"
+    });
+    predicates.push({
+      type: "security",
+      securityCheck: "sql_injection",
+      expected: "no_findings",
+      description: "Auto-scan: no SQL injection patterns in edited code files"
+    });
+  }
   return predicates;
 }
 function extractCrossFilePredicates(edits, existingFiles) {

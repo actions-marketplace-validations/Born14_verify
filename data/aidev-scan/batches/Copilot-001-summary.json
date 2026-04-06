@@ -1,0 +1,241 @@
+{
+  "timestamp": "2026-04-06T23:39:04.845Z",
+  "adapter": "aidev-pop",
+  "agent": "Copilot",
+  "batchNumber": 1,
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 78,
+  "findingRate": "15.6%",
+  "highConfidenceRate": "41.0%",
+  "gateStats": {
+    "K5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 500,
+      "failed": 57,
+      "high": 20,
+      "low": 17,
+      "unknown": 20
+    },
+    "temporal": {
+      "ran": 443,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 443,
+      "failed": 7,
+      "high": 2,
+      "low": 1,
+      "unknown": 4
+    },
+    "state": {
+      "ran": 436,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 436,
+      "failed": 3,
+      "high": 3,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 433,
+      "failed": 11,
+      "high": 7,
+      "low": 2,
+      "unknown": 2
+    },
+    "observation": {
+      "ran": 422,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 422,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3151984235",
+      "gate": "access",
+      "file": "src/CommunityToolkit.Aspire.Hosting.Sqlite/CommunityToolkit.Aspire.Hosting.Sqlite.csproj",
+      "detail": "5 error(s), 0 warning(s): 5× path traversal"
+    },
+    {
+      "pr_id": "3080755872",
+      "gate": "access",
+      "file": ".bundle/config",
+      "detail": "11 error(s), 0 warning(s): 10× path traversal, 1× permission escalation"
+    },
+    {
+      "pr_id": "3161674567",
+      "gate": "access",
+      "file": "eng/emitter-package-lock.json",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3194210207",
+      "gate": "access",
+      "file": "sdk/include/opentelemetry/sdk/metrics/meter_context.h",
+      "detail": "19 error(s), 0 warning(s): 19× permission escalation"
+    },
+    {
+      "pr_id": "3082660156",
+      "gate": "access",
+      "file": "engine.Dockerfile",
+      "detail": "13 error(s), 0 warning(s): 13× path traversal"
+    },
+    {
+      "pr_id": "3235069491",
+      "gate": "propagation",
+      "file": "LICENSE",
+      "detail": "60 propagation error(s), 0 warning(s): CSS class \".apps-container\" renamed in website/public/index.h"
+    },
+    {
+      "pr_id": "3090639461",
+      "gate": "contention",
+      "file": "src/VSCode/package-lock.json",
+      "detail": "1 error(s), 0 warning(s): 1× missing transaction"
+    },
+    {
+      "pr_id": "3074614660",
+      "gate": "access",
+      "file": "api/model.cpp",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3138364477",
+      "gate": "access",
+      "file": "eng/pipelines/templates/stages/platform-matrix.json",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "3080743634",
+      "gate": "access",
+      "file": ".chronus/changes/fix-xml-doc-empty-lines.yaml",
+      "detail": "7 error(s), 0 warning(s): 7× path traversal"
+    },
+    {
+      "pr_id": "3113180373",
+      "gate": "access",
+      "file": "yarn.lock",
+      "detail": "1 error(s), 0 warning(s): 1× permission escalation"
+    },
+    {
+      "pr_id": "3259111897",
+      "gate": "access",
+      "file": "features/summary.feature",
+      "detail": "7 error(s), 0 warning(s): 7× path traversal"
+    },
+    {
+      "pr_id": "3145684400",
+      "gate": "propagation",
+      "file": "packages/ui-graphs/src/calculations.ts",
+      "detail": "24 propagation error(s), 0 warning(s): Import path \"./types\" changed to \"../types\" in packages/ui-gr"
+    },
+    {
+      "pr_id": "3151237217",
+      "gate": "access",
+      "file": "global.json",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3226808853",
+      "gate": "access",
+      "file": ".devcontainer/devcontainer.json",
+      "detail": "7 error(s), 0 warning(s): 5× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3206444195",
+      "gate": "access",
+      "file": "examples/c/cloth_simulation.c",
+      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
+    },
+    {
+      "pr_id": "3223503362",
+      "gate": "access",
+      "file": "openmetadata-ui/src/main/resources/ui/src/pages/LogsViewerPage/LogsViewerPage.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3125850603",
+      "gate": "propagation",
+      "file": ".dprint.jsonc",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"../utils\" changed in internal/execute/tsc_test.go"
+    },
+    {
+      "pr_id": "3096902726",
+      "gate": "propagation",
+      "file": "dotCover.Output/css/dotcover.report.css",
+      "detail": "43 propagation error(s), 0 warning(s): CSS class \".vsplitbarmask\" renamed in dotCover.Output/css/dot"
+    },
+    {
+      "pr_id": "3080023392",
+      "gate": "access",
+      "file": "src/Compiler/Symbols/Symbols.fs",
+      "detail": "162 error(s), 0 warning(s): 162× path traversal"
+    },
+    {
+      "pr_id": "3258905127",
+      "gate": "access",
+      "file": "config.yaml",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3207300968",
+      "gate": "access",
+      "file": "scripts/container-upgrade.sh",
+      "detail": "14 error(s), 0 warning(s): 14× path traversal"
+    },
+    {
+      "pr_id": "3197983907",
+      "gate": "access",
+      "file": ".github/policy.rego",
+      "detail": "20 error(s), 0 warning(s): 12× path traversal, 8× permission escalation"
+    },
+    {
+      "pr_id": "3258059378",
+      "gate": "access",
+      "file": "compose.local.yml",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3100789352",
+      "gate": "access",
+      "file": "global.json",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3079967973",
+      "gate": "contention",
+      "file": "l10n/bundle.l10n.json",
+      "detail": "6 error(s), 0 warning(s): 3× race condition, 3× missing transaction"
+    }
+  ]
+}

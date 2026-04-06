@@ -1,0 +1,151 @@
+{
+  "timestamp": "2026-04-06T23:23:31.003Z",
+  "adapter": "aidev-pop",
+  "agent": "Devin",
+  "batchNumber": 1,
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 71,
+  "findingRate": "14.2%",
+  "highConfidenceRate": "57.7%",
+  "gateStats": {
+    "K5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 500,
+      "failed": 20,
+      "high": 5,
+      "low": 7,
+      "unknown": 8
+    },
+    "temporal": {
+      "ran": 480,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 480,
+      "failed": 7,
+      "high": 3,
+      "low": 1,
+      "unknown": 3
+    },
+    "state": {
+      "ran": 473,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 473,
+      "failed": 30,
+      "high": 28,
+      "low": 2,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 443,
+      "failed": 14,
+      "high": 5,
+      "low": 9,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 429,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 429,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "2914424485",
+      "gate": "access",
+      "file": "src/components/tables/HistoryTable.vue",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "2971908072",
+      "gate": "access",
+      "file": "client-admin/app/page.tsx",
+      "detail": "8 error(s), 0 warning(s): 8× path traversal"
+    },
+    {
+      "pr_id": "2768952674",
+      "gate": "access",
+      "file": ".gitignore",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "2805430490",
+      "gate": "propagation",
+      "file": "src/elements/common/makeResponsive.tsx",
+      "detail": "12 propagation error(s), 0 warning(s): Import path \"../common/theming\" changed to \"./ContentExplorer"
+    },
+    {
+      "pr_id": "3094071534",
+      "gate": "access",
+      "file": "package.json",
+      "detail": "6 error(s), 6 warning(s): 6× path traversal"
+    },
+    {
+      "pr_id": "2859527888",
+      "gate": "access",
+      "file": ".github/workflows/multi-compiler.yml",
+      "detail": "4 error(s), 0 warning(s): 4× permission escalation"
+    },
+    {
+      "pr_id": "2928053953",
+      "gate": "propagation",
+      "file": "src/assets/index.ts",
+      "detail": "14 propagation error(s), 0 warning(s): Import path \"./check-small.png\" changed to \"./checkSmall.png\""
+    },
+    {
+      "pr_id": "3136450775",
+      "gate": "access",
+      "file": ".github/workflows/deployment-summary.yml",
+      "detail": "82 error(s), 0 warning(s): 82× path traversal"
+    },
+    {
+      "pr_id": "2770944230",
+      "gate": "access",
+      "file": "extensions/cornerstone/src/index.tsx",
+      "detail": "5 error(s), 3 warning(s): 4× path traversal, 1× environment escalation"
+    },
+    {
+      "pr_id": "3032232141",
+      "gate": "access",
+      "file": "airbyte-ci/connectors/java-dockerfile/.dockerignore",
+      "detail": "7 error(s), 0 warning(s): 7× path traversal"
+    },
+    {
+      "pr_id": "2771402284",
+      "gate": "propagation",
+      "file": "src/api/APIFactory.ts",
+      "detail": "4 propagation error(s), 0 warning(s): Import path \"../constants\" changed in src/common/types/core.d."
+    }
+  ]
+}

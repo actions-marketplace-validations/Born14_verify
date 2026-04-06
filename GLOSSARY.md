@@ -13,9 +13,9 @@ The one function. Takes edits + predicates, runs them through 17 gates, returns 
 The convergence loop that wraps verify(). Agent plans → verify judges → failure narrows the search space → agent retries with more information. Three exit paths: converged (success), exhausted (ran out of attempts), stuck (no progress detected).
 
 ### Gate
-A checkpoint in the verification pipeline. Each gate checks one thing. If it fails, everything stops. There are 17, they always run in the same order. Think of them as a gauntlet your edit has to survive.
+A checkpoint in the verification pipeline. Each gate checks one thing. If it fails, everything stops. There are 26, they always run in the same order. All gates support config toggles (`gates: { temporal: false }` to disable). Think of them as a gauntlet your edit has to survive.
 
-**Gate order:** Grounding → F9 (syntax) → K5 (constraints) → G5 (containment) → Filesystem → Infrastructure → Serialization → Config → Security → A11y → Performance → Staging (Docker) → Browser (Playwright) → HTTP (fetch) → Invariants (health) → Vision (screenshot) → Triangulation (3-authority verdict)
+**Gate order:** Grounding → F9 (syntax) → K5 (constraints) → G5 (containment) → Hallucination → Access → Temporal → Propagation → State → Capacity → Contention → Observation → Filesystem → Infrastructure → Serialization → Config → Security → A11y → Performance → Staging (Docker) → Browser (Playwright) → HTTP (fetch) → Invariants (health) → Vision (screenshot) → Triangulation (3-authority verdict) → Message
 
 ### Predicate
 A claim about what should be true after your edit. "The h1 should be red." "The /health endpoint should return 200." "The users table should have a bio column." You declare what success looks like, verify checks if reality agrees.
@@ -191,9 +191,10 @@ The real-world version of the ledger. Records when verify was wrong against a li
 
 ### Tier
 How much infrastructure the self-test uses:
-- **Pure** (default) — no Docker, no network. ~1,685 scenarios, ~2 min.
-- **Live** (`--live`) — adds Docker + real Postgres. ~1,800+ scenarios, ~5 min.
-- **Full** (`--full`) — adds Playwright browser. ~1,900+ scenarios, ~10 min.
+- **Pure** (default) — no Docker, no network. ~2,800 core scenarios, ~2 min. Aspirational scenarios excluded by default (`--exclude-tags=aspirational`).
+- **Live** (`--live`) — adds Docker + real Postgres. Core + supply chain scenarios, ~5 min.
+- **Full** (`--full`) — adds Playwright browser. All tiers, ~10 min.
+- **Total corpus:** 18,000+ scenarios across all tiers (core + aspirational + supply chain + WPT).
 - **WPT** (`--wpt`) — adds 7,291 web platform tests. Combinable with any tier.
 
 ---

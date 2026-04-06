@@ -98,14 +98,48 @@ export function classifyFinding(finding: ScanFinding): FindingClassification {
   }
 
   // GC-653: Access gate on config/infra files — not runtime code
-  // .gitignore, .dockerignore, package.json, workflow files
   if (gate === 'access' && (
     file.endsWith('.gitignore') || file.endsWith('.dockerignore') ||
     file === 'package.json' || file.endsWith('/package.json') ||
     file.includes('.github/workflows/') ||
-    file.endsWith('.yml') && file.includes('.github/')
+    (file.endsWith('.yml') && file.includes('.github/'))
   )) {
     return { confidence: 'low', reason: 'GC-653: access gate on config/infra file', shape: 'GC-653' };
+  }
+
+  // GC-654: Access gate on MSBuild/project files (.csproj, .fsproj, .vbproj)
+  if (gate === 'access' && /\.(csproj|fsproj|vbproj|sln|props|targets)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-654: access gate on MSBuild project file', shape: 'GC-654' };
+  }
+
+  // GC-655: Access gate on Dockerfiles — paths in COPY/ADD are normal
+  if (gate === 'access' && /[Dd]ockerfile/.test(file)) {
+    return { confidence: 'low', reason: 'GC-655: access gate on Dockerfile', shape: 'GC-655' };
+  }
+
+  // GC-656: Access gate on lockfiles — generated, not authored
+  if (gate === 'access' && /[-.]lock\.(json|yaml|yml)$|\.lock$|\.lockb$|^bun\.lock/.test(file)) {
+    return { confidence: 'low', reason: 'GC-656: access gate on lockfile', shape: 'GC-656' };
+  }
+
+  // GC-657: Access gate on C/C++ headers — #include paths are normal
+  if (gate === 'access' && /\.(h|hpp|hxx|hh)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-657: access gate on C/C++ header', shape: 'GC-657' };
+  }
+
+  // GC-658: Access gate on general YAML/config outside .github/
+  if (gate === 'access' && /\.(yaml|yml|toml|ini|cfg)$/.test(file) && !file.includes('.github/')) {
+    return { confidence: 'low', reason: 'GC-658: access gate on general config file', shape: 'GC-658' };
+  }
+
+  // GC-659: Access gate on Ruby bundler config
+  if (gate === 'access' && (file.includes('.bundle/') || file === 'Gemfile' || file === 'Gemfile.lock')) {
+    return { confidence: 'low', reason: 'GC-659: access gate on Ruby bundler config', shape: 'GC-659' };
+  }
+
+  // GC-660: Propagation gate on LICENSE files — license text isn't cross-file reference
+  if (gate === 'propagation' && /LICENSE|LICENCE|COPYING/i.test(file)) {
+    return { confidence: 'low', reason: 'GC-660: propagation gate on license file', shape: 'GC-660' };
   }
 
   // Doc files rarely have real issues (docs show examples, not production code)

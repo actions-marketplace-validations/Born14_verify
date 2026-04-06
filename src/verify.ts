@@ -76,6 +76,20 @@ export async function verify(
   mkdirSync(stateDir, { recursive: true });
 
   const store = new ConstraintStore(stateDir);
+  // Pre-seed constraints from config (harness use — e.g., K5 test scenarios)
+  if (config.constraints && config.constraints.length > 0) {
+    for (const c of config.constraints) {
+      // Ensure required fields have defaults to prevent crashes
+      const safe = {
+        appliesTo: [],
+        surface: { files: [], intents: [] },
+        requires: {},
+        ...c,
+      };
+      (store as any).data.constraints.push(safe);
+    }
+    log(`[K5] Pre-seeded ${config.constraints.length} constraint(s) from config`);
+  }
   const sessionId = `s_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
 
   const gateConfig = config.gates ?? {};

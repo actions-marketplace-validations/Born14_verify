@@ -496,7 +496,10 @@ export function validateAgainstGrounding<T extends {
     }
 
     // ── Content predicates: check pattern against actual file contents ──
-    // Only reject if pattern doesn't exist AND no edit would create it
+    // Two checks:
+    //   1. Pre-edit: pattern must exist in source OR an edit creates it
+    //   2. Post-edit: if pattern exists pre-edit but an edit removes it, that's
+    //      a goal contradiction (Shape 648: edit destroys what predicate asserts)
     if (p.type === 'content' && p.file && p.pattern && opts?.appDir) {
       try {
         const filePath = join(opts.appDir, p.file);
@@ -511,6 +514,22 @@ export function validateAgainstGrounding<T extends {
             );
             if (!editsWouldCreate) {
               return { ...p, groundingMiss: true, groundingReason: `Pattern "${p.pattern}" not found in file "${p.file}" and no edit would create it` };
+            }
+          } else {
+            // Pattern EXISTS pre-edit. Check if an edit on this file REMOVES it.
+            // Simulate post-edit content by applying edits to the file content.
+            const fileEdits = opts.edits?.filter(e => e.file === p.file) ?? [];
+            if (fileEdits.length > 0) {
+              let postEdit = content;
+              for (const e of fileEdits) {
+                const normalizedSearch = e.search.replace(/\r\n/g, '\n');
+                if (postEdit.includes(normalizedSearch)) {
+                  postEdit = postEdit.replace(normalizedSearch, e.replace.replace(/\r\n/g, '\n'));
+                }
+              }
+              if (!postEdit.includes(normalizedPattern)) {
+                return { ...p, groundingMiss: true, groundingReason: `Edit removes "${p.pattern}" from "${p.file}" — post-edit content no longer matches predicate` };
+              }
             }
           }
         } else {

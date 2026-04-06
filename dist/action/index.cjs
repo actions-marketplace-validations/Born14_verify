@@ -9809,6 +9809,7 @@ async function run() {
   const appDir = process.env.INPUT_APP_DIR ?? process.env["INPUT_APP-DIR"] ?? ".";
   const intentEnabled = (process.env.INPUT_INTENT ?? "false") === "true";
   const apiKey = process.env.INPUT_API_KEY ?? process.env["INPUT_API-KEY"] ?? "";
+  const provider = process.env.INPUT_PROVIDER ?? "gemini";
   const stagingEnabled = (process.env.INPUT_STAGING ?? "false") === "true";
   const commentEnabled = (process.env.INPUT_COMMENT ?? "true") === "true";
   const failOn = process.env.INPUT_FAIL_ON ?? process.env["INPUT_FAIL-ON"] ?? "error";
@@ -9872,11 +9873,11 @@ async function run() {
     tiers.push("intent-heuristic");
     console.log(`  Tier 3a (intent heuristic): ${intentPreds.length} predicates`);
     if (apiKey) {
-      console.log("  Tier 3b (LLM intent): generating...");
+      console.log(`  Tier 3b (LLM intent via ${provider}): generating...`);
       try {
-        const llmPreds = await extractLLMPredicates(edits, metadata, apiKey);
+        const llmPreds = await extractLLMPredicates(edits, metadata, apiKey, provider);
         predicates.push(...llmPreds);
-        tiers.push("intent-llm");
+        tiers.push(`intent-llm-${provider}`);
         console.log(`  Tier 3b (LLM intent): ${llmPreds.length} predicates`);
       } catch (err) {
         console.log(`  Tier 3b (LLM intent): failed \u2014 ${err.message}`);
@@ -9919,7 +9920,7 @@ async function run() {
     process.exit(1);
   }
 }
-async function extractLLMPredicates(edits, metadata, apiKey) {
+async function extractLLMPredicates(edits, metadata, apiKey, provider = "gemini") {
   const diffSummary = edits.map(
     (e) => `${e.file}: "${e.search.substring(0, 60)}" \u2192 "${e.replace.substring(0, 60)}"`
   ).join("\n");
@@ -9933,17 +9934,7 @@ ${diffSummary}
 What should be true about the codebase AFTER this PR is applied?
 Return a JSON array of assertions. Each assertion: { "file": "path", "pattern": "text that should exist", "reason": "why" }
 Only include specific, testable assertions. Max 5.`;
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0, maxOutputTokens: 500 }
-    })
-  });
-  if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  const text = await callLLM(prompt, apiKey, provider);
   const jsonMatch = text.match(/\[[\s\S]*\]/);
   if (!jsonMatch) return [];
   try {
@@ -9956,6 +9947,61 @@ Only include specific, testable assertions. Max 5.`;
     }));
   } catch {
     return [];
+  }
+}
+async function callLLM(prompt, apiKey, provider) {
+  switch (provider) {
+    case "gemini": {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0, maxOutputTokens: 500 }
+        })
+      });
+      if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    }
+    case "openai": {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0,
+          max_tokens: 500
+        })
+      });
+      if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content ?? "";
+    }
+    case "anthropic": {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01"
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 500,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+      if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`);
+      const data = await res.json();
+      return data.content?.[0]?.text ?? "";
+    }
+    default:
+      throw new Error(`Unknown provider: ${provider}. Use gemini, openai, or anthropic.`);
   }
 }
 function setOutput(name, value) {

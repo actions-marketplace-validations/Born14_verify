@@ -16,8 +16,12 @@ inputs:
     required: false
     default: 'false'
   api-key:
-    description: 'Gemini API key for intent-level predicate extraction (Tier 3b)'
+    description: 'API key for intent-level predicate extraction (Tier 3b). Works with any provider.'
     required: false
+  provider:
+    description: 'LLM provider for intent extraction: gemini (default), openai, anthropic'
+    required: false
+    default: 'gemini'
   staging:
     description: 'Enable Docker staging gate (builds and runs the app)'
     required: false

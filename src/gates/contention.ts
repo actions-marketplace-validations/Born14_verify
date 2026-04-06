@@ -419,9 +419,13 @@ export function runContentionGate(ctx: GateContext): ContentionGateResult {
 
   // Only scan NEW content introduced by edits (replace text), not pre-existing code.
   // This prevents false positives from pre-existing patterns in the codebase.
+  // GC-651: Skip frontend files — form components don't do DB writes
+  const FRONTEND_EXTS = new Set(['tsx', 'jsx', 'vue', 'svelte', 'html', 'css', 'scss', 'less']);
   const sourceFiles: SourceFile[] = [];
   for (const edit of ctx.edits) {
     if (!edit.replace) continue;
+    const ext = edit.file.split('.').pop()?.toLowerCase() ?? '';
+    if (FRONTEND_EXTS.has(ext)) continue;
     sourceFiles.push({
       relativePath: edit.file,
       content: edit.replace,

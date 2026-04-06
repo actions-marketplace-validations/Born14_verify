@@ -506,9 +506,11 @@ export function runAccessGate(ctx: GateContext): AccessGateResult {
 
   // 3. Scan NEW content introduced by edits only (not pre-existing code)
   // This prevents false positives from pre-existing patterns in the codebase.
+  // GC-652: Skip type definitions — .d.ts and types files aren't runtime code
   const sourceFiles: SourceFile[] = [];
   for (const edit of ctx.edits) {
     if (!edit.replace) continue;
+    if (edit.file.endsWith('.d.ts') || edit.file.includes('types.ts') || edit.file.includes('types/')) continue;
     sourceFiles.push({
       relativePath: edit.file,
       content: edit.replace,

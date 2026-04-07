@@ -630,6 +630,8 @@ async function runImproveCommand() {
   const maxCandidates = parseInt(getArg('max-candidates') ?? '3', 10);
   const maxLines = parseInt(getArg('max-lines') ?? '20', 10);
   const dryRun = hasFlag('dry-run');
+  const continuous = hasFlag('continuous');
+  const maxIterations = continuous ? parseInt(getArg('max-iterations') ?? '5', 10) : 1;
 
   // Parse families
   const familiesArg = getArg('families');
@@ -650,6 +652,7 @@ async function runImproveCommand() {
   console.log(`  Docker: ${dockerEnabled ? 'enabled' : 'disabled'}`);
   console.log(`  Max candidates: ${maxCandidates}, Max lines: ${maxLines}`);
   if (dryRun) console.log('  Mode: DRY RUN');
+  if (continuous) console.log(`  Continuous: ${maxIterations} max iterations`);
 
   await runImproveLoop(
     {
@@ -666,6 +669,7 @@ async function runImproveCommand() {
       maxCandidates,
       maxLines,
       dryRun,
+      maxIterations,
     },
   );
 }

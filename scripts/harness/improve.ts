@@ -87,6 +87,66 @@ export async function runImproveLoop(
   runConfig: RunConfig,
   improveConfig: ImproveConfig,
 ): Promise<void> {
+  const maxIterations = improveConfig.maxIterations ?? 1;
+  const continuous = maxIterations > 1;
+
+  if (continuous) {
+    console.log('\n  ╔══════════════════════════════════════════════════╗');
+    console.log('  ║  Verify Improvement Engine — Continuous Mode      ║');
+    console.log('  ╚══════════════════════════════════════════════════╝\n');
+    console.log(`  Max iterations: ${maxIterations}  LLM: ${improveConfig.llm}  Candidates: ${improveConfig.maxCandidates}\n`);
+  }
+
+  const cumulativeUsage: LLMUsage = { inputTokens: 0, outputTokens: 0, calls: 0 };
+  const allEntries: ImprovementEntry[] = [];
+  let totalAccepted = 0;
+
+  for (let iteration = 1; iteration <= maxIterations; iteration++) {
+    if (continuous) {
+      console.log(`\n  ═══ Iteration ${iteration}/${maxIterations} ═══════════════════════════════\n`);
+    }
+
+    const { entries, usage, hadAccepted } = await runSingleIteration(
+      runConfig, improveConfig,
+    );
+
+    allEntries.push(...entries);
+    cumulativeUsage.inputTokens += usage.inputTokens;
+    cumulativeUsage.outputTokens += usage.outputTokens;
+    cumulativeUsage.calls += usage.calls;
+
+    const accepted = entries.filter(e => e.verdict === 'accepted').length;
+    totalAccepted += accepted;
+
+    // Early termination: no improvements → stop climbing
+    if (!hadAccepted) {
+      if (continuous && iteration < maxIterations) {
+        console.log(`  No improvements in iteration ${iteration} — stopping continuous loop.\n`);
+      }
+      break;
+    }
+
+    // If continuous and we accepted something, next iteration re-baselines
+    if (continuous && iteration < maxIterations) {
+      console.log(`  Iteration ${iteration}: ${accepted} accepted — re-baselining for next iteration...\n`);
+    }
+  }
+
+  // Cumulative summary for continuous mode
+  if (continuous && totalAccepted > 0) {
+    console.log(`\n  Continuous mode complete: ${totalAccepted} total accepted across ${allEntries.length} bundles.`);
+    console.log(`  LLM cost: ${cumulativeUsage.inputTokens} input + ${cumulativeUsage.outputTokens} output tokens (${cumulativeUsage.calls} calls)\n`);
+  }
+}
+
+/**
+ * Run a single iteration of the improve loop.
+ * Extracted to support continuous mode (multiple iterations with re-baselining).
+ */
+async function runSingleIteration(
+  runConfig: RunConfig,
+  improveConfig: ImproveConfig,
+): Promise<{ entries: ImprovementEntry[]; usage: LLMUsage; hadAccepted: boolean }> {
   const packageRoot = resolve(import.meta.dir, '../..');
   const dataDir = join(packageRoot, 'data');
   mkdirSync(dataDir, { recursive: true });
@@ -110,7 +170,7 @@ export async function runImproveLoop(
   if (dirty.length === 0) {
     console.log('  ✓ All scenarios clean — nothing to improve.\n');
     saveImprovementLedger(dataDir, []);
-    return;
+    return { entries: [], usage: { inputTokens: 0, outputTokens: 0, calls: 0 }, hadAccepted: false };
   }
 
   // ─── Step 2: Evidence bundling ────────────────────────────────────────
@@ -145,7 +205,7 @@ export async function runImproveLoop(
   // ─── Step 4-6: Process each bundle ────────────────────────────────────
   const entries: ImprovementEntry[] = [];
   const usage: LLMUsage = { inputTokens: 0, outputTokens: 0, calls: 0 };
-  const attemptedHashes = new Set<string>(priorHashes); // includes cross-run hashes
+  const attemptedHashes = new Set<string>(priorHashes);
   const attempts: AttemptRecord[] = [];
 
   for (const bundle of bundles) {
@@ -175,6 +235,9 @@ export async function runImproveLoop(
   // ─── Step 7: Report ───────────────────────────────────────────────────
   saveImprovementLedger(dataDir, entries);
   printImprovementReport(entries, usage);
+
+  const hadAccepted = entries.some(e => e.verdict === 'accepted');
+  return { entries, usage, hadAccepted };
 }
 
 // =============================================================================

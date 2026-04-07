@@ -288,6 +288,10 @@ export interface ImproveConfig {
   maxCandidates: number;
   maxLines: number;
   dryRun: boolean;
+  /** Continuous mode: number of improve iterations (default: 1 = single pass).
+   *  When > 1, the loop re-baselines after each accepted fix and runs again.
+   *  Stops early if an iteration produces no improvements. */
+  maxIterations?: number;
 }
 
 export type LLMCallFn = (

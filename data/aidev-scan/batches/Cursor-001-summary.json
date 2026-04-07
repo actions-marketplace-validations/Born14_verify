@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-04-07T00:01:11.181Z",
+  "timestamp": "2026-04-07T02:14:54.708Z",
   "adapter": "aidev-pop",
   "agent": "Cursor",
   "batchNumber": 1,
   "batchSize": 500,
   "prsScanned": 500,
-  "prsWithFindings": 72,
-  "findingRate": "14.4%",
-  "highConfidenceRate": "19.4%",
+  "prsWithFindings": 64,
+  "findingRate": "12.8%",
+  "highConfidenceRate": "28.1%",
   "gateStats": {
     "K5": {
       "ran": 500,
@@ -25,55 +25,55 @@
     },
     "access": {
       "ran": 500,
-      "failed": 35,
-      "high": 4,
-      "low": 22,
-      "unknown": 9
+      "failed": 28,
+      "high": 5,
+      "low": 17,
+      "unknown": 6
     },
     "temporal": {
-      "ran": 465,
+      "ran": 472,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "propagation": {
-      "ran": 465,
+      "ran": 472,
       "failed": 5,
-      "high": 0,
-      "low": 3,
-      "unknown": 2
+      "high": 1,
+      "low": 1,
+      "unknown": 3
     },
     "state": {
-      "ran": 460,
+      "ran": 467,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "capacity": {
-      "ran": 460,
-      "failed": 19,
-      "high": 8,
-      "low": 11,
+      "ran": 467,
+      "failed": 22,
+      "high": 10,
+      "low": 12,
       "unknown": 0
     },
     "contention": {
-      "ran": 441,
-      "failed": 13,
+      "ran": 445,
+      "failed": 9,
       "high": 2,
-      "low": 11,
-      "unknown": 0
+      "low": 6,
+      "unknown": 1
     },
     "observation": {
-      "ran": 428,
+      "ran": 436,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "triangulation": {
-      "ran": 428,
+      "ran": 436,
       "failed": 0,
       "high": 0,
       "low": 0,
@@ -82,16 +82,28 @@
   },
   "unknowns": [
     {
-      "pr_id": "3207044337",
+      "pr_id": "3128183116",
       "gate": "access",
-      "file": "spml/pom.xml",
-      "detail": "1 error(s), 0 warning(s): 1× path traversal"
+      "file": "async-code-web/app/projects/page.tsx",
+      "detail": "32 error(s), 0 warning(s): 32× path traversal"
     },
     {
-      "pr_id": "3198764472",
+      "pr_id": "3128285665",
       "gate": "access",
-      "file": "spml/pom.xml",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+      "file": "app/page.tsx",
+      "detail": "14 error(s), 0 warning(s): 12× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3131810994",
+      "gate": "access",
+      "file": "src/bundler/linker_context/computeCrossChunkDependencies.zig",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3137374542",
+      "gate": "contention",
+      "file": "packages/web/package.json",
+      "detail": "2 error(s), 2 warning(s): 2× race condition"
     },
     {
       "pr_id": "3141717000",
@@ -100,52 +112,34 @@
       "detail": "4 error(s), 0 warning(s): 4× path traversal"
     },
     {
-      "pr_id": "3195908841",
-      "gate": "propagation",
-      "file": ".babelrc",
-      "detail": "41 propagation error(s), 0 warning(s): CSS class \".wm-window\" renamed in dist/ventus.css but src/ven"
+      "pr_id": "3152472726",
+      "gate": "access",
+      "file": "web/src/features/evals/components/eval-templates-table.tsx",
+      "detail": "2 error(s), 9 warning(s): 2× path traversal"
     },
     {
-      "pr_id": "3203187912",
+      "pr_id": "3171819372",
+      "gate": "propagation",
+      "file": "src/sentry/models/project.py",
+      "detail": "6 propagation error(s), 0 warning(s): Import path \"./svgIcon\" changed in static/app/icons/iconClaude"
+    },
+    {
+      "pr_id": "3174634284",
+      "gate": "propagation",
+      "file": "src/sentry/migrations/0925_backfill_open_periods.py",
+      "detail": "6 propagation error(s), 0 warning(s): Import path \"./svgIcon\" changed in static/app/icons/iconClaude"
+    },
+    {
+      "pr_id": "3175055580",
       "gate": "access",
       "file": "go.mod",
-      "detail": "3 error(s), 0 warning(s): 2× path traversal, 1× permission escalation"
-    },
-    {
-      "pr_id": "3225261494",
-      "gate": "access",
-      "file": ".cursorrules",
-      "detail": "11 error(s), 0 warning(s): 11× path traversal"
-    },
-    {
-      "pr_id": "3190159928",
-      "gate": "access",
-      "file": "src/bun.js/bindings/v8/V8Array.cpp",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
-    {
-      "pr_id": "3208946277",
-      "gate": "access",
-      "file": "web/src/features/prompts/components/PromptVersionDiffDialog.tsx",
-      "detail": "7 error(s), 4 warning(s): 2× path traversal, 5× permission escalation"
-    },
-    {
-      "pr_id": "3207082361",
-      "gate": "access",
-      "file": "go.work",
-      "detail": "2 error(s), 3 warning(s): 2× path traversal"
+      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
     },
     {
       "pr_id": "3182983420",
       "gate": "propagation",
       "file": "apps/app/src/app/(app)/[orgId]/components/UpgradeBanner.tsx",
       "detail": "5 propagation error(s), 0 warning(s): CSS class \".container\" renamed in <style> but HTML still uses "
-    },
-    {
-      "pr_id": "3211069690",
-      "gate": "access",
-      "file": "app/build.gradle",
-      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
     }
   ]
 }

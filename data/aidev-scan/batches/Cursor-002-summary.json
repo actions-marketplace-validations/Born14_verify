@@ -1,79 +1,79 @@
 {
-  "timestamp": "2026-04-07T02:05:01.583Z",
+  "timestamp": "2026-04-07T02:18:02.423Z",
   "adapter": "aidev-pop",
   "agent": "Cursor",
   "batchNumber": 2,
-  "batchSize": 1041,
-  "prsScanned": 498,
-  "prsWithFindings": 84,
-  "findingRate": "16.9%",
-  "highConfidenceRate": "31.0%",
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 98,
+  "findingRate": "19.6%",
+  "highConfidenceRate": "25.5%",
   "gateStats": {
     "K5": {
-      "ran": 498,
+      "ran": 500,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "G5": {
-      "ran": 498,
+      "ran": 500,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "access": {
-      "ran": 498,
-      "failed": 44,
-      "high": 9,
-      "low": 26,
-      "unknown": 9
+      "ran": 500,
+      "failed": 53,
+      "high": 6,
+      "low": 34,
+      "unknown": 13
     },
     "temporal": {
-      "ran": 454,
+      "ran": 447,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "propagation": {
-      "ran": 454,
-      "failed": 4,
+      "ran": 447,
+      "failed": 7,
       "high": 0,
-      "low": 1,
-      "unknown": 3
+      "low": 3,
+      "unknown": 4
     },
     "state": {
-      "ran": 450,
+      "ran": 440,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "capacity": {
-      "ran": 450,
-      "failed": 25,
-      "high": 14,
+      "ran": 440,
+      "failed": 27,
+      "high": 16,
       "low": 11,
       "unknown": 0
     },
     "contention": {
-      "ran": 425,
+      "ran": 413,
       "failed": 11,
       "high": 3,
       "low": 7,
       "unknown": 1
     },
     "observation": {
-      "ran": 414,
+      "ran": 402,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "triangulation": {
-      "ran": 414,
+      "ran": 402,
       "failed": 0,
       "high": 0,
       "low": 0,
@@ -82,16 +82,10 @@
   },
   "unknowns": [
     {
-      "pr_id": "3235036061",
+      "pr_id": "3190159928",
       "gate": "access",
-      "file": "dart/lib/src/hub.dart",
+      "file": "src/bun.js/bindings/v8/V8Array.cpp",
       "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
-    {
-      "pr_id": "3128183116",
-      "gate": "access",
-      "file": "async-code-web/app/projects/page.tsx",
-      "detail": "32 error(s), 0 warning(s): 32× path traversal"
     },
     {
       "pr_id": "3192489182",
@@ -100,40 +94,22 @@
       "detail": "3 error(s), 0 warning(s): 3× path traversal"
     },
     {
-      "pr_id": "3171819372",
+      "pr_id": "3193527516",
       "gate": "propagation",
-      "file": "src/sentry/models/project.py",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"./svgIcon\" changed in static/app/icons/iconClaude"
+      "file": ".content-collections/cache/blog/advanced_analytics/b5f638a7324ed5ed26fbad5cbba558859ed66c38936b89c134e1f596e0099e50.cache",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"./author\" changed in AUTHOR_AND_TOC_FEATURES.md b"
     },
     {
-      "pr_id": "3200632117",
-      "gate": "access",
-      "file": ".vscode/settings.json",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
-    {
-      "pr_id": "3230281893",
+      "pr_id": "3195908841",
       "gate": "propagation",
-      "file": "packages/workshop-utils/src/apps.server.ts",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"./files.server.js\" changed in packages/workshop-u"
+      "file": ".babelrc",
+      "detail": "41 propagation error(s), 0 warning(s): CSS class \".wm-window\" renamed in dist/ventus.css but src/ven"
     },
     {
-      "pr_id": "3131810994",
-      "gate": "access",
-      "file": "src/bundler/linker_context/computeCrossChunkDependencies.zig",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
-    {
-      "pr_id": "3174634284",
-      "gate": "propagation",
-      "file": "src/sentry/migrations/0925_backfill_open_periods.py",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"./svgIcon\" changed in static/app/icons/iconClaude"
-    },
-    {
-      "pr_id": "3236584552",
-      "gate": "access",
-      "file": "scripts/install.ps1",
-      "detail": "3 error(s), 0 warning(s): 2× path traversal, 1× permission escalation"
+      "pr_id": "3196929641",
+      "gate": "contention",
+      "file": "apps/web/client/src/components/store/editor/hosting/index.ts",
+      "detail": "2 error(s), 0 warning(s): 2× race condition"
     },
     {
       "pr_id": "3197264721",
@@ -142,10 +118,52 @@
       "detail": "7 error(s), 0 warning(s): 4× path traversal, 3× permission escalation"
     },
     {
-      "pr_id": "3137374542",
-      "gate": "contention",
-      "file": "packages/web/package.json",
-      "detail": "2 error(s), 2 warning(s): 2× race condition"
+      "pr_id": "3198587968",
+      "gate": "propagation",
+      "file": "packages/client/src/Gui/Gui.ts",
+      "detail": "12 propagation error(s), 0 warning(s): CSS class \".inventory-overlay\" renamed in <style> but HTML st"
+    },
+    {
+      "pr_id": "3198764472",
+      "gate": "access",
+      "file": "spml/pom.xml",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3200632117",
+      "gate": "access",
+      "file": ".vscode/settings.json",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3201257688",
+      "gate": "access",
+      "file": ".clangd",
+      "detail": "4 error(s), 0 warning(s): 4× permission escalation"
+    },
+    {
+      "pr_id": "3203187912",
+      "gate": "access",
+      "file": "go.mod",
+      "detail": "3 error(s), 0 warning(s): 2× path traversal, 1× permission escalation"
+    },
+    {
+      "pr_id": "3204637625",
+      "gate": "propagation",
+      "file": "src/layouts/components/HeaderTab.vue",
+      "detail": "11 propagation error(s), 0 warning(s): CSS class \".container\" renamed in <style> but HTML still uses"
+    },
+    {
+      "pr_id": "3207042909",
+      "gate": "access",
+      "file": "spml/pom.xml",
+      "detail": "1 error(s), 0 warning(s): 1× path traversal"
+    },
+    {
+      "pr_id": "3207044337",
+      "gate": "access",
+      "file": "spml/pom.xml",
+      "detail": "1 error(s), 0 warning(s): 1× path traversal"
     },
     {
       "pr_id": "3207062310",
@@ -154,10 +172,22 @@
       "detail": "1 error(s), 0 warning(s): 1× path traversal"
     },
     {
-      "pr_id": "3245321897",
+      "pr_id": "3207082361",
       "gate": "access",
-      "file": "apps/server/cmd/bun/migrations/20250712225234_add_login_attempts_table.tx.down.sql",
-      "detail": "5 error(s), 0 warning(s): 5× path traversal"
+      "file": "go.work",
+      "detail": "2 error(s), 3 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3208946277",
+      "gate": "access",
+      "file": "web/src/features/prompts/components/PromptVersionDiffDialog.tsx",
+      "detail": "7 error(s), 4 warning(s): 2× path traversal, 5× permission escalation"
+    },
+    {
+      "pr_id": "3218869116",
+      "gate": "access",
+      "file": ".cursorignore",
+      "detail": "1 error(s), 0 warning(s): 1× path traversal"
     }
   ]
 }

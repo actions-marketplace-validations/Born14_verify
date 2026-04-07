@@ -1,79 +1,79 @@
 {
-  "timestamp": "2026-04-06T23:23:31.003Z",
+  "timestamp": "2026-04-07T02:30:49.514Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 1,
   "batchSize": 500,
-  "prsScanned": 500,
-  "prsWithFindings": 71,
-  "findingRate": "14.2%",
-  "highConfidenceRate": "57.7%",
+  "prsScanned": 497,
+  "prsWithFindings": 70,
+  "findingRate": "14.1%",
+  "highConfidenceRate": "51.4%",
   "gateStats": {
     "K5": {
-      "ran": 500,
+      "ran": 497,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "G5": {
-      "ran": 500,
+      "ran": 497,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "access": {
-      "ran": 500,
-      "failed": 20,
-      "high": 5,
-      "low": 7,
-      "unknown": 8
+      "ran": 497,
+      "failed": 33,
+      "high": 14,
+      "low": 18,
+      "unknown": 1
     },
     "temporal": {
-      "ran": 480,
+      "ran": 464,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "propagation": {
-      "ran": 480,
-      "failed": 7,
-      "high": 3,
-      "low": 1,
-      "unknown": 3
+      "ran": 464,
+      "failed": 10,
+      "high": 2,
+      "low": 0,
+      "unknown": 8
     },
     "state": {
-      "ran": 473,
+      "ran": 454,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "capacity": {
-      "ran": 473,
-      "failed": 30,
-      "high": 28,
-      "low": 2,
+      "ran": 454,
+      "failed": 19,
+      "high": 18,
+      "low": 1,
       "unknown": 0
     },
     "contention": {
-      "ran": 443,
-      "failed": 14,
-      "high": 5,
-      "low": 9,
-      "unknown": 0
+      "ran": 435,
+      "failed": 8,
+      "high": 2,
+      "low": 4,
+      "unknown": 2
     },
     "observation": {
-      "ran": 429,
+      "ran": 427,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "triangulation": {
-      "ran": 429,
+      "ran": 427,
       "failed": 0,
       "high": 0,
       "low": 0,
@@ -82,52 +82,10 @@
   },
   "unknowns": [
     {
-      "pr_id": "2914424485",
-      "gate": "access",
-      "file": "src/components/tables/HistoryTable.vue",
-      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
-    },
-    {
-      "pr_id": "2971908072",
-      "gate": "access",
-      "file": "client-admin/app/page.tsx",
-      "detail": "8 error(s), 0 warning(s): 8× path traversal"
-    },
-    {
-      "pr_id": "2768952674",
-      "gate": "access",
-      "file": ".gitignore",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
-    {
-      "pr_id": "2805430490",
-      "gate": "propagation",
-      "file": "src/elements/common/makeResponsive.tsx",
-      "detail": "12 propagation error(s), 0 warning(s): Import path \"../common/theming\" changed to \"./ContentExplorer"
-    },
-    {
-      "pr_id": "3094071534",
-      "gate": "access",
-      "file": "package.json",
-      "detail": "6 error(s), 6 warning(s): 6× path traversal"
-    },
-    {
-      "pr_id": "2859527888",
-      "gate": "access",
-      "file": ".github/workflows/multi-compiler.yml",
-      "detail": "4 error(s), 0 warning(s): 4× permission escalation"
-    },
-    {
-      "pr_id": "2928053953",
-      "gate": "propagation",
-      "file": "src/assets/index.ts",
-      "detail": "14 propagation error(s), 0 warning(s): Import path \"./check-small.png\" changed to \"./checkSmall.png\""
-    },
-    {
-      "pr_id": "3136450775",
-      "gate": "access",
-      "file": ".github/workflows/deployment-summary.yml",
-      "detail": "82 error(s), 0 warning(s): 82× path traversal"
+      "pr_id": "2767891481",
+      "gate": "contention",
+      "file": "request-invoice-web/.eslintrc.json",
+      "detail": "8 error(s), 0 warning(s): 8× race condition"
     },
     {
       "pr_id": "2770944230",
@@ -136,16 +94,58 @@
       "detail": "5 error(s), 3 warning(s): 4× path traversal, 1× environment escalation"
     },
     {
-      "pr_id": "3032232141",
-      "gate": "access",
-      "file": "airbyte-ci/connectors/java-dockerfile/.dockerignore",
-      "detail": "7 error(s), 0 warning(s): 7× path traversal"
-    },
-    {
       "pr_id": "2771402284",
       "gate": "propagation",
       "file": "src/api/APIFactory.ts",
       "detail": "4 propagation error(s), 0 warning(s): Import path \"../constants\" changed in src/common/types/core.d."
+    },
+    {
+      "pr_id": "2776299690",
+      "gate": "propagation",
+      "file": "src/elements/content-picker/ItemList.tsx",
+      "detail": "7 propagation error(s), 0 warning(s): Import path \"../common/share-access-select\" changed in src/ele"
+    },
+    {
+      "pr_id": "2776592584",
+      "gate": "propagation",
+      "file": "src/elements/content-picker/Footer.js.flow",
+      "detail": "12 propagation error(s), 0 warning(s): Import path \"../../components/button\" changed in src/elements"
+    },
+    {
+      "pr_id": "2779120679",
+      "gate": "propagation",
+      "file": "src/background/background.js",
+      "detail": "8 propagation error(s), 0 warning(s): Import path \"./values\" changed in src/background/index.js but "
+    },
+    {
+      "pr_id": "2780647811",
+      "gate": "contention",
+      "file": "package.json",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "2783421768",
+      "gate": "propagation",
+      "file": "packages/orbit-components/.storybook/main.ts",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src\" changed in packages/orbit-components/play"
+    },
+    {
+      "pr_id": "2790868866",
+      "gate": "propagation",
+      "file": "src/elements/common/nav-router/NavRouter.tsx",
+      "detail": "6 propagation error(s), 0 warning(s): Import path \"../../icons/general/IconNavigateLeft\" changed in "
+    },
+    {
+      "pr_id": "2793293460",
+      "gate": "propagation",
+      "file": "contract_manager/scripts/get_pyth_pricefeed_details.ts",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src/chains\" changed in contract_manager/script"
+    },
+    {
+      "pr_id": "2805430490",
+      "gate": "propagation",
+      "file": "src/elements/common/makeResponsive.tsx",
+      "detail": "12 propagation error(s), 0 warning(s): Import path \"../common/theming\" changed to \"./ContentExplorer"
     }
   ]
 }

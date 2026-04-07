@@ -1,0 +1,127 @@
+{
+  "timestamp": "2026-04-07T02:54:13.111Z",
+  "adapter": "aidev-pop",
+  "agent": "Devin",
+  "batchNumber": 8,
+  "batchSize": 500,
+  "prsScanned": 499,
+  "prsWithFindings": 75,
+  "findingRate": "15.0%",
+  "highConfidenceRate": "60.0%",
+  "gateStats": {
+    "K5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 499,
+      "failed": 23,
+      "high": 7,
+      "low": 13,
+      "unknown": 3
+    },
+    "temporal": {
+      "ran": 476,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 476,
+      "failed": 5,
+      "high": 2,
+      "low": 1,
+      "unknown": 2
+    },
+    "state": {
+      "ran": 471,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 471,
+      "failed": 41,
+      "high": 35,
+      "low": 6,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 430,
+      "failed": 6,
+      "high": 1,
+      "low": 3,
+      "unknown": 2
+    },
+    "observation": {
+      "ran": 424,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 424,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3117623976",
+      "gate": "access",
+      "file": "app/javascript/components/Settings/PaymentsPage/AccountDetailsSection.tsx",
+      "detail": "15 error(s), 0 warning(s): 6× path traversal, 9× permission escalation"
+    },
+    {
+      "pr_id": "3121105508",
+      "gate": "propagation",
+      "file": "db/schema/conversationMessages.ts",
+      "detail": "2 propagation error(s), 0 warning(s): Import path \"../lib/with-timestamps\" changed in db/schema/esca"
+    },
+    {
+      "pr_id": "3121717297",
+      "gate": "contention",
+      "file": "package.json",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "3132861512",
+      "gate": "propagation",
+      "file": "app/services/exports/purchase_export_service.rb",
+      "detail": "1728 propagation error(s), 0 warning(s): CSS class \".navbar-inner\" renamed in <style> but HTML still"
+    },
+    {
+      "pr_id": "3152700757",
+      "gate": "access",
+      "file": "frontend/internal-packages/db/schema/schema.sql",
+      "detail": "48 error(s), 0 warning(s): 48× permission escalation"
+    },
+    {
+      "pr_id": "3155127737",
+      "gate": "contention",
+      "file": "frontend/apps/app/components/Chat/hooks/useRealtimeMessages.ts",
+      "detail": "2 error(s), 0 warning(s): 2× race condition"
+    },
+    {
+      "pr_id": "3158557487",
+      "gate": "access",
+      "file": "frontend/apps/app/components/MarkdownContent/MarkdownContent.tsx",
+      "detail": "27 error(s), 0 warning(s): 27× permission escalation"
+    }
+  ]
+}

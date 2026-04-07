@@ -1,79 +1,79 @@
 {
-  "timestamp": "2026-04-07T00:44:26.651Z",
+  "timestamp": "2026-04-07T02:39:30.725Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 4,
   "batchSize": 500,
-  "prsScanned": 2000,
-  "prsWithFindings": 302,
-  "findingRate": "15.1%",
-  "highConfidenceRate": "57.9%",
+  "prsScanned": 496,
+  "prsWithFindings": 61,
+  "findingRate": "12.3%",
+  "highConfidenceRate": "67.2%",
   "gateStats": {
     "K5": {
-      "ran": 2000,
+      "ran": 496,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "G5": {
-      "ran": 2000,
+      "ran": 496,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "access": {
-      "ran": 2000,
-      "failed": 109,
-      "high": 34,
-      "low": 50,
-      "unknown": 25
+      "ran": 496,
+      "failed": 14,
+      "high": 3,
+      "low": 8,
+      "unknown": 3
     },
     "temporal": {
-      "ran": 1891,
+      "ran": 482,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "propagation": {
-      "ran": 1891,
-      "failed": 20,
-      "high": 2,
-      "low": 3,
-      "unknown": 15
+      "ran": 482,
+      "failed": 1,
+      "high": 0,
+      "low": 0,
+      "unknown": 1
     },
     "state": {
-      "ran": 1871,
+      "ran": 481,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "capacity": {
-      "ran": 1871,
-      "failed": 134,
-      "high": 115,
-      "low": 19,
+      "ran": 481,
+      "failed": 24,
+      "high": 22,
+      "low": 2,
       "unknown": 0
     },
     "contention": {
-      "ran": 1737,
-      "failed": 39,
-      "high": 24,
-      "low": 10,
-      "unknown": 5
+      "ran": 457,
+      "failed": 22,
+      "high": 16,
+      "low": 4,
+      "unknown": 2
     },
     "observation": {
-      "ran": 1698,
+      "ran": 435,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "triangulation": {
-      "ran": 1698,
+      "ran": 435,
       "failed": 0,
       "high": 0,
       "low": 0,
@@ -82,274 +82,40 @@
   },
   "unknowns": [
     {
+      "pr_id": "2941014562",
+      "gate": "contention",
+      "file": "package.json",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
       "pr_id": "2951230031",
       "gate": "propagation",
       "file": "packages/convex-helpers/server/customFunctions.test.ts",
       "detail": "16 propagation error(s), 0 warning(s): Import path \"./customFunctions.js\" changed in packages/convex"
     },
     {
-      "pr_id": "3106783403",
-      "gate": "access",
-      "file": "apps/realtime-service/.env.example",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3029374639",
-      "gate": "access",
-      "file": "macos/Onit/Tethered/TetherAppsManager.swift",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3105417177",
-      "gate": "propagation",
-      "file": "alchemy/src/cloudflare/bindings.ts",
-      "detail": "441 propagation error(s), 4 warning(s): Import path \"../src/alchemy.js\" changed to \"../src/alchemy.t"
-    },
-    {
-      "pr_id": "3019945406",
-      "gate": "access",
-      "file": "frontend/packages/db/supabase/migrations/20250425123516_add_rls_to_organizations_table.sql",
-      "detail": "138 error(s), 0 warning(s): 138× permission escalation"
-    },
-    {
-      "pr_id": "3057846956",
-      "gate": "propagation",
-      "file": "target_chains/ethereum/contracts/forge-test/PulseScheduler.t.sol",
-      "detail": "95 propagation error(s), 0 warning(s): Import path \"./entropy-deployments\" changed in apps/entropy-e"
-    },
-    {
-      "pr_id": "2831233724",
-      "gate": "access",
-      "file": ".tmux.conf",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
-    {
-      "pr_id": "3192204870",
-      "gate": "access",
-      "file": "app/views/help_center/articles/contents/_13-getting-paid.html.erb",
-      "detail": "16 error(s), 0 warning(s): 6× path traversal, 10× permission escalation"
-    },
-    {
-      "pr_id": "3112246853",
-      "gate": "propagation",
-      "file": "biome.jsonc",
-      "detail": "110 propagation error(s), 0 warning(s): Import path \"../../packages/configs/eslint/index.js\" changed"
-    },
-    {
-      "pr_id": "3073587664",
-      "gate": "access",
-      "file": "tools/devcontainer_create_venv.sh",
-      "detail": "5 error(s), 0 warning(s): 2× path traversal, 3× permission escalation"
-    },
-    {
-      "pr_id": "3100453288",
-      "gate": "access",
-      "file": "src/cook-web/public/locales/en-US.json",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3010545410",
-      "gate": "access",
-      "file": "frontend/packages/db/supabase/migrations/20250422034040_modify_github_repositories.sql",
-      "detail": "75 error(s), 0 warning(s): 75× permission escalation"
-    },
-    {
-      "pr_id": "3097518060",
+      "pr_id": "2958197114",
       "gate": "contention",
-      "file": "src/Cargo.lock",
-      "detail": "1 error(s), 0 warning(s): 1× race condition"
-    },
-    {
-      "pr_id": "3152700757",
-      "gate": "access",
-      "file": "frontend/internal-packages/db/schema/schema.sql",
-      "detail": "48 error(s), 0 warning(s): 48× permission escalation"
-    },
-    {
-      "pr_id": "3106112458",
-      "gate": "access",
-      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/settings/tools/toolListItem.tsx",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3019947988",
-      "gate": "access",
-      "file": "frontend/packages/db/supabase/migrations/20250425123428_add_rls_to_organization_members.sql",
-      "detail": "42 error(s), 0 warning(s): 42× permission escalation"
-    },
-    {
-      "pr_id": "2801019781",
-      "gate": "contention",
-      "file": ".github/workflows/integrationTests.yaml",
-      "detail": "1 error(s), 0 warning(s): 1× race condition"
-    },
-    {
-      "pr_id": "3080936507",
-      "gate": "propagation",
-      "file": "apps/api/src/routes/organization.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Column \"credits\" changed in packages/db/migrations/1747921176_"
-    },
-    {
-      "pr_id": "2879029392",
-      "gate": "access",
-      "file": "fullstack/freertos-wolfip-wolfssl-https/setup.sh",
-      "detail": "4 error(s), 0 warning(s): 4× permission escalation"
-    },
-    {
-      "pr_id": "2867049623",
-      "gate": "propagation",
-      "file": "src/elements/content-sidebar/SidebarNav.tsx",
-      "detail": "16 propagation error(s), 0 warning(s): Import path \"../../icon/fill/DocGenIcon\" changed in src/eleme"
-    },
-    {
-      "pr_id": "3019935504",
-      "gate": "access",
-      "file": "frontend/packages/db/schema/schema.sql",
-      "detail": "111 error(s), 0 warning(s): 111× permission escalation"
-    },
-    {
-      "pr_id": "2776592584",
-      "gate": "propagation",
-      "file": "src/elements/content-picker/Footer.js.flow",
-      "detail": "12 propagation error(s), 0 warning(s): Import path \"../../components/button\" changed in src/elements"
-    },
-    {
-      "pr_id": "2922685827",
-      "gate": "propagation",
-      "file": "supabase/functions/_backend/triggers/on_user_delete.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Column \"id\" changed in supabase/migrations/20250316005953_opti"
-    },
-    {
-      "pr_id": "3241890972",
-      "gate": "propagation",
-      "file": "apps/web/src/components/features/colors/DefaultThemeSelector/DefaultThemeSelector.tsx",
-      "detail": "20 propagation error(s), 0 warning(s): Import path \"../../src/chats\" changed to \"./chats\" in package"
-    },
-    {
-      "pr_id": "3050218206",
-      "gate": "access",
-      "file": ".cursorrules",
-      "detail": "18 error(s), 0 warning(s): 18× path traversal"
-    },
-    {
-      "pr_id": "3036416301",
-      "gate": "access",
-      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/(inbox)/_components/messageItem.tsx",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3176305274",
-      "gate": "propagation",
-      "file": "packages/app-store/googlecalendar/api/webhook.ts",
-      "detail": "3 propagation error(s), 0 warning(s): Import path \"./lib/fixtures\" changed in apps/web/playwright/ca"
-    },
-    {
-      "pr_id": "3057698280",
-      "gate": "propagation",
-      "file": "target_chains/ethereum/contracts/contracts/pulse/Scheduler.sol",
-      "detail": "95 propagation error(s), 0 warning(s): Import path \"./entropy-deployments\" changed in apps/entropy-e"
-    },
-    {
-      "pr_id": "2999563616",
-      "gate": "access",
-      "file": "frontend/apps/app/features/projects/components/ProjectItem/LastCommitInfo.tsx",
-      "detail": "132 error(s), 0 warning(s): 132× permission escalation"
-    },
-    {
-      "pr_id": "2767891481",
-      "gate": "contention",
-      "file": "request-invoice-web/.eslintrc.json",
-      "detail": "8 error(s), 0 warning(s): 8× race condition"
-    },
-    {
-      "pr_id": "2861636339",
-      "gate": "access",
-      "file": "tls/client-tls-resume.c",
-      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
-    },
-    {
-      "pr_id": "2978436805",
-      "gate": "access",
-      "file": ".env.example",
-      "detail": "8 error(s), 0 warning(s): 8× path traversal"
-    },
-    {
-      "pr_id": "3155127737",
-      "gate": "contention",
-      "file": "frontend/apps/app/components/Chat/hooks/useRealtimeMessages.ts",
+      "file": "supabase/config.toml",
       "detail": "2 error(s), 0 warning(s): 2× race condition"
     },
     {
-      "pr_id": "3029783614",
+      "pr_id": "2965833400",
       "gate": "access",
-      "file": "LLMStream",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+      "file": "frontend/apps/app/components/UserFeedbackClient.tsx",
+      "detail": "84 error(s), 2 warning(s): 84× permission escalation"
     },
     {
-      "pr_id": "3013775126",
+      "pr_id": "2971908072",
       "gate": "access",
-      "file": "frontend/packages/db/schema/schema.sql",
-      "detail": "114 error(s), 0 warning(s): 114× permission escalation"
+      "file": "client-admin/app/page.tsx",
+      "detail": "8 error(s), 0 warning(s): 8× path traversal"
     },
     {
-      "pr_id": "2779120679",
-      "gate": "propagation",
-      "file": "src/background/background.js",
-      "detail": "8 propagation error(s), 0 warning(s): Import path \"./values\" changed in src/background/index.js but "
-    },
-    {
-      "pr_id": "3234480284",
+      "pr_id": "2976319344",
       "gate": "access",
-      "file": ".env.template",
-      "detail": "21 error(s), 0 warning(s): 21× permission escalation"
-    },
-    {
-      "pr_id": "3038390136",
-      "gate": "access",
-      "file": "airbyte-integrations/connectors/build.gradle",
-      "detail": "6 error(s), 0 warning(s): 2× path traversal, 4× permission escalation"
-    },
-    {
-      "pr_id": "3074232546",
-      "gate": "access",
-      "file": "tools/devcontainer_create_venv.sh",
-      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
-    },
-    {
-      "pr_id": "2852313611",
-      "gate": "propagation",
-      "file": "src/elements/content-sharing/constants.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../../common/types/api\" changed in src/elements/c"
-    },
-    {
-      "pr_id": "3105400292",
-      "gate": "propagation",
-      "file": "alchemy/src/cloudflare/bucket.ts",
-      "detail": "1908 propagation error(s), 75 warning(s): Import path \"../util.ts\" changed in alchemy/test/cloudflar"
-    },
-    {
-      "pr_id": "3117623976",
-      "gate": "access",
-      "file": "app/javascript/components/Settings/PaymentsPage/AccountDetailsSection.tsx",
-      "detail": "15 error(s), 0 warning(s): 6× path traversal, 9× permission escalation"
-    },
-    {
-      "pr_id": "3057663648",
-      "gate": "contention",
-      "file": ".github/workflows/connectors_version_inc_check.yml",
-      "detail": "1 error(s), 0 warning(s): 1× missing transaction"
-    },
-    {
-      "pr_id": "3050214713",
-      "gate": "access",
-      "file": ".cursorrules",
-      "detail": "9 error(s), 0 warning(s): 9× path traversal"
-    },
-    {
-      "pr_id": "2776299690",
-      "gate": "propagation",
-      "file": "src/elements/content-picker/ItemList.tsx",
-      "detail": "7 propagation error(s), 0 warning(s): Import path \"../common/share-access-select\" changed in src/ele"
+      "file": "client/app/page.tsx",
+      "detail": "8 error(s), 0 warning(s): 8× path traversal"
     }
   ]
 }

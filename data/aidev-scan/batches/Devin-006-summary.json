@@ -1,0 +1,157 @@
+{
+  "timestamp": "2026-04-07T02:46:39.011Z",
+  "adapter": "aidev-pop",
+  "agent": "Devin",
+  "batchNumber": 6,
+  "batchSize": 500,
+  "prsScanned": 499,
+  "prsWithFindings": 81,
+  "findingRate": "16.2%",
+  "highConfidenceRate": "54.3%",
+  "gateStats": {
+    "K5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 499,
+      "failed": 32,
+      "high": 10,
+      "low": 15,
+      "unknown": 7
+    },
+    "temporal": {
+      "ran": 467,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 467,
+      "failed": 6,
+      "high": 1,
+      "low": 1,
+      "unknown": 4
+    },
+    "state": {
+      "ran": 461,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 461,
+      "failed": 33,
+      "high": 28,
+      "low": 5,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 428,
+      "failed": 10,
+      "high": 5,
+      "low": 4,
+      "unknown": 1
+    },
+    "observation": {
+      "ran": 418,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 418,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3034601138",
+      "gate": "access",
+      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/settings/_components/websiteCrawlSetting.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3036416301",
+      "gate": "access",
+      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/(inbox)/_components/messageItem.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3036425780",
+      "gate": "access",
+      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/(inbox)/_components/inbox.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3044855706",
+      "gate": "access",
+      "file": "frontend/packages/db/supabase/migrations/20250507063300_fix_organization_members_rls.sql",
+      "detail": "6 error(s), 0 warning(s): 6× permission escalation"
+    },
+    {
+      "pr_id": "3047627084",
+      "gate": "access",
+      "file": "frontend/apps/app/app/(app)/app/(with-project-and-branch)/projects/[projectId]/ref/[branchOrCommit]/build/page.tsx",
+      "detail": "6 error(s), 0 warning(s): 6× permission escalation"
+    },
+    {
+      "pr_id": "3050185194",
+      "gate": "access",
+      "file": "airbyte-integrations/connectors/source-facebook-marketing/source_facebook_marketing/schemas/ad_sets.json",
+      "detail": "13 error(s), 0 warning(s): 9× path traversal, 4× permission escalation"
+    },
+    {
+      "pr_id": "3056134870",
+      "gate": "propagation",
+      "file": "backend/src/api/chat-completions.ts",
+      "detail": "4 propagation error(s), 0 warning(s): Import path \"../worker-configuration\" changed in backend/src/a"
+    },
+    {
+      "pr_id": "3057698280",
+      "gate": "propagation",
+      "file": "target_chains/ethereum/contracts/contracts/pulse/Scheduler.sol",
+      "detail": "95 propagation error(s), 0 warning(s): Import path \"./entropy-deployments\" changed in apps/entropy-e"
+    },
+    {
+      "pr_id": "3057846956",
+      "gate": "propagation",
+      "file": "target_chains/ethereum/contracts/forge-test/PulseScheduler.t.sol",
+      "detail": "95 propagation error(s), 0 warning(s): Import path \"./entropy-deployments\" changed in apps/entropy-e"
+    },
+    {
+      "pr_id": "3057880405",
+      "gate": "propagation",
+      "file": "target_chains/ethereum/contracts/contracts/pulse/Scheduler.sol",
+      "detail": "95 propagation error(s), 0 warning(s): Import path \"./entropy-deployments\" changed in apps/entropy-e"
+    },
+    {
+      "pr_id": "3065695363",
+      "gate": "access",
+      "file": "frontend/packages/db/supabase/migrations/20250515100643_add_new_chat_workspace_tables.sql",
+      "detail": "102 error(s), 0 warning(s): 102× permission escalation"
+    },
+    {
+      "pr_id": "3067443431",
+      "gate": "contention",
+      "file": "apps/api/requests.http",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    }
+  ]
+}

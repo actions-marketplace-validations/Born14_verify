@@ -128,8 +128,26 @@ async function run(): Promise<void> {
 
   // ─── Step 3: Run verify ───────────────────────────────────────────────
   console.log('\n[3/4] Running verify...');
+
+  // Create a minimal appDir with only PR-changed files for fast scanning.
+  // This prevents gates from scanning 10K+ files in large repos like cal.com.
+  const { mkdirSync: mkdirS, writeFileSync: writeFS, rmSync: rmS } = await import('fs');
+  const { dirname: dirN, join: joinP } = await import('path');
+  const { tmpdir: tmpD } = await import('os');
+  const prAppDir = joinP(tmpD(), `verify-action-${Date.now()}`);
+  mkdirS(prAppDir, { recursive: true });
+
+  for (const edit of edits) {
+    try {
+      const filePath = joinP(prAppDir, edit.file);
+      mkdirS(dirN(filePath), { recursive: true });
+      // Write both search and replace content so gates can scan the full context
+      writeFS(filePath, (edit.search || '') + '\n' + (edit.replace || ''));
+    } catch { /* skip files with problematic paths */ }
+  }
+
   const result = await verify(edits, predicates, {
-    appDir,
+    appDir: prAppDir,
     gates: {
       // Diff-only gates — all enabled (these work without Docker/repo cloning)
       // security, access, temporal, propagation, state, capacity, contention,
@@ -145,6 +163,9 @@ async function run(): Promise<void> {
       vision: false,
     },
   });
+
+  // Cleanup temp appDir
+  try { rmS(prAppDir, { recursive: true, force: true }); } catch {}
 
   const passed = result.gates.filter(g => g.passed).length;
   const failed = result.gates.filter(g => !g.passed).length;

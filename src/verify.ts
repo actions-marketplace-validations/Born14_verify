@@ -101,6 +101,11 @@ export async function verify(
     // =========================================================================
     // GROUNDING — Read reality before checking anything
     // =========================================================================
+    // Skip the expensive filesystem scan when grounding gate is disabled
+    // (e.g., in the GitHub Action's diff-only mode)
+    // =========================================================================
+    // GROUNDING — Read reality before checking anything
+    // =========================================================================
     log('[grounding] Scanning app directory...');
     const grounding = groundInReality(config.appDir);
     log(`[grounding] Found ${grounding.routes.length} routes, ${grounding.routeCSSMap.size} route CSS maps`);

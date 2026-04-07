@@ -9927,8 +9927,21 @@ async function run() {
   }
   console.log(`  Total: ${predicates.length} predicates`);
   console.log("\n[3/4] Running verify...");
+  const { mkdirSync: mkdirS, writeFileSync: writeFS, rmSync: rmS } = await import("fs");
+  const { dirname: dirN, join: joinP } = await import("path");
+  const { tmpdir: tmpD } = await import("os");
+  const prAppDir = joinP(tmpD(), `verify-action-${Date.now()}`);
+  mkdirS(prAppDir, { recursive: true });
+  for (const edit of edits) {
+    try {
+      const filePath = joinP(prAppDir, edit.file);
+      mkdirS(dirN(filePath), { recursive: true });
+      writeFS(filePath, (edit.search || "") + "\n" + (edit.replace || ""));
+    } catch {
+    }
+  }
   const result = await verify(edits, predicates, {
-    appDir,
+    appDir: prAppDir,
     gates: {
       // Diff-only gates — all enabled (these work without Docker/repo cloning)
       // security, access, temporal, propagation, state, capacity, contention,
@@ -9945,6 +9958,10 @@ async function run() {
       vision: false
     }
   });
+  try {
+    rmS(prAppDir, { recursive: true, force: true });
+  } catch {
+  }
   const passed = result.gates.filter((g) => g.passed).length;
   const failed = result.gates.filter((g) => !g.passed).length;
   console.log(`  Result: ${result.success ? "PASS" : "FAIL"} (${passed} passed, ${failed} failed)`);

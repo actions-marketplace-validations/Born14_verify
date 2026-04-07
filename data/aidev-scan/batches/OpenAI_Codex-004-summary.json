@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-04-07T04:07:31.837Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 4,
+  "batchSize": 500,
+  "prsScanned": 499,
+  "prsWithFindings": 39,
+  "findingRate": "7.8%",
+  "highConfidenceRate": "43.6%",
+  "gateStats": {
+    "K5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 499,
+      "failed": 21,
+      "high": 2,
+      "low": 15,
+      "unknown": 4
+    },
+    "temporal": {
+      "ran": 478,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 478,
+      "failed": 2,
+      "high": 2,
+      "low": 0,
+      "unknown": 0
+    },
+    "state": {
+      "ran": 476,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 476,
+      "failed": 15,
+      "high": 12,
+      "low": 3,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 461,
+      "failed": 1,
+      "high": 1,
+      "low": 0,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 460,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 460,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3081347944",
+      "gate": "access",
+      "file": "src/bake/DevServer.zig",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3081547049",
+      "gate": "access",
+      "file": "src/cli/package_manager_command.zig",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3082279573",
+      "gate": "access",
+      "file": "src/cli/package_manager_command.zig",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3085153537",
+      "gate": "access",
+      "file": "src/app/src/pages/redteam/setup/components/PluginConfigDialog.tsx",
+      "detail": "1 error(s), 2 warning(s): 1× path traversal"
+    }
+  ]
+}

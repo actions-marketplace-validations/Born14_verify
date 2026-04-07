@@ -1,0 +1,97 @@
+{
+  "timestamp": "2026-04-07T05:09:21.745Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 34,
+  "batchSize": 500,
+  "prsScanned": 499,
+  "prsWithFindings": 45,
+  "findingRate": "9.0%",
+  "highConfidenceRate": "20.0%",
+  "gateStats": {
+    "K5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 499,
+      "failed": 25,
+      "high": 0,
+      "low": 25,
+      "unknown": 0
+    },
+    "temporal": {
+      "ran": 474,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 474,
+      "failed": 4,
+      "high": 2,
+      "low": 0,
+      "unknown": 2
+    },
+    "state": {
+      "ran": 470,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 470,
+      "failed": 4,
+      "high": 4,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 466,
+      "failed": 12,
+      "high": 3,
+      "low": 9,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 454,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 454,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3230202013",
+      "gate": "propagation",
+      "file": "modules/gptPreAuction.ts",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src/utils.js\" changed to \"../libraries/impUtil"
+    },
+    {
+      "pr_id": "3233206925",
+      "gate": "propagation",
+      "file": "modules/yieldlabBidAdapter.js",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src/utils.js\" changed to \"../libraries/impUtil"
+    }
+  ]
+}

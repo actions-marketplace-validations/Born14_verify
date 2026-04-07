@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-04-07T05:18:10.684Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 39,
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 26,
+  "findingRate": "5.2%",
+  "highConfidenceRate": "0.0%",
+  "gateStats": {
+    "K5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 500,
+      "failed": 17,
+      "high": 0,
+      "low": 16,
+      "unknown": 1
+    },
+    "temporal": {
+      "ran": 483,
+      "failed": 1,
+      "high": 0,
+      "low": 0,
+      "unknown": 1
+    },
+    "propagation": {
+      "ran": 482,
+      "failed": 1,
+      "high": 0,
+      "low": 0,
+      "unknown": 1
+    },
+    "state": {
+      "ran": 481,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 481,
+      "failed": 3,
+      "high": 0,
+      "low": 3,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 478,
+      "failed": 4,
+      "high": 0,
+      "low": 4,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 474,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 474,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3249955137",
+      "gate": "access",
+      "file": "app/views/dashboard/your_hours.html.slim",
+      "detail": "12 error(s), 0 warning(s): 7× path traversal, 5× permission escalation"
+    },
+    {
+      "pr_id": "3250150783",
+      "gate": "propagation",
+      "file": "modules/livewrappedAnalyticsAdapter.js",
+      "detail": "2 propagation error(s), 0 warning(s): CSS class \".section\" renamed in <style> but HTML still uses cl"
+    },
+    {
+      "pr_id": "3251895270",
+      "gate": "temporal",
+      "file": "api/api_helpers.py",
+      "detail": "1 temporal error(s), 0 warning(s): 2025_07_01_warnings.sql references table \"runs\" not created by an"
+    }
+  ]
+}

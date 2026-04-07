@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-04-07T04:11:42.472Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 6,
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 21,
+  "findingRate": "4.2%",
+  "highConfidenceRate": "38.1%",
+  "gateStats": {
+    "K5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 500,
+      "failed": 7,
+      "high": 0,
+      "low": 7,
+      "unknown": 0
+    },
+    "temporal": {
+      "ran": 493,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 493,
+      "failed": 4,
+      "high": 0,
+      "low": 1,
+      "unknown": 3
+    },
+    "state": {
+      "ran": 489,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 489,
+      "failed": 8,
+      "high": 8,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 481,
+      "failed": 2,
+      "high": 0,
+      "low": 1,
+      "unknown": 1
+    },
+    "observation": {
+      "ran": 479,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 479,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3090153150",
+      "gate": "propagation",
+      "file": "site/src/components/HomepageFeatures/index.tsx",
+      "detail": "5 propagation error(s), 0 warning(s): Import path \"../utils/navigation\" changed in site/src/pages/gu"
+    },
+    {
+      "pr_id": "3091352056",
+      "gate": "propagation",
+      "file": "src/prebid.js",
+      "detail": "24 propagation error(s), 0 warning(s): Import path \"../libraries/gptUtils/gptUtils.js\" changed to \"."
+    },
+    {
+      "pr_id": "3092649302",
+      "gate": "contention",
+      "file": "bindings/python/py_src/tokenizers/decoders/__init__.pyi",
+      "detail": "5 error(s), 0 warning(s): 5× race condition"
+    },
+    {
+      "pr_id": "3093605650",
+      "gate": "propagation",
+      "file": "packages/remix-forms/src/hidden-errors.test.tsx",
+      "detail": "2 propagation error(s), 0 warning(s): Import path \"./schema-form\" changed in packages/remix-forms/sr"
+    }
+  ]
+}

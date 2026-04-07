@@ -1,0 +1,115 @@
+{
+  "timestamp": "2026-04-07T04:23:11.616Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 10,
+  "batchSize": 500,
+  "prsScanned": 498,
+  "prsWithFindings": 29,
+  "findingRate": "5.8%",
+  "highConfidenceRate": "37.9%",
+  "gateStats": {
+    "K5": {
+      "ran": 497,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 497,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 497,
+      "failed": 20,
+      "high": 3,
+      "low": 13,
+      "unknown": 4
+    },
+    "temporal": {
+      "ran": 477,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 477,
+      "failed": 1,
+      "high": 0,
+      "low": 0,
+      "unknown": 1
+    },
+    "state": {
+      "ran": 476,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 476,
+      "failed": 3,
+      "high": 3,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 473,
+      "failed": 5,
+      "high": 5,
+      "low": 0,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 468,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 468,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3117467968",
+      "gate": "propagation",
+      "file": "frontend/tests/actions/actions.test.js",
+      "detail": "6 propagation error(s), 0 warning(s): Import path \"../../src/actions/preferencesActions\" changed in "
+    },
+    {
+      "pr_id": "3118869744",
+      "gate": "access",
+      "file": "SubtitleTranslate - ChatGPT.as",
+      "detail": "10 error(s), 0 warning(s): 10× path traversal"
+    },
+    {
+      "pr_id": "3119037956",
+      "gate": "access",
+      "file": "lib/data/model/app/server_detail_card.dart",
+      "detail": "14 error(s), 0 warning(s): 14× path traversal"
+    },
+    {
+      "pr_id": "3119383333",
+      "gate": "access",
+      "file": "lib/data/store/setting.dart",
+      "detail": "12 error(s), 0 warning(s): 12× path traversal"
+    },
+    {
+      "pr_id": "3119688458",
+      "gate": "access",
+      "file": "src/bun.js/api/server.zig",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    }
+  ]
+}

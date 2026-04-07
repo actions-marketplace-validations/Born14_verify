@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-04-07T04:01:49.776Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 2,
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 25,
+  "findingRate": "5.0%",
+  "highConfidenceRate": "24.0%",
+  "gateStats": {
+    "K5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 500,
+      "failed": 16,
+      "high": 2,
+      "low": 12,
+      "unknown": 2
+    },
+    "temporal": {
+      "ran": 484,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 484,
+      "failed": 3,
+      "high": 0,
+      "low": 2,
+      "unknown": 1
+    },
+    "state": {
+      "ran": 481,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 481,
+      "failed": 3,
+      "high": 3,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 478,
+      "failed": 3,
+      "high": 1,
+      "low": 1,
+      "unknown": 1
+    },
+    "observation": {
+      "ran": 475,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 475,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3071076995",
+      "gate": "access",
+      "file": "autogpt_platform/frontend/src/components/agptui/StoreCard.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3071573623",
+      "gate": "propagation",
+      "file": "packages/utils/src/str.test.ts",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"./str\" changed to \"../src/str\" in packages/utils/"
+    },
+    {
+      "pr_id": "3071883910",
+      "gate": "access",
+      "file": "server_api/src/services/engine/moderation/image_labeling/ImageLabelingBase.cjs",
+      "detail": "3 error(s), 0 warning(s): 3× path traversal"
+    },
+    {
+      "pr_id": "3072396145",
+      "gate": "contention",
+      "file": "packages/blob-storage/package.json",
+      "detail": "2 error(s), 0 warning(s): 2× race condition"
+    }
+  ]
+}

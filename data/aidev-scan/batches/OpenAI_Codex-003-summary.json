@@ -1,0 +1,127 @@
+{
+  "timestamp": "2026-04-07T04:04:17.575Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 3,
+  "batchSize": 500,
+  "prsScanned": 499,
+  "prsWithFindings": 43,
+  "findingRate": "8.6%",
+  "highConfidenceRate": "44.2%",
+  "gateStats": {
+    "K5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 499,
+      "failed": 19,
+      "high": 4,
+      "low": 11,
+      "unknown": 4
+    },
+    "temporal": {
+      "ran": 480,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 480,
+      "failed": 3,
+      "high": 0,
+      "low": 1,
+      "unknown": 2
+    },
+    "state": {
+      "ran": 477,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 477,
+      "failed": 11,
+      "high": 11,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 466,
+      "failed": 10,
+      "high": 4,
+      "low": 5,
+      "unknown": 1
+    },
+    "observation": {
+      "ran": 456,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 456,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3074285678",
+      "gate": "access",
+      "file": "src/StandaloneModuleGraph.zig",
+      "detail": "6 error(s), 2 warning(s): 6× path traversal"
+    },
+    {
+      "pr_id": "3074482141",
+      "gate": "access",
+      "file": "src/bun.zig",
+      "detail": "6 error(s), 2 warning(s): 6× path traversal"
+    },
+    {
+      "pr_id": "3074921265",
+      "gate": "propagation",
+      "file": "src/app/signers/PageClient.tsx",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"../../common/types/tokenPrice\" changed in src/app"
+    },
+    {
+      "pr_id": "3075224580",
+      "gate": "access",
+      "file": "alpha_factory_v1/demos/alpha_agi_business_v1/colab_alpha_agi_business_v1_demo.ipynb",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3078237999",
+      "gate": "access",
+      "file": "src/deps/zstd.zig",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3078790028",
+      "gate": "contention",
+      "file": "examples/oapp-solana/.env.example",
+      "detail": "1 error(s), 1 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "3078939326",
+      "gate": "propagation",
+      "file": "packages/cli/src/commands/create.ts",
+      "detail": "12 propagation error(s), 1 warning(s): Import path \"./types\" changed in packages/the-org/src/investm"
+    }
+  ]
+}

@@ -1,34 +1,34 @@
 {
-  "timestamp": "2026-04-07T03:59:33.184Z",
+  "timestamp": "2026-04-07T05:22:37.134Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
-  "batchNumber": 1,
+  "batchNumber": 42,
   "batchSize": 500,
-  "prsScanned": 499,
-  "prsWithFindings": 23,
-  "findingRate": "4.6%",
-  "highConfidenceRate": "26.1%",
+  "prsScanned": 500,
+  "prsWithFindings": 31,
+  "findingRate": "6.2%",
+  "highConfidenceRate": "19.4%",
   "gateStats": {
     "K5": {
-      "ran": 497,
+      "ran": 500,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "G5": {
-      "ran": 497,
+      "ran": 500,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "access": {
-      "ran": 497,
-      "failed": 17,
-      "high": 4,
-      "low": 12,
-      "unknown": 1
+      "ran": 500,
+      "failed": 20,
+      "high": 1,
+      "low": 16,
+      "unknown": 3
     },
     "temporal": {
       "ran": 480,
@@ -53,27 +53,27 @@
     },
     "capacity": {
       "ran": 480,
-      "failed": 2,
-      "high": 2,
-      "low": 0,
+      "failed": 7,
+      "high": 3,
+      "low": 4,
       "unknown": 0
     },
     "contention": {
-      "ran": 478,
+      "ran": 473,
       "failed": 4,
-      "high": 0,
-      "low": 3,
+      "high": 2,
+      "low": 1,
       "unknown": 1
     },
     "observation": {
-      "ran": 474,
+      "ran": 469,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "triangulation": {
-      "ran": 474,
+      "ran": 469,
       "failed": 0,
       "high": 0,
       "low": 0,
@@ -82,16 +82,28 @@
   },
   "unknowns": [
     {
-      "pr_id": "3070839522",
+      "pr_id": "3265530515",
       "gate": "access",
-      "file": ".agentignore",
+      "file": "meson.build",
+      "detail": "1 error(s), 0 warning(s): 1× permission escalation"
+    },
+    {
+      "pr_id": "3265560610",
+      "gate": "contention",
+      "file": "servers/server-clear-thought/package.json",
+      "detail": "1 error(s), 0 warning(s): 1× missing transaction"
+    },
+    {
+      "pr_id": "3265942018",
+      "gate": "access",
+      "file": ".nvmrc",
       "detail": "2 error(s), 0 warning(s): 2× path traversal"
     },
     {
-      "pr_id": "3070995753",
-      "gate": "contention",
-      "file": "opf-db/Cargo.toml",
-      "detail": "1 error(s), 0 warning(s): 1× race condition"
+      "pr_id": "3265964157",
+      "gate": "access",
+      "file": "go.mod",
+      "detail": "16 error(s), 0 warning(s): 16× path traversal"
     }
   ]
 }

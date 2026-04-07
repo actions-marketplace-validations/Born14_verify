@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-04-07T04:31:49.771Z",
+  "adapter": "aidev-pop",
+  "agent": "OpenAI_Codex",
+  "batchNumber": 12,
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 38,
+  "findingRate": "7.6%",
+  "highConfidenceRate": "21.1%",
+  "gateStats": {
+    "K5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 499,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 499,
+      "failed": 18,
+      "high": 3,
+      "low": 13,
+      "unknown": 2
+    },
+    "temporal": {
+      "ran": 481,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 481,
+      "failed": 9,
+      "high": 0,
+      "low": 8,
+      "unknown": 1
+    },
+    "state": {
+      "ran": 472,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 472,
+      "failed": 9,
+      "high": 5,
+      "low": 4,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 463,
+      "failed": 2,
+      "high": 0,
+      "low": 2,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 461,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 461,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3126063436",
+      "gate": "access",
+      "file": "scripts/parquet-export",
+      "detail": "3 error(s), 0 warning(s): 3× path traversal"
+    },
+    {
+      "pr_id": "3127321009",
+      "gate": "access",
+      "file": "apps/desktop/src/routes/camera.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3127935480",
+      "gate": "propagation",
+      "file": "lib/@rbac/rbac.js",
+      "detail": "4 propagation error(s), 0 warning(s): Import path \"./helpers\" changed in lib/@rbac/rbac.js.map but l"
+    }
+  ]
+}

@@ -1,79 +1,79 @@
 {
-  "timestamp": "2026-04-07T03:59:33.184Z",
+  "timestamp": "2026-04-07T04:50:45.867Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
-  "batchNumber": 1,
+  "batchNumber": 23,
   "batchSize": 500,
-  "prsScanned": 499,
-  "prsWithFindings": 23,
-  "findingRate": "4.6%",
-  "highConfidenceRate": "26.1%",
+  "prsScanned": 500,
+  "prsWithFindings": 13,
+  "findingRate": "2.6%",
+  "highConfidenceRate": "61.5%",
   "gateStats": {
     "K5": {
-      "ran": 497,
+      "ran": 500,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "G5": {
-      "ran": 497,
+      "ran": 500,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "access": {
-      "ran": 497,
-      "failed": 17,
-      "high": 4,
-      "low": 12,
-      "unknown": 1
+      "ran": 500,
+      "failed": 3,
+      "high": 0,
+      "low": 3,
+      "unknown": 0
     },
     "temporal": {
-      "ran": 480,
+      "ran": 497,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "propagation": {
-      "ran": 480,
-      "failed": 0,
-      "high": 0,
+      "ran": 497,
+      "failed": 1,
+      "high": 1,
       "low": 0,
       "unknown": 0
     },
     "state": {
-      "ran": 480,
+      "ran": 496,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "capacity": {
-      "ran": 480,
-      "failed": 2,
-      "high": 2,
-      "low": 0,
+      "ran": 496,
+      "failed": 6,
+      "high": 5,
+      "low": 1,
       "unknown": 0
     },
     "contention": {
-      "ran": 478,
-      "failed": 4,
-      "high": 0,
-      "low": 3,
+      "ran": 490,
+      "failed": 3,
+      "high": 2,
+      "low": 0,
       "unknown": 1
     },
     "observation": {
-      "ran": 474,
+      "ran": 487,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "triangulation": {
-      "ran": 474,
+      "ran": 487,
       "failed": 0,
       "high": 0,
       "low": 0,
@@ -82,16 +82,10 @@
   },
   "unknowns": [
     {
-      "pr_id": "3070839522",
-      "gate": "access",
-      "file": ".agentignore",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3070995753",
+      "pr_id": "3176486386",
       "gate": "contention",
-      "file": "opf-db/Cargo.toml",
-      "detail": "1 error(s), 0 warning(s): 1× race condition"
+      "file": "StikDebug.xcodeproj/project.pbxproj",
+      "detail": "1 error(s), 0 warning(s): 1× missing transaction"
     }
   ]
 }

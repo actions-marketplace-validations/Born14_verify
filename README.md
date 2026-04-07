@@ -1,5 +1,8 @@
 # @sovereign-labs/verify
 
+[![npm](https://img.shields.io/npm/v/@sovereign-labs/verify)](https://www.npmjs.com/package/@sovereign-labs/verify)
+[![GitHub Action](https://img.shields.io/badge/GitHub%20Action-Born14%2Fverify-blue)](https://github.com/Born14/verify)
+
 **Your agent says "done." But do you know *how* it fails?**
 
 Not whether it fails. *How.*
@@ -236,7 +239,7 @@ We scanned every PR in the [AIDev-POP dataset](https://huggingface.co/datasets/h
 ## GitHub Action
 
 ```yaml
-- uses: sovereign-labs/verify-action@v1
+- uses: Born14/verify@v0.8.2
 ```
 
 Runs verify on every PR. Posts gate results as a comment. Three modes:

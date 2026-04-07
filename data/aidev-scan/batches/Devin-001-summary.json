@@ -1,103 +1,91 @@
 {
-  "timestamp": "2026-04-07T10:13:45.761Z",
+  "timestamp": "2026-04-07T13:45:34.452Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 1,
-  "batchSize": 500,
-  "prsScanned": 497,
-  "prsWithFindings": 70,
-  "findingRate": "14.1%",
-  "highConfidenceRate": "51.4%",
+  "batchSize": 50,
+  "prsScanned": 49,
+  "prsWithFindings": 12,
+  "findingRate": "24.5%",
+  "highConfidenceRate": "66.7%",
   "gateStats": {
     "K5": {
-      "ran": 497,
+      "ran": 49,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "G5": {
-      "ran": 497,
+      "ran": 49,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "access": {
-      "ran": 497,
-      "failed": 33,
-      "high": 14,
-      "low": 19,
+      "ran": 49,
+      "failed": 6,
+      "high": 4,
+      "low": 2,
       "unknown": 0
     },
     "temporal": {
-      "ran": 464,
+      "ran": 43,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "propagation": {
-      "ran": 464,
-      "failed": 10,
-      "high": 2,
-      "low": 7,
-      "unknown": 1
+      "ran": 43,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
     },
     "state": {
-      "ran": 454,
+      "ran": 43,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
     "capacity": {
-      "ran": 454,
-      "failed": 19,
-      "high": 18,
-      "low": 1,
+      "ran": 43,
+      "failed": 3,
+      "high": 3,
+      "low": 0,
       "unknown": 0
     },
     "contention": {
-      "ran": 435,
-      "failed": 8,
-      "high": 2,
-      "low": 4,
-      "unknown": 2
+      "ran": 40,
+      "failed": 2,
+      "high": 0,
+      "low": 2,
+      "unknown": 0
     },
     "observation": {
-      "ran": 427,
+      "ran": 38,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     },
+    "security": {
+      "ran": 23,
+      "failed": 1,
+      "high": 1,
+      "low": 0,
+      "unknown": 0
+    },
     "triangulation": {
-      "ran": 427,
+      "ran": 37,
       "failed": 0,
       "high": 0,
       "low": 0,
       "unknown": 0
     }
   },
-  "unknowns": [
-    {
-      "pr_id": "2767891481",
-      "gate": "contention",
-      "file": "request-invoice-web/.eslintrc.json",
-      "detail": "8 error(s), 0 warning(s): 8× race condition"
-    },
-    {
-      "pr_id": "2776592584",
-      "gate": "propagation",
-      "file": "src/elements/content-picker/Footer.js.flow",
-      "detail": "12 propagation error(s), 0 warning(s): Import path \"../../components/button\" changed in src/elements"
-    },
-    {
-      "pr_id": "2780647811",
-      "gate": "contention",
-      "file": "package.json",
-      "detail": "1 error(s), 0 warning(s): 1× race condition"
-    }
-  ]
+  "unknowns": []
 }

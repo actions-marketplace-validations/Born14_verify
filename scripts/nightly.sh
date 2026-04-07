@@ -117,6 +117,14 @@ echo "" | tee -a "$LOG"
 echo "[Stage 8] Discover + confirm shapes..." | tee -a "$LOG"
 bun scripts/harness/discover-shapes.ts --confirm 2>&1 | tee -a "$LOG" || true
 
+# ─── Bridge: Scan discoveries → supply chain ────────────────────────────────
+
+if [ -f data/aidev-scan/new-shapes.jsonl ]; then
+  echo "" | tee -a "$LOG"
+  echo "[Bridge] Feeding scan discoveries to supply chain..." | tee -a "$LOG"
+  bun scripts/scan/bridge-to-supply.ts 2>&1 | tee -a "$LOG" || true
+fi
+
 # ─── Summary ────────────────────────────────────────────────────────────────
 
 echo "" | tee -a "$LOG"

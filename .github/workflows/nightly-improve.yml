@@ -337,6 +337,12 @@ jobs:
             --ledger=data/self-test-ledger.jsonl \
             --confirm 2>&1 | tee discover-output.txt || true
 
+          # Bridge scan discoveries to supply chain
+          if [ -f data/aidev-scan/new-shapes.jsonl ]; then
+            echo "=== Bridge: Scan → Supply Chain ==="
+            bun scripts/scan/bridge-to-supply.ts 2>&1 | tee -a discover-output.txt || true
+          fi
+
           # Extract new_shapes count from output
           NEW=$(grep -oP 'new_shapes=\K\d+' discover-output.txt || echo "0")
           echo "new_shapes=$NEW" >> $GITHUB_OUTPUT

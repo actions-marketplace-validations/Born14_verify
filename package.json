@@ -1,6 +1,6 @@
 {
   "name": "@sovereign-labs/verify",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Know how your AI coding agent fails. Deterministic verification of agent edits against filesystem reality. 26 gates, 647 failure shapes. Catches silent edit failures, fabricated selectors, undeclared mutations, security anti-patterns. Questions? github.com/Born14/verify/discussions",
   "type": "module",
   "main": "./dist/index.js",

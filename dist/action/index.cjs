@@ -5381,6 +5381,15 @@ function formatBytes(bytes) {
 // src/gates/access.ts
 var import_fs14 = require("fs");
 var import_path14 = require("path");
+var DANGEROUS_SYSTEM_PATHS = [
+  { regex: /\/etc\/(?:passwd|shadow|sudoers|hosts)/g, detail: "References sensitive system file" },
+  { regex: /~\/\.ssh\//g, detail: "References SSH credentials directory" },
+  { regex: /\/home\/[^/]+\/\.ssh\//g, detail: "References user SSH directory" },
+  { regex: /\/proc\/self\//g, detail: "References /proc/self/ (process introspection)" },
+  { regex: /C:\\Users\\[^\\]+\\\.ssh/gi, detail: "References Windows SSH directory" }
+];
+var USER_INPUT_PATTERN = /(?:req\.|params\.|body\.|query\.|args\.|process\.argv|request\.|ctx\.|context\.)/;
+var FILE_OP_WITH_INPUT = /(?:readFile|readFileSync|writeFile|writeFileSync|createReadStream|createWriteStream|open|openSync|unlink|unlinkSync|stat|statSync|access|accessSync|exec|execSync|spawn)\s*\(\s*(?:req\.|params\.|body\.|query\.|args\.|process\.argv)/g;
 var SYSTEM_PATH_PATTERNS = [
   { regex: /\/etc\//g, detail: "References /etc/ (system configuration)" },
   { regex: /\/var\/log\//g, detail: "References /var/log/ (system logs)" },
@@ -5388,13 +5397,10 @@ var SYSTEM_PATH_PATTERNS = [
   { regex: /\/proc\//g, detail: "References /proc/ (kernel process info)" },
   { regex: /\/sys\//g, detail: "References /sys/ (kernel parameters)" },
   { regex: /\/root\//g, detail: "References /root/ (root home directory)" },
-  { regex: /~\/\.ssh\//g, detail: "References ~/.ssh/ (SSH credentials)" },
-  { regex: /\/home\/[^/]+\/\.ssh\//g, detail: "References user .ssh directory" },
   { regex: /\/usr\/local\/bin\//g, detail: "References /usr/local/bin/ (system binaries)" },
   { regex: /\/tmp\//g, detail: "References /tmp/ (shared temporary directory)" },
   { regex: /C:\\Windows\\/gi, detail: "References C:\\Windows\\ (Windows system directory)" },
-  { regex: /C:\\Program Files/gi, detail: "References C:\\Program Files (Windows programs)" },
-  { regex: /C:\\Users\\[^\\]+\\\.ssh/gi, detail: "References Windows user .ssh directory" }
+  { regex: /C:\\Program Files/gi, detail: "References C:\\Program Files (Windows programs)" }
 ];
 var DOCKER_SOCKET_PATTERNS = [
   { regex: /\/var\/run\/docker\.sock/g, detail: "Docker socket access (container escape risk)" },
@@ -5496,16 +5502,42 @@ function scanSystemPaths(files) {
       const line = file.lines[i];
       const trimmed = line.trim();
       if (trimmed.startsWith("//") || trimmed.startsWith("#") || trimmed.startsWith("*")) continue;
-      for (const { regex, detail } of SYSTEM_PATH_PATTERNS) {
+      const hasUserInput = USER_INPUT_PATTERN.test(line);
+      FILE_OP_WITH_INPUT.lastIndex = 0;
+      if (FILE_OP_WITH_INPUT.test(line)) {
+        violations.push({
+          type: "path_traversal",
+          severity: "error",
+          file: file.relativePath,
+          line: i + 1,
+          detail: "User input in file operation (path traversal risk)"
+        });
+        continue;
+      }
+      for (const { regex, detail } of DANGEROUS_SYSTEM_PATHS) {
         regex.lastIndex = 0;
         if (regex.test(line)) {
           violations.push({
             type: "path_traversal",
-            severity: "error",
+            severity: hasUserInput ? "error" : "warning",
             file: file.relativePath,
             line: i + 1,
-            detail
+            detail: hasUserInput ? `${detail} \u2014 with user input (path traversal)` : `${detail} (hardcoded, low risk)`
           });
+        }
+      }
+      if (hasUserInput) {
+        for (const { regex, detail } of SYSTEM_PATH_PATTERNS) {
+          regex.lastIndex = 0;
+          if (regex.test(line)) {
+            violations.push({
+              type: "path_traversal",
+              severity: "error",
+              file: file.relativePath,
+              line: i + 1,
+              detail: `${detail} \u2014 with user input`
+            });
+          }
         }
       }
       for (const { regex, detail } of DOCKER_SOCKET_PATTERNS) {
@@ -5666,6 +5698,7 @@ function runAccessGate(ctx) {
   const sourceFiles = [];
   for (const edit of ctx.edits) {
     if (!edit.replace) continue;
+    if (edit.file.endsWith(".d.ts") || edit.file.includes("types.ts") || edit.file.includes("types/")) continue;
     sourceFiles.push({
       relativePath: edit.file,
       content: edit.replace,
@@ -7889,9 +7922,12 @@ function runContentionGate(ctx) {
   const start = Date.now();
   const issues = [];
   const baseDir = ctx.stageDir ?? ctx.config.appDir;
+  const FRONTEND_EXTS = /* @__PURE__ */ new Set(["tsx", "jsx", "vue", "svelte", "html", "css", "scss", "less"]);
   const sourceFiles = [];
   for (const edit of ctx.edits) {
     if (!edit.replace) continue;
+    const ext = edit.file.split(".").pop()?.toLowerCase() ?? "";
+    if (FRONTEND_EXTS.has(ext)) continue;
     sourceFiles.push({
       relativePath: edit.file,
       content: edit.replace,

@@ -142,6 +142,46 @@ export function classifyFinding(finding: ScanFinding): FindingClassification {
     return { confidence: 'low', reason: 'GC-660: propagation gate on license file', shape: 'GC-660' };
   }
 
+  // GC-661: Access gate on agent config JSON (.promptx, .claude, .cursor config)
+  if (gate === 'access' && (/\.promptx\//.test(file) || /\.claude\//.test(file) || /\.cursor\//.test(file))) {
+    return { confidence: 'low', reason: 'GC-661: access gate on agent config JSON', shape: 'GC-661' };
+  }
+
+  // GC-662: Contention gate on config JSON (mcp.json, lockfiles)
+  if (gate === 'contention' && (/mcp\.json$/.test(file) || /[-.]lock\.(json|yaml|yml)$|\.lock$/.test(file))) {
+    return { confidence: 'low', reason: 'GC-662: contention gate on config JSON', shape: 'GC-662' };
+  }
+
+  // GC-663: Access gate on shell scripts — paths in scripts are normal
+  if (gate === 'access' && /\.(sh|bash|zsh)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-663: access gate on shell script', shape: 'GC-663' };
+  }
+
+  // GC-664: Access gate on .env.example/.env.staging — template files, not production
+  if (gate === 'access' && /\.env\.(example|sample|template|staging|development|test)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-664: access gate on env template file', shape: 'GC-664' };
+  }
+
+  // GC-665: Access gate on agent rule files
+  if (gate === 'access' && /\.(cursorrules|clinerules)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-665: access gate on agent rule file', shape: 'GC-665' };
+  }
+
+  // GC-666: Access gate on Gradle build files
+  if (gate === 'access' && /\.(gradle|gradle\.kts)$|settings\.gradle/.test(file)) {
+    return { confidence: 'low', reason: 'GC-666: access gate on Gradle build file', shape: 'GC-666' };
+  }
+
+  // GC-667: Contention gate on CI workflow YAML
+  if (gate === 'contention' && /\.(yaml|yml)$/.test(file) && file.includes('.github/')) {
+    return { confidence: 'low', reason: 'GC-667: contention gate on CI workflow YAML', shape: 'GC-667' };
+  }
+
+  // GC-668: Propagation gate on JSONC config files
+  if (gate === 'propagation' && /\.jsonc$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-668: propagation gate on JSONC config', shape: 'GC-668' };
+  }
+
   // Doc files rarely have real issues (docs show examples, not production code)
   if (isDocFile(file)) {
     return { confidence: 'low', reason: 'finding in documentation file — likely example code' };

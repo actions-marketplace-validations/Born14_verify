@@ -334,12 +334,151 @@ function compile() {
     console.log(`  Generated: agents/${agent}.md`);
   }
 
+  // Generate cross-agent comparison
+  const comparison = generateComparison(summaryFiles);
+  writeFileSync(join(WIKI_DIR, 'comparison.md'), comparison);
+  console.log(`  Generated: comparison.md`);
+
   // Generate index
   const index = generateIndex([...agents].sort(), summaryFiles.length, totalPRs);
   writeFileSync(join(WIKI_DIR, 'index.md'), index);
   console.log(`  Generated: index.md`);
 
   console.log(`\nWiki compiled: ${WIKI_DIR}`);
+}
+
+// =============================================================================
+// CROSS-AGENT COMPARISON PAGE
+// =============================================================================
+
+function generateComparison(summaryFiles: string[]): string {
+  const lines: string[] = [];
+
+  // Aggregate per agent
+  const agentData: Record<string, {
+    prs: number;
+    findings: number;
+    high: number;
+    low: number;
+    unknown: number;
+    gates: Record<string, { ran: number; failed: number; high: number }>;
+  }> = {};
+
+  for (const sf of summaryFiles) {
+    const s: BatchSummary = JSON.parse(readFileSync(sf, 'utf-8'));
+    if (!agentData[s.agent]) {
+      agentData[s.agent] = { prs: 0, findings: 0, high: 0, low: 0, unknown: 0, gates: {} };
+    }
+    const a = agentData[s.agent];
+    a.prs += s.prsScanned;
+    a.findings += s.prsWithFindings;
+
+    for (const [gate, stats] of Object.entries(s.gateStats)) {
+      if (!a.gates[gate]) a.gates[gate] = { ran: 0, failed: 0, high: 0 };
+      a.gates[gate].ran += stats.ran;
+      a.gates[gate].failed += stats.failed;
+      a.gates[gate].high += stats.high;
+    }
+  }
+
+  // Compute totals from results files
+  for (const sf of summaryFiles) {
+    const s: BatchSummary = JSON.parse(readFileSync(sf, 'utf-8'));
+    const resultsFile = sf.replace('-summary.json', '.jsonl');
+    if (!existsSync(resultsFile)) continue;
+    const results: PRResult[] = readFileSync(resultsFile, 'utf-8')
+      .split('\n').filter(l => l.trim()).map(l => JSON.parse(l));
+    const a = agentData[s.agent];
+    a.high += results.reduce((sum, r) => sum + r.highCount, 0);
+    a.low += results.reduce((sum, r) => sum + r.lowCount, 0);
+    a.unknown += results.reduce((sum, r) => sum + r.unknownCount, 0);
+  }
+
+  const totalPRs = Object.values(agentData).reduce((a, d) => a + d.prs, 0);
+  const totalFindings = Object.values(agentData).reduce((a, d) => a + d.findings, 0);
+
+  lines.push('# Cross-Agent Reliability Comparison');
+  lines.push('');
+  lines.push(`Based on ${totalPRs.toLocaleString()} real agent PRs from the AIDev-POP dataset.`);
+  lines.push('');
+
+  // Main comparison table
+  lines.push('## Structural Finding Rates');
+  lines.push('');
+  lines.push('| Agent | PRs | Raw Finding Rate | High-Confidence Rate | Top Failure Pattern |');
+  lines.push('|-------|-----|-----------------|---------------------|---------------------|');
+
+  // Sort by high-confidence rate descending
+  const sorted = Object.entries(agentData).sort((a, b) => {
+    const rateA = a[1].high / a[1].prs;
+    const rateB = b[1].high / b[1].prs;
+    return rateB - rateA;
+  });
+
+  for (const [agent, data] of sorted) {
+    const rawRate = (data.findings / data.prs * 100).toFixed(1);
+    const highRate = (data.high / data.prs * 100).toFixed(1);
+    // Find top gate
+    const topGate = Object.entries(data.gates)
+      .filter(([_, s]) => s.high > 0)
+      .sort((a, b) => b[1].high - a[1].high)[0];
+    const topPattern = topGate ? `${topGate[0]} (${topGate[1].high})` : 'none';
+    lines.push(`| ${agent} | ${data.prs} | ${rawRate}% | ${highRate}% | ${topPattern} |`);
+  }
+  lines.push('');
+
+  // Per-gate comparison
+  lines.push('## Per-Gate Failure Rates (High Confidence Only)');
+  lines.push('');
+
+  const allGates = new Set<string>();
+  for (const data of Object.values(agentData)) {
+    for (const gate of Object.keys(data.gates)) allGates.add(gate);
+  }
+
+  const gateHeader = ['| Gate |', ...sorted.map(([a]) => ` ${a} |`)].join('');
+  const gateSep = ['|------|', ...sorted.map(() => '------|')].join('');
+  lines.push(gateHeader);
+  lines.push(gateSep);
+
+  for (const gate of [...allGates].sort()) {
+    const hasFindings = sorted.some(([_, d]) => (d.gates[gate]?.high ?? 0) > 0);
+    if (!hasFindings) continue;
+    const cells = sorted.map(([_, d]) => {
+      const stats = d.gates[gate];
+      if (!stats || stats.high === 0) return ' — |';
+      const rate = (stats.high / stats.ran * 100).toFixed(1);
+      return ` ${rate}% (${stats.high}) |`;
+    });
+    lines.push(`| ${gate} |${cells.join('')}`);
+  }
+  lines.push('');
+
+  // Key insights
+  lines.push('## Key Insights');
+  lines.push('');
+  lines.push('- **Agents fail differently.** Each agent has a distinct structural failure signature.');
+  lines.push(`- **Overall:** ${(totalFindings / totalPRs * 100).toFixed(1)}% of agent PRs have structural findings (${totalPRs.toLocaleString()} PRs scanned).`);
+
+  const highTotal = Object.values(agentData).reduce((a, d) => a + d.high, 0);
+  lines.push(`- **High confidence:** ${(highTotal / totalPRs * 100).toFixed(1)}% of PRs have high-confidence structural issues.`);
+
+  // Agent-specific insights
+  for (const [agent, data] of sorted) {
+    const topGate = Object.entries(data.gates)
+      .filter(([_, s]) => s.high > 0)
+      .sort((a, b) => b[1].high - a[1].high)[0];
+    if (topGate) {
+      lines.push(`- **${agent}:** top issue is ${topGate[0]} (${topGate[1].high} high-confidence findings across ${data.prs} PRs).`);
+    }
+  }
+  lines.push('');
+
+  lines.push('---');
+  lines.push(`*Auto-generated by wiki-compiler.ts from ${summaryFiles.length} batches. Updated ${new Date().toISOString().split('T')[0]}.*`);
+  lines.push('*Dataset: [AIDev-POP](https://huggingface.co/datasets/hao-li/AIDev) — real agent PRs from popular open-source repos.*');
+
+  return lines.join('\n');
 }
 
 compile();

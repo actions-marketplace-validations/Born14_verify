@@ -131,9 +131,17 @@ async function run(): Promise<void> {
   const result = await verify(edits, predicates, {
     appDir,
     gates: {
+      // Diff-only gates — all enabled (these work without Docker/repo cloning)
+      // security, access, temporal, propagation, state, capacity, contention,
+      // observation, containment (G5), constraints (K5) all fire on edits alone
+
+      // Disabled: need Docker, Playwright, or full repo state
+      grounding: false,    // needs real repo source files for selector validation
+      syntax: false,       // needs real files for search string matching
       staging: stagingEnabled,
       browser: false,
       http: stagingEnabled,
+      invariants: false,
       vision: false,
     },
   });

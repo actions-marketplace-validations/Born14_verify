@@ -4491,11 +4491,16 @@ function runSecurityGate(ctx) {
       predicateResults: []
     };
   }
-  const scanDir = ctx.stageDir ?? ctx.config.appDir;
-  let sourceFiles = readSourceFiles(scanDir);
+  let sourceFiles;
   if (ctx.edits.length > 0) {
-    const editedFiles = new Set(ctx.edits.map((e) => e.file));
-    sourceFiles = sourceFiles.filter((f) => editedFiles.has(f.relativePath));
+    sourceFiles = ctx.edits.filter((e) => e.replace).map((e) => ({
+      path: e.file,
+      content: (e.search || "") + "\n" + e.replace,
+      relativePath: e.file
+    }));
+  } else {
+    const scanDir = ctx.stageDir ?? ctx.config.appDir;
+    sourceFiles = readSourceFiles(scanDir);
   }
   const results = [];
   let allPassed = true;
@@ -9925,9 +9930,18 @@ async function run() {
   const result = await verify(edits, predicates, {
     appDir,
     gates: {
+      // Diff-only gates — all enabled (these work without Docker/repo cloning)
+      // security, access, temporal, propagation, state, capacity, contention,
+      // observation, containment (G5), constraints (K5) all fire on edits alone
+      // Disabled: need Docker, Playwright, or full repo state
+      grounding: false,
+      // needs real repo source files for selector validation
+      syntax: false,
+      // needs real files for search string matching
       staging: stagingEnabled,
       browser: false,
       http: stagingEnabled,
+      invariants: false,
       vision: false
     }
   });

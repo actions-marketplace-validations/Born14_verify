@@ -415,14 +415,22 @@ export function runSecurityGate(ctx: GateContext): GateResult & { predicateResul
     };
   }
 
-  const scanDir = ctx.stageDir ?? ctx.config.appDir;
-  let sourceFiles = readSourceFiles(scanDir);
-
-  // Scope scan to edited files only — avoids flagging pre-existing issues
-  // in files the PR didn't touch. If no edits, scan everything (full audit mode).
+  // Build source files from edits when available (fast — no filesystem scan).
+  // Falls back to readSourceFiles for full audit mode (no edits).
+  let sourceFiles: Array<{ path: string; content: string; relativePath: string }>;
   if (ctx.edits.length > 0) {
-    const editedFiles = new Set(ctx.edits.map(e => e.file));
-    sourceFiles = sourceFiles.filter(f => editedFiles.has(f.relativePath));
+    // Fast path: build source files directly from edit content
+    sourceFiles = ctx.edits
+      .filter(e => e.replace)
+      .map(e => ({
+        path: e.file,
+        content: (e.search || '') + '\n' + e.replace,
+        relativePath: e.file,
+      }));
+  } else {
+    // Full audit mode: scan the entire directory
+    const scanDir = ctx.stageDir ?? ctx.config.appDir;
+    sourceFiles = readSourceFiles(scanDir);
   }
   const results: PredicateResult[] = [];
   let allPassed = true;

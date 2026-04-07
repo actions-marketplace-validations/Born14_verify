@@ -324,7 +324,7 @@ The extraction produced three packages:
 | Structural finding rate | 8.5% raw, 3.4% high-confidence |
 | Nightly runners | 2 (Lenovo with Docker, GitHub CI without) |
 | GitHub Action | Built, tested, multi-provider LLM |
-| npm | v0.8.0, 590 weekly downloads |
+| npm | v0.8.2, 691 weekly downloads |
 | Runtime dependencies | 0 |
 
 ---

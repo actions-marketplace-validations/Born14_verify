@@ -178,7 +178,7 @@ npx @sovereign-labs/verify init          # Create .verify/check.json
 npx @sovereign-labs/verify check         # Run verification
 npx @sovereign-labs/verify demo          # See what it catches
 npx @sovereign-labs/verify ground        # Scan CSS/HTML/routes
-npx @sovereign-labs/verify self-test     # Run 9,000+ scenario harness
+npx @sovereign-labs/verify self-test     # Run 2,800+ scenario harness
 git diff | npx @sovereign-labs/verify check --diff   # Pipe git diff
 ```
 

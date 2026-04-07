@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-04-07T03:08:40.995Z",
+  "adapter": "aidev-pop",
+  "agent": "Copilot",
+  "batchNumber": 2,
+  "batchSize": 500,
+  "prsScanned": 449,
+  "prsWithFindings": 54,
+  "findingRate": "12.0%",
+  "highConfidenceRate": "35.2%",
+  "gateStats": {
+    "K5": {
+      "ran": 449,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 449,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 449,
+      "failed": 37,
+      "high": 9,
+      "low": 23,
+      "unknown": 5
+    },
+    "temporal": {
+      "ran": 412,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 412,
+      "failed": 4,
+      "high": 0,
+      "low": 0,
+      "unknown": 4
+    },
+    "state": {
+      "ran": 408,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 408,
+      "failed": 8,
+      "high": 6,
+      "low": 2,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 400,
+      "failed": 5,
+      "high": 4,
+      "low": 1,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 395,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 395,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3087114684",
+      "gate": "propagation",
+      "file": "packages/agents/src/HfAgent.ts",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src.js\" changed to \"../src/HfAgent.js\" in pack"
+    },
+    {
+      "pr_id": "3090862045",
+      "gate": "access",
+      "file": "SPECS/bind/bind.signatures.json",
+      "detail": "39 error(s), 1 warning(s): 32× path traversal, 6× permission escalation, 1× environment escalation"
+    },
+    {
+      "pr_id": "3093824141",
+      "gate": "propagation",
+      "file": "src/llms.ts",
+      "detail": "2 propagation error(s), 0 warning(s): CSS class \".tooltip\" renamed in <style> but HTML still uses cl"
+    },
+    {
+      "pr_id": "3096200855",
+      "gate": "propagation",
+      "file": "yarn.lock",
+      "detail": "86 propagation error(s), 0 warning(s): CSS class \".small\" renamed in packages/tokens-studio-for-figm"
+    },
+    {
+      "pr_id": "3096902726",
+      "gate": "propagation",
+      "file": "dotCover.Output/css/dotcover.report.css",
+      "detail": "43 propagation error(s), 0 warning(s): CSS class \".vsplitbarmask\" renamed in dotCover.Output/css/dot"
+    },
+    {
+      "pr_id": "3098589362",
+      "gate": "access",
+      "file": "eng/Version.Details.xml",
+      "detail": "481 error(s), 0 warning(s): 481× path traversal"
+    },
+    {
+      "pr_id": "3099639511",
+      "gate": "access",
+      "file": "eng/Version.Details.xml",
+      "detail": "481 error(s), 0 warning(s): 481× path traversal"
+    },
+    {
+      "pr_id": "3100789352",
+      "gate": "access",
+      "file": "global.json",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3105161001",
+      "gate": "access",
+      "file": "mlflow/R/mlflow/DESCRIPTION",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    }
+  ]
+}

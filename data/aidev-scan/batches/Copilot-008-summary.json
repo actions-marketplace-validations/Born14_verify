@@ -1,0 +1,217 @@
+{
+  "timestamp": "2026-04-07T03:43:14.731Z",
+  "adapter": "aidev-pop",
+  "agent": "Copilot",
+  "batchNumber": 8,
+  "batchSize": 500,
+  "prsScanned": 462,
+  "prsWithFindings": 59,
+  "findingRate": "12.8%",
+  "highConfidenceRate": "32.2%",
+  "gateStats": {
+    "K5": {
+      "ran": 462,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 462,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 462,
+      "failed": 37,
+      "high": 9,
+      "low": 15,
+      "unknown": 13
+    },
+    "temporal": {
+      "ran": 425,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 425,
+      "failed": 4,
+      "high": 1,
+      "low": 0,
+      "unknown": 3
+    },
+    "state": {
+      "ran": 421,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 421,
+      "failed": 5,
+      "high": 4,
+      "low": 1,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 416,
+      "failed": 13,
+      "high": 5,
+      "low": 2,
+      "unknown": 6
+    },
+    "observation": {
+      "ran": 403,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 403,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3211680515",
+      "gate": "access",
+      "file": "Makefile",
+      "detail": "10 error(s), 0 warning(s): 6× path traversal, 4× permission escalation"
+    },
+    {
+      "pr_id": "3211770505",
+      "gate": "propagation",
+      "file": "src/vs/base/browser/ui/tree/abstractTree.ts",
+      "detail": "5 propagation error(s), 0 warning(s): CSS class \".tree-container\" renamed in <style> but HTML still "
+    },
+    {
+      "pr_id": "3214127213",
+      "gate": "access",
+      "file": "source/slang/slang-check-decl.cpp",
+      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
+    },
+    {
+      "pr_id": "3214340478",
+      "gate": "propagation",
+      "file": "Bootstrap/DiagnosticLogger.ts",
+      "detail": "724 propagation error(s), 30 warning(s): Import path \"../Library/RequestResponseHeaders\" changed in "
+    },
+    {
+      "pr_id": "3216208267",
+      "gate": "contention",
+      "file": "src/prometheus/compiler/compiler.lua",
+      "detail": "2 error(s), 0 warning(s): 2× race condition"
+    },
+    {
+      "pr_id": "3216646414",
+      "gate": "access",
+      "file": "build/CMakeFiles/3.31.6/CMakeCCompiler.cmake",
+      "detail": "28 error(s), 0 warning(s): 28× path traversal"
+    },
+    {
+      "pr_id": "3217654347",
+      "gate": "access",
+      "file": "blobplugin_profile.cov",
+      "detail": "7 error(s), 0 warning(s): 7× path traversal"
+    },
+    {
+      "pr_id": "3221937633",
+      "gate": "propagation",
+      "file": "packages/client/src/utils.test-d.ts",
+      "detail": "2 propagation error(s), 0 warning(s): Import path \"./types\" changed in packages/client/src/utils.tes"
+    },
+    {
+      "pr_id": "3222050638",
+      "gate": "access",
+      "file": "GUI/Qt/Components/FileChooserPanelWithHistory.cxx",
+      "detail": "6 error(s), 0 warning(s): 6× path traversal"
+    },
+    {
+      "pr_id": "3223503362",
+      "gate": "access",
+      "file": "openmetadata-ui/src/main/resources/ui/src/pages/LogsViewerPage/LogsViewerPage.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3225203739",
+      "gate": "access",
+      "file": "library/decimal.po",
+      "detail": "3 error(s), 0 warning(s): 3× path traversal"
+    },
+    {
+      "pr_id": "3225205321",
+      "gate": "access",
+      "file": "library/sys.po",
+      "detail": "3 error(s), 0 warning(s): 3× path traversal"
+    },
+    {
+      "pr_id": "3226217517",
+      "gate": "contention",
+      "file": ".ts-unused-exports.json",
+      "detail": "2 error(s), 2 warning(s): 2× race condition"
+    },
+    {
+      "pr_id": "3226517119",
+      "gate": "contention",
+      "file": "packages/renderer/.editorconfig",
+      "detail": "1 error(s), 1 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "3226779561",
+      "gate": "contention",
+      "file": "custom_components/smart_irrigation/frontend/dist/smart-irrigation.js",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "3226805360",
+      "gate": "access",
+      "file": ".devcontainer/devcontainer.json",
+      "detail": "7 error(s), 0 warning(s): 5× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3226806559",
+      "gate": "access",
+      "file": ".devcontainer/devcontainer.json",
+      "detail": "7 error(s), 0 warning(s): 5× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3226808033",
+      "gate": "access",
+      "file": ".devcontainer/devcontainer.json",
+      "detail": "7 error(s), 0 warning(s): 5× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3226808853",
+      "gate": "access",
+      "file": ".devcontainer/devcontainer.json",
+      "detail": "7 error(s), 0 warning(s): 5× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3227679621",
+      "gate": "access",
+      "file": "coverage.out",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3230608495",
+      "gate": "contention",
+      "file": "custom_components/smart_irrigation/frontend/dist/smart-irrigation.js",
+      "detail": "2 error(s), 0 warning(s): 2× race condition"
+    },
+    {
+      "pr_id": "3230611789",
+      "gate": "contention",
+      "file": "custom_components/smart_irrigation/frontend/dist/smart-irrigation.js",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    }
+  ]
+}

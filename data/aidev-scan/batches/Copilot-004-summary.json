@@ -1,0 +1,181 @@
+{
+  "timestamp": "2026-04-07T03:18:15.031Z",
+  "adapter": "aidev-pop",
+  "agent": "Copilot",
+  "batchNumber": 4,
+  "batchSize": 500,
+  "prsScanned": 468,
+  "prsWithFindings": 69,
+  "findingRate": "14.7%",
+  "highConfidenceRate": "39.1%",
+  "gateStats": {
+    "K5": {
+      "ran": 468,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 468,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 468,
+      "failed": 54,
+      "high": 17,
+      "low": 26,
+      "unknown": 11
+    },
+    "temporal": {
+      "ran": 414,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 414,
+      "failed": 6,
+      "high": 1,
+      "low": 0,
+      "unknown": 5
+    },
+    "state": {
+      "ran": 408,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 408,
+      "failed": 3,
+      "high": 3,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 405,
+      "failed": 6,
+      "high": 6,
+      "low": 0,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 399,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 399,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3136582509",
+      "gate": "access",
+      "file": "integrations/argocd/.port/resources/blueprints.json",
+      "detail": "20 error(s), 0 warning(s): 20× path traversal"
+    },
+    {
+      "pr_id": "3136584440",
+      "gate": "access",
+      "file": "integrations/opsgenie/.port/resources/blueprints.json",
+      "detail": "10 error(s), 0 warning(s): 10× path traversal"
+    },
+    {
+      "pr_id": "3137658330",
+      "gate": "propagation",
+      "file": "src/filter/isDimension.test.ts",
+      "detail": "4 propagation error(s), 0 warning(s): Import path \"./getValue.js\" changed in src/utilities/dimension"
+    },
+    {
+      "pr_id": "3138223553",
+      "gate": "access",
+      "file": "src/reactviews/pages/ConnectionDialog/connectionsListContainer.tsx",
+      "detail": "20 error(s), 0 warning(s): 20× permission escalation"
+    },
+    {
+      "pr_id": "3138364477",
+      "gate": "access",
+      "file": "eng/pipelines/templates/stages/platform-matrix.json",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "3141665913",
+      "gate": "propagation",
+      "file": "language_service/src/state.rs",
+      "detail": "11 propagation error(s), 0 warning(s): Import path \"./shared\" changed in vscode/src/copilot/azqChatS"
+    },
+    {
+      "pr_id": "3141911282",
+      "gate": "access",
+      "file": "src/reactviews/common/forms/form.component.tsx",
+      "detail": "20 error(s), 0 warning(s): 20× permission escalation"
+    },
+    {
+      "pr_id": "3142854017",
+      "gate": "propagation",
+      "file": "src/actions/expandHoverDown.ts",
+      "detail": "74 propagation error(s), 0 warning(s): Import path \"../@types/DragThoughtItem\" changed in src/compon"
+    },
+    {
+      "pr_id": "3144633929",
+      "gate": "propagation",
+      "file": "src/vs/editor/common/standaloneStrings.ts",
+      "detail": "10 propagation error(s), 0 warning(s): CSS class \".branding\" renamed in <style> but HTML still uses "
+    },
+    {
+      "pr_id": "3144671213",
+      "gate": "access",
+      "file": "src/Templates/src/cgmanifest.json",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "3145684400",
+      "gate": "propagation",
+      "file": "packages/ui-graphs/src/calculations.ts",
+      "detail": "24 propagation error(s), 0 warning(s): Import path \"./types\" changed to \"../types\" in packages/ui-gr"
+    },
+    {
+      "pr_id": "3147372193",
+      "gate": "access",
+      "file": "vendor/bundle/ruby/3.2.0/bin/combust",
+      "detail": "10 error(s), 1 warning(s): 10× path traversal"
+    },
+    {
+      "pr_id": "3147820985",
+      "gate": "access",
+      "file": "src/gui/DatabaseOpenWidget.cpp",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3151237217",
+      "gate": "access",
+      "file": "global.json",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3151614876",
+      "gate": "access",
+      "file": "src/bicep/mlz.bicep",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3153218899",
+      "gate": "access",
+      "file": "packages/core/src/Composition.tsx",
+      "detail": "9 error(s), 0 warning(s): 9× path traversal"
+    }
+  ]
+}

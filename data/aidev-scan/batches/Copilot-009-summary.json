@@ -1,0 +1,127 @@
+{
+  "timestamp": "2026-04-07T03:49:08.431Z",
+  "adapter": "aidev-pop",
+  "agent": "Copilot",
+  "batchNumber": 9,
+  "batchSize": 500,
+  "prsScanned": 462,
+  "prsWithFindings": 66,
+  "findingRate": "14.3%",
+  "highConfidenceRate": "30.3%",
+  "gateStats": {
+    "K5": {
+      "ran": 462,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 462,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 462,
+      "failed": 42,
+      "high": 12,
+      "low": 28,
+      "unknown": 2
+    },
+    "temporal": {
+      "ran": 420,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 420,
+      "failed": 5,
+      "high": 1,
+      "low": 2,
+      "unknown": 2
+    },
+    "state": {
+      "ran": 415,
+      "failed": 1,
+      "high": 0,
+      "low": 0,
+      "unknown": 1
+    },
+    "capacity": {
+      "ran": 414,
+      "failed": 5,
+      "high": 3,
+      "low": 2,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 409,
+      "failed": 13,
+      "high": 4,
+      "low": 7,
+      "unknown": 2
+    },
+    "observation": {
+      "ran": 396,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 396,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3231946113",
+      "gate": "propagation",
+      "file": "glide-core/src/socket_listener.rs",
+      "detail": "2 propagation error(s), 0 warning(s): Import path \"../build-ts/native\" changed in node/tests/TestUti"
+    },
+    {
+      "pr_id": "3239564957",
+      "gate": "contention",
+      "file": "pom.xml",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "3244675358",
+      "gate": "access",
+      "file": "venv/bin/Activate.ps1",
+      "detail": "7 error(s), 0 warning(s): 5× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3250455355",
+      "gate": "state",
+      "file": "global.json",
+      "detail": "2 state error(s), 0 warning(s): 2x file existence"
+    },
+    {
+      "pr_id": "3252602399",
+      "gate": "access",
+      "file": "vendor/bundle/ruby/3.2.0/bundler/gems/middleman-668239ab8440",
+      "detail": "7 error(s), 0 warning(s): 7× path traversal"
+    },
+    {
+      "pr_id": "3254588245",
+      "gate": "propagation",
+      "file": "tests/fixtures/unit/comment/in-chain-line-comment.typ",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"./config/monaco\" changed in playground/src/main.t"
+    },
+    {
+      "pr_id": "3255130444",
+      "gate": "contention",
+      "file": ".cargo/config.toml",
+      "detail": "3 error(s), 0 warning(s): 3× race condition"
+    }
+  ]
+}

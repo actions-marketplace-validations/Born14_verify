@@ -148,6 +148,11 @@ bun run improve -- --llm=gemini --dry-run
 
 # No-LLM triage (mechanical only, zero tokens)
 bun run improve -- --llm=none
+
+# Continuous mode — re-baseline after each fix, iterate until no improvements
+# OFF by default. Each iteration costs another round of LLM calls.
+bun run improve -- --llm=gemini --continuous
+bun run improve -- --llm=gemini --continuous --max-iterations=10
 ```
 
 ### GitHub Action (CI)

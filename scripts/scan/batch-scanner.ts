@@ -57,7 +57,8 @@ function createAIDevAdapter(): SourceAdapter {
       const { agent, offset, limit } = options;
 
       // Load PR metadata (33K rows — small enough)
-      const prMap = new Map<string, { agent: string; repo: string; title: string }>();
+      // Sort by ID for deterministic batching
+      const allPRs: Array<{ id: string; agent: string; repo: string; title: string }> = [];
       const prText = readFileSync(prJSONL, 'utf-8');
       for (const line of prText.split('\n')) {
         if (!line.trim()) continue;
@@ -65,7 +66,8 @@ function createAIDevAdapter(): SourceAdapter {
           const raw = JSON.parse(line);
           const prAgent = raw.agent ?? 'unknown';
           if (agent && prAgent !== agent) continue;
-          prMap.set(String(raw.id), {
+          allPRs.push({
+            id: String(raw.id),
             agent: prAgent,
             repo: raw.repo_url?.replace('https://api.github.com/repos/', '') ?? '',
             title: raw.title ?? '',
@@ -73,16 +75,20 @@ function createAIDevAdapter(): SourceAdapter {
         } catch {}
       }
 
+      // Deterministic batch: sort by ID, slice [offset, offset+limit)
+      allPRs.sort((a, b) => a.id.localeCompare(b.id));
+      const batchPRs = allPRs.slice(offset, offset + limit);
+      const targetIds = new Set(batchPRs.map(p => p.id));
+      const prMap = new Map(batchPRs.map(p => [p.id, { agent: p.agent, repo: p.repo, title: p.title }]));
+
       // Stream commit details, collect patches per PR
+      // Stream commit details, collect ONLY patches for this batch's target IDs
       const file = Bun.file(detailsJSONL);
       const stream = file.stream();
       const decoder = new TextDecoder();
       let buffer = '';
 
       const patchesByPR = new Map<string, Array<{ filename: string; status: string; patch: string }>>();
-      const completedPRs = new Set<string>();
-      let yielded = 0;
-      let skipped = 0;
 
       for await (const chunk of stream) {
         buffer += decoder.decode(chunk, { stream: true });
@@ -95,7 +101,7 @@ function createAIDevAdapter(): SourceAdapter {
             const d = JSON.parse(line);
             if (!d.patch) continue;
             const prId = String(d.pr_id);
-            if (!prMap.has(prId)) continue;
+            if (!targetIds.has(prId)) continue; // only collect for this batch
 
             if (!patchesByPR.has(prId)) patchesByPR.set(prId, []);
             patchesByPR.get(prId)!.push({
@@ -105,56 +111,14 @@ function createAIDevAdapter(): SourceAdapter {
             });
           } catch {}
         }
-
-        // Check if we have enough complete PRs to yield
-        // A PR is "complete" once we've seen it and moved past it in the stream
-        // Heuristic: yield PRs that have patches and haven't been yielded yet
-        for (const [prId, patches] of patchesByPR) {
-          if (completedPRs.has(prId)) continue;
-          if (yielded >= offset + limit) break;
-
-          // Skip PRs before offset
-          if (skipped + yielded < offset) {
-            completedPRs.add(prId);
-            skipped++;
-            continue;
-          }
-
-          const pr = prMap.get(prId)!;
-          const diff = patches.map(p => {
-            const isNew = p.status === 'added';
-            const header = isNew
-              ? `diff --git a/${p.filename} b/${p.filename}\nnew file mode 100644\n--- /dev/null\n+++ b/${p.filename}\n`
-              : `diff --git a/${p.filename} b/${p.filename}\n--- a/${p.filename}\n+++ b/${p.filename}\n`;
-            return header + p.patch;
-          }).join('\n');
-
-          completedPRs.add(prId);
-          yielded++;
-
-          yield {
-            id: prId,
-            agent: pr.agent,
-            repo: pr.repo,
-            title: pr.title,
-            diff,
-          };
-
-          if (yielded >= offset + limit) break;
-        }
-
-        if (yielded >= offset + limit) break;
       }
 
-      // Yield remaining PRs from buffer
-      for (const [prId, patches] of patchesByPR) {
-        if (completedPRs.has(prId)) continue;
-        if (yielded >= offset + limit) break;
-        if (skipped + yielded < offset) { skipped++; continue; }
+      // Yield all collected PRs in batch order
+      for (const batchPR of batchPRs) {
+        const patches = patchesByPR.get(batchPR.id);
+        if (!patches || patches.length === 0) continue;
 
-        const pr = prMap.get(prId);
-        if (!pr) continue;
-
+        const pr = prMap.get(batchPR.id)!;
         const diff = patches.map(p => {
           const isNew = p.status === 'added';
           const header = isNew
@@ -163,11 +127,8 @@ function createAIDevAdapter(): SourceAdapter {
           return header + p.patch;
         }).join('\n');
 
-        completedPRs.add(prId);
-        yielded++;
-
         yield {
-          id: prId,
+          id: batchPR.id,
           agent: pr.agent,
           repo: pr.repo,
           title: pr.title,

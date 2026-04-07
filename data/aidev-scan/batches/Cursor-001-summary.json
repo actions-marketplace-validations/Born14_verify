@@ -1,0 +1,151 @@
+{
+  "timestamp": "2026-04-07T00:01:11.181Z",
+  "adapter": "aidev-pop",
+  "agent": "Cursor",
+  "batchNumber": 1,
+  "batchSize": 500,
+  "prsScanned": 500,
+  "prsWithFindings": 72,
+  "findingRate": "14.4%",
+  "highConfidenceRate": "19.4%",
+  "gateStats": {
+    "K5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 500,
+      "failed": 35,
+      "high": 4,
+      "low": 22,
+      "unknown": 9
+    },
+    "temporal": {
+      "ran": 465,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 465,
+      "failed": 5,
+      "high": 0,
+      "low": 3,
+      "unknown": 2
+    },
+    "state": {
+      "ran": 460,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 460,
+      "failed": 19,
+      "high": 8,
+      "low": 11,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 441,
+      "failed": 13,
+      "high": 2,
+      "low": 11,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 428,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 428,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3207044337",
+      "gate": "access",
+      "file": "spml/pom.xml",
+      "detail": "1 error(s), 0 warning(s): 1× path traversal"
+    },
+    {
+      "pr_id": "3198764472",
+      "gate": "access",
+      "file": "spml/pom.xml",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3141717000",
+      "gate": "access",
+      "file": ".cursor.environment.json",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3195908841",
+      "gate": "propagation",
+      "file": ".babelrc",
+      "detail": "41 propagation error(s), 0 warning(s): CSS class \".wm-window\" renamed in dist/ventus.css but src/ven"
+    },
+    {
+      "pr_id": "3203187912",
+      "gate": "access",
+      "file": "go.mod",
+      "detail": "3 error(s), 0 warning(s): 2× path traversal, 1× permission escalation"
+    },
+    {
+      "pr_id": "3225261494",
+      "gate": "access",
+      "file": ".cursorrules",
+      "detail": "11 error(s), 0 warning(s): 11× path traversal"
+    },
+    {
+      "pr_id": "3190159928",
+      "gate": "access",
+      "file": "src/bun.js/bindings/v8/V8Array.cpp",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3208946277",
+      "gate": "access",
+      "file": "web/src/features/prompts/components/PromptVersionDiffDialog.tsx",
+      "detail": "7 error(s), 4 warning(s): 2× path traversal, 5× permission escalation"
+    },
+    {
+      "pr_id": "3207082361",
+      "gate": "access",
+      "file": "go.work",
+      "detail": "2 error(s), 3 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3182983420",
+      "gate": "propagation",
+      "file": "apps/app/src/app/(app)/[orgId]/components/UpgradeBanner.tsx",
+      "detail": "5 propagation error(s), 0 warning(s): CSS class \".container\" renamed in <style> but HTML still uses "
+    },
+    {
+      "pr_id": "3211069690",
+      "gate": "access",
+      "file": "app/build.gradle",
+      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
+    }
+  ]
+}

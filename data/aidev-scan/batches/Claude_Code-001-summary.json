@@ -1,0 +1,211 @@
+{
+  "timestamp": "2026-04-07T00:06:09.006Z",
+  "adapter": "aidev-pop",
+  "agent": "Claude_Code",
+  "batchNumber": 1,
+  "batchSize": 459,
+  "prsScanned": 457,
+  "prsWithFindings": 117,
+  "findingRate": "25.6%",
+  "highConfidenceRate": "33.3%",
+  "gateStats": {
+    "K5": {
+      "ran": 457,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 457,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 457,
+      "failed": 70,
+      "high": 15,
+      "low": 40,
+      "unknown": 15
+    },
+    "temporal": {
+      "ran": 387,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 387,
+      "failed": 7,
+      "high": 2,
+      "low": 2,
+      "unknown": 3
+    },
+    "state": {
+      "ran": 380,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 380,
+      "failed": 22,
+      "high": 13,
+      "low": 9,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 358,
+      "failed": 18,
+      "high": 9,
+      "low": 6,
+      "unknown": 3
+    },
+    "observation": {
+      "ran": 340,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 340,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "3176427591",
+      "gate": "access",
+      "file": ".github/actions/molecule/action.yaml",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "3208559377",
+      "gate": "access",
+      "file": ".promptx/pouch.json",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3251609070",
+      "gate": "access",
+      "file": "scripts/validate-config.sh",
+      "detail": "26 error(s), 0 warning(s): 18× path traversal, 8× permission escalation"
+    },
+    {
+      "pr_id": "2922672896",
+      "gate": "access",
+      "file": "deploy/.env.example",
+      "detail": "52 error(s), 0 warning(s): 17× path traversal, 35× permission escalation"
+    },
+    {
+      "pr_id": "3151798896",
+      "gate": "access",
+      "file": ".claude/settings.local.json",
+      "detail": "78 error(s), 1 warning(s): 67× path traversal, 10× permission escalation, 1× environment escalation"
+    },
+    {
+      "pr_id": "3184725856",
+      "gate": "access",
+      "file": "src/bun.js/bindings/napi.cpp",
+      "detail": "2 error(s), 1 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3131363751",
+      "gate": "access",
+      "file": ".env.example",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3147421099",
+      "gate": "contention",
+      "file": ".cursor/mcp.json",
+      "detail": "1 error(s), 0 warning(s): 1× missing transaction"
+    },
+    {
+      "pr_id": "3258945821",
+      "gate": "propagation",
+      "file": ".gitignore",
+      "detail": "2 propagation error(s), 0 warning(s): CSS class \".cls-1\" renamed in <style> but HTML still uses clas"
+    },
+    {
+      "pr_id": "3230307499",
+      "gate": "access",
+      "file": "src/cli/pack_command.zig",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3246635062",
+      "gate": "contention",
+      "file": ".husky/pre-commit",
+      "detail": "46 error(s), 13 warning(s): 46× race condition"
+    },
+    {
+      "pr_id": "2888185420",
+      "gate": "access",
+      "file": "src/slic3r/GUI/GUI_App.cpp",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "3176357483",
+      "gate": "access",
+      "file": ".github/actions/molecule/action.yaml",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "3188865855",
+      "gate": "propagation",
+      "file": ".gitignore",
+      "detail": "10 propagation error(s), 0 warning(s): Import path \"../shared/button\" changed in app/components/kits"
+    },
+    {
+      "pr_id": "3165677582",
+      "gate": "access",
+      "file": ".claude/settings.local.json",
+      "detail": "41 error(s), 0 warning(s): 39× path traversal, 2× permission escalation"
+    },
+    {
+      "pr_id": "3271988317",
+      "gate": "propagation",
+      "file": "apps/mobile/App.tsx",
+      "detail": "1 propagation error(s), 0 warning(s): Import path \"./_generated/server\" changed in packages/convex/c"
+    },
+    {
+      "pr_id": "3185547207",
+      "gate": "contention",
+      "file": ".gitignore",
+      "detail": "4 error(s), 4 warning(s): 4× race condition"
+    },
+    {
+      "pr_id": "3094661465",
+      "gate": "access",
+      "file": "src/scripts/find-redundant-subclass-axioms.pl",
+      "detail": "10 error(s), 0 warning(s): 10× path traversal"
+    },
+    {
+      "pr_id": "3176421116",
+      "gate": "access",
+      "file": ".github/actions/molecule/action.yaml",
+      "detail": "3 error(s), 0 warning(s): 3× permission escalation"
+    },
+    {
+      "pr_id": "3246681942",
+      "gate": "access",
+      "file": ".python-version",
+      "detail": "1 error(s), 0 warning(s): 1× permission escalation"
+    },
+    {
+      "pr_id": "3216793862",
+      "gate": "access",
+      "file": "docker/openemr/7.0.3/utilities/devtoolsLibrary.source",
+      "detail": "56 error(s), 4 warning(s): 52× path traversal, 4× permission escalation"
+    }
+  ]
+}

@@ -77,7 +77,7 @@ We have **18,391 scenarios** today. They come from two independent sources.
 
 Written by developers (and Claude). Each one tests a specific, known failure pattern. "What happens when an agent references a CSS class that doesn't exist?" "What happens when a database column is renamed but the API still returns the old field name?"
 
-There are 647 known failure patterns in our taxonomy, organized across 30 domains (CSS, HTML, database, HTTP, security, accessibility, etc.). Synthetic scenarios cover 596 of them.
+There are 668+ known failure patterns in our taxonomy, organized across 30 domains (CSS, HTML, database, HTTP, security, accessibility, etc.). Includes 18 gate calibration shapes discovered from scanning 33,056 real agent PRs.
 
 These are deterministic — they produce the same result every time. They're checked into the codebase and never change unless someone deliberately updates them. This stability is critical for testing whether a proposed gate fix actually improves things without breaking anything else.
 
@@ -130,9 +130,9 @@ Every night at 3 AM UTC, two independent runners execute the autonomous hardenin
 
 The machine finds its own bugs, proposes its own fixes, and discovers new failure categories. The operator reads a morning report and handles the 1% the machine can't resolve.
 
-**Proven March 30, 2026:** The full 8-stage loop ran end-to-end on GitHub CI. 5,663 scenarios tested, 16 bundles diagnosed, 24 candidate shapes discovered. The improve loop correctly rejected all fixes on noisy data (no false acceptances). The machine is conservative by design — it won't ship a fix that isn't clearly an improvement.
+**Proven April 4-5, 2026:** The improve loop produced its first accepted fixes after weeks of 0/51. Fixes: triage misroute (16 bundles hitting frozen verify.ts), context injection (types + taxonomy), bundle size reduction (20→5). Result: 5 accepted fixes in one night. Then 681 dirty → 0 in one day of manual + automated fixing.
 
-**Proven March 29, 2026:** The improve loop completed its first full acceptance cycle. It found a regex bug in the security gate (`eval_disabled` should have been `eval`), proposed the fix, validated against 3,422 scenarios, passed holdout (1,421 scenarios), and accepted. Score: +0.8, zero regressions.
+**Proven April 6-7, 2026:** Scanned 33,056 real agent PRs from AIDev-POP dataset through the gate pipeline. Deterministic, $0 cost. Found 8.5% of agent PRs have structural issues, 3.4% high-confidence. Five per-agent reliability profiles produced. 18 new gate calibration shapes discovered from real-world data.
 
 A key architectural insight emerged: the LLM diagnoses which line to fix, but the *code* reads the actual line content from the file to build the edit. This "line-to-search grounding" eliminates the fragility of asking an LLM to reproduce exact source strings. Each component handles what it's best at — LLMs reason, code reads files.
 
@@ -313,18 +313,18 @@ The extraction produced three packages:
 
 ---
 
-## Current State (March 30, 2026)
+## Current State (April 7, 2026)
 
 | Metric | Value |
 |--------|-------|
-| Gates | 26 (including hallucination) |
-| Total scenarios | 18,391 (11,959 synthetic + 6,432 real-world) |
-| Failure shapes covered | 611 / 647 (94%) |
-| Unit tests | 388 (21,397 assertions) |
-| Real-world sources | 13 |
+| Gates | 26 (all toggleable via config) |
+| Core scenarios | ~2,800 (ALL CLEAN — 0 dirty) |
+| Failure taxonomy | 668+ shapes (650 original + 18 gate calibration from real-world scan) |
+| Real agent PRs scanned | 33,056 across 5 agents (AIDev-POP dataset) |
+| Structural finding rate | 8.5% raw, 3.4% high-confidence |
 | Nightly runners | 2 (Lenovo with Docker, GitHub CI without) |
-| Autonomous loop stages | 8 of 8 built, all proven in CI |
-| Package size | ~23K LOC (src) |
+| GitHub Action | Built, tested, multi-provider LLM |
+| npm | v0.8.0, 590 weekly downloads |
 | Runtime dependencies | 0 |
 
 ---

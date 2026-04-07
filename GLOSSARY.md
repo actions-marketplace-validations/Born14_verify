@@ -62,7 +62,7 @@ A harvest script that produces concrete scenarios from a shape. It must simulate
 ## Failure Classification
 
 ### Failure Taxonomy
-The dictionary. FAILURE-TAXONOMY.md defines 603 individual failure shapes across 27 domains. The parity grid is the map; the taxonomy is the reference. Every shape should reference its grid cell.
+The dictionary. FAILURE-TAXONOMY.md defines 668+ individual failure shapes across 30 domains. Includes 18 gate calibration (GC) shapes discovered from scanning 33,056 real agent PRs. The parity grid is the map; the taxonomy is the reference. Every shape should reference its grid cell.
 
 ### Failure Shape
 A named, described way that a predicate can produce wrong results. Either a false positive (passes when it shouldn't) or a false negative (fails when it shouldn't). The atomic unit of the taxonomy. One shape maps to one grid cell.
@@ -249,6 +249,6 @@ A parent class that produces hundreds of failures, all same gate, same root caus
 | Document | Role |
 |----------|------|
 | **PARITY-GRID.md** | The map — what must be covered (8×10 grid, priorities, metrics) |
-| **FAILURE-TAXONOMY.md** | The dictionary — 603 shapes, 27 domains, technical detail |
+| **FAILURE-TAXONOMY.md** | The dictionary — 668+ shapes, 30 domains, technical detail |
 | **GLOSSARY.md** | This file — plain-language definitions |
 | **ASSESSMENT.md** | The settled view — what verify is, what not to say about it |

@@ -217,10 +217,38 @@ The checks are domain-agnostic:
 - **Communication agents** — message the right channel, no forbidden content
 - **Document agents** — don't overwrite the wrong cells
 
+## Real-world validation: 33,056 agent PRs scanned
+
+We scanned every PR in the [AIDev-POP dataset](https://huggingface.co/datasets/hao-li/AIDev) — 33,056 real pull requests from 5 AI coding agents across 2,807 popular open-source repos. Deterministic pipeline, $0 cost, no LLM calls.
+
+**High-confidence structural finding rates:**
+
+| Agent | PRs | Finding Rate | Top Issue |
+|-------|-----|-------------|-----------|
+| Devin | 4,800 | 8.2% | Unbounded queries |
+| Claude Code | 457 | 8.5% | Path/permission |
+| Copilot | 4,496 | 4.8% | Path/permission |
+| Cursor | 1,539 | 4.4% | Unbounded queries |
+| Codex | 21,764 | 1.9% | Unbounded queries |
+
+3.4% of all agent PRs have high-confidence structural issues that existing CI doesn't catch. See [METHODOLOGY.md](METHODOLOGY.md) for full details.
+
+## GitHub Action
+
+```yaml
+- uses: sovereign-labs/verify-action@v1
+```
+
+Runs verify on every PR. Posts gate results as a comment. Three modes:
+- **Structural** (default, free) — diff-only analysis, no API key needed
+- **Intent** — extracts predicates from PR title/description (Gemini, OpenAI, or Anthropic)
+- **Staging** — Docker build + runtime verification
+
 ## Full Documentation
 
 - **[REFERENCE.md](REFERENCE.md)** — Gates, predicates, configuration, CLI, fault management
 - **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — Architecture, the 8-stage autonomous loop
+- **[METHODOLOGY.md](METHODOLOGY.md)** — AIDev-POP scan methodology and reproducibility
 - **[GLOSSARY.md](GLOSSARY.md)** — Terms and definitions
 
 ## License

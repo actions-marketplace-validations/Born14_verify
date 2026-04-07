@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:53:31.261Z",
+  "timestamp": "2026-04-07T11:57:48.252Z",
   "adapter": "aidev-pop",
   "agent": "Copilot",
   "batchNumber": 10,
@@ -41,8 +41,8 @@
       "ran": 384,
       "failed": 2,
       "high": 0,
-      "low": 0,
-      "unknown": 2
+      "low": 1,
+      "unknown": 1
     },
     "state": {
       "ran": 382,
@@ -92,12 +92,6 @@
       "gate": "access",
       "file": "vendor/bundle/ruby/3.2.0/bundler/gems/middleman-56b170c38534",
       "detail": "7 error(s), 0 warning(s): 7× path traversal"
-    },
-    {
-      "pr_id": "3259102188",
-      "gate": "propagation",
-      "file": "packages/create-vite/__tests__/cli.spec.ts",
-      "detail": "7 propagation error(s), 0 warning(s): CSS class \".logo\" renamed in <style> but HTML still uses class"
     },
     {
       "pr_id": "3259111897",

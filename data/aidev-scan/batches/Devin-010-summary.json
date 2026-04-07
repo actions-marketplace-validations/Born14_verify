@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:00:08.431Z",
+  "timestamp": "2026-04-07T11:09:37.697Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 10,
@@ -27,8 +27,8 @@
       "ran": 320,
       "failed": 14,
       "high": 6,
-      "low": 6,
-      "unknown": 2
+      "low": 7,
+      "unknown": 1
     },
     "temporal": {
       "ran": 306,
@@ -41,8 +41,8 @@
       "ran": 306,
       "failed": 2,
       "high": 1,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 304,
@@ -81,18 +81,6 @@
     }
   },
   "unknowns": [
-    {
-      "pr_id": "3241890972",
-      "gate": "propagation",
-      "file": "apps/web/src/components/features/colors/DefaultThemeSelector/DefaultThemeSelector.tsx",
-      "detail": "20 propagation error(s), 0 warning(s): Import path \"../../src/chats\" changed to \"./chats\" in package"
-    },
-    {
-      "pr_id": "3244848585",
-      "gate": "access",
-      "file": "apps/web/src/app/app/layout.tsx",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
     {
       "pr_id": "3245424562",
       "gate": "access",

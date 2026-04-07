@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:36:34.566Z",
+  "timestamp": "2026-04-07T10:27:05.994Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 3,
@@ -41,8 +41,8 @@
       "ran": 484,
       "failed": 9,
       "high": 2,
-      "low": 5,
-      "unknown": 2
+      "low": 7,
+      "unknown": 0
     },
     "state": {
       "ran": 475,
@@ -110,18 +110,6 @@
       "gate": "temporal",
       "file": "apps/nextjs/src/app/(dashboard)/mailboxes/[mailbox_slug]/(inbox)/_components/list.tsx",
       "detail": "1 temporal error(s), 0 warning(s): 20250314131628_add_lifetime_purchases_to_platform_customers.sql a"
-    },
-    {
-      "pr_id": "2922685827",
-      "gate": "propagation",
-      "file": "supabase/functions/_backend/triggers/on_user_delete.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Column \"id\" changed in supabase/migrations/20250316005953_opti"
-    },
-    {
-      "pr_id": "2928053953",
-      "gate": "propagation",
-      "file": "src/assets/index.ts",
-      "detail": "14 propagation error(s), 0 warning(s): Import path \"./check-small.png\" changed to \"./checkSmall.png\""
     }
   ]
 }

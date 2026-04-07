@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T05:18:10.684Z",
+  "timestamp": "2026-04-07T11:56:50.624Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 39,
@@ -41,8 +41,8 @@
       "ran": 482,
       "failed": 1,
       "high": 0,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 481,
@@ -86,12 +86,6 @@
       "gate": "access",
       "file": "app/views/dashboard/your_hours.html.slim",
       "detail": "12 error(s), 0 warning(s): 7× path traversal, 5× permission escalation"
-    },
-    {
-      "pr_id": "3250150783",
-      "gate": "propagation",
-      "file": "modules/livewrappedAnalyticsAdapter.js",
-      "detail": "2 propagation error(s), 0 warning(s): CSS class \".section\" renamed in <style> but HTML still uses cl"
     },
     {
       "pr_id": "3251895270",

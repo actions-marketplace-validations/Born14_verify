@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:20:19.268Z",
+  "timestamp": "2026-04-07T10:24:28.977Z",
   "adapter": "aidev-pop",
   "agent": "Cursor",
   "batchNumber": 3,
@@ -27,8 +27,8 @@
       "ran": 498,
       "failed": 39,
       "high": 9,
-      "low": 24,
-      "unknown": 6
+      "low": 25,
+      "unknown": 5
     },
     "temporal": {
       "ran": 459,
@@ -41,8 +41,8 @@
       "ran": 459,
       "failed": 2,
       "high": 0,
-      "low": 1,
-      "unknown": 1
+      "low": 2,
+      "unknown": 0
     },
     "state": {
       "ran": 457,
@@ -94,12 +94,6 @@
       "detail": "5 error(s), 0 warning(s): 5× path traversal"
     },
     {
-      "pr_id": "3230281893",
-      "gate": "propagation",
-      "file": "packages/workshop-utils/src/apps.server.ts",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"./files.server.js\" changed in packages/workshop-u"
-    },
-    {
       "pr_id": "3235036061",
       "gate": "access",
       "file": "dart/lib/src/hub.dart",
@@ -116,12 +110,6 @@
       "gate": "access",
       "file": "apps/server/cmd/bun/migrations/20250712225234_add_login_attempts_table.tx.down.sql",
       "detail": "5 error(s), 0 warning(s): 5× path traversal"
-    },
-    {
-      "pr_id": "3250808281",
-      "gate": "access",
-      "file": "nntrainer/tensor/tensor.cpp",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
     }
   ]
 }

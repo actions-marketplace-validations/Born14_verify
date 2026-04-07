@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T05:06:54.723Z",
+  "timestamp": "2026-04-07T11:40:32.734Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 33,
@@ -7,7 +7,7 @@
   "prsScanned": 500,
   "prsWithFindings": 27,
   "findingRate": "5.4%",
-  "highConfidenceRate": "44.4%",
+  "highConfidenceRate": "40.7%",
   "gateStats": {
     "K5": {
       "ran": 500,
@@ -40,8 +40,8 @@
     "propagation": {
       "ran": 488,
       "failed": 2,
-      "high": 1,
-      "low": 0,
+      "high": 0,
+      "low": 1,
       "unknown": 1
     },
     "state": {

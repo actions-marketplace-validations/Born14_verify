@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T05:09:21.745Z",
+  "timestamp": "2026-04-07T11:44:03.440Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 34,
@@ -7,7 +7,7 @@
   "prsScanned": 499,
   "prsWithFindings": 45,
   "findingRate": "9.0%",
-  "highConfidenceRate": "20.0%",
+  "highConfidenceRate": "15.6%",
   "gateStats": {
     "K5": {
       "ran": 499,
@@ -40,9 +40,9 @@
     "propagation": {
       "ran": 474,
       "failed": 4,
-      "high": 2,
-      "low": 0,
-      "unknown": 2
+      "high": 0,
+      "low": 4,
+      "unknown": 0
     },
     "state": {
       "ran": 470,
@@ -80,18 +80,5 @@
       "unknown": 0
     }
   },
-  "unknowns": [
-    {
-      "pr_id": "3230202013",
-      "gate": "propagation",
-      "file": "modules/gptPreAuction.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src/utils.js\" changed to \"../libraries/impUtil"
-    },
-    {
-      "pr_id": "3233206925",
-      "gate": "propagation",
-      "file": "modules/yieldlabBidAdapter.js",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src/utils.js\" changed to \"../libraries/impUtil"
-    }
-  ]
+  "unknowns": []
 }

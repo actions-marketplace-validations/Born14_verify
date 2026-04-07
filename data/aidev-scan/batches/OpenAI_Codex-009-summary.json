@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:20:52.615Z",
+  "timestamp": "2026-04-07T10:39:12.005Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 9,
@@ -41,8 +41,8 @@
       "ran": 495,
       "failed": 4,
       "high": 0,
-      "low": 3,
-      "unknown": 1
+      "low": 4,
+      "unknown": 0
     },
     "state": {
       "ran": 491,
@@ -80,12 +80,5 @@
       "unknown": 0
     }
   },
-  "unknowns": [
-    {
-      "pr_id": "3111855570",
-      "gate": "propagation",
-      "file": "packages/gensx/src/commands/deploy.tsx",
-      "detail": "4 propagation error(s), 6 warning(s): Import path \"../../eslint.config.mjs\" changed in examples/stre"
-    }
-  ]
+  "unknowns": []
 }

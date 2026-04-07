@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T05:12:03.274Z",
+  "timestamp": "2026-04-07T11:47:51.888Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 35,
@@ -27,8 +27,8 @@
       "ran": 500,
       "failed": 67,
       "high": 4,
-      "low": 62,
-      "unknown": 1
+      "low": 63,
+      "unknown": 0
     },
     "temporal": {
       "ran": 433,
@@ -41,8 +41,8 @@
       "ran": 433,
       "failed": 2,
       "high": 0,
-      "low": 0,
-      "unknown": 2
+      "low": 2,
+      "unknown": 0
     },
     "state": {
       "ran": 431,
@@ -80,24 +80,5 @@
       "unknown": 0
     }
   },
-  "unknowns": [
-    {
-      "pr_id": "3237089884",
-      "gate": "propagation",
-      "file": "libraries/ortbConverter/converter.ts",
-      "detail": "11 propagation error(s), 0 warning(s): Import path \"../src/utils.js\" changed to \"../libraries/impUti"
-    },
-    {
-      "pr_id": "3240718422",
-      "gate": "access",
-      "file": "packages/bytebot-ui/src/app/tasks/[id]/page.tsx",
-      "detail": "6 error(s), 0 warning(s): 6× permission escalation"
-    },
-    {
-      "pr_id": "3240884071",
-      "gate": "propagation",
-      "file": "open-sauce-2025.html",
-      "detail": "1 propagation error(s), 0 warning(s): CSS class \".speaker-avatar\" renamed to \".length-badge\" in <sty"
-    }
-  ]
+  "unknowns": []
 }

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:41:37.303Z",
+  "timestamp": "2026-04-07T10:59:19.587Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 16,
@@ -41,8 +41,8 @@
       "ran": 486,
       "failed": 1,
       "high": 0,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 485,
@@ -81,12 +81,6 @@
     }
   },
   "unknowns": [
-    {
-      "pr_id": "3146322249",
-      "gate": "propagation",
-      "file": "index.ts",
-      "detail": "4 propagation error(s), 0 warning(s): Import path \"../config.js\" changed in src/commands/repos.js bu"
-    },
     {
       "pr_id": "3147238673",
       "gate": "access",

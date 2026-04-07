@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:34:45.002Z",
+  "timestamp": "2026-04-07T11:44:08.200Z",
   "adapter": "aidev-pop",
   "agent": "Copilot",
   "batchNumber": 7,
@@ -27,8 +27,8 @@
       "ran": 440,
       "failed": 36,
       "high": 7,
-      "low": 23,
-      "unknown": 6
+      "low": 24,
+      "unknown": 5
     },
     "temporal": {
       "ran": 404,
@@ -116,12 +116,6 @@
       "gate": "access",
       "file": ".docker/frankenphp/Caddyfile",
       "detail": "24 error(s), 0 warning(s): 19× path traversal, 5× permission escalation"
-    },
-    {
-      "pr_id": "3206444195",
-      "gate": "access",
-      "file": "examples/c/cloth_simulation.c",
-      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
     }
   ]
 }

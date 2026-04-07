@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:39:30.725Z",
+  "timestamp": "2026-04-07T10:32:28.957Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 4,
@@ -27,8 +27,8 @@
       "ran": 496,
       "failed": 14,
       "high": 3,
-      "low": 8,
-      "unknown": 3
+      "low": 11,
+      "unknown": 0
     },
     "temporal": {
       "ran": 482,
@@ -41,8 +41,8 @@
       "ran": 482,
       "failed": 1,
       "high": 0,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 481,
@@ -88,34 +88,10 @@
       "detail": "1 error(s), 0 warning(s): 1× race condition"
     },
     {
-      "pr_id": "2951230031",
-      "gate": "propagation",
-      "file": "packages/convex-helpers/server/customFunctions.test.ts",
-      "detail": "16 propagation error(s), 0 warning(s): Import path \"./customFunctions.js\" changed in packages/convex"
-    },
-    {
       "pr_id": "2958197114",
       "gate": "contention",
       "file": "supabase/config.toml",
       "detail": "2 error(s), 0 warning(s): 2× race condition"
-    },
-    {
-      "pr_id": "2965833400",
-      "gate": "access",
-      "file": "frontend/apps/app/components/UserFeedbackClient.tsx",
-      "detail": "84 error(s), 2 warning(s): 84× permission escalation"
-    },
-    {
-      "pr_id": "2971908072",
-      "gate": "access",
-      "file": "client-admin/app/page.tsx",
-      "detail": "8 error(s), 0 warning(s): 8× path traversal"
-    },
-    {
-      "pr_id": "2976319344",
-      "gate": "access",
-      "file": "client/app/page.tsx",
-      "detail": "8 error(s), 0 warning(s): 8× path traversal"
     }
   ]
 }

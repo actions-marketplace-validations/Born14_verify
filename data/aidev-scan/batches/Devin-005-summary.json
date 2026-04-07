@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:42:57.200Z",
+  "timestamp": "2026-04-07T10:39:28.439Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 5,
@@ -27,8 +27,8 @@
       "ran": 499,
       "failed": 44,
       "high": 9,
-      "low": 24,
-      "unknown": 11
+      "low": 26,
+      "unknown": 9
     },
     "temporal": {
       "ran": 455,
@@ -41,8 +41,8 @@
       "ran": 455,
       "failed": 1,
       "high": 0,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 454,
@@ -88,18 +88,6 @@
       "detail": "172 error(s), 0 warning(s): 172× permission escalation"
     },
     {
-      "pr_id": "2989797052",
-      "gate": "propagation",
-      "file": "apps/next/app/settings/payouts/BankAccountModal.tsx",
-      "detail": "2 propagation error(s), 0 warning(s): Import path \"../index\" changed in e2e/helpers/checkComboboxVis"
-    },
-    {
-      "pr_id": "2999563616",
-      "gate": "access",
-      "file": "frontend/apps/app/features/projects/components/ProjectItem/LastCommitInfo.tsx",
-      "detail": "132 error(s), 0 warning(s): 132× permission escalation"
-    },
-    {
       "pr_id": "3010545410",
       "gate": "access",
       "file": "frontend/packages/db/supabase/migrations/20250422034040_modify_github_repositories.sql",
@@ -134,12 +122,6 @@
       "gate": "access",
       "file": "frontend/packages/db/supabase/migrations/20250425123428_add_rls_to_organization_members.sql",
       "detail": "42 error(s), 0 warning(s): 42× permission escalation"
-    },
-    {
-      "pr_id": "3019949623",
-      "gate": "access",
-      "file": "platform/cli/templates/mode/src/index.tsx",
-      "detail": "8 error(s), 3 warning(s): 5× path traversal, 2× permission escalation, 1× environment escalation"
     },
     {
       "pr_id": "3029374639",

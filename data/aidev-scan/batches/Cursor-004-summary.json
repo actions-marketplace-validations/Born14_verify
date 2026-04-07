@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:21:26.973Z",
+  "timestamp": "2026-04-07T10:26:42.338Z",
   "adapter": "aidev-pop",
   "agent": "Cursor",
   "batchNumber": 4,
@@ -41,8 +41,8 @@
       "ran": 38,
       "failed": 1,
       "high": 0,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 37,
@@ -80,12 +80,5 @@
       "unknown": 0
     }
   },
-  "unknowns": [
-    {
-      "pr_id": "3268897252",
-      "gate": "propagation",
-      "file": "src/lib/utils/leagueInfo.js",
-      "detail": "1119 propagation error(s), 0 warning(s): CSS class \".carouselBtn\" renamed in <style> but HTML still "
-    }
-  ]
+  "unknowns": []
 }

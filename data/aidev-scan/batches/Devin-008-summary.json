@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:54:13.111Z",
+  "timestamp": "2026-04-07T10:59:28.666Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 8,
@@ -27,8 +27,8 @@
       "ran": 499,
       "failed": 23,
       "high": 7,
-      "low": 13,
-      "unknown": 3
+      "low": 15,
+      "unknown": 1
     },
     "temporal": {
       "ran": 476,
@@ -41,8 +41,8 @@
       "ran": 476,
       "failed": 5,
       "high": 2,
-      "low": 1,
-      "unknown": 2
+      "low": 2,
+      "unknown": 1
     },
     "state": {
       "ran": 471,
@@ -82,18 +82,6 @@
   },
   "unknowns": [
     {
-      "pr_id": "3117623976",
-      "gate": "access",
-      "file": "app/javascript/components/Settings/PaymentsPage/AccountDetailsSection.tsx",
-      "detail": "15 error(s), 0 warning(s): 6× path traversal, 9× permission escalation"
-    },
-    {
-      "pr_id": "3121105508",
-      "gate": "propagation",
-      "file": "db/schema/conversationMessages.ts",
-      "detail": "2 propagation error(s), 0 warning(s): Import path \"../lib/with-timestamps\" changed in db/schema/esca"
-    },
-    {
       "pr_id": "3121717297",
       "gate": "contention",
       "file": "package.json",
@@ -116,12 +104,6 @@
       "gate": "contention",
       "file": "frontend/apps/app/components/Chat/hooks/useRealtimeMessages.ts",
       "detail": "2 error(s), 0 warning(s): 2× race condition"
-    },
-    {
-      "pr_id": "3158557487",
-      "gate": "access",
-      "file": "frontend/apps/app/components/MarkdownContent/MarkdownContent.tsx",
-      "detail": "27 error(s), 0 warning(s): 27× permission escalation"
     }
   ]
 }

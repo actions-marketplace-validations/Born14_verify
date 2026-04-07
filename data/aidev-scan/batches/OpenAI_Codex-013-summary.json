@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:35:29.076Z",
+  "timestamp": "2026-04-07T10:53:08.617Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 13,
@@ -41,8 +41,8 @@
       "ran": 487,
       "failed": 5,
       "high": 0,
-      "low": 3,
-      "unknown": 2
+      "low": 5,
+      "unknown": 0
     },
     "state": {
       "ran": 482,
@@ -80,18 +80,5 @@
       "unknown": 0
     }
   },
-  "unknowns": [
-    {
-      "pr_id": "3130058614",
-      "gate": "propagation",
-      "file": "tests/src/findSelector.multiple.test.ts",
-      "detail": "2 propagation error(s), 0 warning(s): Import path \"../../server/out/core/findSelector\" changed in te"
-    },
-    {
-      "pr_id": "3132544963",
-      "gate": "propagation",
-      "file": "_includes/analytics.html",
-      "detail": "28 propagation error(s), 0 warning(s): CSS class \".svg-icon\" renamed in _sass/_svg-icons.scss but _i"
-    }
-  ]
+  "unknowns": []
 }

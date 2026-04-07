@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:18:02.423Z",
+  "timestamp": "2026-04-07T10:20:03.447Z",
   "adapter": "aidev-pop",
   "agent": "Cursor",
   "batchNumber": 2,
@@ -27,8 +27,8 @@
       "ran": 500,
       "failed": 53,
       "high": 6,
-      "low": 34,
-      "unknown": 13
+      "low": 37,
+      "unknown": 10
     },
     "temporal": {
       "ran": 447,
@@ -41,8 +41,8 @@
       "ran": 447,
       "failed": 7,
       "high": 0,
-      "low": 3,
-      "unknown": 4
+      "low": 4,
+      "unknown": 3
     },
     "state": {
       "ran": 440,
@@ -82,12 +82,6 @@
   },
   "unknowns": [
     {
-      "pr_id": "3190159928",
-      "gate": "access",
-      "file": "src/bun.js/bindings/v8/V8Array.cpp",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
-    },
-    {
       "pr_id": "3192489182",
       "gate": "access",
       "file": "assets/schema_input.json",
@@ -110,18 +104,6 @@
       "gate": "contention",
       "file": "apps/web/client/src/components/store/editor/hosting/index.ts",
       "detail": "2 error(s), 0 warning(s): 2× race condition"
-    },
-    {
-      "pr_id": "3197264721",
-      "gate": "access",
-      "file": "web/src/features/datasets/components/PreviewCsvImport.tsx",
-      "detail": "7 error(s), 0 warning(s): 4× path traversal, 3× permission escalation"
-    },
-    {
-      "pr_id": "3198587968",
-      "gate": "propagation",
-      "file": "packages/client/src/Gui/Gui.ts",
-      "detail": "12 propagation error(s), 0 warning(s): CSS class \".inventory-overlay\" renamed in <style> but HTML st"
     },
     {
       "pr_id": "3198764472",
@@ -176,12 +158,6 @@
       "gate": "access",
       "file": "go.work",
       "detail": "2 error(s), 3 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3208946277",
-      "gate": "access",
-      "file": "web/src/features/prompts/components/PromptVersionDiffDialog.tsx",
-      "detail": "7 error(s), 4 warning(s): 2× path traversal, 5× permission escalation"
     },
     {
       "pr_id": "3218869116",

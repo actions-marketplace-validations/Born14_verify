@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:33:32.690Z",
+  "timestamp": "2026-04-07T10:20:41.044Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 2,
@@ -27,8 +27,8 @@
       "ran": 495,
       "failed": 25,
       "high": 3,
-      "low": 15,
-      "unknown": 7
+      "low": 17,
+      "unknown": 5
     },
     "temporal": {
       "ran": 470,
@@ -41,8 +41,8 @@
       "ran": 470,
       "failed": 12,
       "high": 3,
-      "low": 0,
-      "unknown": 9
+      "low": 9,
+      "unknown": 0
     },
     "state": {
       "ran": 458,
@@ -100,40 +100,10 @@
       "detail": "1 error(s), 0 warning(s): 1× permission escalation"
     },
     {
-      "pr_id": "2840501983",
-      "gate": "propagation",
-      "file": "apps/studio/src/lib/editor/engine/move/index.ts",
-      "detail": "2 propagation error(s), 0 warning(s): Import path \"./base\" changed in apps/studio/builder-config/dar"
-    },
-    {
-      "pr_id": "2840540666",
-      "gate": "propagation",
-      "file": "apps/studio/electron/main/bun/parse.ts",
-      "detail": "4 propagation error(s), 0 warning(s): Import path \"./base\" changed in apps/studio/builder-config/dar"
-    },
-    {
-      "pr_id": "2841184790",
-      "gate": "propagation",
-      "file": "apps/studio/electron/main/bun/parse.ts",
-      "detail": "4 propagation error(s), 0 warning(s): Import path \"./base\" changed in apps/studio/builder-config/dar"
-    },
-    {
       "pr_id": "2847161494",
       "gate": "access",
       "file": "public/locales/es/common.json",
       "detail": "1 error(s), 0 warning(s): 1× permission escalation"
-    },
-    {
-      "pr_id": "2852313611",
-      "gate": "propagation",
-      "file": "src/elements/content-sharing/constants.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../../common/types/api\" changed in src/elements/c"
-    },
-    {
-      "pr_id": "2852373257",
-      "gate": "propagation",
-      "file": "src/elements/content-sharing/types.js",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../../common/types/api\" changed in src/elements/c"
     },
     {
       "pr_id": "2857142827",
@@ -142,46 +112,10 @@
       "detail": "6 error(s), 0 warning(s): 4× path traversal, 2× permission escalation"
     },
     {
-      "pr_id": "2861636339",
-      "gate": "access",
-      "file": "tls/client-tls-resume.c",
-      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
-    },
-    {
-      "pr_id": "2862032354",
-      "gate": "propagation",
-      "file": "index.html",
-      "detail": "1 propagation error(s), 0 warning(s): CSS class \".dialog\" renamed in styles.css but index.html still"
-    },
-    {
-      "pr_id": "2867049623",
-      "gate": "propagation",
-      "file": "src/elements/content-sidebar/SidebarNav.tsx",
-      "detail": "16 propagation error(s), 0 warning(s): Import path \"../../icon/fill/DocGenIcon\" changed in src/eleme"
-    },
-    {
       "pr_id": "2881667376",
       "gate": "access",
       "file": "configure.ac",
       "detail": "12 error(s), 0 warning(s): 12× path traversal"
-    },
-    {
-      "pr_id": "2883354620",
-      "gate": "propagation",
-      "file": "src/elements/common/Internationalize.tsx",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../../constants\" changed in src/elements/common/m"
-    },
-    {
-      "pr_id": "2884498451",
-      "gate": "propagation",
-      "file": "src/common/types/core.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../constants\" changed in src/common/types/core.js"
-    },
-    {
-      "pr_id": "2884694604",
-      "gate": "access",
-      "file": "src/wolfsftp.c",
-      "detail": "40 error(s), 3 warning(s): 15× path traversal, 25× permission escalation"
     }
   ]
 }

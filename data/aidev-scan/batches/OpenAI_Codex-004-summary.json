@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:07:31.837Z",
+  "timestamp": "2026-04-07T10:20:58.758Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 4,
@@ -27,8 +27,8 @@
       "ran": 499,
       "failed": 21,
       "high": 2,
-      "low": 15,
-      "unknown": 4
+      "low": 16,
+      "unknown": 3
     },
     "temporal": {
       "ran": 478,
@@ -98,12 +98,6 @@
       "gate": "access",
       "file": "src/cli/package_manager_command.zig",
       "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3085153537",
-      "gate": "access",
-      "file": "src/app/src/pages/redteam/setup/components/PluginConfigDialog.tsx",
-      "detail": "1 error(s), 2 warning(s): 1× path traversal"
     }
   ]
 }

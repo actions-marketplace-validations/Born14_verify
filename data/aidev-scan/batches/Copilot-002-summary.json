@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:08:40.995Z",
+  "timestamp": "2026-04-07T11:17:39.311Z",
   "adapter": "aidev-pop",
   "agent": "Copilot",
   "batchNumber": 2,
@@ -41,8 +41,8 @@
       "ran": 412,
       "failed": 4,
       "high": 0,
-      "low": 0,
-      "unknown": 4
+      "low": 2,
+      "unknown": 2
     },
     "state": {
       "ran": 408,
@@ -82,22 +82,10 @@
   },
   "unknowns": [
     {
-      "pr_id": "3087114684",
-      "gate": "propagation",
-      "file": "packages/agents/src/HfAgent.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src.js\" changed to \"../src/HfAgent.js\" in pack"
-    },
-    {
       "pr_id": "3090862045",
       "gate": "access",
       "file": "SPECS/bind/bind.signatures.json",
       "detail": "39 error(s), 1 warning(s): 32× path traversal, 6× permission escalation, 1× environment escalation"
-    },
-    {
-      "pr_id": "3093824141",
-      "gate": "propagation",
-      "file": "src/llms.ts",
-      "detail": "2 propagation error(s), 0 warning(s): CSS class \".tooltip\" renamed in <style> but HTML still uses cl"
     },
     {
       "pr_id": "3096200855",

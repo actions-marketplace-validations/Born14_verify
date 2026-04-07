@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:57:43.428Z",
+  "timestamp": "2026-04-07T11:06:00.326Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 9,
@@ -27,8 +27,8 @@
       "ran": 497,
       "failed": 24,
       "high": 8,
-      "low": 10,
-      "unknown": 6
+      "low": 11,
+      "unknown": 5
     },
     "temporal": {
       "ran": 473,
@@ -41,8 +41,8 @@
       "ran": 473,
       "failed": 5,
       "high": 0,
-      "low": 1,
-      "unknown": 4
+      "low": 5,
+      "unknown": 0
     },
     "state": {
       "ran": 468,
@@ -82,18 +82,6 @@
   },
   "unknowns": [
     {
-      "pr_id": "3168569644",
-      "gate": "propagation",
-      "file": "components/editor/control-section.tsx",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"./color-picker\" changed to \"./color-controls-tab\""
-    },
-    {
-      "pr_id": "3176305274",
-      "gate": "propagation",
-      "file": "packages/app-store/googlecalendar/api/webhook.ts",
-      "detail": "3 propagation error(s), 0 warning(s): Import path \"./lib/fixtures\" changed in apps/web/playwright/ca"
-    },
-    {
       "pr_id": "3192204870",
       "gate": "access",
       "file": "app/views/help_center/articles/contents/_13-getting-paid.html.erb",
@@ -106,18 +94,6 @@
       "detail": "4 error(s), 0 warning(s): 4× path traversal"
     },
     {
-      "pr_id": "3193705340",
-      "gate": "propagation",
-      "file": "app/api/chat/conversation/route.ts",
-      "detail": "4 propagation error(s), 0 warning(s): Column \"id\" changed in db/drizzle/0100_pink_the_stranger.sql b"
-    },
-    {
-      "pr_id": "3203548150",
-      "gate": "propagation",
-      "file": "packages/app-store/salesforce/lib/__tests__/CrmService.integration.test.ts",
-      "detail": "2 propagation error(s), 0 warning(s): Import path \"./lib/fixtures\" changed in apps/web/playwright/bo"
-    },
-    {
       "pr_id": "3210892176",
       "gate": "access",
       "file": "app/assets/images/integrations/linear.svg",
@@ -128,12 +104,6 @@
       "gate": "access",
       "file": "app/components/integration_list_component.html.erb",
       "detail": "3 error(s), 0 warning(s): 3× path traversal"
-    },
-    {
-      "pr_id": "3216501010",
-      "gate": "access",
-      "file": "frontend/app/(dashboard)/invoices/index.tsx",
-      "detail": "4 error(s), 0 warning(s): 4× path traversal"
     },
     {
       "pr_id": "3225256791",

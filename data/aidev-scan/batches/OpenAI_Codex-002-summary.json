@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:01:49.776Z",
+  "timestamp": "2026-04-07T10:12:38.347Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 2,
@@ -27,8 +27,8 @@
       "ran": 500,
       "failed": 16,
       "high": 2,
-      "low": 12,
-      "unknown": 2
+      "low": 13,
+      "unknown": 1
     },
     "temporal": {
       "ran": 484,
@@ -41,8 +41,8 @@
       "ran": 484,
       "failed": 3,
       "high": 0,
-      "low": 2,
-      "unknown": 1
+      "low": 3,
+      "unknown": 0
     },
     "state": {
       "ran": 481,
@@ -81,18 +81,6 @@
     }
   },
   "unknowns": [
-    {
-      "pr_id": "3071076995",
-      "gate": "access",
-      "file": "autogpt_platform/frontend/src/components/agptui/StoreCard.tsx",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
-      "pr_id": "3071573623",
-      "gate": "propagation",
-      "file": "packages/utils/src/str.test.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"./str\" changed to \"../src/str\" in packages/utils/"
-    },
     {
       "pr_id": "3071883910",
       "gate": "access",

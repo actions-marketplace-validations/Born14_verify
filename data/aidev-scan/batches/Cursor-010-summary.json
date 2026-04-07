@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-04-07T10:31:46.861Z",
+  "adapter": "aidev-pop",
+  "agent": "Cursor",
+  "batchNumber": 10,
+  "batchSize": 500,
+  "prsScanned": 0,
+  "prsWithFindings": 0,
+  "findingRate": "NaN%",
+  "highConfidenceRate": "0.0%",
+  "gateStats": {},
+  "unknowns": []
+}

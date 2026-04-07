@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:30:49.514Z",
+  "timestamp": "2026-04-07T10:13:45.761Z",
   "adapter": "aidev-pop",
   "agent": "Devin",
   "batchNumber": 1,
@@ -27,8 +27,8 @@
       "ran": 497,
       "failed": 33,
       "high": 14,
-      "low": 18,
-      "unknown": 1
+      "low": 19,
+      "unknown": 0
     },
     "temporal": {
       "ran": 464,
@@ -41,8 +41,8 @@
       "ran": 464,
       "failed": 10,
       "high": 2,
-      "low": 0,
-      "unknown": 8
+      "low": 7,
+      "unknown": 1
     },
     "state": {
       "ran": 454,
@@ -88,64 +88,16 @@
       "detail": "8 error(s), 0 warning(s): 8× race condition"
     },
     {
-      "pr_id": "2770944230",
-      "gate": "access",
-      "file": "extensions/cornerstone/src/index.tsx",
-      "detail": "5 error(s), 3 warning(s): 4× path traversal, 1× environment escalation"
-    },
-    {
-      "pr_id": "2771402284",
-      "gate": "propagation",
-      "file": "src/api/APIFactory.ts",
-      "detail": "4 propagation error(s), 0 warning(s): Import path \"../constants\" changed in src/common/types/core.d."
-    },
-    {
-      "pr_id": "2776299690",
-      "gate": "propagation",
-      "file": "src/elements/content-picker/ItemList.tsx",
-      "detail": "7 propagation error(s), 0 warning(s): Import path \"../common/share-access-select\" changed in src/ele"
-    },
-    {
       "pr_id": "2776592584",
       "gate": "propagation",
       "file": "src/elements/content-picker/Footer.js.flow",
       "detail": "12 propagation error(s), 0 warning(s): Import path \"../../components/button\" changed in src/elements"
     },
     {
-      "pr_id": "2779120679",
-      "gate": "propagation",
-      "file": "src/background/background.js",
-      "detail": "8 propagation error(s), 0 warning(s): Import path \"./values\" changed in src/background/index.js but "
-    },
-    {
       "pr_id": "2780647811",
       "gate": "contention",
       "file": "package.json",
       "detail": "1 error(s), 0 warning(s): 1× race condition"
-    },
-    {
-      "pr_id": "2783421768",
-      "gate": "propagation",
-      "file": "packages/orbit-components/.storybook/main.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src\" changed in packages/orbit-components/play"
-    },
-    {
-      "pr_id": "2790868866",
-      "gate": "propagation",
-      "file": "src/elements/common/nav-router/NavRouter.tsx",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"../../icons/general/IconNavigateLeft\" changed in "
-    },
-    {
-      "pr_id": "2793293460",
-      "gate": "propagation",
-      "file": "contract_manager/scripts/get_pyth_pricefeed_details.ts",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"../src/chains\" changed in contract_manager/script"
-    },
-    {
-      "pr_id": "2805430490",
-      "gate": "propagation",
-      "file": "src/elements/common/makeResponsive.tsx",
-      "detail": "12 propagation error(s), 0 warning(s): Import path \"../common/theming\" changed to \"./ContentExplorer"
     }
   ]
 }

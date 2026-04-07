@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:55:38.896Z",
+  "timestamp": "2026-04-07T11:21:57.413Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 26,
@@ -41,8 +41,8 @@
       "ran": 487,
       "failed": 8,
       "high": 1,
-      "low": 2,
-      "unknown": 5
+      "low": 6,
+      "unknown": 1
     },
     "state": {
       "ran": 479,
@@ -82,34 +82,10 @@
   },
   "unknowns": [
     {
-      "pr_id": "3189719663",
-      "gate": "propagation",
-      "file": "src/providers/openai/chat.ts",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"../../src/assertions/xml\" changed to \"../../src/p"
-    },
-    {
-      "pr_id": "3189776043",
-      "gate": "propagation",
-      "file": "modules/videoModule/videoImpressionVerifier.js",
-      "detail": "6 propagation error(s), 0 warning(s): Import path \"./lib/composer.js\" changed in libraries/ortbConve"
-    },
-    {
       "pr_id": "3190227280",
       "gate": "propagation",
       "file": "programs/marginfi/src/constants.rs",
       "detail": "1 propagation error(s), 0 warning(s): Import path \"./utils/user-instructions\" changed to \"./utils/to"
-    },
-    {
-      "pr_id": "3193363709",
-      "gate": "propagation",
-      "file": "test/spec/modules/pubmaticRtdProvider_spec.js",
-      "detail": "12 propagation error(s), 0 warning(s): CSS class \".section\" renamed in <style> but HTML still uses c"
-    },
-    {
-      "pr_id": "3193867357",
-      "gate": "propagation",
-      "file": "modules/userId/index.ts",
-      "detail": "2 propagation error(s), 0 warning(s): CSS class \".section\" renamed in <style> but HTML still uses cl"
     }
   ]
 }

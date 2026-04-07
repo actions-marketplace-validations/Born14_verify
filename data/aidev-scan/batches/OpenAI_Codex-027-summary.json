@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:57:56.980Z",
+  "timestamp": "2026-04-07T11:25:36.019Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 27,
@@ -27,8 +27,8 @@
       "ran": 498,
       "failed": 6,
       "high": 0,
-      "low": 4,
-      "unknown": 2
+      "low": 5,
+      "unknown": 1
     },
     "temporal": {
       "ran": 492,
@@ -41,8 +41,8 @@
       "ran": 492,
       "failed": 1,
       "high": 0,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 491,
@@ -86,18 +86,6 @@
       "gate": "access",
       "file": "lib/analytics/widgets/analytics_lifecycle_handler.dart",
       "detail": "1 error(s), 0 warning(s): 1× permission escalation"
-    },
-    {
-      "pr_id": "3199191078",
-      "gate": "access",
-      "file": "src/csync/csync_exclude.cpp",
-      "detail": "5 error(s), 0 warning(s): 5× path traversal"
-    },
-    {
-      "pr_id": "3199931387",
-      "gate": "propagation",
-      "file": "integrationExamples/gpt/id_lift_measurement.html",
-      "detail": "2 propagation error(s), 0 warning(s): CSS class \".section\" renamed in <style> but HTML still uses cl"
     }
   ]
 }

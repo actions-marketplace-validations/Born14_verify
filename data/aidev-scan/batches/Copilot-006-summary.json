@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:30:21.217Z",
+  "timestamp": "2026-04-07T11:40:54.437Z",
   "adapter": "aidev-pop",
   "agent": "Copilot",
   "batchNumber": 6,
@@ -41,8 +41,8 @@
       "ran": 424,
       "failed": 4,
       "high": 0,
-      "low": 1,
-      "unknown": 3
+      "low": 3,
+      "unknown": 1
     },
     "state": {
       "ran": 420,
@@ -94,12 +94,6 @@
       "detail": "6 propagation error(s), 0 warning(s): Import path \"../constants/strings\" changed to \"../loc/strings\""
     },
     {
-      "pr_id": "3179782246",
-      "gate": "propagation",
-      "file": "src/components/MediocreMassiveMediaPlayerCard/MediocreMassiveMediaPlayerCardEditor.tsx",
-      "detail": "53 propagation error(s), 0 warning(s): CSS class \".small\" renamed in coverage/lcov-report/base.css b"
-    },
-    {
       "pr_id": "3181601322",
       "gate": "contention",
       "file": "angular.json",
@@ -110,12 +104,6 @@
       "gate": "contention",
       "file": "genaisrc/mdtranslator.genai.mts",
       "detail": "1 error(s), 0 warning(s): 1× race condition"
-    },
-    {
-      "pr_id": "3193322434",
-      "gate": "propagation",
-      "file": "src/extension.ts",
-      "detail": "2 propagation error(s), 0 warning(s): Import path \"../../common/telemetry\" changed in src/test/lm/co"
     },
     {
       "pr_id": "3193344742",

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:43:14.731Z",
+  "timestamp": "2026-04-07T11:49:49.142Z",
   "adapter": "aidev-pop",
   "agent": "Copilot",
   "batchNumber": 8,
@@ -7,7 +7,7 @@
   "prsScanned": 462,
   "prsWithFindings": 59,
   "findingRate": "12.8%",
-  "highConfidenceRate": "32.2%",
+  "highConfidenceRate": "30.5%",
   "gateStats": {
     "K5": {
       "ran": 462,
@@ -27,8 +27,8 @@
       "ran": 462,
       "failed": 37,
       "high": 9,
-      "low": 15,
-      "unknown": 13
+      "low": 18,
+      "unknown": 10
     },
     "temporal": {
       "ran": 425,
@@ -40,9 +40,9 @@
     "propagation": {
       "ran": 425,
       "failed": 4,
-      "high": 1,
-      "low": 0,
-      "unknown": 3
+      "high": 0,
+      "low": 4,
+      "unknown": 0
     },
     "state": {
       "ran": 421,
@@ -88,24 +88,6 @@
       "detail": "10 error(s), 0 warning(s): 6× path traversal, 4× permission escalation"
     },
     {
-      "pr_id": "3211770505",
-      "gate": "propagation",
-      "file": "src/vs/base/browser/ui/tree/abstractTree.ts",
-      "detail": "5 propagation error(s), 0 warning(s): CSS class \".tree-container\" renamed in <style> but HTML still "
-    },
-    {
-      "pr_id": "3214127213",
-      "gate": "access",
-      "file": "source/slang/slang-check-decl.cpp",
-      "detail": "2 error(s), 0 warning(s): 2× permission escalation"
-    },
-    {
-      "pr_id": "3214340478",
-      "gate": "propagation",
-      "file": "Bootstrap/DiagnosticLogger.ts",
-      "detail": "724 propagation error(s), 30 warning(s): Import path \"../Library/RequestResponseHeaders\" changed in "
-    },
-    {
       "pr_id": "3216208267",
       "gate": "contention",
       "file": "src/prometheus/compiler/compiler.lua",
@@ -122,24 +104,6 @@
       "gate": "access",
       "file": "blobplugin_profile.cov",
       "detail": "7 error(s), 0 warning(s): 7× path traversal"
-    },
-    {
-      "pr_id": "3221937633",
-      "gate": "propagation",
-      "file": "packages/client/src/utils.test-d.ts",
-      "detail": "2 propagation error(s), 0 warning(s): Import path \"./types\" changed in packages/client/src/utils.tes"
-    },
-    {
-      "pr_id": "3222050638",
-      "gate": "access",
-      "file": "GUI/Qt/Components/FileChooserPanelWithHistory.cxx",
-      "detail": "6 error(s), 0 warning(s): 6× path traversal"
-    },
-    {
-      "pr_id": "3223503362",
-      "gate": "access",
-      "file": "openmetadata-ui/src/main/resources/ui/src/pages/LogsViewerPage/LogsViewerPage.tsx",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
     },
     {
       "pr_id": "3225203739",

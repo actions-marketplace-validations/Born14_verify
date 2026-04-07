@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:12:33.894Z",
+  "timestamp": "2026-04-07T11:23:46.640Z",
   "adapter": "aidev-pop",
   "agent": "Copilot",
   "batchNumber": 3,
@@ -41,8 +41,8 @@
       "ran": 415,
       "failed": 3,
       "high": 0,
-      "low": 1,
-      "unknown": 2
+      "low": 2,
+      "unknown": 1
     },
     "state": {
       "ran": 412,
@@ -128,12 +128,6 @@
       "gate": "propagation",
       "file": "packages/app/src/library/EstimatedTxFee/index.module.scss",
       "detail": "6 propagation error(s), 0 warning(s): Import path \"./types\" changed in packages/app/src/library/Stat"
-    },
-    {
-      "pr_id": "3129773117",
-      "gate": "propagation",
-      "file": "src/tree/BaseCachedBranchDataProvider.ts",
-      "detail": "8 propagation error(s), 0 warning(s): Import path \"../../extensionVariables\" changed in src/commands"
     },
     {
       "pr_id": "3134580076",

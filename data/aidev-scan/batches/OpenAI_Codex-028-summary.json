@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T04:59:17.906Z",
+  "timestamp": "2026-04-07T11:27:48.787Z",
   "adapter": "aidev-pop",
   "agent": "OpenAI_Codex",
   "batchNumber": 28,
@@ -41,8 +41,8 @@
       "ran": 490,
       "failed": 1,
       "high": 0,
-      "low": 0,
-      "unknown": 1
+      "low": 1,
+      "unknown": 0
     },
     "state": {
       "ran": 489,
@@ -80,12 +80,5 @@
       "unknown": 0
     }
   },
-  "unknowns": [
-    {
-      "pr_id": "3205263638",
-      "gate": "propagation",
-      "file": "AzureMapsGrid/AzureMapsGrid/AzureMapsGridControl.tsx",
-      "detail": "1 propagation error(s), 0 warning(s): Import path \"./generated/ManifestTypes\" changed in AzureMapsGr"
-    }
-  ]
+  "unknowns": []
 }

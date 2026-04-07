@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T03:05:44.022Z",
+  "timestamp": "2026-04-07T11:13:15.519Z",
   "adapter": "aidev-pop",
   "agent": "Copilot",
   "batchNumber": 1,
@@ -27,8 +27,8 @@
       "ran": 408,
       "failed": 47,
       "high": 12,
-      "low": 24,
-      "unknown": 11
+      "low": 28,
+      "unknown": 7
     },
     "temporal": {
       "ran": 361,
@@ -41,8 +41,8 @@
       "ran": 361,
       "failed": 3,
       "high": 1,
-      "low": 1,
-      "unknown": 1
+      "low": 2,
+      "unknown": 0
     },
     "state": {
       "ran": 358,
@@ -82,12 +82,6 @@
   },
   "unknowns": [
     {
-      "pr_id": "3074614660",
-      "gate": "access",
-      "file": "api/model.cpp",
-      "detail": "2 error(s), 0 warning(s): 2× path traversal"
-    },
-    {
       "pr_id": "3074990791",
       "gate": "access",
       "file": "Makefile",
@@ -104,24 +98,6 @@
       "gate": "access",
       "file": "src/FSharp.Build/WriteCodeFragment.fs",
       "detail": "58 error(s), 0 warning(s): 58× path traversal"
-    },
-    {
-      "pr_id": "3076722865",
-      "gate": "access",
-      "file": "ui/app/src/components/workspaces/WorkspaceProvider.tsx",
-      "detail": "11 error(s), 0 warning(s): 6× path traversal, 5× permission escalation"
-    },
-    {
-      "pr_id": "3076981888",
-      "gate": "access",
-      "file": "ui/app/src/components/workspaces/WorkspaceLeftNav.tsx",
-      "detail": "11 error(s), 0 warning(s): 6× path traversal, 5× permission escalation"
-    },
-    {
-      "pr_id": "3078195603",
-      "gate": "access",
-      "file": "Test/SqlDom/TestScripts/ForClauseInSubqueryTests.sql",
-      "detail": "7 error(s), 0 warning(s): 7× path traversal"
     },
     {
       "pr_id": "3078382638",
@@ -164,12 +140,6 @@
       "gate": "contention",
       "file": "PwshSpectreConsole/Build.ps1",
       "detail": "1 error(s), 0 warning(s): 1× race condition"
-    },
-    {
-      "pr_id": "3083117301",
-      "gate": "propagation",
-      "file": "packages/blocks/microsoft-teams/src/lib/actions/request-action-message.ts",
-      "detail": "2 propagation error(s), 0 warning(s): CSS class \".container\" renamed in <style> but HTML still uses "
     },
     {
       "pr_id": "3084597647",

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-07T02:14:54.708Z",
+  "timestamp": "2026-04-07T10:12:54.802Z",
   "adapter": "aidev-pop",
   "agent": "Cursor",
   "batchNumber": 1,
@@ -27,8 +27,8 @@
       "ran": 500,
       "failed": 28,
       "high": 5,
-      "low": 17,
-      "unknown": 6
+      "low": 20,
+      "unknown": 3
     },
     "temporal": {
       "ran": 472,
@@ -41,8 +41,8 @@
       "ran": 472,
       "failed": 5,
       "high": 1,
-      "low": 1,
-      "unknown": 3
+      "low": 2,
+      "unknown": 2
     },
     "state": {
       "ran": 467,
@@ -82,18 +82,6 @@
   },
   "unknowns": [
     {
-      "pr_id": "3128183116",
-      "gate": "access",
-      "file": "async-code-web/app/projects/page.tsx",
-      "detail": "32 error(s), 0 warning(s): 32× path traversal"
-    },
-    {
-      "pr_id": "3128285665",
-      "gate": "access",
-      "file": "app/page.tsx",
-      "detail": "14 error(s), 0 warning(s): 12× path traversal, 2× permission escalation"
-    },
-    {
       "pr_id": "3131810994",
       "gate": "access",
       "file": "src/bundler/linker_context/computeCrossChunkDependencies.zig",
@@ -112,12 +100,6 @@
       "detail": "4 error(s), 0 warning(s): 4× path traversal"
     },
     {
-      "pr_id": "3152472726",
-      "gate": "access",
-      "file": "web/src/features/evals/components/eval-templates-table.tsx",
-      "detail": "2 error(s), 9 warning(s): 2× path traversal"
-    },
-    {
       "pr_id": "3171819372",
       "gate": "propagation",
       "file": "src/sentry/models/project.py",
@@ -134,12 +116,6 @@
       "gate": "access",
       "file": "go.mod",
       "detail": "2 error(s), 0 warning(s): 2× permission escalation"
-    },
-    {
-      "pr_id": "3182983420",
-      "gate": "propagation",
-      "file": "apps/app/src/app/(app)/[orgId]/components/UpgradeBanner.tsx",
-      "detail": "5 propagation error(s), 0 warning(s): CSS class \".container\" renamed in <style> but HTML still uses "
     }
   ]
 }

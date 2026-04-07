@@ -246,9 +246,13 @@ Runs verify on every PR. Posts gate results as a comment. Three modes:
 
 ## Full Documentation
 
+- **[FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md)** — 675+ failure shapes across 30 domains. The classification of how agents fail.
 - **[REFERENCE.md](REFERENCE.md)** — Gates, predicates, configuration, CLI, fault management
 - **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — Architecture, the 8-stage autonomous loop
 - **[METHODOLOGY.md](METHODOLOGY.md)** — AIDev-POP scan methodology and reproducibility
+- **[PARITY-GRID.md](PARITY-GRID.md)** — 8×10 capability × failure class coverage matrix
+- **[ASSESSMENT.md](ASSESSMENT.md)** — What verify is and isn't
+- **[ROADMAP.md](ROADMAP.md)** — Current state and priorities
 - **[GLOSSARY.md](GLOSSARY.md)** — Terms and definitions
 
 ## License

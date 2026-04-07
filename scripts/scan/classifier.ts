@@ -219,6 +219,46 @@ export function classifyFinding(finding: ScanFinding): FindingClassification {
     return { confidence: 'low', reason: 'GC-675: propagation gate on HTML — CSS class string matches', shape: 'GC-675' };
   }
 
+  // GC-676: Access gate on .devcontainer config
+  if (gate === 'access' && file.includes('.devcontainer')) {
+    return { confidence: 'low', reason: 'GC-676: access gate on devcontainer config', shape: 'GC-676' };
+  }
+
+  // GC-677: Access gate on Zig source files — file paths in Zig are normal
+  if (gate === 'access' && /\.zig$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-677: access gate on Zig source file', shape: 'GC-677' };
+  }
+
+  // GC-678: Access gate on Dart source files
+  if (gate === 'access' && /\.dart$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-678: access gate on Dart source file', shape: 'GC-678' };
+  }
+
+  // GC-679: Access gate on Makefiles — paths in make rules are normal
+  if (gate === 'access' && /[Mm]akefile/.test(file)) {
+    return { confidence: 'low', reason: 'GC-679: access gate on Makefile', shape: 'GC-679' };
+  }
+
+  // GC-680: Access gate on Go module files
+  if (gate === 'access' && /go\.(mod|sum|work)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-680: access gate on Go module file', shape: 'GC-680' };
+  }
+
+  // GC-681: Access gate on RON/config files (.ron = Rust Object Notation)
+  if (gate === 'access' && /\.ron$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-681: access gate on RON config file', shape: 'GC-681' };
+  }
+
+  // GC-682: Access gate on PowerShell scripts
+  if (gate === 'access' && /\.ps1$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-682: access gate on PowerShell script', shape: 'GC-682' };
+  }
+
+  // GC-683: Contention gate on .mts (TypeScript module) files
+  if (gate === 'contention' && /\.mts$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-683: contention gate on .mts TypeScript module', shape: 'GC-683' };
+  }
+
   // Doc files rarely have real issues (docs show examples, not production code)
   if (isDocFile(file)) {
     return { confidence: 'low', reason: 'finding in documentation file — likely example code' };

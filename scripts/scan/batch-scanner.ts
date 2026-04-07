@@ -241,10 +241,19 @@ async function runBatch(agent: string, batchNumber: number, batchSize: number): 
       } catch {}
     }
 
-    // Run verify
+    // Auto-generate security predicates for code files (same as the Action does)
+    const codeExts = new Set(['js', 'ts', 'py', 'rb', 'go', 'rs', 'java', 'php', 'mjs', 'cjs']);
+    const hasCodeEdits = edits.some(e => codeExts.has(e.file.split('.').pop()?.toLowerCase() ?? ''));
+    const securityPredicates = hasCodeEdits ? [
+      { type: 'security', securityCheck: 'secrets_in_code', expected: 'no_findings' },
+      { type: 'security', securityCheck: 'xss', expected: 'no_findings' },
+      { type: 'security', securityCheck: 'sql_injection', expected: 'no_findings' },
+    ] : [];
+
+    // Run verify with security predicates
     let gateResults: Array<{ gate: string; passed: boolean; detail: string }> = [];
     try {
-      const result = await verify(edits, [], {
+      const result = await verify(edits, securityPredicates as any, {
         appDir: prDir,
         gates: {
           grounding: false, syntax: false, staging: false,

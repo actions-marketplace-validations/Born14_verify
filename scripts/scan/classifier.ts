@@ -182,6 +182,43 @@ export function classifyFinding(finding: ScanFinding): FindingClassification {
     return { confidence: 'low', reason: 'GC-668: propagation gate on JSONC config', shape: 'GC-668' };
   }
 
+  // GC-669: Propagation gate on TS/JS — CSS class name false matches
+  // Generic CSS classes (.container, .tooltip, .small) in string literals aren't cross-file renames
+  if (gate === 'propagation' && /\.(ts|js|mjs|cjs)$/.test(file) && !file.endsWith('.tsx') && !file.endsWith('.jsx')) {
+    return { confidence: 'low', reason: 'GC-669: propagation gate on TS/JS — CSS class string matches', shape: 'GC-669' };
+  }
+
+  // GC-670: Access gate on React/TSX components
+  // UI components importing APIs and using function calls aren't privilege escalation
+  if (gate === 'access' && /\.(tsx|jsx)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-670: access gate on React/TSX component', shape: 'GC-670' };
+  }
+
+  // GC-671: Propagation gate on React/TSX — CSS class name false matches
+  if (gate === 'propagation' && /\.(tsx|jsx)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-671: propagation gate on React/TSX — CSS class string matches', shape: 'GC-671' };
+  }
+
+  // GC-672: Access gate on SQL test files — test scripts aren't real permission issues
+  if (gate === 'access' && /\.(sql)$/.test(file) && (file.includes('test') || file.includes('Test') || file.includes('spec'))) {
+    return { confidence: 'low', reason: 'GC-672: access gate on SQL test file', shape: 'GC-672' };
+  }
+
+  // GC-673: Access gate on C/C++ source files — includes and filesystem APIs are normal
+  if (gate === 'access' && /\.(cpp|c|cc|cxx)$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-673: access gate on C/C++ source file', shape: 'GC-673' };
+  }
+
+  // GC-674: Propagation gate on Solidity — import paths in .sol files are normal
+  if (gate === 'propagation' && /\.sol$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-674: propagation gate on Solidity contract', shape: 'GC-674' };
+  }
+
+  // GC-675: Propagation gate on HTML — generic CSS class names aren't cross-file renames
+  if (gate === 'propagation' && /\.html?$/.test(file)) {
+    return { confidence: 'low', reason: 'GC-675: propagation gate on HTML — CSS class string matches', shape: 'GC-675' };
+  }
+
   // Doc files rarely have real issues (docs show examples, not production code)
   if (isDocFile(file)) {
     return { confidence: 'low', reason: 'finding in documentation file — likely example code' };

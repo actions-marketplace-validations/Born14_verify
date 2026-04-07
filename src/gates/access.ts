@@ -48,7 +48,32 @@ export interface AccessGateResult extends GateResult {
 // SYSTEM PATH PATTERNS
 // =============================================================================
 
-/** Absolute paths that indicate system file access (Unix + Windows). */
+/**
+ * System paths that are ALWAYS dangerous when combined with user input.
+ * These only fire when the line also contains a user input source.
+ * Hardcoded system paths without user input are demoted to warnings (below).
+ */
+const DANGEROUS_SYSTEM_PATHS: Array<{ regex: RegExp; detail: string }> = [
+  { regex: /\/etc\/(?:passwd|shadow|sudoers|hosts)/g, detail: 'References sensitive system file' },
+  { regex: /~\/\.ssh\//g, detail: 'References SSH credentials directory' },
+  { regex: /\/home\/[^/]+\/\.ssh\//g, detail: 'References user SSH directory' },
+  { regex: /\/proc\/self\//g, detail: 'References /proc/self/ (process introspection)' },
+  { regex: /C:\\Users\\[^\\]+\\\.ssh/gi, detail: 'References Windows SSH directory' },
+];
+
+/**
+ * User input sources — when these appear on the same line as a file operation
+ * or system path, it's a real path traversal risk.
+ */
+const USER_INPUT_PATTERN = /(?:req\.|params\.|body\.|query\.|args\.|process\.argv|request\.|ctx\.|context\.)/;
+
+/**
+ * File operation functions — readFile, writeFile, open, exec, etc.
+ * When combined with user input, these are path traversal vectors.
+ */
+const FILE_OP_WITH_INPUT = /(?:readFile|readFileSync|writeFile|writeFileSync|createReadStream|createWriteStream|open|openSync|unlink|unlinkSync|stat|statSync|access|accessSync|exec|execSync|spawn)\s*\(\s*(?:req\.|params\.|body\.|query\.|args\.|process\.argv)/g;
+
+/** Absolute paths that indicate system file access — only flag as error with user input. */
 const SYSTEM_PATH_PATTERNS: Array<{ regex: RegExp; detail: string }> = [
   { regex: /\/etc\//g, detail: 'References /etc/ (system configuration)' },
   { regex: /\/var\/log\//g, detail: 'References /var/log/ (system logs)' },
@@ -56,13 +81,10 @@ const SYSTEM_PATH_PATTERNS: Array<{ regex: RegExp; detail: string }> = [
   { regex: /\/proc\//g, detail: 'References /proc/ (kernel process info)' },
   { regex: /\/sys\//g, detail: 'References /sys/ (kernel parameters)' },
   { regex: /\/root\//g, detail: 'References /root/ (root home directory)' },
-  { regex: /~\/\.ssh\//g, detail: 'References ~/.ssh/ (SSH credentials)' },
-  { regex: /\/home\/[^/]+\/\.ssh\//g, detail: 'References user .ssh directory' },
   { regex: /\/usr\/local\/bin\//g, detail: 'References /usr/local/bin/ (system binaries)' },
   { regex: /\/tmp\//g, detail: 'References /tmp/ (shared temporary directory)' },
   { regex: /C:\\Windows\\/gi, detail: 'References C:\\Windows\\ (Windows system directory)' },
   { regex: /C:\\Program Files/gi, detail: 'References C:\\Program Files (Windows programs)' },
-  { regex: /C:\\Users\\[^\\]+\\\.ssh/gi, detail: 'References Windows user .ssh directory' },
 ];
 
 /** Docker socket and sensitive mount patterns. */
@@ -277,19 +299,53 @@ function scanSystemPaths(files: SourceFile[]): AccessViolation[] {
       const trimmed = line.trim();
       if (trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('*')) continue;
 
-      for (const { regex, detail } of SYSTEM_PATH_PATTERNS) {
+      const hasUserInput = USER_INPUT_PATTERN.test(line);
+
+      // Priority 1: File operation with user input → always error (real path traversal)
+      FILE_OP_WITH_INPUT.lastIndex = 0;
+      if (FILE_OP_WITH_INPUT.test(line)) {
+        violations.push({
+          type: 'path_traversal',
+          severity: 'error',
+          file: file.relativePath,
+          line: i + 1,
+          detail: 'User input in file operation (path traversal risk)',
+        });
+        continue; // don't double-count
+      }
+
+      // Priority 2: Dangerous system paths (sensitive files) → error if user input, warning otherwise
+      for (const { regex, detail } of DANGEROUS_SYSTEM_PATHS) {
         regex.lastIndex = 0;
         if (regex.test(line)) {
           violations.push({
             type: 'path_traversal',
-            severity: 'error',
+            severity: hasUserInput ? 'error' : 'warning',
             file: file.relativePath,
             line: i + 1,
-            detail,
+            detail: hasUserInput ? `${detail} — with user input (path traversal)` : `${detail} (hardcoded, low risk)`,
           });
         }
       }
 
+      // Priority 3: General system paths → only flag as error when user input is present
+      // Without user input, hardcoded /tmp/ or /etc/ references are normal in many codebases
+      if (hasUserInput) {
+        for (const { regex, detail } of SYSTEM_PATH_PATTERNS) {
+          regex.lastIndex = 0;
+          if (regex.test(line)) {
+            violations.push({
+              type: 'path_traversal',
+              severity: 'error',
+              file: file.relativePath,
+              line: i + 1,
+              detail: `${detail} — with user input`,
+            });
+          }
+        }
+      }
+
+      // Docker socket patterns are always errors regardless of context
       for (const { regex, detail } of DOCKER_SOCKET_PATTERNS) {
         regex.lastIndex = 0;
         if (regex.test(line)) {

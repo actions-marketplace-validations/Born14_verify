@@ -1,0 +1,15 @@
+        id: next-cache
+        uses: actions/cache@v4
+        with:
+          path: apps/next/.next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'apps/*/pnpm-lock.yaml') }}-${{ hashFiles('apps/next/**/*.{ts,tsx}') }}
+          restore-keys: |
+            next-${{ runner.os }}-
+
+        id: next-cache
+        uses: actions/cache@v4
+        with:
+          path: apps/frontend/.next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'apps/*/pnpm-lock.yaml') }}-${{ hashFiles('apps/frontend/**/*.{ts,tsx}') }}
+          restore-keys: |
+            next-${{ runner.os }}-

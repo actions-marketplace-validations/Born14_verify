@@ -1,0 +1,10 @@
+web: cd apps/rails && ./bin/rails s -p 3000
+sidekiq: cd apps/rails && bundle exec sidekiq -q default -q mailers
+tsc: pnpm run typecheck:watch
+next: TZ=UTC pnpm next dev apps/next -H flexile.dev -p 3001
+inngest: pnpm inngest-cli dev --no-discovery -u http://localhost:3001/api/inngest
+web: cd apps/backend && ./bin/rails s -p 3000
+sidekiq: cd apps/backend && bundle exec sidekiq -q default -q mailers
+tsc: pnpm run typecheck:watch
+next: TZ=UTC pnpm next dev apps/frontend -H flexile.dev -p 3001
+inngest: pnpm inngest-cli dev --no-discovery -u http://localhost:3001/api/inngest

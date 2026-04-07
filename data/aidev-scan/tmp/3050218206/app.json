@@ -1,0 +1,14 @@
+  "env": {
+    "APP_BASE": {
+      "required": true,
+      "value": "apps/rails/"
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "required": true
+  "env": {
+    "APP_BASE": {
+      "required": true,
+      "value": "apps/backend/"
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "required": true

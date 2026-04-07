@@ -1,0 +1,355 @@
+{
+  "timestamp": "2026-04-07T00:29:55.552Z",
+  "adapter": "aidev-pop",
+  "agent": "Devin",
+  "batchNumber": 3,
+  "batchSize": 500,
+  "prsScanned": 1500,
+  "prsWithFindings": 235,
+  "findingRate": "15.7%",
+  "highConfidenceRate": "55.3%",
+  "gateStats": {
+    "K5": {
+      "ran": 1500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 1500,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 1500,
+      "failed": 85,
+      "high": 23,
+      "low": 39,
+      "unknown": 23
+    },
+    "temporal": {
+      "ran": 1415,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 1415,
+      "failed": 22,
+      "high": 5,
+      "low": 1,
+      "unknown": 16
+    },
+    "state": {
+      "ran": 1393,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 1393,
+      "failed": 100,
+      "high": 88,
+      "low": 12,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 1293,
+      "failed": 28,
+      "high": 14,
+      "low": 8,
+      "unknown": 6
+    },
+    "observation": {
+      "ran": 1265,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 1265,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "unknowns": [
+    {
+      "pr_id": "2790868866",
+      "gate": "propagation",
+      "file": "src/elements/common/nav-router/NavRouter.tsx",
+      "detail": "6 propagation error(s), 0 warning(s): Import path \"../../icons/general/IconNavigateLeft\" changed in "
+    },
+    {
+      "pr_id": "2840540666",
+      "gate": "propagation",
+      "file": "apps/studio/electron/main/bun/parse.ts",
+      "detail": "4 propagation error(s), 0 warning(s): Import path \"./base\" changed in apps/studio/builder-config/dar"
+    },
+    {
+      "pr_id": "2989797052",
+      "gate": "propagation",
+      "file": "apps/next/app/settings/payouts/BankAccountModal.tsx",
+      "detail": "2 propagation error(s), 0 warning(s): Import path \"../index\" changed in e2e/helpers/checkComboboxVis"
+    },
+    {
+      "pr_id": "2881667376",
+      "gate": "access",
+      "file": "configure.ac",
+      "detail": "12 error(s), 0 warning(s): 12× path traversal"
+    },
+    {
+      "pr_id": "3065400643",
+      "gate": "access",
+      "file": "airbyte-integrations/connectors/destination-teradata/build.gradle",
+      "detail": "36 error(s), 0 warning(s): 28× path traversal, 8× permission escalation"
+    },
+    {
+      "pr_id": "3189114886",
+      "gate": "access",
+      "file": ".env.example",
+      "detail": "7 error(s), 0 warning(s): 7× path traversal"
+    },
+    {
+      "pr_id": "3105484875",
+      "gate": "propagation",
+      "file": "alchemy/src/cloudflare/bound.ts",
+      "detail": "2541 propagation error(s), 4 warning(s): Import path \"../src/alchemy.js\" changed to \"../src/alchemy."
+    },
+    {
+      "pr_id": "3036425780",
+      "gate": "access",
+      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/(inbox)/_components/inbox.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3158557487",
+      "gate": "access",
+      "file": "frontend/apps/app/components/MarkdownContent/MarkdownContent.tsx",
+      "detail": "27 error(s), 0 warning(s): 27× permission escalation"
+    },
+    {
+      "pr_id": "3097996516",
+      "gate": "contention",
+      "file": "src/Cargo.lock",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "2841184790",
+      "gate": "propagation",
+      "file": "apps/studio/electron/main/bun/parse.ts",
+      "detail": "4 propagation error(s), 0 warning(s): Import path \"./base\" changed in apps/studio/builder-config/dar"
+    },
+    {
+      "pr_id": "2915657286",
+      "gate": "contention",
+      "file": "package.json",
+      "detail": "1 error(s), 1 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "2901688039",
+      "gate": "contention",
+      "file": "packages/growth/package.json",
+      "detail": "2 error(s), 2 warning(s): 2× race condition"
+    },
+    {
+      "pr_id": "3057880405",
+      "gate": "propagation",
+      "file": "target_chains/ethereum/contracts/contracts/pulse/Scheduler.sol",
+      "detail": "95 propagation error(s), 0 warning(s): Import path \"./entropy-deployments\" changed in apps/entropy-e"
+    },
+    {
+      "pr_id": "2941014562",
+      "gate": "contention",
+      "file": "package.json",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "2884694604",
+      "gate": "access",
+      "file": "src/wolfsftp.c",
+      "detail": "40 error(s), 3 warning(s): 15× path traversal, 25× permission escalation"
+    },
+    {
+      "pr_id": "3098643979",
+      "gate": "propagation",
+      "file": "public/help/article/196-contact-gumroad.html",
+      "detail": "3 propagation error(s), 0 warning(s): CSS class \".navbar-inner\" renamed in <style> but HTML still us"
+    },
+    {
+      "pr_id": "3050185194",
+      "gate": "access",
+      "file": "airbyte-integrations/connectors/source-facebook-marketing/source_facebook_marketing/schemas/ad_sets.json",
+      "detail": "13 error(s), 0 warning(s): 9× path traversal, 4× permission escalation"
+    },
+    {
+      "pr_id": "2951230031",
+      "gate": "propagation",
+      "file": "packages/convex-helpers/server/customFunctions.test.ts",
+      "detail": "16 propagation error(s), 0 warning(s): Import path \"./customFunctions.js\" changed in packages/convex"
+    },
+    {
+      "pr_id": "3106783403",
+      "gate": "access",
+      "file": "apps/realtime-service/.env.example",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3225256791",
+      "gate": "access",
+      "file": "tools/format.bat",
+      "detail": "5 error(s), 0 warning(s): 2× path traversal, 3× permission escalation"
+    },
+    {
+      "pr_id": "3029374639",
+      "gate": "access",
+      "file": "macos/Onit/Tethered/TetherAppsManager.swift",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3105417177",
+      "gate": "propagation",
+      "file": "alchemy/src/cloudflare/bindings.ts",
+      "detail": "441 propagation error(s), 4 warning(s): Import path \"../src/alchemy.js\" changed to \"../src/alchemy.t"
+    },
+    {
+      "pr_id": "3019945406",
+      "gate": "access",
+      "file": "frontend/packages/db/supabase/migrations/20250425123516_add_rls_to_organizations_table.sql",
+      "detail": "138 error(s), 0 warning(s): 138× permission escalation"
+    },
+    {
+      "pr_id": "3057846956",
+      "gate": "propagation",
+      "file": "target_chains/ethereum/contracts/forge-test/PulseScheduler.t.sol",
+      "detail": "95 propagation error(s), 0 warning(s): Import path \"./entropy-deployments\" changed in apps/entropy-e"
+    },
+    {
+      "pr_id": "2831233724",
+      "gate": "access",
+      "file": ".tmux.conf",
+      "detail": "4 error(s), 0 warning(s): 4× path traversal"
+    },
+    {
+      "pr_id": "3192204870",
+      "gate": "access",
+      "file": "app/views/help_center/articles/contents/_13-getting-paid.html.erb",
+      "detail": "16 error(s), 0 warning(s): 6× path traversal, 10× permission escalation"
+    },
+    {
+      "pr_id": "3112246853",
+      "gate": "propagation",
+      "file": "biome.jsonc",
+      "detail": "110 propagation error(s), 0 warning(s): Import path \"../../packages/configs/eslint/index.js\" changed"
+    },
+    {
+      "pr_id": "3073587664",
+      "gate": "access",
+      "file": "tools/devcontainer_create_venv.sh",
+      "detail": "5 error(s), 0 warning(s): 2× path traversal, 3× permission escalation"
+    },
+    {
+      "pr_id": "3100453288",
+      "gate": "access",
+      "file": "src/cook-web/public/locales/en-US.json",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3010545410",
+      "gate": "access",
+      "file": "frontend/packages/db/supabase/migrations/20250422034040_modify_github_repositories.sql",
+      "detail": "75 error(s), 0 warning(s): 75× permission escalation"
+    },
+    {
+      "pr_id": "3097518060",
+      "gate": "contention",
+      "file": "src/Cargo.lock",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "3152700757",
+      "gate": "access",
+      "file": "frontend/internal-packages/db/schema/schema.sql",
+      "detail": "48 error(s), 0 warning(s): 48× permission escalation"
+    },
+    {
+      "pr_id": "3106112458",
+      "gate": "access",
+      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/settings/tools/toolListItem.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    },
+    {
+      "pr_id": "3019947988",
+      "gate": "access",
+      "file": "frontend/packages/db/supabase/migrations/20250425123428_add_rls_to_organization_members.sql",
+      "detail": "42 error(s), 0 warning(s): 42× permission escalation"
+    },
+    {
+      "pr_id": "2801019781",
+      "gate": "contention",
+      "file": ".github/workflows/integrationTests.yaml",
+      "detail": "1 error(s), 0 warning(s): 1× race condition"
+    },
+    {
+      "pr_id": "3080936507",
+      "gate": "propagation",
+      "file": "apps/api/src/routes/organization.ts",
+      "detail": "1 propagation error(s), 0 warning(s): Column \"credits\" changed in packages/db/migrations/1747921176_"
+    },
+    {
+      "pr_id": "2879029392",
+      "gate": "access",
+      "file": "fullstack/freertos-wolfip-wolfssl-https/setup.sh",
+      "detail": "4 error(s), 0 warning(s): 4× permission escalation"
+    },
+    {
+      "pr_id": "2867049623",
+      "gate": "propagation",
+      "file": "src/elements/content-sidebar/SidebarNav.tsx",
+      "detail": "16 propagation error(s), 0 warning(s): Import path \"../../icon/fill/DocGenIcon\" changed in src/eleme"
+    },
+    {
+      "pr_id": "3019935504",
+      "gate": "access",
+      "file": "frontend/packages/db/schema/schema.sql",
+      "detail": "111 error(s), 0 warning(s): 111× permission escalation"
+    },
+    {
+      "pr_id": "2776592584",
+      "gate": "propagation",
+      "file": "src/elements/content-picker/Footer.js.flow",
+      "detail": "12 propagation error(s), 0 warning(s): Import path \"../../components/button\" changed in src/elements"
+    },
+    {
+      "pr_id": "2922685827",
+      "gate": "propagation",
+      "file": "supabase/functions/_backend/triggers/on_user_delete.ts",
+      "detail": "1 propagation error(s), 0 warning(s): Column \"id\" changed in supabase/migrations/20250316005953_opti"
+    },
+    {
+      "pr_id": "3241890972",
+      "gate": "propagation",
+      "file": "apps/web/src/components/features/colors/DefaultThemeSelector/DefaultThemeSelector.tsx",
+      "detail": "20 propagation error(s), 0 warning(s): Import path \"../../src/chats\" changed to \"./chats\" in package"
+    },
+    {
+      "pr_id": "3050218206",
+      "gate": "access",
+      "file": ".cursorrules",
+      "detail": "18 error(s), 0 warning(s): 18× path traversal"
+    },
+    {
+      "pr_id": "3036416301",
+      "gate": "access",
+      "file": "app/(dashboard)/mailboxes/[mailbox_slug]/(inbox)/_components/messageItem.tsx",
+      "detail": "2 error(s), 0 warning(s): 2× path traversal"
+    }
+  ]
+}

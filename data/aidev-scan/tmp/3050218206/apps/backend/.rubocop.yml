@@ -1,0 +1,85 @@
+
+inherit_from:
+  - ./config/.rails-rubocop.yml
+
+# Rails configuration overrides
+# Put any Rails-specific configuration overrides in this block.
+# End Rails configuration overrides
+
+require:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-rake
+
+AllCops:
+  # RuboCop has a bunch of cops enabled by default. This setting tells RuboCop
+  # to ignore them, so only the ones explicitly set in this file are enabled.
+  DisabledByDefault: true
+  SuggestExtensions: false
+  Exclude:
+    - 'bin/**/*'
+    - 'db/migrate/**/*'
+    - 'db/schema.rb'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'vendor/bundle/**/*'
+
+Layout/ArgumentAlignment:
+  Enabled: true
+
+Layout/ArrayAlignment:
+  Enabled: true
+
+Layout/BlockAlignment:
+  Enabled: true
+
+Layout/DefEndAlignment:
+  Enabled: true
+
+Layout/FirstArgumentIndentation:
+  Enabled: true
+
+Layout/FirstArrayElementIndentation:
+  Enabled: true
+
+Layout/FirstHashElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
+Layout/HashAlignment:
+  Enabled: true
+
+Layout/MultilineMethodCallBraceLayout:
+  Enabled: true
+
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: true
+
+Layout/SpaceInsideArrayPercentLiteral:
+  Enabled: true
+
+Lint/Debugger:
+  Enabled: true
+
+Lint/ShadowingOuterLocalVariable:
+  Enabled: true
+
+Rails/TimeZone:
+  Enabled: true
+  EnforcedStyle: flexible
+
+Style/BlockDelimiters:
+  Enabled: true
+
+Layout/FirstHashElementLineBreak:
+  Enabled: true
+
+Layout/MultilineHashBraceLayout:
+  EnforcedStyle: new_line
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Layout/MultilineHashKeyLineBreaks:
+  Enabled: true

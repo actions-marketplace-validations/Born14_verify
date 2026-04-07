@@ -1,0 +1,4 @@
+
+web: bundle exec puma -C config/puma.rb
+release: ./ci_scripts/release.sh
+sidekiq: bundle exec sidekiq -q default -q mailers

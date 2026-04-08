@@ -1,0 +1,120 @@
+{
+  "timestamp": "2026-04-08T18:09:10.006Z",
+  "repo": "seasonedcc/remix-forms",
+  "prCount": 68,
+  "prsScanned": 54,
+  "prsSkipped": 14,
+  "prsWithFindings": 11,
+  "findingRate": "20.4%",
+  "highConfidenceRate": "18.2%",
+  "gateStats": {
+    "grounding": {
+      "ran": 54,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "F9": {
+      "ran": 54,
+      "failed": 9,
+      "high": 0,
+      "low": 0,
+      "unknown": 9
+    },
+    "K5": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "temporal": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "state": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 45,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "filesystem": {
+      "ran": 38,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "security": {
+      "ran": 40,
+      "failed": 2,
+      "high": 2,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 43,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "newGatesVsLevel1": {
+    "grounding": 0,
+    "syntax": 9,
+    "filesystem": 0,
+    "serialization": 0,
+    "security": 2,
+    "a11y": 0,
+    "performance": 0
+  },
+  "notes": "Second production Level 2 run, picked as Candidate A from 12 TS/JS-pure non-Devin candidates. Direct comparison to cal.com (commit cedf388): different agent (100% OpenAI Codex vs 100% Devin), different shape (small TS library vs Next.js monorepo), different size (68 PRs vs 220). Skip rate dropped sharply from 81% (cal.com) to 21% (remix-forms) — confirms the cal.com skip rate was Devin-specific (force-pushed branches), not a general scanner limitation. Codex preserves parent commit SHAs much more reliably. Of the 54 scanned PRs: 11 with findings (20.4% finding rate vs cal.com's 64.3% — substantially lower), 9 F9 findings, 2 high-confidence security findings (hardcoded passwords in .spec.ts test files — first high-confidence findings from any Level 2 scan, classification target for triage: real credential leak vs legitimate test fixture). F9 pattern breakdown across the 9 findings: 5 'file not found' on .spec.ts files (suspect SI-003 multi-commit FP class), 3 'search string not found' on .test.ts/.tsx files (likely X-90 fabrications), 1 'ambiguous match' on .tsx file (X-91 territory). Per-PR JSONL stays Lenovo-local per data-separate-knowledge-unified policy. Triage pending operator review of raw data."
+}

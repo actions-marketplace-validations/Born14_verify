@@ -329,3 +329,129 @@ Single-commit PRs (common in Copilot, Codex) won't trigger SI-003 at all. Estima
 cal.com Level 2 first production run (commit `cedf388`). The bug was invisible at Level 1 (synthetic stubs always satisfy any search string), invisible on the smoke test (`modelcontextprotocol/inspector` had no multi-commit creation patterns), and only became diagnostic when the operator triaged the 26 F9 findings and noticed a sub-pattern of `file not found` clustered on large new-package PRs.
 
 This is the second time on 2026-04-08 that an unexpected diagnostic signal pointed at the wrong layer first. Initial hypothesis was "predicate generator bug" → ruled out by code read. Second hypothesis was "F9 file-creation guard bug" → ruled out by code read. Third hypothesis was "diff parser bug" → ruled out by code read. Actual bug found in the scanner's diff reconstruction step, three layers up from where it surfaces. Lesson: when a diagnostic narrows to a specific gate output, the cause may be in the input pipeline that fed the gate, not in the gate itself.
+
+---
+
+## SI-004 — Serialization gate misfire on lockfile content routed to package.json path
+
+**Date:** 2026-04-08
+**Severity:** medium — produces false serialization findings on PRs that touch lockfiles, via a path/content mismatch in the scanner's edit reconstruction
+**Discovered during:** cal.com Level 2 (commit `cedf388`) and total-typescript-monorepo Level 2 (commit `38b28b7`) cross-scan triage
+**Triaged by:** Pattern recognition across two independent scans on different agent populations
+**Status:** documented, **root cause hypothesis pending investigation** — three layers candidate but not yet ruled out
+
+### Symptom
+
+The serialization gate produces `JSON Parse error: Unexpected identifier "<token>"` failures on file paths that legitimately contain JSON (e.g., `package.json`, `.json` configs), but the parse-error token names a lockfile-specific field that does NOT belong in the named file type.
+
+**5 confirmed occurrences across 2 scans:**
+
+cal.com Level 2 (1 occurrence):
+- PR 3174617673 (Devin, "feat: add circular dependency check to CI workflow") — serialization gate fired on `.github/workflows/all-checks.yml` with `JSON Parse error: Unexpected identifier "name"`. The file is YAML, not JSON; `"name"` is a top-level GitHub Actions workflow key.
+
+total-typescript-monorepo Level 2 (4 occurrences):
+- PR 3192275043 (Cursor) — serialization on `apps/internal-cli/package.json`, error `JSON Parse error: Unexpected identifier "lockfileVersion"`
+- PR 3192276530 (Cursor) — same path, same error: `lockfileVersion`
+- PR 3196991617 (Cursor) — same path, same error: `lockfileVersion`
+- PR 3196925778 (Cursor, classified `low`) — `PHASE_1_COMPLETION_REPORT.md` with same `lockfileVersion` error (wrong file type entirely — Markdown)
+
+`lockfileVersion` is the top-level field of `package-lock.json`, `pnpm-lock.yaml`, and `yarn.lock`. It does NOT appear in `package.json`. The fact that the parser is finding it inside a `package.json`-named edit means the **content of the edit** is lockfile content, not package.json content.
+
+### Hypothesis (NOT yet investigated)
+
+Per the SI-003 lesson — "when a diagnostic narrows to a specific gate output, the cause may be in the input pipeline that fed the gate, not in the gate itself" — three candidate layers need to be ruled out before naming the actual bug:
+
+1. **`generatePredicates()` in `scripts/scan/level2-scanner.ts` (lines ~221-227)** — possibly emitting `serialization` predicates on the wrong file type. Code at the time of writing:
+
+   ```typescript
+   for (const edit of edits) {
+     const lower = edit.file.toLowerCase();
+     if (lower.endsWith('.json') || lower.endsWith('.yaml') || lower.endsWith('.yml')) {
+       predicates.push({ type: 'serialization', file: edit.file, comparison: 'structural' });
+     }
+   }
+   ```
+
+   The generator already does NOT emit serialization for `.md` files, so the `PHASE_1_COMPLETION_REPORT.md` finding **cannot come from this path** unless the upstream `edit.file` value is itself wrong.
+
+2. **`parseDiff()` in `src/parsers/git-diff.ts`** — possibly producing edits with the wrong `file` field. If the diff reconstruction concatenates multiple commits' patches and a subsequent `diff --git` header isn't recognized, two file's contents can flow into one Edit object's `replace` string.
+
+3. **`scanPR()` in `scripts/scan/level2-scanner.ts` diff reconstruction (lines 305-315)** — same suspect as SI-003. The function reconstructs each commit's diff with synthetic headers and concatenates. If the dataset has two commit_details rows where one has `filename: "package.json"` and the next has `filename: "package-lock.json"`, the concatenated diff might place lockfile patch content under the package.json header. **This is the most likely candidate** because:
+   - It's the same code path that caused SI-003
+   - It explains both the cal.com YAML case (workflow file path with workflow content but parsed as JSON because the predicate generator only checks file extension) and the total-typescript lockfile case (package.json path with lockfile content)
+   - The `.md` finding fits if the diff reconstruction produces an edit with `file: 'PHASE_1_COMPLETION_REPORT.md'` whose `replace` content contains lockfile fragments — possible if a single commit_details entry has cross-contaminated data
+
+The above is **hypothesis only** — none of the three layers has been verified by code read or isolation test tonight. SI-004 is filed as documentation pending investigation.
+
+### Trigger (suspected)
+
+PRs that touch BOTH a lockfile AND a similarly-named JSON file in the same edit batch. Common in:
+- Dependency updates (`pnpm install` modifies both `package.json` and `pnpm-lock.yaml`)
+- Workspace setup PRs (multiple `package.json` files plus their lockfiles)
+- Monorepo lockfile sync PRs
+
+The 4 cal.com YAML occurrence is a different variant — workflow file with workflow content, parsed as JSON because the predicate generator includes `.yml` in its serialization trigger set. **This may be a separate bug or the same bug with a different surface.** Investigation should distinguish them.
+
+### Related observation — gates firing on Markdown files
+
+In addition to the serialization-on-`.md` finding above (PR 3196925778), the total-typescript scan also produced an **access gate finding on a `.md` file**:
+
+- PR 3192645075 (Cursor, classified `low`) — `ALONGSIDE_FLAG_FEATURE.md` with `1 error(s), 0 warning(s): 1× path traversal`
+
+The access gate's `path_traversal` check should not be running against Markdown content. Either:
+- The auto-predicate generator is not the source (it doesn't gate predicates on file extension for security/access — those run on every code file)
+- The access gate's `scanSystemPaths` function is matching on a `/var/`, `/etc/`, or `..` substring inside the Markdown text content, which is content-not-context-aware
+- Or the diff parser is producing an edit with `file: 'ALONGSIDE_FLAG_FEATURE.md'` whose `search`/`replace` contains code-like content from a different real file
+
+This is the **same theme as SI-004**: gates firing on file types they shouldn't, possibly because the `edit.file` value doesn't match the actual `edit.replace` content. If SI-004's root cause turns out to be the `scanPR()` diff reconstruction, this access-on-Markdown observation would be the same bug surfacing on a different gate. **Treating as a related observation, not a separate incident, until investigation confirms.**
+
+### Fix candidates
+
+**NOT YET PROPOSED — investigation required first.** SI-004 is documented as a hypothesis-pending-investigation entry. Three things need to happen before fix candidates can be drafted:
+
+1. **Reproduce the bug in isolation.** Pick one of the 5 occurrences (recommend PR 3192275043 — Cursor, total-typescript, only 5-10 commits to inspect) and run an isolation test that:
+   - Loads the PR's commits from `pr_commit_details.jsonl`
+   - Reconstructs the diff exactly as `scanPR()` does
+   - Calls `parseDiff()` and prints the resulting `Edit[]` for inspection
+   - Checks whether any edit's `file` field disagrees with its `replace` content type
+
+2. **Rule out the three candidate layers** (predicate generator, diff parser, scanner reconstruction) with code reads + isolation evidence, same protocol as SI-003.
+
+3. **Identify the actual bug location** and propose fix options A/B/C with tradeoffs.
+
+Once those three steps are done, write a "Fix candidates" section into this entry following the SI-003 pattern.
+
+### Tests (pending root cause)
+
+Once the bug is located and fixed, regression tests should:
+- Reproduce a synthetic multi-file PR where one commit modifies `package.json` and another modifies `package-lock.json`
+- Assert the resulting edits have correct `file` ↔ `replace` correspondence (no cross-contamination)
+- Assert the serialization gate does not fire `lockfileVersion` errors on `package.json`
+- Positive control: assert legitimate JSON parse errors on actually-malformed package.json still fire
+
+### Detection going forward
+
+If a Level 2 scan produces serialization findings with `JSON Parse error: Unexpected identifier "lockfileVersion"`, that is the SI-004 pattern. Scriptable check:
+
+```bash
+cat ~/verify-l2/data/aidev-scan/level2/batches/<repo>.jsonl | jq -r 'select(.findings[]?.gate=="serialization") | .pr_id + " " + (.findings[] | select(.gate=="serialization") | .detail)' | grep lockfileVersion
+```
+
+If the count is non-zero, SI-004 is firing on this scan.
+
+### Impact estimate
+
+5 occurrences across 2 scans (cal.com 1, total-typescript 4) over a combined 96 scanned PRs. Roughly 5% of scanned PRs hit this class on agent populations that touch lockfiles. The 0% rate on remix-forms (54 PRs scanned) is consistent with remix-forms being a small library that doesn't routinely modify lockfiles in agent PRs.
+
+Across the AIDev-POP dataset, dependency-update and workspace-setup PRs are common in:
+- **Cursor PRs** — Cursor has high lockfile-touch rates per PR
+- **Devin PRs** — particularly on monorepo refactor PRs
+- **Codex PRs** — lower rate, library-focused PRs touch lockfiles less often
+
+Estimate: SI-004 affects 2-10% of serialization findings on lockfile-heavy repos, near 0% on small libraries.
+
+### Surfaced by
+
+cal.com Level 2 (1 occurrence, originally classified as "Candidate 4 — held below threshold") + total-typescript-monorepo Level 2 (4 occurrences, pushing total above threshold). Same flywheel pattern as SI-003: a single-occurrence anomaly was held in scratch from the first scan, then a second scan on a different agent population produced 4 more occurrences of the same shape, promoting the pattern from "noise" to "incident."
+
+This is the **third time on 2026-04-08** that scanner output revealed a scanner bug, not an agent bug. SI-001 (catastrophic regex), SI-002 (silent shape drop in discover-shapes), SI-003 (multi-commit PR FP), and now SI-004 (serialization-on-lockfile-content path mismatch). Pattern: real production scans surface scanner resilience bugs that are invisible to synthetic test suites because the test suites don't include the specific shape of bad input that triggers them. Lesson: the only way to find scanner bugs is to run the scanner on diverse production data.

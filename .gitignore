@@ -25,3 +25,38 @@ data/harvest-manifest.json
 !data/.gitkeep
 MARKETING-STRATEGY.md
 data/aidev-scan/tmp/
+
+# Node
+node_modules/
+package-lock.json
+
+# Local development copy of AIDev-POP corpus (3.2GB, lives on Lenovo for real scans)
+data/aidev-pop/
+
+# Generated documentation from scripts/scan/wiki-compiler.ts
+data/wiki/
+
+# discover-shapes output (regenerated on demand; triaged into FAILURE-TAXONOMY.md)
+data/discovered-shapes.jsonl
+
+# Level 2 / k5 scanner working dirs under fixtures
+fixtures/demo-app/.verify/
+fixtures/demo-app/.verify-k5-*/
+
+# Compiled TypeScript output leaking next to sources
+scripts/campaign/*.js
+scripts/campaign/*.js.map
+scripts/campaign/*.d.ts
+scripts/campaign/*.d.ts.map
+scripts/harness/*.js
+scripts/harness/*.js.map
+scripts/harness/*.d.ts
+scripts/harness/*.d.ts.map
+scripts/scan/*.js
+scripts/scan/*.js.map
+scripts/scan/*.d.ts
+scripts/scan/*.d.ts.map
+fixtures/http-server.js
+fixtures/http-server.js.map
+fixtures/http-server.d.ts
+fixtures/http-server.d.ts.map

@@ -1395,6 +1395,8 @@ These are not predicate-type failures but failures in verify's own gate logic. T
 | X-87 | Predicate passes all gates but describes wrong thing | no coverage | Agent predicate is syntactically correct but semantically misaligned with goal |
 | X-88 | Deferred predicate never actually validated | no coverage | DB predicate deferred to post-deploy, but post-deploy gate skips it |
 | X-89 | Predicate fingerprint changes across pipeline stages | no coverage | Same predicate fingerprinted differently at K5 vs at narrowing — constraint mismatch |
+| X-90 | Agent edit search string fabricated against existing file | discovered 2026-04-08 | Agent generates an edit `{file, search, replace}` where the file exists at the parent commit but the `search` string does not appear in it. F9 reports `search string not found`. Pattern dominates Devin's small-medium refactor PRs in cal.com Level 2 (14+ occurrences in 42 scanned PRs). Invisible at Level 1 because synthetic file stubs always satisfy the search literally. Strongest signal class enabled by Level 2 grounding context. |
+| X-91 | Agent edit search string matches non-uniquely (ambiguous) | discovered 2026-04-08 | Agent's edit `search` string is too short or under-contextualized to uniquely target a position in the file — F9 reports `ambiguous match (N occurrences)`. Common on test files with repeated patterns (`expect`, `describe` blocks) and on sweeping rename refactors. Distinct from X-90 fabrication: the agent did read the file but did not generate enough surrounding context to disambiguate the edit target. 5 occurrences in 42 cal.com PRs scanned. |
 
 ### Gate Calibration — False Positive Patterns (discovered from AIDev-POP scan, April 2026)
 
@@ -1440,7 +1442,7 @@ These are not agent failure shapes — they are **gate** failure shapes. The gat
 | GC-683 | Contention gate flags .mts TypeScript modules | **fixed** | `.mts` — TypeScript ESM module files. |
 | GC-684 | Access gate severity is binary — no admin-context exception for edit content | **discovered 2026-04-08** | `severity: 'error'` fires on all SYSTEM_PATH_PATTERNS and DOCKER_SOCKET_PATTERNS in edit `replace` content regardless of whether the edit targets an admin file (Dockerfile, SQL migration, CI config) or a user-input handler. Bundle 107 (run #43) attempted blanket severity downgrade and **regressed `[HARVEST:build] COPY references parent directory`** because it removed legitimate detection of `COPY ../../../etc/passwd`. Root fix needs per-pattern context classification: real path traversal sequences (`..` outside project, hardcoded sensitive paths like `/etc/passwd`) stay error; admin-context patterns (`/var/log/` mention in SQL log table comment) become warning. Linked to SCAN-700–SCAN-717 cluster. |
 
-**Cross-cutting total: 123 shapes (89 + 34 GC). Generator coverage: 40 unique classes. Scenario-only coverage: 2. No coverage: 47. Gate calibration: 34.**
+**Cross-cutting total: 125 shapes (91 + 34 GC). Generator coverage: 40 unique classes. Scenario-only coverage: 2. No coverage: 49. Gate calibration: 34.**
 
 ### Candidate Shapes from AIDev-POP Scan (pending operator review)
 
@@ -1708,7 +1710,7 @@ Failures where cumulative resource consumption across a workflow exceeds declare
 | Attribution | 10 | 10 | 0 | 100% | — |
 | Drift | 13 | 13 | 0 | **100%** | +11 (DR-01–DR-13) |
 | Message | 14 | 14 | 0 | 100% | — |
-| Cross-cutting | 90 | 89 | 1 | 99% | +38 (X-05–X-89) +1 GC-684 (Apr 8 auto-discovered) |
+| Cross-cutting | 92 | 89 | 3 | 97% | +38 (X-05–X-89) +1 GC-684 +2 X-90/X-91 (Apr 8 cal.com triage) |
 | Staging | 15 | 15 | 0 | 100% | — |
 | Configuration | 8 | 8 | 0 | **100%** | +5 (CFG-03–CFG-08) |
 | Accessibility | 8 | 8 | 0 | **100%** | +5 (A11Y-01–A11Y-08) |
@@ -1720,7 +1722,7 @@ Failures where cumulative resource consumption across a workflow exceeds declare
 | Injection | 14 | 14 | 0 | **100%** | +14 (INJ-01–INJ-14) |
 | Hallucination | 15 | 0 | 15 | 0% | — (gate not built yet) |
 | Budget | 15 | 15 | 0 | **100%** | +15 (BUD-01–BUD-15) |
-| **Total** | **650** | **611** | **39** | **94%** | **+271 (Mar 29) +15 hallucination (Mar 30) +1 FS-39 +1 C-69 +1 GC-684 (Apr 8 auto-discovered)** |
+| **Total** | **652** | **611** | **41** | **94%** | **+271 (Mar 29) +15 hallucination (Mar 30) +1 FS-39 +1 C-69 +1 GC-684 +2 X-90/X-91 (Apr 8 cal.com)** |
 
 ### The numbers (updated March 30, 2026)
 

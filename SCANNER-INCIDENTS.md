@@ -215,3 +215,117 @@ All 4 tests pass post-fix. Full unit suite (346 tests) passes with no regression
 Operator question during a Level 2 debugging session ("what's the append bug?"). The bug had been latent for an unknown number of nights — at least 3, possibly longer — and was only visible because the operator happened to ask about a warning line they had noticed. Without the question, the silent drop would have continued indefinitely.
 
 This is the **silent-drop class** of infrastructure bug: a pipeline component that exits 0 and reports zero output is **almost always** dropping work, not "finding nothing to do." First debug question for any "everything looks fine but nothing happened" case should be: what was the input size, and where does the component fall through to a no-op path?
+
+---
+
+## SI-003 — Multi-commit PR file-creation false positive in F9
+
+**Date:** 2026-04-08
+**Severity:** medium — produces false F9 `file_missing` findings on PRs that create-then-modify the same file
+**Discovered during:** cal.com Level 2 first production run triage (commit `cedf388`)
+**Triaged by:** Manual code read of `generatePredicates()` + `runSyntaxGate()` + `parseDiff()`, followed by isolation test against PR 3161649548 in `pr_commit_details.jsonl`
+**Status:** documented, no fix applied
+
+### Symptom
+
+Cal.com Level 2 produced 26 F9 findings across 42 scanned PRs. ~5-6 of those (19% of findings) were `file not found` failures on files in large multi-commit PRs that introduce new packages or modules. Examples:
+
+- PR 3224857167 (Devin, 1382 edits, "refactor Deel app to OAuth integration") — `packages/app-store/deel/lib/DeelService.ts: file not found` ×3
+- PR 3161649548 (Devin, 93 edits, "framework-agnostic googleapis caching layer") — `packages/app-store/_utils/googleapis/CachedCalendarClient.ts: file not found` ×2
+- PR 3241012029 (Devin, 48 edits, "add comprehensive getSlots performance tests") — `packages/lib/getSlots-performance.test.ts: file not found` ×3
+
+In each case the file IS introduced by the PR — but in an earlier commit than the one containing the modifications that F9 fired on.
+
+### Root cause
+
+Three components were checked and ruled out before the actual root cause was found:
+
+1. **`generatePredicates()` in `scripts/scan/level2-scanner.ts` (lines 215-219)** — CORRECT. Skips `filesystem_exists` for file-creation edits with empty `search` string.
+2. **`runSyntaxGate()` in `src/gates/syntax.ts` (lines 36-43)** — CORRECT. Explicitly handles file creation: `if (edit.search === '' && edit.replace) continue`.
+3. **`parseDiff()` in `src/parsers/git-diff.ts` (lines 52-63)** — CORRECT. Produces `{search: '', replace: <content>}` for files marked `isNew` in the diff header.
+
+The actual bug is in **`scanPR()` in `scripts/scan/level2-scanner.ts`** at the diff reconstruction step (lines 305-315):
+
+```typescript
+const diff = commits.map(c => {
+  const isNew = c.status === 'added';
+  const header = isNew
+    ? `diff --git ... new file mode 100644 --- /dev/null +++ b/${c.filename}\n`
+    : `diff --git ... --- a/${c.filename} +++ b/${c.filename}\n`;
+  return header + c.patch;
+}).join('\n');
+```
+
+All commits in the PR are reconstructed as separate diff blocks and concatenated. `parseDiff()` then produces an `Edit[]` containing one creation edit (empty search, full content) **plus** subsequent modification edits with non-empty searches against the same file. The whole batch is evaluated against the parent of the **earliest** commit (`sha~1` of the first commit). At that base state, the file doesn't exist yet — so the modification edits fire `file_missing` even though the same edit batch contains the creation edit.
+
+PR semantics require **sequential application** — file system state must evolve between commits within the same PR. The scanner squashes everything into a single base-commit evaluation, losing that ordering.
+
+### Trigger
+
+Any PR meeting all of:
+- Multiple commits (`pr_commit_details.jsonl` shows ≥2 distinct SHAs for the PR)
+- An earlier commit creates a file (`status: "added"`)
+- A later commit modifies that same file (`status: "modified"`)
+- The modification's edit has a non-empty `search` string
+
+Most common in Devin PRs (which favor many small commits per PR) on monorepos with new-package introduction.
+
+### Confirmation evidence
+
+Isolation test against PR 3161649548 in `~/datasets/aidev-pop/pr_commit_details.jsonl`:
+
+- 53 commits found for the PR
+- `CachedCalendarClient.ts` entry has `status: "added"` (correctly marked in dataset)
+- `parseDiff()` produces 3 edits for the file: 1 creation (empty search, 2049 bytes replace) + 2 modifications (255 and 117 byte non-empty searches)
+- F9 evaluates all 3 edits against parent of earliest commit
+- The creation edit passes (file-creation guard fires correctly)
+- Both modification edits fail with `file_missing` because the file doesn't exist at the parent commit yet
+- This is the false positive
+
+### Fix candidates
+
+**NOT YET APPLIED — documentation only until operator approves a fix path.**
+
+**Option A — Pre-filter (simplest):** In `scanPR()`, after `parseDiff()` returns the edits array, build a `Set<string>` of files that have any edit with `search === ''` (creation). For those files, drop subsequent modification edits from the array before passing to `verify()`. Loses some F9 fidelity (any genuine fabrication in a post-creation modification will be silently dropped) but eliminates the FP class with ~5 lines of code.
+
+**Option B — Sequential apply:** In `scanPR()`, group edits by commit SHA. Run F9 incrementally — apply commit 1's edits to a temporary working tree, then check commit 2's edits against the modified tree, etc. Most accurate but ~Nx slower per PR (where N is the commit count). Requires checkout/apply/restore cycles per commit.
+
+**Option C — Status-aware filter (recommended):** In the diff reconstruction loop in `scanPR()` (lines 305-315), build a `Map<filename, "created" | "modified">` from the commit details' `status` field BEFORE reconstructing the diff. For files with any `status: "added"` entry, only emit the creation edit and skip the modification edits. Uses information already in the dataset, doesn't change F9 semantics, doesn't slow down scanning. ~10 lines in `level2-scanner.ts`.
+
+**Why C over A:** A drops modifications based on what `parseDiff()` produces (post-parse), which means the scanner has to scan the parsed `Edit[]` for empty-search markers. C drops modifications based on what `pr_commit_details.jsonl` says (pre-parse), which is more authoritative — the dataset directly tells us "this file was added in this PR" without needing parser inference.
+
+**Why not B:** Sequential application is the "correct" model but it's a 5-10x performance hit per PR and requires significant refactoring of `scanPR()`. The cal.com scan ran in 3:42; Option B would push that to 20-40 minutes. Not justified for the marginal accuracy gain.
+
+### Tests (pending fix)
+
+Once a fix is applied, regression test should:
+- Reproduce a multi-commit creation+modification PR synthetically (one commit creates `foo.ts`, another commit modifies it)
+- Assert F9 does not produce `file_missing` failures for the modification edits
+- Assert F9 still catches genuine fabrications on existing files (positive control — must not be over-corrected)
+
+### Detection going forward
+
+If a Level 2 scan produces F9 `file_missing` findings concentrated on files in large PRs, check whether the same file appears with `status: "added"` in the commit details. Scriptable check:
+
+```bash
+grep -F "<filename>" ~/datasets/aidev-pop/pr_commit_details.jsonl | jq -r 'select(.pr_id=="<id>") | .status' | sort | uniq -c
+```
+
+If `added` appears in the count, this is the SI-003 false positive class.
+
+### Impact estimate
+
+In the cal.com Level 2 run, ~5-6 of 26 F9 findings (19-23%) are this false positive class. The 14-16 real fabrications (X-90 territory) are unaffected — those are on **existing** files where the agent's search string doesn't match real content.
+
+Across the AIDev-POP dataset, multi-commit PRs are concentrated in:
+- **Devin PRs** — Devin tends to commit incrementally, often 5-50+ commits per PR
+- **Large refactor PRs** — sweeping renames, package introductions, framework migrations
+- **Monorepos** — where new packages are introduced as separate commits
+
+Single-commit PRs (common in Copilot, Codex) won't trigger SI-003 at all. Estimate: SI-003 affects 10-30% of F9 findings on Devin-heavy repos, near 0% on Copilot/Codex-heavy repos.
+
+### Surfaced by
+
+cal.com Level 2 first production run (commit `cedf388`). The bug was invisible at Level 1 (synthetic stubs always satisfy any search string), invisible on the smoke test (`modelcontextprotocol/inspector` had no multi-commit creation patterns), and only became diagnostic when the operator triaged the 26 F9 findings and noticed a sub-pattern of `file not found` clustered on large new-package PRs.
+
+This is the second time on 2026-04-08 that an unexpected diagnostic signal pointed at the wrong layer first. Initial hypothesis was "predicate generator bug" → ruled out by code read. Second hypothesis was "F9 file-creation guard bug" → ruled out by code read. Third hypothesis was "diff parser bug" → ruled out by code read. Actual bug found in the scanner's diff reconstruction step, three layers up from where it surfaces. Lesson: when a diagnostic narrows to a specific gate output, the cause may be in the input pipeline that fed the gate, not in the gate itself.

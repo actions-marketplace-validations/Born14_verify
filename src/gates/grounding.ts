@@ -80,6 +80,16 @@ export function groundInReality(appDir: string): GroundingContext {
   for (const filePath of sourceFiles) {
     const content = readFileSync(filePath, 'utf-8');
 
+    // SI-001 defense in depth: skip oversized files. Files >100KB are
+    // almost always generated/minified bundles, icon sprites, vendor CSS,
+    // or framework dumps — they don't contain semantic selectors agents
+    // typically edit, and they're the most likely to trigger pathological
+    // regex scans even after individual extractor short-circuits.
+    if (content.length > 100_000) {
+      console.warn(`[grounding] Skipping oversized file (${Math.round(content.length / 1024)}KB > 100KB): ${filePath}`);
+      continue;
+    }
+
     // Extract routes
     const fileRoutes = extractRoutes(content);
     routes.push(...fileRoutes);
@@ -849,9 +859,15 @@ function extractCSS(content: string): Map<string, Record<string, string>> {
   while ((match = styleBlockPattern.exec(content)) !== null) {
     cssBlocks.push(match[1]);
   }
-  while ((match = cssLiteralPattern.exec(content)) !== null) {
-    if (match[1].includes('{') && match[1].includes(':')) {
-      cssBlocks.push(match[1]);
+  // SI-001 short-circuit: cssLiteralPattern uses three sequential greedy
+  // negated quantifiers (`[^`]*\{[^`]*\}[^`]*`) which exhibit O(n²) scan
+  // time on backtick-free content. Skip the regex entirely if there are
+  // no backticks — the pattern can't possibly match.
+  if (content.includes('`')) {
+    while ((match = cssLiteralPattern.exec(content)) !== null) {
+      if (match[1].includes('{') && match[1].includes(':')) {
+        cssBlocks.push(match[1]);
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { groundInReality, validateAgainstGrounding } from '../../src/gates/grounding.js';
+import { groundInReality, validateAgainstGrounding, clearGroundingCache } from '../../src/gates/grounding.js';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -132,5 +132,92 @@ describe('validateAgainstGrounding', () => {
     const result = validateAgainstGrounding(predicates, ctx);
     expect(result[0]).not.toHaveProperty('groundingMiss');
     rmSync(dir, { recursive: true, force: true });
+  });
+});
+
+// SI-001 regression — extractCSS pathological backtracking on backtick-free large files
+// Discovered Apr 8 2026 on calcom/cal.com globals.css (343KB) during first Level 2 run.
+// Pre-fix: scanner pinned at 85% CPU for 14+ minutes, no I/O, no progress, no crash.
+// Fix: (1) backtick short-circuit in extractCSS, (2) 100KB size cap in groundInReality loop.
+describe('SI-001 regression — large file pathological pattern', () => {
+  test('handles 343KB CSS file without backticks in <1s (was 14+ min)', () => {
+    const dir = makeTempDir();
+    clearGroundingCache();
+    try {
+      // ~343KB of CSS-like content with no backticks — the exact size and
+      // pathology of cal.com's packages/platform/atoms/globals.css
+      const pathological = '.foo { color: red; }\n'.repeat(17_000);
+      writeFileSync(join(dir, 'globals.css'), pathological);
+
+      const start = Date.now();
+      const ctx = groundInReality(dir);
+      const elapsed = Date.now() - start;
+
+      // Pre-fix: this took 14+ minutes (we killed it). Post-fix: <1s.
+      // The size cap skips the file entirely, so the result is empty.
+      expect(elapsed).toBeLessThan(1000);
+      expect(ctx).toBeTruthy();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('positive control: still parses CSS-in-JS template literals (small file)', () => {
+    const dir = makeTempDir();
+    clearGroundingCache();
+    try {
+      // CSS-in-JS with backticks — must still be parsed correctly even with
+      // the backtick short-circuit. This guards against the short-circuit
+      // accidentally breaking the legitimate template-literal case used by
+      // styled-components, emotion, etc.
+      writeFileSync(join(dir, 'component.ts'), [
+        "const styles = `",
+        "  .hero { color: red; font-size: 2rem; }",
+        "  .nav { background: #333; }",
+        "`;",
+      ].join('\n'));
+
+      const ctx = groundInReality(dir);
+      // The .hero selector from the template literal must be in the CSS map.
+      // Walk all routes since the file isn't route-scoped.
+      const allSelectors = new Set<string>();
+      for (const routeCSS of ctx.routeCSSMap.values()) {
+        for (const selector of routeCSS.keys()) allSelectors.add(selector);
+      }
+      expect(allSelectors.has('.hero')).toBe(true);
+      expect(allSelectors.has('.nav')).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('size cap skips files >100KB but still processes smaller files in same dir', () => {
+    const dir = makeTempDir();
+    clearGroundingCache();
+    try {
+      // One oversized file (should be skipped)
+      writeFileSync(join(dir, 'big.css'), '.foo { color: red; }\n'.repeat(6000)); // ~120KB
+
+      // One normal file (should be processed normally)
+      writeFileSync(join(dir, 'small.html'), [
+        '<style>',
+        '  .normal { color: blue; }',
+        '</style>',
+      ].join('\n'));
+
+      const start = Date.now();
+      const ctx = groundInReality(dir);
+      const elapsed = Date.now() - start;
+
+      expect(elapsed).toBeLessThan(1000);
+      // The small file's selector must still be in the result
+      const allSelectors = new Set<string>();
+      for (const routeCSS of ctx.routeCSSMap.values()) {
+        for (const selector of routeCSS.keys()) allSelectors.add(selector);
+      }
+      expect(allSelectors.has('.normal')).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

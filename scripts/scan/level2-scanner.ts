@@ -127,6 +127,10 @@ async function loadCommitsForPRs(prIds: Set<string>): Promise<Map<string, Commit
   let buffer = '';
 
   const commitsByPR = new Map<string, CommitInfo[]>();
+  const loadStart = Date.now();
+  let rowsScanned = 0;
+  let rowsMatched = 0;
+  console.log(`  [commits] Streaming pr_commit_details.jsonl, looking for ${prIds.size} PR IDs...`);
 
   for await (const chunk of stream) {
     buffer += decoder.decode(chunk, { stream: true });
@@ -135,11 +139,18 @@ async function loadCommitsForPRs(prIds: Set<string>): Promise<Map<string, Commit
 
     for (const line of lines) {
       if (!line.trim()) continue;
+      rowsScanned++;
+      // Heartbeat every 100K rows so a slow stream is visible
+      if (rowsScanned % 100_000 === 0) {
+        const elapsed = ((Date.now() - loadStart) / 1000).toFixed(1);
+        console.log(`  [commits] ${rowsScanned} rows scanned, ${rowsMatched} matched, ${elapsed}s elapsed`);
+      }
       try {
         const d = JSON.parse(line);
         const prId = String(d.pr_id);
         if (!prIds.has(prId)) continue;
 
+        rowsMatched++;
         if (!commitsByPR.has(prId)) commitsByPR.set(prId, []);
         commitsByPR.get(prId)!.push({
           sha: d.sha,
@@ -151,6 +162,8 @@ async function loadCommitsForPRs(prIds: Set<string>): Promise<Map<string, Commit
     }
   }
 
+  const totalElapsed = ((Date.now() - loadStart) / 1000).toFixed(1);
+  console.log(`  [commits] Done: ${rowsScanned} rows scanned, ${rowsMatched} commits matched across ${commitsByPR.size} PRs in ${totalElapsed}s`);
   return commitsByPR;
 }
 
@@ -423,12 +436,20 @@ async function scanRepo(
   let withFindings = 0;
   let totalHigh = 0;
 
+  console.log(`  [scan] Starting per-PR loop for ${prs.length} PRs...`);
+  let prIndex = 0;
+
   for (const pr of prs) {
+    prIndex++;
     const commits = commitsByPR.get(pr.id);
     if (!commits || commits.length === 0) {
       skipped++;
       continue;
     }
+
+    // Per-PR heartbeat — every PR logs its start time so a hang shows the exact PR
+    const prStart = Date.now();
+    console.log(`  [scan] PR ${prIndex}/${prs.length} #${pr.id} (${pr.agent}) starting...`);
 
     const { result, skipped: wasSkipped, skipReason } = await scanPR(
       pr, commits, repoDir, verify, parseDiff,
@@ -436,10 +457,15 @@ async function scanRepo(
 
     if (wasSkipped) {
       skipped++;
+      const elapsed = Date.now() - prStart;
+      console.log(`  [scan] PR ${prIndex}/${prs.length} #${pr.id} skipped (${skipReason}) in ${elapsed}ms`);
       continue;
     }
 
     scanned++;
+    const elapsed = Date.now() - prStart;
+    const findingCount = result.findings.length;
+    console.log(`  [scan] PR ${prIndex}/${prs.length} #${pr.id} done in ${elapsed}ms — ${findingCount} findings, ${result.gatesRan.length} gates ran`);
 
     // Append to JSONL
     appendFileSync(outputFile, JSON.stringify(result) + '\n');

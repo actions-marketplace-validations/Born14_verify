@@ -208,6 +208,27 @@ function cleanupRepo(repoDir: string): void {
 // AUTO-PREDICATE GENERATOR — wakes up dormant gates
 // =============================================================================
 
+/**
+ * SI-003 Option C: status-aware commit filter.
+ *
+ * For files that are CREATED anywhere in this PR (any commit row with
+ * `status === 'added'`), only emit the creation row(s) and drop subsequent
+ * modification rows. The scanner squashes all commits into a single base-
+ * commit evaluation, so post-creation modifications would otherwise fire
+ * F9 `file_missing` against a base state where the file doesn't exist yet.
+ *
+ * This uses information already in the dataset (the commit `status` field)
+ * and is a pure transform on the commits array — no parser inference, no
+ * checkout/apply cycles. See SCANNER-INCIDENTS.md SI-003 for full reasoning.
+ */
+export function filterCommitsForSI003(commits: CommitInfo[]): CommitInfo[] {
+  const createdFiles = new Set<string>();
+  for (const c of commits) {
+    if (c.status === 'added') createdFiles.add(c.filename);
+  }
+  return commits.filter(c => !(createdFiles.has(c.filename) && c.status !== 'added'));
+}
+
 export function generatePredicates(appDir: string, edits: Array<{ file: string; search: string; replace: string }>): any[] {
   const predicates: any[] = [];
 
@@ -303,8 +324,12 @@ async function scanPR(
     return { result: null, skipped: true, skipReason: 'checkout_failed' };
   }
 
+  // SI-003: drop modification rows for files that are also created in the
+  // same PR. See SCANNER-INCIDENTS.md SI-003 (Option C) for the reasoning.
+  const filteredCommits = filterCommitsForSI003(commits);
+
   // Reconstruct unified diff from commit patches
-  const diff = commits
+  const diff = filteredCommits
     .filter(c => c.patch)
     .map(c => {
       const isNew = c.status === 'added';

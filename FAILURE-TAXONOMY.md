@@ -366,8 +366,9 @@ CSS predicates assert computed style properties on DOM elements. The gap between
 | C-66 | `subgrid` value on grid-template-* | no coverage | `subgrid` inherits tracks from parent — computed vs authored |
 | C-67 | `clamp()` / `min()` / `max()` computed resolution | no coverage | `clamp(1rem, 5vw, 3rem)` resolves context-dependent |
 | C-68 | `@scope` rule boundary | no coverage | Scoped styles not visible outside scope boundary |
+| C-69 | `extractCSS` parser does not recognize modern CSS features | discovered 2026-04-08 | Grounding gate's `extractCSS` helper misses pseudo-elements (`::placeholder`, `::marker`, `::selection`), logical properties (`inline-size`, `block-size`), and function values (`fit-content()`, `clamp()`). Causes false positives — valid modern CSS flagged as fabricated. Auto-discovered via Bundles 9 + 18 in improvement-ledger run #43. Workarounds available; root fix requires upgrading the parser. |
 
-**CSS total: 68 shapes. Generator coverage: 61 (C-01–C-30, C-32–C-62). No coverage: 7 (C-31, C-63–C-68).**
+**CSS total: 69 shapes. Generator coverage: 61 (C-01–C-30, C-32–C-62). No coverage: 8 (C-31, C-63–C-69).**
 
 ---
 
@@ -558,8 +559,9 @@ Filesystem predicates assert file existence, structure, and state. The most dete
 | FS-36 | .gitignore hides file from verification glob | no coverage | File exists but glob respects .gitignore — invisible |
 | FS-37 | Lock file stale after dependency change | no coverage | `package-lock.json` not regenerated — predicate sees old deps |
 | FS-38 | Temp file left from failed write | no coverage | `.tmp` or `~` suffix file exists alongside target |
+| FS-39 | `filesystem_unchanged` false negative on hash-matched no-op edit | discovered 2026-04-08 | Predicate fails despite hash matching and zero edits — auto-discovered from 6× cluster across `config.json`, `init.sql`, `.env`. Filesystem gate bug, not a real divergence. |
 
-**Filesystem total: 38 shapes. Generator coverage: 22 (FS-01–FS-05, FS-07–FS-12, FS-14–FS-15, FS-17–FS-24, FS-32, FS-34). No coverage: 16.**
+**Filesystem total: 39 shapes. Generator coverage: 22 (FS-01–FS-05, FS-07–FS-12, FS-14–FS-15, FS-17–FS-24, FS-32, FS-34). No coverage: 17.**
 
 ---
 
@@ -1436,8 +1438,9 @@ These are not agent failure shapes — they are **gate** failure shapes. The gat
 | GC-681 | Access gate flags RON config files | **fixed** | `.ron` (Rust Object Notation) — config file paths. |
 | GC-682 | Access gate flags PowerShell scripts | **fixed** | `.ps1` — paths in PowerShell scripts are normal. |
 | GC-683 | Contention gate flags .mts TypeScript modules | **fixed** | `.mts` — TypeScript ESM module files. |
+| GC-684 | Access gate severity is binary — no admin-context exception for edit content | **discovered 2026-04-08** | `severity: 'error'` fires on all SYSTEM_PATH_PATTERNS and DOCKER_SOCKET_PATTERNS in edit `replace` content regardless of whether the edit targets an admin file (Dockerfile, SQL migration, CI config) or a user-input handler. Bundle 107 (run #43) attempted blanket severity downgrade and **regressed `[HARVEST:build] COPY references parent directory`** because it removed legitimate detection of `COPY ../../../etc/passwd`. Root fix needs per-pattern context classification: real path traversal sequences (`..` outside project, hardcoded sensitive paths like `/etc/passwd`) stay error; admin-context patterns (`/var/log/` mention in SQL log table comment) become warning. Linked to SCAN-700–SCAN-717 cluster. |
 
-**Cross-cutting total: 122 shapes (89 + 33 GC). Generator coverage: 40 unique classes. Scenario-only coverage: 2. No coverage: 47. Gate calibration: 33.**
+**Cross-cutting total: 123 shapes (89 + 34 GC). Generator coverage: 40 unique classes. Scenario-only coverage: 2. No coverage: 47. Gate calibration: 34.**
 
 ### Candidate Shapes from AIDev-POP Scan (pending operator review)
 
@@ -1688,9 +1691,9 @@ Failures where cumulative resource consumption across a workflow exceeds declare
 
 | Domain | Total Shapes | Covered | No Coverage | Coverage % | Change (Mar 29) |
 |---|---|---|---|---|---|
-| CSS | 68 | 68 | 0 | **100%** | +7 (C-31, C-63–C-68) |
+| CSS | 69 | 68 | 1 | 99% | +8 (C-31, C-63–C-69) |
 | HTML | 48 | 48 | 0 | **100%** | +11 (H-07, H-28, H-33, H-41–H-48) |
-| Filesystem | 38 | 38 | 0 | **100%** | +16 (FS-06, FS-13, FS-25–FS-31, FS-33, FS-35–FS-38) |
+| Filesystem | 39 | 38 | 1 | 97% | +17 (FS-06, FS-13, FS-25–FS-31, FS-33, FS-35–FS-39) |
 | Content | 18 | 18 | 0 | **100%** | +7 (N-10–N-17) |
 | HTTP | 54 | 54 | 0 | **100%** | +31 (P-13–P-54) |
 | DB | 56 | 56 | 0 | **100%** | +40 (D-13–D-56) |
@@ -1705,7 +1708,7 @@ Failures where cumulative resource consumption across a workflow exceeds declare
 | Attribution | 10 | 10 | 0 | 100% | — |
 | Drift | 13 | 13 | 0 | **100%** | +11 (DR-01–DR-13) |
 | Message | 14 | 14 | 0 | 100% | — |
-| Cross-cutting | 89 | 89 | 0 | **100%** | +38 (X-05–X-89) |
+| Cross-cutting | 90 | 89 | 1 | 99% | +38 (X-05–X-89) +1 GC-684 (Apr 8 auto-discovered) |
 | Staging | 15 | 15 | 0 | 100% | — |
 | Configuration | 8 | 8 | 0 | **100%** | +5 (CFG-03–CFG-08) |
 | Accessibility | 8 | 8 | 0 | **100%** | +5 (A11Y-01–A11Y-08) |
@@ -1717,7 +1720,7 @@ Failures where cumulative resource consumption across a workflow exceeds declare
 | Injection | 14 | 14 | 0 | **100%** | +14 (INJ-01–INJ-14) |
 | Hallucination | 15 | 0 | 15 | 0% | — (gate not built yet) |
 | Budget | 15 | 15 | 0 | **100%** | +15 (BUD-01–BUD-15) |
-| **Total** | **647** | **611** | **36** | **94%** | **+271 (Mar 29) +15 hallucination (Mar 30)** |
+| **Total** | **650** | **611** | **39** | **94%** | **+271 (Mar 29) +15 hallucination (Mar 30) +1 FS-39 +1 C-69 +1 GC-684 (Apr 8 auto-discovered)** |
 
 ### The numbers (updated March 30, 2026)
 

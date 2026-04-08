@@ -61,13 +61,15 @@ interface ClusterKey {
   errorSignature: string;
 }
 
-interface FailureCluster {
+// Exported for regression tests (SI-002).
+export interface FailureCluster {
   key: ClusterKey;
   entries: LedgerEntry[];
   count: number;
 }
 
-interface CandidateShape {
+// Exported for regression tests (SI-002).
+export interface CandidateShape {
   proposedId: string;
   domain: string;
   description: string;
@@ -104,6 +106,10 @@ const GATE_TO_DOMAIN: Record<string, string> = {
   access: 'access', capacity: 'capacity', contention: 'contention',
   state: 'state', temporal: 'temporal', propagation: 'propagation',
   observation: 'observation', content: 'content', hallucination: 'hallucination',
+  // SI-002 (Apr 8 2026): identity entry so the empty-gate fallback (see line ~170)
+  // routes cross-cutting false-negative meta-shapes to the existing X- prefix
+  // and `## Cross-Cutting Failures (Gate-Level)` section instead of 'unknown'.
+  crosscutting: 'crosscutting',
 };
 
 /** Domain → shape ID prefix */
@@ -167,7 +173,15 @@ function clusterFailures(entries: LedgerEntry[]): FailureCluster[] {
   const clusters = new Map<string, FailureCluster>();
 
   for (const entry of entries) {
-    const gate = entry.result.gatesFailed[0] ?? 'invariant';
+    // SI-002 (Apr 8 2026): when no gate explicitly failed (e.g. "verify passed
+    // but should have failed" meta-shapes), route the cluster to 'crosscutting'.
+    // The previous fallback 'invariant' was a specification gap, not a typo:
+    // GATE_TO_DOMAIN had 'invariants' (plural, the gate name) but not 'invariant'
+    // (singular), so domain resolved to 'unknown' and the appender silent-skipped
+    // the shape. Crosscutting is the semantically correct home — these are
+    // cross-cutting false-negative shapes about verify's overall discrimination
+    // power, not failures of specific runtime invariants.
+    const gate = entry.result.gatesFailed[0] ?? 'crosscutting';
     const sig = extractErrorSignature(entry);
     const key = `${gate}::${sig}`;
 
@@ -191,7 +205,11 @@ function clusterFailures(entries: LedgerEntry[]): FailureCluster[] {
 // Shape proposal
 // ─────────────────────────────────────────────────────────────────────────────
 
-function proposeShape(cluster: FailureCluster, existingIds: Set<string>): CandidateShape {
+// Exported for regression tests (tests/unit/discover-shapes-fail-loud.test.ts).
+// SI-002 (Apr 8 2026): pins the empty-gate → 'crosscutting' routing fix so a
+// future edit to the GATE_TO_DOMAIN map or the fallback gate name cannot
+// silently re-introduce the silent-drop bug without a test failure.
+export function proposeShape(cluster: FailureCluster, existingIds: Set<string>): CandidateShape {
   const gate = cluster.key.gate;
   const domain = GATE_TO_DOMAIN[gate] ?? 'unknown';
   const prefix = DOMAIN_TO_PREFIX[domain] ?? 'X';
@@ -280,6 +298,13 @@ for (const [heading, domain] of Object.entries(HEADING_TO_DOMAIN)) {
   // First match wins (some domains like 'crosscutting' map to two headings)
   if (!DOMAIN_TO_HEADING[domain]) DOMAIN_TO_HEADING[domain] = heading;
 }
+// SI-002 (Apr 8 2026): explicitly route 'crosscutting' to the Gate-Level section
+// rather than the first-match-wins default ('Cross-Predicate Interaction Failures').
+// The Cross-Predicate section uses I-NN IDs, while the Gate-Level section is the
+// home of the X-NN series (X-01..X-56). DOMAIN_TO_PREFIX['crosscutting'] = 'X', so
+// shapes must land in the section that already uses the X- prefix to keep the
+// table visually and semantically consistent.
+DOMAIN_TO_HEADING['crosscutting'] = 'Cross-Cutting Failures (Gate-Level)';
 
 /** Extract normalized keywords from a description for fuzzy matching */
 function extractKeywords(text: string): string[] {
@@ -390,8 +415,12 @@ function findInsertionPoint(content: string, domain: string): number {
   return lastRowOffset;
 }
 
+// Exported for regression tests (tests/unit/discover-shapes-fail-loud.test.ts).
+// SI-002 (Apr 8 2026): pins the fail-loud guard so a future refactor that
+// reverts the throw to warn+continue will fail a test instead of silently
+// dropping shapes again.
 /** Append confirmed shapes to FAILURE-TAXONOMY.md */
-function appendToTaxonomy(confirmed: CandidateShape[], maxIdPerPrefix: Map<string, number>): number {
+export function appendToTaxonomy(confirmed: CandidateShape[], maxIdPerPrefix: Map<string, number>): number {
   if (confirmed.length === 0) return 0;
 
   let content = readFileSync(TAXONOMY_PATH, 'utf-8');
@@ -415,8 +444,19 @@ function appendToTaxonomy(confirmed: CandidateShape[], maxIdPerPrefix: Map<strin
   for (const [domain, shapes] of domains) {
     const insertAt = findInsertionPoint(content, domain);
     if (insertAt === -1) {
-      console.log(`  WARNING: Could not find section for domain "${domain}" — skipping ${shapes.length} shape(s)`);
-      continue;
+      // SI-002 (Apr 8 2026): fail loud instead of warn-and-continue.
+      // Previously this path silently dropped 9+ shapes over 3 nights because
+      // the nightly job exited 0 and the warning was invisible in log aggregation.
+      // Any future unroutable domain MUST stop the pipeline and force a human
+      // decision about where the shapes belong — either add the section to
+      // FAILURE-TAXONOMY.md or update DOMAIN_TO_HEADING / GATE_TO_DOMAIN.
+      const ids = shapes.map(s => s.proposedId).join(', ');
+      throw new Error(
+        `Shape append failed: no section for domain "${domain}". ` +
+        `${shapes.length} shape(s) would be lost: ${ids}. ` +
+        `Add section to FAILURE-TAXONOMY.md or update DOMAIN_TO_HEADING. ` +
+        `See SCANNER-INCIDENTS.md SI-002 for context.`,
+      );
     }
 
     const prefix = DOMAIN_TO_PREFIX[domain] ?? 'X';
@@ -629,4 +669,10 @@ function main() {
   console.log(`new_shapes=${appended}`);
 }
 
-main();
+// SI-002 (Apr 8 2026): guarded so regression tests can import appendToTaxonomy
+// and proposeShape without triggering a full nightly run. When invoked as a
+// script (`bun scripts/harness/discover-shapes.ts ...`), import.meta.main is
+// true. When imported as a module from a test, it is false.
+if (import.meta.main) {
+  main();
+}

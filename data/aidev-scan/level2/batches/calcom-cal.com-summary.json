@@ -1,0 +1,127 @@
+{
+  "timestamp": "2026-04-08T15:25:15.818Z",
+  "repo": "calcom/cal.com",
+  "prCount": 220,
+  "prsScanned": 42,
+  "prsSkipped": 178,
+  "prsWithFindings": 27,
+  "findingRate": "64.3%",
+  "highConfidenceRate": "0.0%",
+  "gateStats": {
+    "grounding": {
+      "ran": 42,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "F9": {
+      "ran": 42,
+      "failed": 26,
+      "high": 0,
+      "low": 0,
+      "unknown": 26
+    },
+    "K5": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "G5": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "access": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "temporal": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "propagation": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "state": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "capacity": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "contention": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "observation": {
+      "ran": 16,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "filesystem": {
+      "ran": 15,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "security": {
+      "ran": 14,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "triangulation": {
+      "ran": 15,
+      "failed": 0,
+      "high": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "serialization": {
+      "ran": 2,
+      "failed": 1,
+      "high": 0,
+      "low": 0,
+      "unknown": 1
+    }
+  },
+  "newGatesVsLevel1": {
+    "grounding": 0,
+    "syntax": 26,
+    "filesystem": 0,
+    "serialization": 1,
+    "security": 0,
+    "a11y": 0,
+    "performance": 0
+  },
+  "notes": "First production Level 2 run. 178/220 PRs skipped because cal.com's Devin PR cohort uses force-pushed branches whose sha~1 does not resolve in the current remote. The 42/220 scanned PRs produced 26 F9 findings (62% F9 failure rate on the scanned subset). Preliminary triage identifies real fabrications, ambiguous-match edits, and a suspected file-creation false-positive class (multi-commit PRs that create-then-modify the same file — see SI-003 candidate in SCANNER-INCIDENTS.md). Skip rate is expected to vary significantly by agent population — Devin PRs skew high, Cursor/Claude Code PRs historically lower."
+}

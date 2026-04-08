@@ -224,7 +224,7 @@ This is the **silent-drop class** of infrastructure bug: a pipeline component th
 **Severity:** medium — produces false F9 `file_missing` findings on PRs that create-then-modify the same file
 **Discovered during:** cal.com Level 2 first production run triage (commit `cedf388`)
 **Triaged by:** Manual code read of `generatePredicates()` + `runSyntaxGate()` + `parseDiff()`, followed by isolation test against PR 3161649548 in `pr_commit_details.jsonl`
-**Status:** documented, no fix applied
+**Status:** **FIXED** in commit `5861009` (Option C). Regression test at `tests/unit/level2-si003-filter.test.ts` (6 cases). Filter extracted as exported `filterCommitsForSI003()` in `scripts/scan/level2-scanner.ts`.
 
 ### Symptom
 
@@ -351,7 +351,7 @@ The two sub-incidents are documented separately below. The split matters for tri
 **Date:** 2026-04-08
 **Severity:** medium — guarantees a false `JSON Parse error` on every YAML file an agent edits
 **Discovered during:** cal.com Level 2 (commit `cedf388`) — 1 occurrence at original triage time
-**Status:** ROOT CAUSE CONFIRMED. Fix is one line. Pending implementation + regression test.
+**Status:** **FIXED** in commit `464dad1`. Regression test at `tests/unit/level2-predicate-generator.test.ts` (4 cases). Predicate generator now emits serialization only on `.json`.
 
 ### Symptom
 
@@ -417,7 +417,7 @@ cal.com Level 2 (1 occurrence). Originally filed as part of SI-004 cluster of 5 
 **Severity:** medium — produces false serialization findings on PRs that touch lockfiles, plus cross-gate findings on Markdown files; root cause likely shared with SI-003
 **Discovered during:** cal.com Level 2 (commit `cedf388`) and total-typescript-monorepo Level 2 (commit `38b28b7`)
 **Triaged by:** Pattern recognition across two independent scans on different agent populations
-**Status:** documented, **root cause hypothesis pending investigation** — likely shares root cause family with SI-003
+**Status:** documented, **root cause hypothesis pending investigation** — likely shares root cause family with SI-003. **Cross-check pending:** SI-003 was fixed in commit `5861009` on 2026-04-08; the next Level 2 validation re-run on total-typescript-monorepo should be checked for residual `lockfileVersion`-on-`package.json` findings. If gone, SI-004b closes via SI-003. If they persist, the bug is in `parseDiff()` and SI-004b needs its own fix.
 
 ### Symptom
 

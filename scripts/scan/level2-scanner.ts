@@ -208,7 +208,7 @@ function cleanupRepo(repoDir: string): void {
 // AUTO-PREDICATE GENERATOR — wakes up dormant gates
 // =============================================================================
 
-function generatePredicates(appDir: string, edits: Array<{ file: string; search: string; replace: string }>): any[] {
+export function generatePredicates(appDir: string, edits: Array<{ file: string; search: string; replace: string }>): any[] {
   const predicates: any[] = [];
 
   // filesystem_exists — every file the agent modifies should exist pre-edit
@@ -218,10 +218,11 @@ function generatePredicates(appDir: string, edits: Array<{ file: string; search:
     }
   }
 
-  // serialization — if agent edits JSON/YAML, validate structure
+  // serialization — if agent edits JSON, validate structure (SI-004a: gate is JSON-only,
+  // emitting against .yaml/.yml guaranteed a JSON.parse error on the first non-JSON token).
   for (const edit of edits) {
     const lower = edit.file.toLowerCase();
-    if (lower.endsWith('.json') || lower.endsWith('.yaml') || lower.endsWith('.yml')) {
+    if (lower.endsWith('.json')) {
       predicates.push({ type: 'serialization', file: edit.file, comparison: 'structural' });
     }
   }
@@ -649,7 +650,10 @@ async function main() {
   console.log('═══════════════════════════════════════');
 }
 
-main().catch(err => {
-  console.error('Level 2 scan failed:', err);
-  process.exit(1);
-});
+// Only run main() when invoked as a script, not when imported (e.g. by tests).
+if (import.meta.main) {
+  main().catch(err => {
+    console.error('Level 2 scan failed:', err);
+    process.exit(1);
+  });
+}

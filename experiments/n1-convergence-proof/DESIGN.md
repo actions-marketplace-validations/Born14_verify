@@ -1,0 +1,755 @@
+# N1 — Convergence Proof Experiment: DESIGN
+
+**Status:** Pre-registration draft, pending operator honesty gate.
+**Date:** 2026-04-09
+**Branch:** `main`
+**Owner:** builder Claude (execution); operator (approval, interpretation).
+
+This document is the **binding pre-registration** for the N1 convergence proof experiment. Once operator-approved and committed, no changes to the experimental design, case list, success criteria, or contingency rules are permitted without an explicit **pre-registration amendment** commit (see §26 — Pre-registration freeze protocol).
+
+---
+
+## 1. Question, hypotheses, and pre-registered success criteria
+
+### Question
+
+**Does `govern()` — the convergence loop wrapping `verify()` with narrowing — produce meaningfully better outcomes than a raw agent loop on failure cases that `verify()` would otherwise catch?**
+
+The answer to this question decides a strategic fork for the verify project:
+
+- **Path A (equivalence):** If `govern()` and raw perform equivalently, verify's distinctive claim lives in extraction + gates + taxonomy, not in the convergence loop. The convergence loop remains an internal tool but doesn't carry the public narrative. Next steps: extraction benchmark, discriminated union refactor, measurement-first framing.
+- **Path B (improvement):** If `govern()` meaningfully improves over raw, the convergence loop is the distinctive product. Extraction + gates become the enforcement mechanism; narrowing becomes the intelligence. Next steps: `govern()` as the primary entry point, narrowing-centric framing, cross-session narrowing work.
+
+### Hypotheses
+
+- **Null (H0):** Raw and governed loops perform equivalently on the N1 dataset, modulo noise. Convergence rates, retry counts, and narrowing quality do not meaningfully differ.
+- **Path B (H1):** The governed loop produces one or more of (a) higher convergence rate, (b) qualitatively different failure modes caught, (c) actionable narrowings that rate "useful" on the inter-rater scale.
+- **Path A (H2):** Both loops converge at statistically indistinguishable rates, and narrowing quality rates "neutral" or worse on majority of sampled cases.
+
+### Denominator rule for convergence-rate claims
+
+Six stop reasons are emitted by `govern()`: `converged`, `exhausted`, `stuck`, `empty_plan_stall`, `approval_aborted`, `agent_error`. These are **not all commensurable** as convergence outcomes.
+
+- **Include in convergence denominator:** `converged`, `exhausted`, `stuck`, `empty_plan_stall`. These are runs where the loop ran its course and produced an answer about whether convergence happened (success, failure by exhaustion, failure by detected stuckness, or failure by persistent empty plans). All four are legitimate convergence verdicts.
+- **Exclude from denominator — report separately as data quality metric:** `agent_error` (infrastructure/LLM failure), `approval_aborted` (not used in N1 — if observed, it's a harness bug).
+
+**Convergence rate** = `converged` ÷ (`converged` + `exhausted` + `stuck` + `empty_plan_stall`).
+
+**Data quality metric** = (`agent_error` + `approval_aborted`) ÷ total runs attempted. Reported per loop per case, as a separate number. A data quality rate above 10% on any case-loop combination triggers re-investigation of that case before the result is trusted.
+
+For the raw loop, only `converged`, `exhausted`, and `agent_error` are possible (raw has no stuck-detector, no empty-plan stall detector, no approval gate). `exhausted` is the raw-loop equivalent of "ran all retries, none succeeded." The denominator for raw is `converged + exhausted`.
+
+### Pre-registered success criteria
+
+All thresholds are **deltas between governed and raw convergence rates**, computed on their respective denominators (see denominator rule above). These are committed *before* any runs happen. No adjustment during or after execution.
+
+- **Strong Path B:** `governed_convergence_rate - raw_convergence_rate ≥ 20 percentage points` on the N1-A primary track. Unambiguous Path B signal. Recommended next step: commit to the convergence narrative, start the Path B product branch.
+
+- **Weak Path B:** `governed_convergence_rate - raw_convergence_rate ≥ 10 percentage points` on N1-A primary track, **AND** inter-rater narrowing quality rates "useful" on ≥50% of sampled cases **with ≥70% inter-rater agreement**. Narrowing quality must hold on its own — if agreement drops below 70%, the narrowing quality signal is too noisy to support Weak Path B, and the experiment falls back on the convergence rate criterion alone.
+
+- **Path A (equivalence):** `|governed_convergence_rate - raw_convergence_rate| < 5 percentage points`, retry count means within ±15% of each other, and narrowing quality rates "neutral" or worse on majority of sampled cases. Recommended next step: extraction-first framing, convergence loop stays internal.
+
+- **Regression:** `raw_convergence_rate > governed_convergence_rate` by any margin. This would be surprising and requires investigation before any conclusion. Do not ship `govern()` as a user-facing feature until the regression is understood.
+
+- **Ambiguous:** Any result that doesn't fall into the four buckets above. RESULTS.md must specify what additional data would disambiguate and whether it's worth collecting.
+
+The **N1-B supplementary track** (bad_hint cases, governed-only) is not part of the primary success criteria. It reports narrowing quality as an independent secondary finding.
+
+---
+
+## 2. Shared prompt shell (verbatim)
+
+This is the exact system prompt used by **both** the raw loop and the governed loop. It is identical in both cases. The behavioral difference between loops is in the *context payload* that gets rendered into the message body on retries, not in the system prompt or the instruction structure.
+
+```
+You are an AI coding agent. You produce edits to accomplish a goal in a
+codebase. Your output must be a JSON object with exactly two fields:
+
+  {
+    "edits": [
+      { "file": "path/to/file.ext", "search": "exact text to find", "replace": "replacement text" }
+    ],
+    "predicates": [
+      { "type": "content", "file": "path/to/file.ext", "pattern": "string that should exist after the edit" }
+    ]
+  }
+
+Rules:
+1. Each edit's "search" field must match the file content EXACTLY, character for character, including whitespace.
+2. Predicates assert claims about the codebase after your edits are applied.
+3. Produce the minimum number of edits required to achieve the goal.
+4. Do not add commentary, explanation, or markdown. Output JSON only.
+
+On retry: you will receive feedback about why your previous attempt failed. Use that feedback to revise your edits and predicates. The goal remains the same across retries.
+```
+
+This prompt is committed verbatim. No substitutions. No per-case variations. Both loops render the same system prompt bytes on every request.
+
+---
+
+## 3. Raw loop context renderer (verbatim template)
+
+On retry attempt N ≥ 2, the raw loop appends a "previous attempt" section to the user message. The template is:
+
+```
+GOAL: {goal_string}
+
+ATTEMPT {N} of {max_attempts}.
+
+Your previous attempt failed. Here are the raw gate failure messages:
+
+{gate_failures_formatted}
+
+Revise your edits and try again.
+```
+
+Where:
+- `{goal_string}` is the scenario's `description` field, passed verbatim.
+- `{N}` is the current attempt number (1-indexed).
+- `{max_attempts}` is 5 (see §5 — Retry budget).
+- `{gate_failures_formatted}` is rendered as:
+  ```
+  - [gate_name]: {gate.detail truncated to 300 chars}
+  ```
+  One line per failed gate, using the `GateResult.gate` and `GateResult.detail` fields from the prior `VerifyResult` object. Failed gates are those with `passed === false`. If zero gates failed but the overall result was unsuccessful, the formatted output contains one line: `- [unknown]: verify returned success: false with no specific gate failure.`
+
+**Worked example** for a raw-loop retry on attempt 2, with goal "F9 exact match: change port number in server.js" and a failed F9 gate:
+
+```
+GOAL: F9 exact match: change port number in server.js
+
+ATTEMPT 2 of 5.
+
+Your previous attempt failed. Here are the raw gate failure messages:
+
+- [F9]: server.js: search string not found; searched for "const PORT = process.env.PORT || 9999;" in server.js
+
+Revise your edits and try again.
+```
+
+On attempt 1, the raw loop sends the system prompt + `GOAL: {goal_string}` with no "previous attempt" section.
+
+The renderer is a pure function `renderRawRetryContext(goal: string, attempt: number, maxAttempts: number, priorResult: VerifyResult): string`. It will be implemented in `experiments/n1-convergence-proof/harness/raw-loop.ts` and its exact bytes will match this specification.
+
+---
+
+## 4. Governed loop context renderer (verbatim template)
+
+On retry attempt N ≥ 2, the governed loop receives a `GovernContext` from `govern()` and renders a "previous attempt" section that includes everything the raw loop shows PLUS the narrowing and convergence signals. The template is:
+
+```
+GOAL: {goal_string}
+
+ATTEMPT {N} of {max_attempts}.
+
+Your previous attempt failed. Here are the raw gate failure messages:
+
+{gate_failures_formatted}
+
+NARROWING (guidance from the verification system):
+
+{narrowing_formatted}
+
+CONSTRAINTS currently active ({constraint_count} total):
+
+{constraints_formatted}
+
+FAILURE SHAPES observed across attempts:
+
+{failure_shapes_formatted}
+
+CONVERGENCE PROGRESS:
+
+{convergence_summary}
+
+Revise your edits and try again.
+```
+
+Where:
+- `{goal_string}`, `{N}`, `{max_attempts}`, `{gate_failures_formatted}` are rendered identically to the raw loop.
+- `{narrowing_formatted}` is rendered from the `Narrowing` object on the prior `VerifyResult`:
+  - If `narrowing.resolutionHint` is present: `HINT: {resolutionHint}` on its own line.
+  - If `narrowing.fileEvidence` is present: `EVIDENCE: {fileEvidence}` on its own line.
+  - If `narrowing.patternRecall` is non-empty: `PRIOR SUCCESSFUL PATTERNS: {patternRecall.join('; ')}` on its own line.
+  - If `narrowing.nextMoves` is non-empty: `SUGGESTED NEXT MOVES:` followed by one line per next move: `  - {move.kind} (score {move.score}): {move.rationale}`.
+  - If `narrowing.bannedFingerprints` is non-empty: `AVOID: these predicate patterns have failed before: {bannedFingerprints.slice(0, 5).join(', ')}`.
+  - If `narrowing` is undefined or all the above fields are empty/absent: the section renders as `(no narrowing produced for this failure)`.
+- `{constraint_count}` is `context.constraints.length`.
+- `{constraints_formatted}` is one line per constraint: `- [{constraint.type}] {constraint.reason}`. If no constraints are active, renders as `(none)`.
+- `{failure_shapes_formatted}` is one line per shape: `- {shape_id}`. If no shapes have been classified, renders as `(none)`.
+- `{convergence_summary}` is `context.convergence?.progressSummary ?? 'first attempt — no convergence history'`.
+
+**Worked example** for a governed-loop retry on attempt 2, same failure as the raw example:
+
+```
+GOAL: F9 exact match: change port number in server.js
+
+ATTEMPT 2 of 5.
+
+Your previous attempt failed. Here are the raw gate failure messages:
+
+- [F9]: server.js: search string not found; searched for "const PORT = process.env.PORT || 9999;" in server.js
+
+NARROWING (guidance from the verification system):
+
+HINT: The search string did not match any content in the file. Check the exact text in the file and match whitespace and punctuation precisely.
+EVIDENCE: Expected "const PORT = process.env.PORT || 9999;" but file contains "const PORT = process.env.PORT || 3000;"
+
+CONSTRAINTS currently active (1 total):
+
+- [search-string] Edit search field must exactly match existing file content before substitution
+
+FAILURE SHAPES observed across attempts:
+
+- F9-001
+
+CONVERGENCE PROGRESS:
+
+1 new shape(s)
+
+Revise your edits and try again.
+```
+
+The renderer is a pure function `renderGovernedRetryContext(goal: string, context: GovernContext, maxAttempts: number): string`. It will be implemented in `experiments/n1-convergence-proof/harness/governed-loop.ts`.
+
+**Note:** in the actual N1 harness, the governed loop does NOT manually render this — `govern()` calls the agent's `plan()` function and passes the `GovernContext` directly. The harness-supplied agent adapter is what calls the renderer. The renderer runs inside the agent adapter, translating `GovernContext` to the prompt body that goes to the LLM. This is the architecturally honest shape of the experiment.
+
+### Invariant: the only difference between loops is the context renderer
+
+Both loops share:
+- The same system prompt (§2)
+- The same LLM model and temperature (§19)
+- The same retry budget (§5)
+- The same `verify()` call after each attempt
+- The same success/failure oracle (`VerifyResult.success`)
+- The same edit/predicate output format (enforced by the system prompt)
+- The same case set for N1-A (no loop-specific case selection)
+
+They differ in exactly one place: what the agent's `plan()` function receives when building the retry prompt. The raw loop receives only the prior `VerifyResult`. The governed loop receives the full `GovernContext` with narrowing, constraints, convergence state, and failure shapes. Both get rendered into the prompt by the respective renderer function, and the resulting bytes are what differ.
+
+---
+
+## 5. Retry budget
+
+**Max attempts: 5.**
+
+Justification:
+- **Minimum 3** is needed to meaningfully distinguish "first-try fails, second-try uses narrowing, third-try stable" from "immediate convergence" or "stuck." Below 3, the convergence loop doesn't get a chance to demonstrate narrowing's effect.
+- **Maximum 7** is a practical ceiling before token costs and wall-clock time start dominating the experiment budget. At 5-7 retries per case × 3 runs per case × 52 cases, the retry budget is the single largest lever on experiment cost.
+- **5 is the sweet spot** observed in real agent deployments (Cursor, Devin, Claude Code default retry budgets cluster around 3-5 per task), so 5 is at the upper bound of realistic deployment and gives the convergence loop enough room to show benefit without bloating the budget.
+- **Committed, not adjustable.** If a case would benefit from more retries, that does not justify raising the budget mid-experiment. The limit is the limit.
+
+The retry budget applies uniformly to both the raw and governed loops. Both loops get exactly 5 attempts per run.
+
+---
+
+## 6. Six stop reasons and denominator rule
+
+See §1 for the denominator rule. This section is explicit about what each stop reason means and how it's tracked.
+
+| Stop reason | Meaning | Raw loop possible? | Included in convergence denominator? |
+|---|---|---|---|
+| `converged` | The final verify() returned `success: true` | yes | **yes** (numerator) |
+| `exhausted` | All retries used, loop was making progress but ran out of attempts | yes | yes |
+| `stuck` | `govern()` detected shape repetition, gate cycles, or constraint saturation | no (raw has no stuck-detector) | yes |
+| `empty_plan_stall` | Agent returned zero edits for 3+ consecutive attempts | yes (raw has its own stall counter) | yes |
+| `agent_error` | Agent's `plan()` threw or produced malformed output | yes | **no** (data quality metric) |
+| `approval_aborted` | Human approval gate rejected the plan | no (N1 does not use approval gate) | **no** (harness bug signal if observed) |
+
+**Secondary metric — stop reason distribution per loop:** The distribution of stop reasons per loop per case is reported in RESULTS.md as a separate finding. This is the metric that reveals *how* the loops fail differently, not just *whether* they fail. A governed loop that shows 40% `stuck` vs a raw loop that shows 5% `exhausted` is a qualitative finding about govern()'s stuck-detector that doesn't show up in the convergence rate alone.
+
+---
+
+## 7. N1-A primary track structure
+
+**Purpose:** Direct raw-vs-governed comparison on convergence behavior.
+
+**Cases:** 52 total.
+- 40 from Source B (fixtures/scenarios staged, `false_negative` intent, non-zero edits)
+- 12 from Source D (hand-constructed synthetic seeds filling coverage gaps in config, grounding, security, a11y)
+
+**Runs per case:** 3 per loop per case.
+
+**Total runs:** 52 cases × 2 loops × 3 runs = **312 runs**.
+
+**Per-run metrics:**
+- Stop reason (one of six)
+- Retry count (1 to 5)
+- Token spend (input + output, per retry, summed per run)
+- Wall clock time (ms per run)
+- Final VerifyResult (for inspection, not for metrics — convergence is decided by `success` boolean)
+
+**Aggregated metrics:**
+- Per-case: convergence rate per loop (majority of 3 runs, or average if fractional), retry count distribution, token cost, stop-reason distribution
+- Per-category: convergence rate delta (governed − raw), per gate category (f9, content, propagation, access, state, hallucination, config, grounding, security, a11y)
+- Overall: convergence rate delta, retry count delta, token cost delta, inter-rater narrowing quality (from §17)
+
+**Track-specific reporting:** primary success criteria (§1) are evaluated on N1-A alone.
+
+---
+
+## 8. N1-B supplementary narrowing quality track
+
+**Purpose:** Direct measurement of narrowing quality on cases explicitly designed to exercise it.
+
+**Cases:** 15-20 from Source B (`bad_hint` intent — scenarios where narrowing is expected to exist and be useful). Exact count locked during Phase 1 based on availability in the staged fixtures.
+
+**Runs per case:** 3 per case, **governed loop only** (no raw comparison — bad_hint cases are about narrowing quality, not convergence parity).
+
+**Total runs:** 15-20 cases × 1 loop × 3 runs = **45-60 runs**.
+
+**Per-run metrics:**
+- Stop reason
+- Narrowing content captured for inter-rater review (not aggregated automatically — fed to §17 protocol)
+- Retry count and token spend (secondary)
+
+**Aggregated metrics:**
+- Narrowing quality distribution (useful / neutral / noise) — from inter-rater review
+- Inter-rater agreement
+- Convergence rate on the bad_hint subset (for context, not for primary criteria)
+
+**Track-specific reporting:** N1-B reports are a separate section in RESULTS.md. N1-B does not contribute to the Strong/Weak Path B criteria directly. It provides an independent line of evidence that either corroborates or contradicts the N1-A narrowing quality signal.
+
+**Total N1 runs (both tracks):** 312 + (45 to 60) = **357 to 372 runs**.
+
+---
+
+## 9. Source classification
+
+**Source A — cal.com post-fix findings: EXCLUDED.** All 5 candidate cases confirmed as SI-006 scanner artifacts during the 2026-04-09 ground truth audit. Routed to `SCANNER-INCIDENTS.md` SI-006 incident entry. Cal.com provides zero cases for N1.
+
+**Source B — fixtures/scenarios staged: PRIMARY.** ~120+ usable `false_negative` non-zero-edit scenarios across ≥6 gate categories, pre-labeled with `expectedSuccess` and `intent` fields, wired to the `fixtures/demo-app/` fixture, loaded by `scripts/harness/external-scenario-loader.ts`. 40 cases drawn for N1-A + 15-20 cases drawn for N1-B.
+
+**Source C — existing test fixtures: DEFERRED.** Unit tests (`tests/govern.test.ts`, `tests/unit/hallucination-gate.test.ts`, `tests/unit/verify-batch.test.ts`) contain edit fixtures, but they're shaped for gate-unit testing, not agent-loop execution, and the conversion cost exceeds the marginal value when Source B is this rich. Source C can be revisited in a follow-up experiment if Source B + Source D turn out to miss coverage.
+
+**Source D — synthetic seeds: SECONDARY.** 12 hand-constructed cases filling coverage gaps in Source B (4 config-nonzero, 2 content-rich, 3 grounding, 2 security, 1 a11y). Hand-construction happens during Phase 1 case assembly.
+
+---
+
+## 10. Cal.com exclusion disclosure
+
+During the N1 ground truth audit on 2026-04-09, 5 candidate cases from the 2026-04-08 post-SI-003-fix cal.com re-run were considered as seed data for the experiment:
+
+- PR 3164956727 (`.github/workflows/pr.yml`)
+- PR 3162624847 (`packages/lib/__tests__/autoLock.test.ts`)
+- PR 3177753579 (`packages/trpc/.../slots/util.ts`)
+- PR 3179554058 (`packages/trpc/.../slots/util.ts`)
+- PR 3161649548 (`apps/api/v2/.../bookings.module.ts`)
+- PR 3224857167 (`packages/trpc/.../outOfOfficeCreateOrUpdate.handler.ts`)
+
+All six (the 5 "newly visible" findings plus the 9-commit `outOfOfficeCreateOrUpdate` case) were confirmed as instances of a previously-undiscovered scanner bug class: **SI-006 — Sequential-modification reversal in F9**. See `SCANNER-INCIDENTS.md` § SI-006 for the full incident writeup, including the correction to the 2026-04-08 cal.com validation interpretation.
+
+Cal.com findings are excluded from N1 because SI-006 cases are scanner false positives — neither a raw nor a governed agent loop can make them go away via edit quality. Using these cases as N1 seeds would have produced noise attributed to `govern()` weakness instead of the scanner bug.
+
+This exclusion is named here so the final N1 dataset isn't a post-hoc selection. Cal.com was considered and excluded before the experiment began, with a documented reason. Any reader of DESIGN.md can verify the exclusion rationale by reading SI-006 and cross-referencing the cal.com commit history.
+
+---
+
+## 11. Threats to validity
+
+Honest enumeration of known limitations that constrain the generalizability of N1 results.
+
+### Source B concentration risk (demo-app homogeneity)
+
+40 of 52 N1-A cases, and 15-20 of 15-20 N1-B cases, are drawn from a single fixture environment: `fixtures/demo-app/`. The shape categories vary (f9, content, propagation, access, state, hallucination, plus whatever N1-B covers), but the environment is identical — same file tree, same surface, same handler shapes, same CSS, same HTML structure.
+
+**Risk:** If a real LLM agent has a particular failure mode against demo-app's specific structure (e.g., it gets confused by the health endpoint pattern, or it misreads the config structure), we measure that failure mode 40+ times and attribute it to "convergence behavior" when it's actually "demo-app idiosyncrasy." Observed convergence patterns may partially reflect environment-specific agent behavior rather than fully general convergence capability.
+
+**Mitigation:** This is not a blocker — Source B is still the right primary given the ground-truth density it provides. But the risk is real and must be named in RESULTS.md's limitations section verbatim.
+
+**Named next step if the risk materializes:** A follow-up experiment (N1.1) with multiple fixture environments is a natural extension. Candidate fixtures: the `fixtures/demo-infra/` directory for infrastructure gates, freshly-synthesized repos for each shape category, or a small curated set of real-world repo snapshots that aren't cal.com.
+
+### Single-codebase ground truth extrapolation
+
+All Source B cases share the demo-app codebase. The pre-flight check confirms that each scenario's reference edits still produce the expected result against the current scanner, but it does not test whether the scenario's *difficulty* (i.e., how hard the goal is for an LLM agent) generalizes to other codebases. A case that's easy on demo-app may be hard on a larger real codebase, and vice versa. N1's results characterize convergence behavior on demo-app, not on "code in general."
+
+### Single-labeler narrowing quality risk
+
+The inter-rater narrowing quality protocol uses two raters: the operator and builder Claude. Both have deep context on verify's design. An independent third-party rater would provide a stronger signal. The current protocol mitigates this by reporting inter-rater agreement explicitly — if agreement is low, the narrowing quality signal is flagged as unreliable. But the fundamental limitation remains: two raters sharing project context may systematically agree or disagree in ways a neutral rater would not.
+
+**Mitigation:** If N1 results motivate a publishable outcome, a third rater outside the verify project should be recruited for a follow-up narrowing quality study before any public claim.
+
+### Retry budget bounds the experiment's power
+
+5 retries per attempt is an upper bound of realistic deployment but a lower bound of what's possible. A case that would converge with 8 retries looks like `exhausted` at 5. The experiment is insensitive to convergence behavior beyond the retry cliff. If the governed loop consistently converges just beyond 5 while the raw loop doesn't, N1 records equivalence when Path B is actually true.
+
+**Mitigation:** Report the *shape* of the retry distribution, not just the aggregate count. A loop that exhausts at retry 5 consistently (flat distribution) is a different signal than a loop that exhausts at retry 5 due to a few hard cases (skewed distribution).
+
+### Model choice effects
+
+Gemini 2.0 Flash is the primary model (§19). A stronger model might converge on first try regardless of loop type, masking govern()'s benefit; a weaker model might fail randomly in ways unrelated to narrowing. The Phase 2.5 pilot (§18) catches this for the specific model chosen, but it cannot rule out the possibility that Path B is "true for some models and false for others." N1's result is scoped to the primary model used, with the Haiku 4.5 sanity check as a cross-model corroboration on a small subset.
+
+### Contamination risk: pre-flight drops as a selection signal
+
+If pre-flight drops a material fraction of Source B cases, the remaining "live" scenarios may share properties (newer, more carefully maintained, etc.) that correlate with LLM-agent difficulty in unknown ways. The pre-flight contingency rule (§13) tries to preserve distribution, but selection bias cannot be fully eliminated. RESULTS.md must report the exact pre-flight drop count and the category distribution before and after replacement draws.
+
+---
+
+## 12. Pre-flight check methodology
+
+Before any case enters the N1 dataset, its **reference edits** (the scenario's hardcoded `edits` field — what a correct agent *should* produce) are run through `verify()` against the `fixtures/demo-app/` appDir with default gates. The expected outcome is:
+
+- For `false_negative` scenarios: `result.success === true` (the reference edits should make verify pass)
+- For `bad_hint` scenarios (N1-B): `result.success === false` with `result.narrowing` present and non-empty (the reference edits should fail in a way that produces narrowing)
+
+If the observed outcome matches the scenario's declared `expectedSuccess` and `intent`, the scenario is **live** and enters the N1 dataset.
+
+If the observed outcome does not match, the scenario is **stale-dropped** and recorded in `case-list.jsonl` (§14) with a `stale-drop` result and the specific mismatch noted (e.g., "expected success=true, got success=false; gate F9 failed with: ...").
+
+**The pre-flight check is run once, during Phase 1 case assembly.** Its output is committed to the repo as part of the case list lock.
+
+**Important:** the pre-flight check is NOT a test of the LLM agent. It is a test of the scenario's ground truth stability. The LLM agent is introduced in Phase 2 (harness construction) and Phase 2.5 (pilot). Pre-flight is purely mechanical: can the scenario's hardcoded correct edits still produce the expected verify result on the current codebase?
+
+### Calibration oracle use
+
+Source B scenarios' reference edits serve a second purpose beyond pre-flight: they are the **calibration oracle** for narrowing quality ratings (§17). When a governed loop converges via narrowing to a solution different from the reference edits, the inter-rater reviewer can compare the agent's edits to the reference and classify the outcome as:
+
+- **Same solution:** agent's edits are structurally identical to the reference (same files, same search/replace structure)
+- **Different-but-valid solution:** agent's edits differ from the reference but `VerifyResult.success === true`, meaning both paths solve the goal
+- **Failure:** agent's edits did not converge
+
+The "different-but-valid" category is significant for interpretation: a governed loop that converges more often but always to the reference solution suggests narrowing is steering the agent toward a known path; a governed loop that converges more often and sometimes to different-but-valid solutions suggests narrowing is helping the agent reason more broadly. Both are Path B signals, but they have different implications for how the narrowing is working.
+
+---
+
+## 13. Pre-flight contingency rule
+
+Let **k** = number of Source B cases dropped by the pre-flight check (reference edits no longer produce `result.success === expectedSuccess` or reference edits no longer produce narrowing for bad_hint cases).
+
+**This rule is pre-registered. Commit to it before Phase 1 pre-flight runs. No adjustment after seeing pre-flight results.**
+
+- **k ≤ 5:** Draw `k` replacement Source B cases from the **same category distribution** as the dropped cases (if 2 dropped cases were from f9 and 3 were from access-fs, draw 2 new f9 + 3 new access-fs). Re-run pre-flight on replacements. Repeat until 40 live Source B cases are held. Total N1-A target remains 52 cases.
+
+- **6 ≤ k ≤ 15:** Draw replacements as above until 40 live Source B cases are held, AND add `k` additional synthetic seeds to Source D (bringing Source D from 12 to 12+k). Total N1-A target becomes 52+k cases. The extra Source D cases compensate for the increased selection bias in the Source B pool caused by repeated draws from a pool with known drift.
+
+- **k > 15:** Stop and report. Do not proceed to harness construction. Something is wrong with Source B's ground truth stability, and the experiment needs re-planning, not more replacement drawing. A pre-registration amendment is required before any further work on N1.
+
+**In all cases:** the final N1-A dataset has **≥50 total cases**. Below that threshold, pre-registered success criteria become statistically unreliable and the experiment is paused for re-planning.
+
+**Clarification 1 — "Same category distribution" edge case.** If a category is exhausted before replacements can be drawn (e.g., 3 dropped cases from a category with only 3 live candidates remaining), pull from a related category in this priority order: same gate with different context (f9 → any f9 variant), same shape family (access-fs → access-http → access-cli), any remaining false_negative non-zero-edit scenario. Every substitution is logged in `case-list.jsonl` with a `category_substitution` note.
+
+**Clarification 2 — Random seed for reproducibility.** All case selection from Source B uses a pinned random seed: **20260409**. A reviewer running the same experiment against the same scenario corpus should get the same case list. The seed is part of the pre-registration and does not change during execution. If re-running months later produces a different case list, the scenario corpus has drifted and that drift is itself a finding worth investigating.
+
+---
+
+## 14. Pre-flight artifact specification (`case-list.jsonl`)
+
+Committed at `experiments/n1-convergence-proof/case-list.jsonl` during Phase 1. One JSON object per line.
+
+**Schema:**
+
+```json
+{
+  "case_id": "f9-exact-001",
+  "source": "B",
+  "intent": "false_negative",
+  "category": "f9",
+  "track": "N1-A",
+  "goal": "F9 exact match: change port number in server.js",
+  "reference_edits": [{"file": "...", "search": "...", "replace": "..."}],
+  "reference_predicates": [{"type": "content", "file": "...", "pattern": "..."}],
+  "pre_flight_result": "pass",
+  "pre_flight_verify_result": {"success": true, "gates_passed_count": 14, "gates_failed_count": 0},
+  "pre_flight_timestamp": "2026-04-09T...",
+  "scanner_sha": "38bbd03",
+  "extractor_sha": "38bbd03",
+  "category_substitution": null,
+  "random_seed": 20260409
+}
+```
+
+**Fields:**
+- `case_id`: unique, stable across runs; for Source B cases this is the scenario's `id` field verbatim
+- `source`: `"B"` or `"D"`
+- `intent`: `"false_negative"` or `"bad_hint"` (Source B) or `"synthetic"` (Source D)
+- `category`: the gate category (e.g., `"f9"`, `"content"`, `"config"`, `"security"`)
+- `track`: `"N1-A"` or `"N1-B"`
+- `goal`: the scenario's `description` field verbatim (Source B) or the hand-written goal (Source D)
+- `reference_edits`: the scenario's `edits` array (Source B) or the constructed correct answer (Source D)
+- `reference_predicates`: the scenario's `predicates` array (Source B) or the constructed correct predicates (Source D)
+- `pre_flight_result`: one of `"pass"`, `"stale-drop"`, `"synthetic"` (Source D, pre-flight not applicable), `"replacement-pass"` (drawn after an initial drop), `"replacement-stale-drop"` (replacement that also failed)
+- `pre_flight_verify_result`: the `{success, gates_passed_count, gates_failed_count}` summary from the pre-flight verify() call (null for synthetic cases)
+- `pre_flight_timestamp`: ISO 8601
+- `scanner_sha`: the git SHA of the scanner code at pre-flight time
+- `extractor_sha`: the git SHA of the extractor code at pre-flight time (may match scanner_sha)
+- `category_substitution`: null if drawn from the original category, or `{"original": "access-fs", "substituted": "access-http", "reason": "original category exhausted"}` if substituted per §13 clarification 1
+- `random_seed`: the pinned seed used for case selection (always 20260409)
+
+Once committed, `case-list.jsonl` does not change during the experiment. If the experiment is re-run later, the pre-flight artifact is the record of what was tested. Any changes require a pre-registration amendment commit (§26).
+
+---
+
+## 15. Random seed for reproducible case selection
+
+**Seed: 20260409** (the date of DESIGN.md authoring, in YYYYMMDD format).
+
+This seed is used by the Phase 1 case-assembly script when drawing 40 Source B cases from the `false_negative` non-zero-edit pool, and 15-20 Source B cases from the `bad_hint` pool. The selection is deterministic: running the Phase 1 script against the same Source B corpus with this seed produces the same case list.
+
+The seed is pinned in DESIGN.md, not in a separate config file, because pre-registration requires the full experimental specification to be in the honesty-gated document. A reviewer reading DESIGN.md sees the exact integer. If the seed were in a config file, it could be edited later without triggering a DESIGN.md amendment, which would defeat the pre-registration.
+
+---
+
+## 16. Calibration oracle use in narrowing quality rating
+
+See §12 (pre-flight methodology) for the mechanism. Summary: Source B reference edits serve as the comparator when inter-rater reviewers classify governed-loop outcomes.
+
+During the Phase 4 analysis, each sampled governed failure (or governed success, for cases where convergence-via-narrowing is observed) is classified by each rater on two axes:
+
+**Axis 1 — Narrowing quality:** useful / neutral / noise (§17)
+
+**Axis 2 — Solution similarity to reference:** same / different-but-valid / failure
+
+The combined classification feeds the narrowing quality interpretation:
+
+- **Useful narrowing + different-but-valid solution:** strongest Path B signal — narrowing helped the agent reason to a valid alternative
+- **Useful narrowing + same solution:** Path B signal — narrowing steered the agent toward the known correct path
+- **Neutral narrowing + same solution:** weak signal — agent may have converged without meaningfully using the narrowing
+- **Noise narrowing + failure:** negative signal — narrowing may be harmful or confusing
+
+---
+
+## 17. Inter-rater narrowing quality protocol
+
+**Raters:** two independent raters.
+- **Rater 1:** operator
+- **Rater 2:** builder Claude (rating independently, without seeing the operator's ratings before submitting own ratings)
+
+**Sample size:** 10-15 governed failures sampled from N1-A + all 15-20 cases from N1-B (governed-only). Total sample: 25-35 cases rated.
+
+**Rating scale:**
+- **Useful:** the narrowing provides information that could plausibly help a next attempt succeed, grounded in the specific failure observed
+- **Neutral:** the narrowing is accurate but generic (e.g., "verify returned failure") and doesn't provide actionable guidance specific to this failure
+- **Noise:** the narrowing is irrelevant, wrong, misleading, or contradicts the actual failure
+
+**Protocol:**
+1. Phase 4 analysis script samples N1-A governed failures and extracts narrowing content for each. Generates a flat list of (case_id, run_id, narrowing_content, verify_failure_summary) tuples.
+2. Each rater independently rates each tuple: `useful | neutral | noise`. No discussion between raters before rating.
+3. Each rater also rates each tuple on solution similarity: `same | different-but-valid | failure` (§16).
+4. Ratings are written to `experiments/n1-convergence-proof/ratings-{rater}.jsonl`.
+5. Analysis script computes per-rater distribution, raw agreement percentage, and per-category breakdown.
+6. Disagreements are flagged with specific examples for discussion in RESULTS.md.
+
+**Reliability gate:** If raters disagree on more than 30% of rated cases (raw agreement < 70%), the narrowing quality signal is flagged as too noisy to support the Weak Path B criterion. In that case, the experiment falls back to the convergence rate criterion alone for Path B determination, and RESULTS.md acknowledges the narrowing quality measurement as inconclusive.
+
+**Transparency:** Both raters' full ratings are committed to the repo so a reviewer can audit agreement independently.
+
+---
+
+## 18. Pilot phase structure
+
+**Before the full 357-372 run execution, a pilot phase validates the harness and the model choice.**
+
+- **Pilot cases:** 5 cases drawn from the N1-A Source B pool, using the same random seed. These 5 must be a representative subset (1 from each of 5 gate categories: f9, content, propagation, access, state).
+- **Pilot runs:** 5 cases × 2 loops × 3 runs = **30 runs**
+- **Model:** primary model (Gemini 2.0 Flash, §19)
+- **Runtime estimate:** 10-20 minutes
+- **Cost estimate:** ~$2
+
+**Decision gate:** Before proceeding to the full batch, the pilot results must satisfy:
+
+1. **Raw convergence rate on pilot:** 20% ≤ raw_convergence_rate ≤ 80%. If below 20%, the model is failing for reasons unrelated to convergence (weak model masks governance benefit). If above 80%, the model succeeds so often there's no room for governance to add value (strong model masks benefit). In either case, **stop and pick a different model**.
+2. **No harness crashes:** zero runs terminated with unexpected exceptions. If crashes occur, fix the harness before proceeding.
+3. **Token usage within budget:** average tokens per run ≤ 5,000. If higher than expected, investigate before spending money on the full batch.
+4. **Per-run wall time reasonable:** average ≤ 30 seconds per run. If much higher, investigate rate limiting or prompt bloat.
+
+**If pilot fails any gate:** stop, investigate, fix, re-pilot. Do NOT proceed to the full batch on a partially-satisfactory pilot result.
+
+**If pilot passes all gates:** proceed to full execution (Phase 3).
+
+---
+
+## 19. Model choice
+
+**Primary model: Gemini 2.0 Flash**
+- **Reasoning:** Mid-capability tier — powerful enough to attempt the task but not so powerful that first-try success is automatic. Low cost per run (~$0.02-0.05). The existing `callLLM()` helper in `src/action/index.ts` already wraps the Gemini API and handles response parsing.
+- **Temperature:** 0 (deterministic output, reduces run-to-run variance within a case)
+- **Max tokens per response:** 500 (enough for a multi-edit plan; plans longer than this are rare for the case categories in N1)
+
+**Sanity check model: Claude Haiku 4.5**
+- **Scope:** 6-8 cases from the N1-A pool, run through both loops with the same 3-runs-per-case protocol
+- **Purpose:** Confirm that N1 results are not a Gemini-specific artifact. If Haiku produces qualitatively similar raw-vs-governed deltas, the result generalizes across at least two models. If Haiku produces different deltas, the RESULTS.md limitations section names the cross-model inconsistency as a finding.
+- **Cost:** ~$2-3 additional
+
+**Total expected token cost for both models:** $8-20 depending on retry patterns. The cost budget (§22) is $30 with alert at $20, which leaves comfortable margin.
+
+---
+
+## 20. API key source
+
+**Re-use the existing `callLLM()` helper from `src/action/index.ts` lines 253-310.** This helper already wraps three providers (Gemini, OpenAI, Anthropic) with the auth and response-parsing logic needed. The N1 harness imports `callLLM()` directly and passes it the agent prompt + scenario context.
+
+**Environment variables:**
+- Primary model (Gemini): `INPUT_API_KEY` with provider set to `gemini`
+- Sanity check model (Haiku): `INPUT_API_KEY` with provider set to `anthropic`
+
+The harness reads the key from `process.env.INPUT_API_KEY` on startup. If not set, the harness exits with a clear error. No code changes to `src/action/index.ts` — the existing code is reused verbatim.
+
+**Key management:** the operator provides the key via environment variable at execution time. The key is never committed to the repo, never logged, and never included in any experiment output.
+
+---
+
+## 21. stateDir hygiene (first-class harness requirement)
+
+**CRITICAL:** `govern()` persists constraints in a stateDir across runs (ConstraintStore at `${stateDir}/constraints.json`, FaultLedger at `${stateDir}/faults.jsonl`). If the same case is run through the governed loop 3 times without wiping state, runs 2 and 3 start with constraints seeded by run 1, which would contaminate the 3-runs-per-case protocol.
+
+**The harness MUST wipe stateDir before each governed-loop run within a case.** The raw loop is clean by construction (it does not use ConstraintStore), but for uniformity the harness wipes stateDir before raw runs too.
+
+**Implementation in the harness:**
+- Each run gets a unique temporary stateDir: `${os.tmpdir()}/n1-${case_id}-${loop_type}-${run_idx}-${pid}`
+- The stateDir is created fresh, populated by the loop, and deleted after the run completes (regardless of outcome)
+- Failure to wipe (permission error, file lock, etc.) aborts the run with an error; the harness does NOT silently proceed on unwiped state
+
+**This is a first-class requirement, not a TODO.** The harness test suite (built during Phase 2) includes an explicit test: run the same case twice through the governed loop with wipe, assert the constraint store counts match; without wipe, assert they differ. This test catches any regression in the wipe logic before full execution.
+
+---
+
+## 22. Cost budget and alert threshold
+
+**Total budget: $30** across all N1 execution phases (pilot + full batch + sanity check).
+
+**Alert threshold: $20.** If mid-execution the total spend crosses $20, the harness stops, reports the spend, and waits for operator confirmation before continuing. Do not let it run to completion on autopilot.
+
+**Estimated breakdown:**
+- Pilot: ~$2
+- N1-A full batch: ~$10-15 (312 runs × ~$0.03 average)
+- N1-B bad_hint track: ~$2-4 (45-60 runs × ~$0.04 average)
+- Haiku sanity check: ~$2-3 (6-8 cases × 2 loops × 3 runs × ~$0.08 average)
+- **Total estimated:** $16-24
+- **Budget margin:** $6-14
+
+**Token budgets per run:** soft cap 5,000 tokens per run (§18 pilot gate). A single run exceeding 10,000 tokens is flagged in the logs as an anomaly for post-hoc investigation.
+
+**Cost tracking:** the harness records per-run token counts (input + output) and per-run estimated cost based on the provider's published pricing. Aggregate cost is reported after each phase (pilot → N1-A → N1-B → Haiku).
+
+---
+
+## 23. Outcome-to-next-action mapping
+
+What happens after RESULTS.md is written, for each possible outcome of N1. This is pre-committed so the experiment produces a decision path, not just data.
+
+### Strong Path B (governed − raw ≥ 20 pp)
+- **Commit to the convergence narrative publicly.** `govern()` becomes the primary entry point in the README, REFERENCE.md is reframed around narrowing as the distinctive feature.
+- **Start the cross-session narrowing branch.** The missing piece identified earlier (narrowing that persists across govern() invocations, not just within one loop) becomes the next major feature.
+- **Build one visible "raw vs governed" demo** that reproduces the N1 result in a form a reader can run in 5 minutes. This becomes the core of the launch narrative.
+- **Publish N1 results as a methodology post.** The pre-registration discipline and the SI-006 discovery during the audit are load-bearing evidence of experimental honesty.
+
+### Weak Path B (governed − raw ≥ 10 pp with narrowing quality ≥ 50% useful at ≥70% inter-rater agreement)
+- **Keep convergence internal for now.** Path B is defensible but not overwhelming; publishing a weak result risks overclaiming.
+- **Publish the extraction benchmark first** (the Path A work), then revisit convergence in 3 months with a larger experiment (N1.1 with multiple fixtures, more cases, possibly a second model run as primary).
+- **Start the discriminated union follow-up branch** (gap #6 from the extractor consolidation) — this is load-bearing for either path.
+
+### Path A (equivalence, |governed − raw| < 5 pp, narrowing quality neutral or worse)
+- **Commit to extraction-first framing.** Rewrite the README around extraction as the product. Reframe `FAILURE-TAXONOMY.md` as an extraction capability catalog.
+- **Start the benchmark harness branch.** The precision/recall number becomes the headline claim.
+- **Start the discriminated union follow-up branch.** Same work as Weak Path B, now with even higher priority because it supports the benchmark story.
+- **Keep `govern()` in the codebase as an internal tool** but remove it from the public API until a future experiment reshapes the Path B hypothesis.
+
+### Regression (raw > governed by any margin)
+- **Do not ship `govern()` as a user-facing feature until the regression is understood.** A governance loop that makes agents *worse* is a serious finding that requires root-cause investigation.
+- **Investigate before drawing conclusions.** Possible explanations: the narrowing is producing misleading information, the constraint accumulation is over-restricting the agent's search space, the governed loop's stuck-detector is firing too aggressively. Each requires its own investigation.
+- **File as a new incident** (probably `GI-001` — Governance Incident 001) with the same discipline as the SI series.
+- **Do not publish N1 results publicly until the regression is resolved or explained.** This is the one outcome where public disclosure is risky because it would undermine the project before the root cause is known.
+
+### Ambiguous (any result not fitting the four buckets above)
+- **RESULTS.md specifies what additional data would disambiguate.** Possible disambiguation: larger case count, different model, different retry budget, different narrowing rendering.
+- **Decide whether it's worth collecting** based on the cost-vs-decisiveness tradeoff. An ambiguous result that could be disambiguated by another $10 of runs should probably be disambiguated. An ambiguous result that would require a month of work to disambiguate should be filed and returned to later.
+
+---
+
+## 24. "What would change our mind" section
+
+Honest enumeration of results that would cause the author to abandon or seriously revise the current interpretation of N1. **The strength of this section is proportional to how hard it would be for the author to write it honestly. If it feels uncomfortable, it is being written correctly.**
+
+### Results that would make the author say "Path A is right after all"
+
+- **Governed and raw have the same convergence rate within 5 pp on the primary 52 cases.** The convergence loop adds no measurable benefit; the narrowing feedback is providing information the agent would have inferred from the raw failure message anyway.
+- **Narrowing quality rates "neutral" on the majority of sampled cases**, with ≥70% inter-rater agreement. The narrowing is accurate but generic — it doesn't help the agent reason in a way that feeds convergence.
+- **The N1-B bad_hint track shows governed-loop convergence on <50% of cases that were explicitly designed to benefit from narrowing.** If narrowing doesn't help even when the cases are hand-constructed to exercise it, narrowing is not the distinctive feature.
+- **Retry count distributions are indistinguishable between loops.** Both loops retry the same number of times on average, which would suggest the narrowing isn't changing the agent's retry behavior in any measurable way.
+- **Token spend is higher in governed than raw for equivalent convergence rates.** govern() would be strictly worse — more cost, same outcome.
+
+### Results that would make the author say "the experiment was misdesigned"
+
+- **Pilot phase fails the decision gate (raw convergence <20% or >80%).** The model choice doesn't provide enough dynamic range to measure governance benefit. The experiment must be re-piloted with a different model.
+- **Pre-flight drops more than 15 cases from Source B.** The contingency rule triggers a full stop. Source B ground truth has drifted too far from current scanner behavior to be trustworthy.
+- **Data quality metric (agent_error + approval_aborted rate) exceeds 10% on any case.** The LLM is flaking on specific cases in ways unrelated to convergence. Either the case is malformed or the model is unreliable on that shape; either way, the per-case result is unreliable.
+- **Inter-rater agreement on narrowing quality drops below 70%.** The two raters share context but cannot agree on what "useful" means. The narrowing quality signal is subjective enough that it cannot support Weak Path B claims.
+- **Stop reason distributions differ dramatically between pilot and full batch.** The pilot predicted convergence patterns that don't hold at scale. Something about the full-batch execution environment differs from the pilot in unexpected ways.
+
+### Results that would make the author say "`govern()` has a problem we didn't anticipate"
+
+- **Governed loop stops with `stuck` at >30% while raw exhausts at <10% on the same cases.** The stuck-detector is firing on cases that raw would have solved given more retries. This would be a bug in `govern()`'s convergence detection — too-aggressive stuck detection prevents cases from succeeding.
+- **Governed loop converges MORE often but with DIFFERENT stop reasons on N1-B bad_hint cases than on N1-A false_negative cases.** The governance loop works differently on cases explicitly designed to exercise narrowing than on general convergence cases. This is a compositional problem — govern() is not a uniform lift across failure categories.
+- **Running the same case 3 times produces different convergence outcomes on the governed loop but the same outcome on the raw loop.** Stochasticity in convergence despite deterministic LLM temperature (temperature=0). This would suggest govern()'s state handling between runs is contaminating the experiment despite the stateDir wipe — a harness bug or a `govern()` bug that needs debugging.
+- **Constraint accumulation is visibly over-restricting the agent's search space.** If the agent's attempts grow MORE constrained over retries to the point of generating empty plans, `govern()` is narrowing too aggressively. The narrowing becomes a straitjacket instead of guidance.
+- **The pre-flight check reveals that the scenario corpus contains more stale ground truth than expected**, and the replacement draws consistently come from the same sub-categories. Source B has a systematic staleness bias that the category-preserving replacement rule cannot fully correct for.
+
+### Results that would make the author say "we need N1.1 before any decision"
+
+- **Strong Path B on N1-A, Weak Path A on N1-B, or vice versa.** The two tracks give contradictory signals. One line of evidence supports Path B, the other supports Path A, and neither is strong enough to overrule the other. A larger N1.1 is needed to resolve the contradiction.
+- **Different shapes of the raw-vs-governed delta across gate categories.** If `govern()` helps massively on f9 but not on content, or vice versa, the claim "convergence loop works" is too coarse. N1.1 must measure per-category.
+- **The Haiku sanity check produces different deltas from Gemini.** Cross-model inconsistency. The result is model-dependent, not universal.
+- **Demo-app concentration risk materializes visibly in the results.** If the majority of governed-loop convergences come from scenarios that share specific demo-app structural features (e.g., all the wins are on CSS scenarios, none on server.js route scenarios), N1's result is a fixture-specific artifact. N1.1 with multiple fixtures is required.
+
+### The meta-question the author is committed to asking about their own result
+
+"If I were a hostile reviewer trying to dismiss this result, what would I attack first?"
+
+For each outcome above, the author commits to answering this question in RESULTS.md — not as a defense against criticism, but as a pre-empted disclosure. The credibility of any N1 result depends on the author's willingness to name its weaknesses in the same document that presents the strengths.
+
+---
+
+## 25. Outcome-to-next-action mapping (cross-reference)
+
+See §23 for the full mapping. This section exists as a placeholder so the 25-item checklist from the pre-design review is fully satisfied. The content lives in §23 to keep it next to the outcome buckets.
+
+---
+
+## 26. Pre-registration freeze protocol
+
+Once this document is operator-approved and committed, **no changes to the experimental design, case list, success criteria, success thresholds, contingency rules, or any specification in §1 through §25 are permitted without an explicit pre-registration amendment commit.**
+
+An amendment commit must:
+
+1. **Touch this DESIGN.md file** with the change clearly visible in the diff.
+2. **Include a new section at the bottom** titled `## Pre-registration amendment N (YYYY-MM-DD)` where N is the amendment number (starting from 1), explaining:
+   - What changed (specific section, specific text)
+   - Why the change was needed (what was wrong with the original)
+   - Whether any already-collected data is invalidated by the amendment (e.g., if success criteria change after runs have started, the old runs must be re-run under the new criteria)
+   - Operator approval of the amendment
+3. **Reference the amendment in the commit message** with format `N1 DESIGN.md pre-registration amendment N: <short description>`.
+4. **Be committed and pushed separately from any other work** — no slipping design changes into unrelated commits.
+
+**The amendment protocol is the discipline that makes this document binding.** Without it, "pre-registered" is aspirational. With it, any future reader can audit the git history of this file and verify that the experimental design was not silently adjusted mid-experiment. If the first version of DESIGN.md (this one) is the baseline, every amendment is visible as a distinct commit with a distinct rationale.
+
+**Mid-experiment changes that would require an amendment:**
+- Adding or removing cases from the case list
+- Changing success criteria thresholds (even by a small amount)
+- Changing the retry budget
+- Changing the LLM model, temperature, or prompt shell
+- Changing the denominator rule or stop reason classification
+- Changing the pre-flight contingency rule
+- Changing the bad_hint track structure
+- Changing the inter-rater protocol or rating scale
+
+**Changes that do NOT require an amendment:**
+- Fixing bugs in the harness code that don't affect the experimental logic (e.g., a typo in a log message)
+- Clarifying ambiguous language in DESIGN.md without changing the meaning (an editorial amendment is still recommended for transparency, but not required)
+- Adding comments in the harness source code
+- Re-running the entire experiment from scratch with the same DESIGN.md (this is a *replication*, not an amendment)
+
+**Refusal clause:** If an operator or builder feels pressure to change the design mid-experiment without going through the amendment protocol — because "it's a small change" or "we'll document it in RESULTS.md" or "the pre-registration is too strict" — that pressure is exactly the scenario this protocol exists to prevent. The amendment protocol is inconvenient by design. Its inconvenience is the feature, not a bug.
+
+**This refusal clause binds the builder as well as the operator.** If future-builder-Claude feels the pressure to make a small tweak without amendment because "it's obvious" or "nobody will notice" or "the amendment overhead isn't worth it for this change," that is also the scenario this protocol exists to prevent. Both sides of the operator/builder relationship are bound equally. A builder who silently adjusts the design mid-experiment, even with the best intentions, defeats pre-registration the same way an operator who waves through a "small change" does. The discipline is bilateral.
+
+---
+
+## Document status
+
+- **Version:** 1 (initial pre-registration)
+- **Author:** builder Claude (execution), operator (approval)
+- **Date:** 2026-04-09
+- **Status:** draft, pending operator honesty gate before commit
+- **Commit:** TBD (not yet committed)
+
+Once committed, this document is frozen per §26 unless amended via the amendment protocol.

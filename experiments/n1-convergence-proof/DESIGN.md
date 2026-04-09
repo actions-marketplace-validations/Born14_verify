@@ -746,10 +746,128 @@ An amendment commit must:
 
 ## Document status
 
-- **Version:** 1 (initial pre-registration)
+- **Version:** 1 (initial pre-registration) + Amendment 1 (2026-04-09)
 - **Author:** builder Claude (execution), operator (approval)
 - **Date:** 2026-04-09
-- **Status:** draft, pending operator honesty gate before commit
-- **Commit:** TBD (not yet committed)
+- **Status:** committed as `d581838` + Amendment 1 appended
+- **Commit:** `d581838` (initial) + Amendment 1 commit (see below)
 
 Once committed, this document is frozen per §26 unless amended via the amendment protocol.
+
+---
+
+## Pre-registration amendment 1 (2026-04-09)
+
+**Title:** Strike §8 (N1-B supplementary narrowing quality track) in its entirety.
+
+**Authored by:** builder Claude
+**Approved by:** operator (explicit ruling delivered during Phase 1 halt, 2026-04-09)
+**Authorization reference:** Operator's ruling delivered in the N1 session immediately following the Phase 1 inventory step, titled "Ruling 1/2/3 — audit gap acknowledged, Option 1 selected, Amendment 1 authorized." The full operator response is the authorization of record.
+**Amendment commit:** see git log for the commit landing this amendment.
+
+### What changed
+
+**§8 (N1-B supplementary narrowing quality track) is struck in its entirety.**
+
+Specifically:
+- The N1-B case structure (15-20 `bad_hint` scenarios from Source B) is removed from the experiment scope.
+- The N1-B run count (45-60 governed-only runs) is removed from total run counts.
+- The N1-B reporting section (a separate RESULTS.md section for narrowing quality on bad_hint cases) is removed.
+- The "N1-B track reports are a separate section in RESULTS.md" rule is struck.
+- Total N1 run count drops from **357-372 runs** (N1-A 312 + N1-B 45-60) to **312 runs** (N1-A only), plus the Haiku sanity check subset which remains unchanged.
+
+**§17 (inter-rater narrowing quality protocol) is scoped down** to cover only the sample drawn from N1-A governed failures. The current §17 text reads:
+
+> Sample size: 10-15 governed failures sampled from N1-A + all 15-20 cases from N1-B (governed-only). Total sample: 25-35 cases rated.
+
+Under Amendment 1, the scoped-down reading is:
+
+> Sample size: 10-15 governed failures sampled from N1-A. Total sample: 10-15 cases rated.
+
+The rest of §17 (rating scale, protocol, reliability gate, transparency) is unaffected. The inter-rater protocol still runs; it just runs over a smaller sample.
+
+### Why
+
+Phase 1 inventory (2026-04-09) ran an aggregate intent-value scan across the full `fixtures/scenarios/` corpus. The results:
+
+- `false_negative`: 2,190 scenarios
+- `false_positive`: 2,249 scenarios
+- `null` (untagged): 35 scenarios
+- `regression_guard`: 18 scenarios
+- **`bad_hint`: 0 scenarios**
+
+Across ~90 staged files, the `bad_hint` intent is completely unpopulated. Zero scenarios carry this intent in the actual corpus.
+
+DESIGN.md §8 was drafted based on the scenario loader's type definition in `scripts/harness/external-scenario-loader.ts`, which accepts `bad_hint` as one of four valid intent values. The inference that `bad_hint` scenarios existed in the corpus was made from the loader's type declaration, not from a data-level verification during the Phase 0b ground truth audit.
+
+**This is an audit gap, acknowledged.** The Phase 0b audit checked `false_negative` vs `false_positive` counts in 6 sampled files and inferred `bad_hint` availability from the loader's type. An aggregate intent-value scan across the full corpus was not run during Phase 0b. If it had been, the `bad_hint = 0` finding would have surfaced before N1-B was included in DESIGN.md §8, and the amendment protocol would not have been needed.
+
+The gap is named here because the credibility of Amendment 1 depends on being honest about how the original design committed to a data source that doesn't exist. Future readers should see that the builder caught the gap during Phase 1 execution, before any runs, and used the §26 amendment protocol to correct it. No silent substitution. No rationalization.
+
+### What was considered and rejected
+
+Two alternative responses to the empty `bad_hint` pool were considered and rejected before Option 1 was adopted.
+
+**Option 2 — Hand-construct 15-20 `bad_hint` cases in Source D.**
+
+Rejected because:
+1. It would concentrate the entire supplementary track on `fixtures/demo-app/`, worsening the concentration risk already named in §11 as a threat to validity. The original hybrid track's justification was that N1-B drew from Source B's pre-labeled ground truth; replacing it with hand-crafted cases loses that property.
+2. The entire reason Source B was promoted to primary in Report 3 was that it provides pre-labeled ground truth. Synthetic `bad_hint` cases don't have that property. Substituting them for the real data source defeats the reason N1-B was added to the design.
+3. The inter-rater protocol in §17 pairs the operator and builder Claude as raters. If the operator hand-constructed the N1-B cases, the operator would be rating narrowings on cases the operator designed, which introduces a different bias than the single-labeler risk §11 already names. The independence assumption of inter-rater rating would break.
+
+**Option 3 — Write a `bad_hint` generator script that corrupts Source B `false_negative` cases.**
+
+Rejected because:
+1. Auto-corrupted cases are a third class of input (neither pre-labeled nor hand-crafted) and the experiment has no infrastructure for a third source type. Adding one mid-stream is a scope expansion and would itself require a §26 amendment beyond this one.
+2. Corruption strategies (mangle expected values, break search strings) produce failures that may not exercise narrowing at all — they may just exercise basic gate failure modes. Verifying that corrupted cases actually test narrowing quality would require inspecting each generated case by hand, which defeats the "automated generator" justification.
+
+Both rejected options were less honest than Option 1 (strike the track). Option 1 is the response that matches the data that actually exists, with no substitute and no workaround.
+
+### What this invalidates
+
+- **§8 (N1-B supplementary narrowing quality track) in full.** The entire section is struck.
+- **§17's sample size calculation.** The original calculation included 15-20 N1-B cases; the scoped-down calculation includes only the 10-15 N1-A sample.
+- **§22's total run count estimate.** The original estimated 357-372 runs; the amended total is 312 runs (N1-A only), plus the Haiku sanity check subset (6-8 cases × 2 loops × 3 runs = 36-48 runs, unchanged), for a new total of **348-360 runs**.
+- **§22's cost estimate narrative.** The cost estimates were built against the 357-372 run count; the actual cost is reduced proportionally. The **cost budget cap of $30 and the alert threshold of $20 are unchanged** — the amended run count is comfortably inside the original budget.
+
+### What this does NOT invalidate
+
+- **§1-§7 (question, hypotheses, success criteria, denominator rule, shared prompt shell, context renderers, retry budget, stop reasons, N1-A primary track).** The primary experiment is unchanged.
+- **§9-§16 (source classification, cal.com exclusion, threats to validity, pre-flight methodology, contingency rule, pre-flight artifact, random seed, calibration oracle).** All unchanged.
+- **§18-§21 (pilot phase, model choice, API key source, stateDir hygiene).** All unchanged.
+- **§23-§25 (outcome mapping, "what would change our mind," cross-reference).** All unchanged.
+- **§26 (Pre-registration freeze protocol).** Unchanged, and now governs Amendment 1 itself (see below).
+- **The pre-registered success criteria (Strong/Weak Path B, Path A, Regression, Ambiguous).** All thresholds are unchanged. The criteria still apply to N1-A alone, which was always the primary track.
+- **The random seed (20260409).** Unchanged.
+- **The pre-flight contingency rule (§13).** Unchanged. The rule applies only to Source B `false_negative` draws, which are unaffected by this amendment.
+- **The case budget for N1-A (40 Source B + 12 Source D = 52 cases).** Unchanged.
+
+### Impact on the primary experiment
+
+N1-A at 312 runs is unaffected by this amendment. The primary experiment can still distinguish all four primary outcomes (Strong Path B, Weak Path B, Path A, Regression) per §1's criteria. The loss is real but bounded: N1-B was a second independent line of evidence on narrowing quality. Without it, the narrowing quality signal rests on the §17 inter-rater review of 10-15 governed failures sampled from N1-A. That is weaker than two independent tracks, but it is not absent.
+
+**RESULTS.md framing under Amendment 1:** "N1-B was planned as a supplementary narrowing quality track using `bad_hint` scenarios from Source B. During Phase 1 inventory, the `bad_hint` intent was found to be unpopulated in the scenario corpus (zero cases across ~90 staged files). Per §26, pre-registration Amendment 1 struck N1-B entirely rather than substituting a synthetic data source. Narrowing quality signal is reported from the N1-A sample only, as a secondary finding under §17."
+
+This is a sharper methodology note than any synthetic replacement would have produced. It states the limitation, names the decision, and cites the amendment by reference.
+
+### Amendment freeze clause
+
+**Amendment 1 is now part of the pre-registration.** It is subject to §26 equally with the original DESIGN.md sections. Specifically:
+
+1. **Amendment 1 cannot be reverted without another amendment.** If a future session decides N1-B should be reintroduced (say, if a future scenario corpus update populates `bad_hint` cases), that reintroduction requires a **Pre-registration Amendment 2** that explicitly references Amendment 1 and explains how the two interact.
+
+2. **Future amendments must acknowledge Amendment 1.** Any Amendment N for N ≥ 2 must include a section titled "Interaction with prior amendments" that lists every preceding amendment and states whether and how Amendment N modifies or supersedes their effects.
+
+3. **The §26 bilateral refusal clause applies to Amendment 1.** Neither the operator nor the builder may silently reverse or modify Amendment 1 under a "small change" rationalization. If pressure arises to reintroduce N1-B informally, §26 requires that pressure to be refused and routed through the amendment protocol.
+
+4. **Amendment 1's rationale is itself audit-gated.** The audit gap named in the "Why" section ("The inference that bad_hint scenarios existed in the corpus was not verified against data during Phase 0b audit") is committed to the public record and cannot be retroactively rewritten to minimize the error. Future readers should see the gap as it was named on 2026-04-09, not as it might be re-framed later.
+
+A pre-registration protocol that allows unlimited silent amendments is no protocol at all. Amendment 1 is binding.
+
+---
+
+### Phase 1 resumption note
+
+Phase 1 was halted at step 1a (Source B inventory) when the empty `bad_hint` pool was discovered. Under Amendment 1, Phase 1 resumes at step 1b (build the selection script) on the amended design. The selection script draws only from the `false_negative` non-zero-edit pool for the 40 Source B cases targeting N1-A. No `bad_hint` draw step runs. All other Phase 1 substeps (pre-flight check, contingency rule application, synthetic seed construction, case-list.jsonl emission) proceed as originally designed.
+
+The pre-flight checkpoint at Phase 1e — report drop count `k` to operator before committing `case-list.jsonl` — is unchanged. The operator and builder have agreed to pause at that checkpoint regardless of this amendment.

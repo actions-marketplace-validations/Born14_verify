@@ -746,11 +746,11 @@ An amendment commit must:
 
 ## Document status
 
-- **Version:** 1 (initial pre-registration) + Amendment 1 (2026-04-09) + Amendment 2 (2026-04-09) + Amendment 3 (2026-04-09)
+- **Version:** 1 (initial pre-registration) + Amendment 1 (2026-04-09) + Amendment 2 (2026-04-09) + Amendment 3 (2026-04-09) + Amendment 4 (2026-04-09)
 - **Author:** builder Claude (execution), operator (approval)
 - **Date:** 2026-04-09
-- **Status:** committed as `d581838` + Amendment 1 + Amendment 2 + Amendment 3 appended
-- **Commit:** `d581838` (initial) + Amendment 1 commit (`2adf908`) + Amendment 2 commit (`e881221`) + Amendment 3 commit (see git log)
+- **Status:** committed as `d581838` + Amendments 1 through 4 appended
+- **Commit:** `d581838` (initial) + Amendment 1 (`2adf908`) + Amendment 2 (`e881221`) + Amendment 3 (`b6a029b`) + Amendment 4 (see git log)
 
 Once committed, this document is frozen per §26 unless amended via the amendment protocol.
 
@@ -1249,3 +1249,230 @@ Phase 1f was halted at the `computeSwaps` execution step when the propagation-ht
 5. **Proceed to Phase 1f-6 (re-run pre-flight on the 3 replacement candidates)** after operator approval of the swap eyeball.
 
 The pre-flight checkpoint at Phase 1e — report drop count `k` to operator before committing `case-list.jsonl` — is unchanged by Amendment 3. The replacement pre-flight is a separate, smaller checkpoint for the 3 replacement cases only, and any drops among the 3 trigger the §13 contingency rule recursively (with Reading 1 for primary-family re-drops).
+
+---
+
+## Pre-registration amendment 4 (2026-04-09)
+
+**Title:** Reconcile §9's Source D per-category breakdown with Amendment 2's implicit invalidation of content-family Source D cases; pre-specify small-sample disclaimers for grounding, security, and a11y; name the three-class taxonomy of pre-registration audit gaps.
+
+**Authored by:** builder Claude
+**Approved by:** operator (explicit ruling delivered during Phase 1g halt, 2026-04-09)
+**Authorization reference:** Operator's ruling delivered in the N1 session immediately following the Phase 1g halt for the §9 ↔ Amendment 2 meta-drafting gap, titled "Three rulings, fast — yes §26 amendment situation, Option α with 5+4+2+1=12, draft Amendment 4 immediately." The full operator response is the authorization of record.
+**Amendment commit:** see git log for the commit landing this amendment.
+
+### Interaction with prior amendments
+
+**Amendment 4 resolves a drafting gap in Amendment 2 without modifying Amendment 2's explicit changes.** Per §26's amendment chain requirement, this is the first four-amendment chain in the pre-registration, and the interaction section names all three prior amendments in order so a future reader auditing the chain can see how the four amendments compose:
+
+- **Amendment 1** struck §8 (the N1-B supplementary narrowing quality track) in its entirety after the `bad_hint` intent was found to be unpopulated in the Source B corpus. Amendment 1 affects the supplementary track only and does not interact with Source D, §9, or Amendment 4 in any way. Amendment 4 does not modify Amendment 1.
+
+- **Amendment 2** modified §7's primary-category reporting list (struck `hallucination`), restructured the Source B selection algorithm for the N1-A primary track from category-level stratified sampling to shape-family-aware allocation followed by stratified remainder, pre-specified the content-family small-sample disclaimer, and updated §7's reporting table schema to distinguish B-primary, B-stratified, and D-synthetic source categories. Amendment 2's Change 4 source column listed Source D as 4 categories (`config, grounding, security, a11y`) and Amendment 2's Option R4 rejection explicitly forbade content cases in Source D on structural grounds (Source B/D category overlap confound). **Amendment 2 implicitly invalidated §9's "2 content-rich" Source D line but did not make the invalidation explicit in its "What this invalidates" section, and did not reconcile the resulting arithmetic inconsistency: §9 committed to 12 Source D cases distributed as 4+2+3+2+1 across 5 categories, but removing the 2 content cases per Amendment 2's structural principle leaves only 4+3+2+1 = 10, not 12.** Amendment 4 resolves this drafting gap by explicitly striking §9's content-rich line (Change 1), reconciling the per-category breakdown to 5+4+2+1 = 12 across the 4 Amendment-2-approved Source D categories (Change 2), and naming the class of drafting gap that produced the inconsistency (Change 3). **Amendment 4 does not modify Amendment 2's four explicit changes.** Amendment 2's Changes 1-4 remain binding exactly as committed. Amendment 4 only completes the work Amendment 2's structural principle implicitly required.
+
+- **Amendment 3** clarified §13's "same category distribution" replacement rule for primary-family drops under Amendment 2 Change 2's family-level allocation, specifying Reading 1 (relaxed sub-file matching within primary families, strict file-level matching for stratified remainder drops, `category_match` audit flag honest, `substitution_reason` field populated with verbatim language for primary-family relaxations). Amendment 3 affects the replacement code path only and does not interact with Source D, §9, or Amendment 4. Amendment 4 does not modify Amendment 3.
+
+**All four amendments remain binding per §26.** None of the four modifies or supersedes any of the others. Amendment 4 completes work that Amendment 2 started implicitly but did not carry through to §9's arithmetic. Future amendments (Amendment 5+) must include an "Interaction with prior amendments" section that lists Amendments 1, 2, 3, and 4 in order and states whether and how the new amendment modifies or supersedes each of their effects.
+
+### What changed
+
+**§9 (Source D synthetic seeds) is modified in three specific ways under Amendment 4.** §9 is not struck in full; its per-category breakdown is reconciled with Amendment 2's structural principle. The following sub-changes apply:
+
+**Change 1: Strike §9's "2 content-rich" Source D line.**
+
+The current §9 language reads:
+
+> **Source D — synthetic seeds: SECONDARY.** 12 hand-constructed cases filling coverage gaps in Source B (4 config-nonzero, **2 content-rich**, 3 grounding, 2 security, 1 a11y). Hand-construction happens during Phase 1 case assembly.
+
+Under Amendment 4, the amended reading is:
+
+> **Source D — synthetic seeds: SECONDARY.** 12 hand-constructed cases filling coverage gaps in Source B (5 config-nonzero, 4 grounding, 2 security, 1 a11y). Hand-construction happens during Phase 1 case assembly.
+
+Content is struck from Source D entirely. Source D is now 4 categories (config, grounding, security, a11y), consistent with Amendment 2 Change 4's source column definition and Amendment 2 Option R4's rejection of Source B/D overlap for primary-family categories.
+
+**Change 2: Reconcile the per-category breakdown to 5+4+2+1 = 12 with pre-specified small-sample disclaimers for grounding, security, and a11y.**
+
+The Source D 12-case budget is reconciled to:
+- **config: 5 cases** (was 4; gained 1 slot from the redistribution)
+- **grounding: 4 cases** (was 3; gained 1 slot from the redistribution)
+- **security: 2 cases** (unchanged)
+- **a11y: 1 case** (unchanged)
+- **Total: 12 cases** (matches the §7 52-case total budget: 40 Source B + 12 Source D)
+
+The 2 slots vacated by striking content are redistributed to the two largest existing Source D categories (config and grounding), one slot each. This is the most conservative redistribution: it preserves the 52-case total, keeps config at the interpretability floor, nudges grounding closer to the floor, and leaves security and a11y untouched. Security and a11y were already below the interpretability floor under the original breakdown and remain so after the redistribution.
+
+**Pre-specified small-sample disclaimers for the three Source D categories that remain below the 30-data-point interpretability floor:**
+
+Following the discipline Amendment 2 Change 3 established for the content-family disclaimer, Amendment 4 pre-commits three additional disclaimers to be used verbatim in RESULTS.md. Each disclaimer binds reporting in both directions — if results favor governed on the category, the disclaimer prevents unqualified claims of "governed wins"; if results show equivalence, the disclaimer prevents unqualified claims of "equivalence shows equivalence." The disclaimers are not optional and cannot be softened post-hoc without an Amendment 5.
+
+**Grounding disclaimer (4 cases = 24 data points per loop):**
+
+> **Grounding family N1-A sample:** 4 Source D synthetic cases × 3 runs × 2 loops = 24 data points per loop. Below the 30-point floor named as the statistical interpretability threshold in Amendment 2 (same arithmetic as the content-family disclaimer in Amendment 2 Change 3). Per-category delta reported for completeness; any claim about grounding-family convergence behavior is **provisional** and requires a follow-up N1.1 with a larger grounding sample before publication.
+
+**Security disclaimer (2 cases = 12 data points per loop):**
+
+> **Security family N1-A sample:** 2 Source D synthetic cases × 3 runs × 2 loops = 12 data points per loop. Below the 30-point floor named as the statistical interpretability threshold in Amendment 2. Per-category delta reported for completeness; any claim about security-family convergence behavior is **provisional** and requires a follow-up N1.1 with a larger security sample before publication.
+
+**A11y disclaimer (1 case = 6 data points per loop):**
+
+> **A11y family N1-A sample:** 1 Source D synthetic case × 3 runs × 2 loops = 6 data points per loop. Well below the 30-point floor. Per-category delta reported for completeness but the single-case sample size precludes any meaningful statistical claim. Any N1 finding about a11y-family convergence behavior is **explicitly not interpretable** at this sample size and requires a follow-up N1.1 with a meaningfully larger a11y sample before any claim can be made.
+
+Config at 5 cases (30 data points per loop) meets the interpretability floor exactly and does not require a small-sample disclaimer under Amendment 4.
+
+The total number of small-sample disclaimers in the pre-registration is now **4** — the content disclaimer pre-committed in Amendment 2 Change 3 plus the grounding, security, and a11y disclaimers pre-committed in Amendment 4 Change 2. All four disclaimers must appear verbatim in RESULTS.md's per-category reporting table. Four of the nine §7 per-category reporting rows (content, grounding, security, a11y) are now bound by pre-specified disclaimers; the other five rows (f9, propagation, access, state, config) are not.
+
+**Change 3: Name the three-class taxonomy of pre-registration audit gaps.**
+
+Amendment 4 resolves a **meta-drafting gap** in Amendment 2: Amendment 2 stated a structural principle (no Source B/D category overlap, forbidding content cases in Source D via Option R4 rejection) and listed the 4 approved Source D categories in Change 4, but did not chase the principle all the way to §9's arithmetic and did not include the implicit invalidation of §9's "2 content-rich" line in Amendment 2's "What this invalidates" list. This is a different class of audit gap from the data-level gaps of Amendments 1-2 and the interaction-level gap of Amendment 3.
+
+Amendment 4 names this taxonomy explicitly and commits it to the public record as part of the pre-registration. **The three classes of pre-registration audit gap observed during N1 Phase 1 are:**
+
+1. **Data-level gap (Amendments 1, 2).** The pre-registration assumes something about the data that turns out to be wrong. Amendment 1 caught `bad_hint` as 0 in the Source B corpus. Amendment 2 caught the stratified sampling's failure to cover 4 of 6 primary shape families because the corpus splits shape families across multiple sub-file categories. Both were caught by data audits at the start of Phase 1. The fix pattern: amend the pre-registration to match what the data actually supports, and drop or restructure anything unsupportable.
+
+2. **Interaction-level gap (Amendment 3).** Two pre-registered rules compose in a way the original pre-registration did not fully specify, and the conflict is only exposed when the rules are exercised against each other in code. Amendment 3 caught the §13 "same category distribution" replacement rule composing undefined-ly with Amendment 2 Change 2's family-level allocation for primary-family drops. The gap was caught when `computeSwaps` threw on a propagation-http drop it could not match to a same-file-level category. The fix pattern: clarify the interaction explicitly, preserve both pre-registered rules in their original forms where possible, introduce an audit-trail flag that surfaces the relaxation honestly rather than hiding it.
+
+3. **Meta-drafting gap (Amendment 4).** An amendment's structural principles implicitly invalidate something outside the amendment's explicit scope, but the implicit invalidation is not made explicit in the amendment's "What this invalidates" list. Amendment 2 stated the structural principle (no Source B/D category overlap, content is a primary family, Source D is 4 categories), but did not chase the principle to §9's arithmetic. The result was an inconsistency between Amendment 2's structural rules and §9's literal text that was only exposed when a later phase attempted to act on §9's instructions. The fix pattern: amend the pre-registration to make the implicit invalidation explicit, reconcile whatever arithmetic was left inconsistent, and add an "implicit invalidations" check to future amendment drafting so the same class of gap is caught during drafting rather than during execution.
+
+**Amendment 4 commits a process change for future amendment drafting: alongside the "What this invalidates" list, future amendments must include an "Implicit invalidations" check that scans the pre-registration for anything the amendment's structural principles affect outside its explicit scope, and either makes those invalidations explicit or confirms none exist.** This is a drafting discipline, not a separate section requirement — the existing "What this invalidates" list can be expanded to cover implicit invalidations, as long as the drafter explicitly considers whether any exist. Amendment 4's own "What this invalidates" section below is the first example of this discipline.
+
+The three-class taxonomy is a contribution the amendment chain has produced about itself. Future readers of the N1 DESIGN.md amendment chain can use it to classify any audit gap they encounter in their own pre-registration work. Pre-registration literature typically does not distinguish these classes; the amendment chain has surfaced them in real time during a single-experiment execution.
+
+### Why
+
+This is a **meta-drafting gap** as named in Change 3 above. The specific mechanism:
+
+Amendment 2 stated a structural principle in its Option R4 rejection: "Mixing Source B and Source D within the same category introduces a confound that makes the per-category delta harder to interpret... Source D has a fixed 12-case budget earmarked for coverage gaps (config, grounding, security, a11y). Adding a 13th case for content expands Source D beyond its Report 3 specification, which would itself require justification."
+
+Amendment 2 Change 4 codified the structural principle in the source column definition: "`D-synthetic` — category is filled by hand-constructed Source D synthetic seeds (config, grounding, security, a11y per Report 3)."
+
+**But §9 (original text, never modified by any amendment) stated:** "12 hand-constructed cases filling coverage gaps in Source B (4 config-nonzero, **2 content-rich**, 3 grounding, 2 security, 1 a11y)."
+
+§9's line was written during initial DESIGN.md drafting, before Amendment 2 existed, based on Report 3's original proposal. Report 3's proposal included 2 content-rich cases as part of the 12-case Source D budget. At the time of §9's writing, this was consistent — Source B's primary families had not yet been formally defined, and content was treated as a category that could be filled by either source.
+
+Amendment 2 then introduced the primary-family concept and the Source B/D overlap prohibition. Amendment 2's Option R4 rejection explicitly forbade content cases in Source D. Amendment 2's Change 4 explicitly listed Source D as 4 categories, not 5. **But Amendment 2 did not strike §9's "2 content-rich" line, did not reconcile the 12-case arithmetic (which only adds to 10 under Amendment 2's rules), and did not include the §9 invalidation in its "What this invalidates" list.**
+
+The drafter of Amendment 2 (me, builder Claude, 2026-04-09 earlier in this session) stated the structural principle but did not chase it to §9's arithmetic. This is a drafting oversight, not an interaction gap or a data gap. The principle was correctly stated; the follow-through on its arithmetic consequences was missing.
+
+**The gap was caught during Phase 1g seed construction**, when the builder attempted to hand-construct the 12 Source D cases per §9's breakdown and ran into the contradiction: §9 says 2 content cases, Amendment 2 forbids content cases in Source D, and removing them leaves only 10 of the required 12 without guidance on where the missing 2 should come from.
+
+**The builder halted per §26 rather than picking a redistribution unilaterally** (which would have silently changed §9's per-category numbers, a DESIGN.md number change that requires an amendment under the §26 test).
+
+**This is the first meta-drafting gap caught in the amendment chain**, and it demonstrates that even a careful amendment can have implicit invalidations the drafter missed. The "Implicit invalidations" check committed in Change 3 is the process fix: future amendment drafting will explicitly consider whether the amendment's structural principles affect anything outside the amendment's explicit scope, and will either document those effects in the "What this invalidates" list or confirm no implicit invalidations exist.
+
+**A note on the honesty of this Why section.** The drafter of Amendment 2 is the same builder Claude who is now drafting Amendment 4. The meta-drafting gap is, strictly, my own drafting gap. Naming it honestly in Amendment 4's Why section is the same discipline Amendments 1, 2, 3 applied to their respective gaps — acknowledge what went wrong, name the specific oversight, and commit the fix. The audit trail is served better by honest self-accounting than by minimizing or deflecting the error.
+
+### What was considered and rejected
+
+Two alternative responses to the §9 ↔ Amendment 2 inconsistency were considered and rejected before Amendment 4's Option α was adopted.
+
+**Option β — Reduce Source D to 10 cases and the total N1-A budget to 50.**
+
+Under Option β, the Source D breakdown becomes 4 config + 3 grounding + 2 security + 1 a11y = 10. The §7 total case count drops from 52 to 50.
+
+Rejected because:
+
+1. **It sits exactly at §13's ≥50 floor.** §13's pre-flight contingency rule states: "In all cases, the final N1-A dataset has ≥50 total cases. Below that threshold, pre-registered success criteria become statistically unreliable and the experiment is paused for re-planning." Option β brings the total to exactly 50, leaving zero margin for any future case loss. If a single Source D seed later fails a downstream check, or a Phase 2+ harness issue forces a case drop, the total falls below 50 and triggers §13's stop condition.
+
+2. **The fragility is not hypothetical.** Phase 1c pre-flight already produced k=3 stale-drops among the 40 Source B cases. Downstream phases (harness construction, pilot, full execution) are realistic sources of additional case loss. Shipping an experiment with zero margin against §13's floor is structurally fragile.
+
+3. **Option α preserves the total at 52 without downstream §13 interaction risk.** The redistribution uses existing Source D categories and introduces no new structural concerns. Option β's only advantage (strictly consistent with Amendment 2's 4-category listing) is satisfied by Option α equally — Amendment 4 strikes content from §9, so both options end with 4 Source D categories. The difference is the total count, and Option α's 52 is structurally safer.
+
+**Option γ — Add a new 5th Source D category to replace content.**
+
+Under Option γ, a new category (e.g., performance, infrastructure, triangulation) is added to Source D as its 5th category, replacing content. The Source D breakdown becomes 4 config + 3 grounding + 2 security + 1 a11y + 2 <new category> = 12.
+
+Rejected because:
+
+1. **It expands Source D beyond the Report 3 specification.** Amendment 2 Option R4 rejection explicitly stated: "Source D has a fixed 12-case budget earmarked for coverage gaps (config, grounding, security, a11y). Adding a 13th case for content expands Source D beyond its Report 3 specification, which would itself require justification." Option γ adds a new category rather than a 13th case, but the same objection applies — the new category is not in Report 3 and not in Amendment 2, so its inclusion requires justification that Amendment 4 would have to invent.
+
+2. **It introduces a scope expansion Amendment 4 is not authorized to make.** Amendment 4's purpose is to reconcile a drafting gap in Amendment 2, not to expand the Source D category surface. Adding a new category requires independent pre-registration justification for why that specific category was chosen, which would necessitate research into which Source B coverage gaps would benefit most from hand-constructed synthetic seeds — work that should be its own amendment, not a ride-along on Amendment 4.
+
+3. **Option α satisfies all constraints without scope expansion.** The 2 vacated content slots are redistributed to the two largest existing Source D categories (config and grounding), preserving the total at 12 and staying within the Report 3-authorized category set. No new category selection, no new justification required.
+
+Both Option β and Option γ are worse than Option α. Option α (5 config + 4 grounding + 2 security + 1 a11y = 12 across the 4 Amendment-2-approved Source D categories) is the most conservative redistribution, preserves the 52-case total, introduces no new scope, and adds only the three pre-specified disclaimers required by the interpretability floor rule from Amendment 2 Change 3.
+
+### What this invalidates
+
+**Explicit invalidations:**
+
+- **§9's "2 content-rich" Source D line.** Struck entirely by Change 1. Content is no longer a Source D category.
+- **§9's per-category Source D breakdown.** The `4 + 2 + 3 + 2 + 1 = 12` breakdown is replaced by `5 + 4 + 2 + 1 = 12` per Change 2.
+- **Report 3's Source D proposal.** The "4 config-nonzero, 2 content-rich, 3 grounding, 2 security, 1 a11y" recommendation that §9 inherited from Report 3 is superseded by Amendment 4 Change 2's redistribution.
+
+**Implicit invalidations made explicit** (per Change 3's discipline):
+
+- **Any Phase 1g or later reference to §9's pre-amendment-4 Source D breakdown** is invalidated. The Phase 1g seed construction must follow the Amendment 4 Change 2 breakdown, not §9's original text.
+- **The pre-flight contingency rule's `6 ≤ k ≤ 15` bucket** (§13) referenced "add `k` additional synthetic seeds to Source D (bringing Source D from 12 to 12+k)". The base count of 12 remains correct under Amendment 4 (the total is unchanged), but any future addition of k additional seeds must distribute those k seeds across the Amendment 4 4-category Source D structure, not the §9 5-category structure. The §13 contingency rule is unchanged in its arithmetic but its category distribution is now scoped to Amendment 4's 4 categories.
+
+### What this does NOT invalidate
+
+- **§7's total 52-case N1-A budget.** Preserved under Option α (40 Source B + 12 Source D = 52).
+- **§7's per-category reporting list** (as amended by Amendment 2 Change 1 to 9 categories, with content remaining as a B-primary row). Amendment 4 does not strike content from the §7 reporting list — content is still a B-primary category and still has 4 cases from the Source B primary-family allocation under Amendment 2 Change 2. Amendment 4 strikes content only from Source D, not from the N1-A case set.
+- **§7's reporting table schema** (Amendment 2 Change 4 source column with B-primary, B-stratified, D-synthetic values). The D-synthetic column entry continues to be valid for the 4 Amendment-4-approved Source D categories.
+- **Amendment 1** (struck N1-B supplementary track). Amendment 4 does not affect the supplementary track question.
+- **Amendment 2's four explicit changes** (strike hallucination, restructure Source B selection, content-family disclaimer, reporting table schema). All four changes of Amendment 2 remain binding exactly as committed. Amendment 4 does not modify Amendment 2 — it only completes the implicit work Amendment 2's structural principle required.
+- **Amendment 2 Change 3's content-family disclaimer.** The content disclaimer pre-committed in Amendment 2 applies to the 4 Source B content cases, which are unchanged by Amendment 4. The disclaimer still appears in RESULTS.md verbatim.
+- **Amendment 3** (§13 Reading 1 for primary-family drops, strict §13 for stratified drops). Amendment 4 does not interact with Amendment 3's two-rule structure.
+- **§13** (pre-flight contingency rule literal text). Unchanged. Amendment 4's Source D restructuring is within the original §13 arithmetic.
+- **§15 random seed (20260409).** Unchanged.
+- **The 40 Source B cases** (original draw + 3 replacement swaps under Amendment 3). Unchanged. Amendment 4 affects Source D only.
+- **The 37 Phase 1c pre-flight passes + 3 Phase 1f-6 replacement pre-flight passes** (40 Source B live cases, all pre-flight verified). Unchanged.
+- **§§1-6, §§8 (struck), §§10-12, §§14, §§16-26.** All unchanged.
+- **The primary experiment's success criteria, denominator rule, retry budget, model choice, cost budget, outcome-to-next-action mapping, "what would change our mind" section, and freeze protocol.** All unchanged.
+
+### Impact on the primary experiment
+
+**Zero direct impact on case counts.** The N1-A total remains 52 cases (40 Source B + 12 Source D). The 312-run total (52 × 2 loops × 3 runs) is unchanged. The per-loop denominators, success criteria thresholds, and the §17 inter-rater protocol are all unchanged.
+
+**The Source D per-category distribution changes** from `4+2+3+2+1` (5 categories) to `5+4+2+1` (4 categories). Content is removed from Source D; its 2 slots are redistributed to config and grounding. The §7 per-category reporting table's 9 rows are unchanged in identity (same 9 categories reported) but the Source D-backed rows change count:
+
+| §7 reporting row | Source under Amendment 2 | Count under Amendment 4 | Small-sample disclaimer? |
+|---|---|---|---|
+| f9 | B-primary (+ B-stratified bonus) | 6 (5 + 1) | No (comfortably above floor) |
+| content | B-primary | 4 | Yes (Amendment 2 Change 3, unchanged) |
+| propagation | B-primary | 5 | No (at floor) |
+| access | B-primary | 5 | No (at floor) |
+| state | B-primary | 5 | No (at floor) |
+| config | D-synthetic | 5 (was 4) | No (at floor under Amendment 4) |
+| grounding | D-synthetic | 4 (was 3) | **Yes (Amendment 4 Change 2)** |
+| security | D-synthetic | 2 (unchanged) | **Yes (Amendment 4 Change 2)** |
+| a11y | D-synthetic | 1 (unchanged) | **Yes (Amendment 4 Change 2)** |
+
+**Four of the nine reporting rows are now bound by pre-specified small-sample disclaimers.** Four rows (f9, propagation, access, state, config — five actually, I'll recount: f9 at 6, propagation at 5, access at 5, state at 5, config at 5) meet the interpretability floor. Four rows (content at 4, grounding at 4, security at 2, a11y at 1) are below it and require the pre-committed disclaimer in RESULTS.md. The total number of above-floor reporting rows is 5 and the total below-floor is 4.
+
+**Phase 1g resumes immediately after Amendment 4 commits** with the updated breakdown. The Phase 1g seed construction builds 5 config seeds, 4 grounding seeds, 2 security seeds, and 1 a11y seed, for 12 total Source D synthetic seeds. Each seed matches the Source B candidate schema exactly (case_id, source, intent, category, primary_family, track, goal, reference_edits, reference_predicates, expected_success, scenario_file, scenario_id) and is distinguishable from Source B candidates by `source: 'D'` (to be introduced in the Source D record format) or by `pre_flight_result: 'synthetic'` per §14. The Phase 1g honesty gate pauses for operator review of the 12 seeds before `case-list.jsonl` is emitted.
+
+### Amendment freeze clause
+
+**Amendment 4 is now part of the pre-registration.** It is subject to §26 equally with the original DESIGN.md sections and with Amendments 1, 2, and 3. Specifically:
+
+1. **Amendment 4 cannot be reverted without another amendment.** If a future session decides to restore content to Source D, modify the 5+4+2+1 per-category breakdown, soften the grounding/security/a11y small-sample disclaimers, or otherwise alter Amendment 4's changes, that change requires a **Pre-registration Amendment 5** that explicitly references Amendments 1, 2, 3, and 4 and explains how the five interact.
+
+2. **Future amendments must acknowledge Amendment 4.** Any Amendment N for N ≥ 5 must include an "Interaction with prior amendments" section that lists Amendments 1, 2, 3, and 4 in order and states whether and how Amendment N modifies or supersedes their effects. The four-amendment chain requirement is now operational and binding.
+
+3. **The §26 bilateral refusal clause applies to Amendment 4.** Neither the operator nor the builder may silently change the Source D per-category breakdown, silently relax or remove the grounding/security/a11y disclaimers, or silently introduce content cases into Source D. Pressure to do any of these must be refused and routed through the amendment protocol.
+
+4. **Amendment 4's meta-drafting gap is committed to the public record.** The specific drafting oversight in Amendment 2 (stating a structural principle without chasing it to §9's arithmetic) and the three-class taxonomy of pre-registration audit gaps (data-level / interaction-level / meta-drafting) are named in the "Why" and "What changed" sections above and cannot be retroactively rewritten to minimize the error or flatten the taxonomy.
+
+5. **The three new small-sample disclaimers (grounding, security, a11y) are binding verbatim.** Change 2 commits exact disclaimer language for each of the three categories. Any softening, conditionalization, or reformulation of the disclaimers requires an Amendment 5. RESULTS.md must include all three verbatim in their respective per-category reporting rows, alongside the content disclaimer already committed in Amendment 2 Change 3.
+
+6. **The implicit-invalidations drafting discipline from Change 3 is binding on future amendments.** Amendment 5+ drafters must explicitly consider whether their amendment's structural principles affect anything outside the amendment's explicit scope, and must document any implicit invalidations in the "What this invalidates" section. Failing to do so produces the meta-drafting gap class that Amendment 4 was written to resolve.
+
+A pre-registration protocol that allows unlimited silent amendments is no protocol at all. Amendment 4 is binding.
+
+---
+
+### Phase 1g resumption note (Amendment 4)
+
+Phase 1g was halted at the seed-construction step when the builder attempted to hand-construct the 12 Source D cases per §9's original breakdown and encountered the §9 ↔ Amendment 2 inconsistency. Under Amendment 4, Phase 1g resumes with:
+
+1. **Hand-construct the 12 Source D synthetic seeds** per the Amendment 4 Change 2 breakdown: 5 config + 4 grounding + 2 security + 1 a11y = 12. Each seed matches the Source B candidate schema exactly (same JSON fields, same types, same formats) and is executable against `fixtures/demo-app/` by the harness. Specifically: `case_id` follows `{category}:{scenario_id}` format where the scenario_id is a hand-constructed identifier (e.g., `config:cfg-synth-001`); `source` is `'D'`; `intent` is `'synthetic'` (per §14); `primary_family` is `null` (Source D is not a primary family); `track` is `'N1-A'`; `pre_flight_result` is `'synthetic'` (per §14, pre-flight is not run on synthetic cases); all other fields populated with hand-constructed values.
+
+2. **Match the Source B schema exactly.** Any deviation in field names, types, or formats between Source B and Source D candidates becomes a confounding variable in N1 results interpretation. The synthetic seeds must be structurally indistinguishable from Source B cases except for the `source: 'D'` and `pre_flight_result: 'synthetic'` fields.
+
+3. **Vary only the content, not the structure.** The seeds test specific gate behaviors (config validation, grounding selector matching, security secrets scanning, a11y alt text checks) that Source B does not cover or covers only via primary families. The goal descriptions, reference_edits, and reference_predicates are hand-crafted to exercise each gate deterministically, but the record shape matches Source B exactly.
+
+4. **Present the 12 seeds to the operator for honesty-gate review before `case-list.jsonl` is committed.** The Phase 1g honesty gate is the last operator touchpoint before Phase 1h (case-list.jsonl lock). The operator reviews each seed for: (a) structural equivalence to Source B cases, (b) coverage of the intended gate behavior for its category, (c) unambiguous expected_success value, (d) no accidental overlap with Source B's primary families (content must not appear in any Source D seed).
+
+5. **Emit `case-list.jsonl` after operator approval.** The final `case-list.jsonl` combines the 40 Source B live cases (37 original pre-flight passes + 3 Phase 1f-6 replacement passes) with the 12 Source D synthetic seeds, for a total of 52 live N1-A cases. `case-list.jsonl` is the Phase 1 lock artifact and is committed as the Phase 1h closure.
+
+The pre-flight checkpoint at Phase 1e (report drop count `k`) is preserved by Amendment 4. No further pre-flight runs are required — the Source B pool is locked at 40 live cases and synthetic seeds are not pre-flighted per §14. Phase 1 ends with Phase 1h's `case-list.jsonl` commit.

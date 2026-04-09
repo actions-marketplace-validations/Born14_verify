@@ -495,3 +495,150 @@ cal.com Level 2 + total-typescript-monorepo Level 2. Originally filed as part of
 ---
 
 **Cluster note for SI-001 through SI-004b.** This is the **third time on 2026-04-08** that scanner output revealed a scanner bug, not an agent bug. SI-001 (catastrophic regex), SI-002 (silent shape drop in discover-shapes), SI-003 (multi-commit PR FP), and now SI-004a (predicate generator emits serialization on YAML) and SI-004b (edit-content/file-path mismatch). Pattern: real production scans surface scanner resilience bugs that are invisible to synthetic test suites because the test suites don't include the specific shape of bad input that triggers them. Lesson: the only way to find scanner bugs is to run the scanner on diverse production data.
+
+---
+
+## SI-006 — Sequential-modification reversal in F9
+
+**Date:** 2026-04-09
+**Severity:** medium — produces false F9 `search string not found` findings on PRs where the same file is modified in multiple sequential commits and later commits' search strings depend on earlier commits' patches being applied
+**Discovered during:** N1 experiment ground truth audit, while triaging the 5 "newly-visible" F9 findings from the 2026-04-08 post-SI-003-fix cal.com re-run
+**Triaged by:** Manual inspection of the 5 candidate cases against `pr_commit_details.jsonl` — all 5 confirmed to share the same mechanism
+**Status:** documented, no fix applied
+
+### Correction to the 2026-04-08 cal.com validation interpretation
+
+The 2026-04-08 cal.com Level 2 re-run (commit `5861009` / `02b616e`) compared post-SI-003-fix findings to the pre-fix baseline and reported:
+
+- 6 file-not-found false positives eliminated (SI-003 fix validated)
+- 5 "newly-visible" `search string not found` findings that were not present in the baseline
+
+The **initial interpretation** of those 5 newly-visible findings was: *"real F9 evaluations on edits that the buggy SI-003 reconstruction was implicitly masking; when the spurious file-missing failures dropped, the F9 gate stopped short-circuiting and started seeing the next layer of edit content. They are now-visible findings that need normal triage."*
+
+The **corrected interpretation** is: all 5 of those newly-visible findings are a new scanner artifact class, not revealed-real agent findings. The SI-003 fix eliminated one bug class (create-then-modify false positives) and the resulting cleaner scan output revealed a **second bug class in the same code region** (modify-then-modify false positives) that the first bug had been masking. SI-003 did not cause SI-006; it simply stopped hiding it.
+
+The cal.com validation's "F9 dropped from 26 to 25" headline number is unchanged, but the narrative should now read: "SI-003 eliminated 6 file-not-found FPs, SI-006 contributed 5 search-string-not-found FPs, net -1 F9 finding, scanner credibility on this specific bug class is partially — not fully — closed." This is a weaker statement than the original claim and the incident log should reflect that honestly.
+
+### Symptom
+
+F9 reports `search string not found` on a file in a multi-commit PR, where the failing search string matches content that *was added by an earlier commit in the same PR*. At the commit the scanner evaluates against (the parent of the earliest commit), the search string does not exist yet — it's part of the earlier commit's patch content. The F9 gate is correctly evaluating the search string against the provided base state; the base state is wrong for sequential modifications.
+
+**5 confirmed occurrences** (all cal.com, all Devin, all multi-commit, all `modified` + `modified` with no `added` rows for the failing file):
+
+| PR | File | Same-file commit count | Title |
+|---|---|---|---|
+| 3164956727 | `.github/workflows/pr.yml` | 2 (modified × 2) | feat: implement unit test code coverage with CLI and GitHub Actions integration |
+| 3162624847 | `packages/lib/__tests__/autoLock.test.ts` | 2 (modified × 2) | feat: add warning threshold for autoLock with email notifications |
+| 3177753579 | `packages/trpc/server/routers/viewer/slots/util.ts` | 2 (modified × 2) | feat: optimize slot generation with inverted algorithm |
+| 3179554058 | `packages/trpc/server/routers/viewer/slots/util.ts` | 3 (modified × 3) | feat: optimize slot calculation performance for team event types |
+| 3161649548 | `apps/api/v2/src/ee/bookings/2024-08-13/bookings.module.ts` | 2 (modified × 2) | feat: framework-agnostic googleapis caching layer |
+| 3224857167 | `packages/trpc/server/routers/viewer/ooo/outOfOfficeCreateOrUpdate.handler.ts` | **9** (modified × 9) | feat: refactor Deel app to OAuth integration with automatic time-off creation |
+
+PR 3224857167 is the extreme case: the agent touched `outOfOfficeCreateOrUpdate.handler.ts` across nine sequential commits, each modifying content the previous commit had introduced. The scanner concatenates all nine modification patches and evaluates the resulting `Edit[]` against the parent of the earliest commit. The probability that all nine search strings exist at that base state is essentially zero.
+
+### Root cause
+
+Three components were checked and ruled out before the actual root cause was located:
+
+1. **The SI-003 Option C filter in `filterCommitsForSI003()`** — CORRECT for its scope. It drops modification commit rows only for files that have at least one `added` row in the same PR (the create-then-modify pattern). For files that are only ever `modified`, the filter passes all rows through unchanged. The 5 SI-006 cases have zero `added` rows for the failing files, so the SI-003 filter correctly does nothing to them. This is not an SI-003 regression; it is a different bug in the same code region.
+
+2. **`parseDiff()` in `src/parsers/git-diff.ts`** — CORRECT. Each commit's patch is parsed independently and produces the correct `Edit[]` relative to the commit boundary the patch was generated against. parseDiff has no knowledge of sequential commits and doesn't need any — the bug is in how the scanner composes multiple commits' patches into a single diff, not in how parseDiff reads any individual patch.
+
+3. **`runSyntaxGate()` in `src/gates/syntax.ts`** — CORRECT. F9 evaluates each edit's search string against the repo state at the provided base commit. When the scanner provides the parent of the earliest commit as the base state, F9 correctly reports "search string not found" for any edit whose search string was added by a later commit in the same PR. The gate is doing its job; it is being fed the wrong base state for the later edits.
+
+The actual bug is in **`scanPR()` in `scripts/scan/level2-scanner.ts`** at the same diff reconstruction step as SI-003 (lines ~305-320 post-unification in the `filteredCommits.filter(c => c.patch).map(...)` block):
+
+```typescript
+const diff = filteredCommits
+  .filter(c => c.patch)
+  .map(c => {
+    const isNew = c.status === 'added';
+    const header = isNew
+      ? `diff --git a/${c.filename} b/${c.filename}\nnew file mode 100644\n--- /dev/null\n+++ b/${c.filename}\n`
+      : `diff --git a/${c.filename} b/${c.filename}\n--- a/${c.filename}\n+++ b/${c.filename}\n`;
+    return header + c.patch;
+  })
+  .join('\n');
+```
+
+The scanner concatenates all commits' patches into a single unified diff and then evaluates the whole batch against `sha~1` of the earliest commit. This is correct when each file in the PR has at most one modification commit. It is **incorrect when the same file has multiple modification commits** because the second commit's patch was generated against the state *after* the first commit's patch was applied, not against the earliest commit's parent. F9 then reports false "search string not found" for any later modification whose search context was introduced by an earlier modification.
+
+PR semantics require **sequential application** of commits when multiple commits touch the same file. The scanner's concatenate-and-evaluate-at-base approach is correct for create-then-modify only when SI-003's filter drops the modifications (because the file is marked `added`). It is incorrect for modify-then-modify because no `added` marker exists and the SI-003 filter does nothing.
+
+This is the **same structural problem as SI-003** (sequential-commit assumption failure in `scanPR()`'s diff reconstruction) on an **adjacent but distinct operator** (`modified` + `modified` instead of `added` + `modified`).
+
+### Trigger
+
+Any PR meeting all of:
+- Multiple commits (`pr_commit_details.jsonl` shows ≥2 distinct SHAs for the PR)
+- At least one file modified in two or more commits
+- None of those commits is marked `added` for that file (if any `added` row exists, SI-003's filter intercepts)
+- The later modification's `search` string includes content introduced by the earlier modification's `replace` string
+
+Most common in:
+- **Devin PRs** — all 5 confirmed cases are Devin, which favors many small commits per PR and frequently revises the same file across commits
+- **Large refactor PRs** — incremental rewrites that touch the same file repeatedly (all 6 cal.com affected PRs are refactor/feat labels on files being heavily reworked)
+- **Any agent workflow that commits after each change** rather than squashing before submitting a PR
+
+### Relationship to SI-004b
+
+SI-004b was documented on 2026-04-08 with a "suspected shared root cause family with SI-003" cross-check note, pending re-run of total-typescript-monorepo after SI-003 landed. With SI-006 now identified, SI-004b's classification should be re-evaluated. The `lockfileVersion`-on-`package.json` findings that define SI-004b could belong to any of three families:
+
+- **SI-003 family (create-then-modify):** package.json is created or deleted alongside lockfile changes in the same PR, with edit-content mismatch caused by the same concatenation mechanism SI-003 addresses
+- **SI-006 family (modify-then-modify):** package.json is modified multiple times in the PR, and the scanner's concatenation places lockfile content under a package.json header
+- **A third adjacent bug** in the same `scanPR()` code region that neither SI-003 nor SI-006 captures
+
+The total-typescript re-run was recommended in the SI-004b entry as the cross-check; that recommendation still stands but the interpretation now has three possible outcomes instead of two. **Do not re-classify SI-004b until the total-typescript re-run produces evidence.**
+
+### Fix candidates
+
+**NOT YET APPLIED — documentation only until operator approves a fix path.** SI-006 is filed as a documented-not-fixed entry following the same discipline as SI-003's original writeup.
+
+**Option A — Sequential apply:** In `scanPR()`, group edits by commit SHA. Run F9 incrementally — apply commit 1's edits to a temporary working tree, then check commit 2's edits against the modified tree, etc. Most accurate but ~Nx slower per PR (where N is the commit count), and requires checkout/apply/restore cycles per commit. Would resolve both SI-003 and SI-006 with a single mechanism change. **Not recommended** — same performance concerns as SI-003's rejected Option B (cal.com scan would grow from 3:42 to ~20-40 min).
+
+**Option B — Drop-or-accept:** In `scanPR()`'s diff reconstruction, detect when a file has multiple `modified` rows in the same PR and either drop all-but-the-first modification (losing visibility into what the later commits did) or accept the false positives and mark F9 findings on those files as "suspected scanner artifact, review manually." Fast but sacrifices either accuracy or automation. **Not recommended** — the "accept false positives" path is exactly what this incident log is fighting, and the "drop later modifications" path has a silent accuracy loss that's hard to detect post-hoc.
+
+**Option C — Extend the status-aware filter to handle modified-modified sequences (recommended):** Extend `filterCommitsForSI003()` (or introduce a sibling `filterCommitsForSI006()`) to track per-file commit ordering. For each file with multiple `modified` rows in the same PR, keep only the **first** commit's modification and drop subsequent ones. Uses information already in the dataset, doesn't change gate semantics, doesn't slow down scanning. Implementation is roughly 10-15 lines extending the existing filter.
+
+**Subtle tradeoff in Option C that should be named explicitly:** for files where commit 2 is the one that actually matters — as in `autoLock.test.ts` above, where commit 2 extends the test file with additional test cases that commit 1's patch laid groundwork for — verify will no longer see commit 2's additions. The agent's later edits become invisible to the scanner. This is an accuracy loss, but it is a **known accuracy loss with a named failure mode** rather than a silent false positive that contaminates the finding pool. A false negative on a later commit is strictly better than a false positive that looks like a real finding, because false negatives are correctable when discovered and false positives erode the scanner's credibility in unrecoverable ways.
+
+**Why C over A/B:** C mirrors SI-003's Option C reasoning — use data already in the dataset, preserve scan speed, accept a narrow and named accuracy loss to eliminate a false positive class. Same pattern, same tradeoff, same code region. The symmetry is what makes C the right answer: if SI-003's Option C was the right call (and the validation re-run confirmed it eliminated the 6 file-not-found FPs cleanly), then SI-006's Option C is the right call for the structurally analogous bug.
+
+**Recommended implementation:** extend the existing `filterCommitsForSI003()` function in `scripts/scan/level2-scanner.ts` to handle both cases in a single pass, and rename it to `filterCommitsForSequentialAssumptions()` or similar. The two filters share the same pre-computation step (a `Map<filename, status[]>` keyed on filename) and can produce a single unified `filteredCommits` output. Alternatively, keep them as separate functions for clarity. Implementation detail, not a spec decision.
+
+### Tests (pending fix)
+
+Once the fix is applied, regression tests should:
+- Reproduce a synthetic two-commit PR where commit 1 modifies `foo.ts` to add `function A()` and commit 2 modifies `foo.ts` to add `function B()` right after `function A()` (commit 2's search string contains `function A()` which doesn't exist at commit 1's parent)
+- Assert F9 does NOT produce `search string not found` for commit 2's edit (the filter drops it)
+- Assert the agent's work on commit 1 is still evaluated (positive control — commit 1's modification is not dropped)
+- Reproduce a three-commit variant where all three commits modify the same file; assert only commit 1 survives the filter
+- Positive control: assert legitimate `search string not found` findings on single-commit modifications still fire
+
+### Detection going forward
+
+If a Level 2 scan produces F9 `search string not found` findings on files in multi-commit PRs, check whether the same file appears with `status: "modified"` in two or more distinct commit SHAs in that PR. Scriptable check:
+
+```bash
+grep -F "<filename>" ~/datasets/aidev-pop/pr_commit_details.jsonl | \
+  jq -r 'select(.pr_id == <pr_id_number>) | "\(.sha[0:8]) \(.status)"' | \
+  sort | uniq -c | sort -rn
+```
+
+If the output shows 2+ `modified` rows for the same filename in the same PR with no `added` rows, the finding is likely SI-006. A stronger signal: check whether the failing search string matches content in an earlier commit's `replace` patch — if so, the diagnosis is definitive.
+
+### Impact estimate
+
+5 confirmed occurrences on the 42-PR cal.com post-fix re-run (~12% of scanned PRs, comparable to SI-003's pre-fix rate of ~19%). The cal.com numbers suggest SI-006 affects a similar population shape as SI-003 — Devin-heavy monorepos with incremental commit practices. Single-commit PRs are unaffected. Estimate: SI-006 affects 10-20% of F9 findings on Devin-heavy repos, near 0% on Copilot/Codex-heavy repos.
+
+Combined with SI-003 (now fixed) and SI-006 (now documented), an **upper-bound estimate suggests that 25-40% of pre-fix F9 findings on Devin-heavy monorepo populations may be sequential-commit assumption failures, not real agent fabrications, pending confirmation via fixes to both bug classes and re-validation.** This estimate is **based on two measurement points from a single codebase** (SI-003 at ~19% of the pre-fix cal.com scan, SI-006 at ~12% of the post-SI-003-fix cal.com scan), and should not be extrapolated to other repositories or agent populations without independent measurement. This is a significant fraction of the F9 signal on Devin-heavy populations and has implications for any future claims about "how often agents fabricate edits" that lean on Level 2 F9 statistics from such populations.
+
+### Surfaced by
+
+N1 experiment ground truth audit on 2026-04-09. The audit was designed to classify the 5 "newly-visible" cal.com findings from the 2026-04-08 post-fix re-run as real fabrications or scanner artifacts before using them as seed data for the N1 convergence proof experiment. All 5 were confirmed as SI-006. Without the pre-experiment audit, the 5 cases would have been used as N1 input, the N1 experiment would have produced meaningless convergence data (neither raw nor governed loops can make a scanner false positive go away), and the "corrupted dataset" failure mode would have been attributed to `govern()` weakness rather than the scanner bug.
+
+This is the **fourth time** scanner output has revealed a scanner bug rather than an agent bug (following SI-001, SI-003, SI-004a, and now SI-006). SI-002 was a different class — it was discovered by operator inspection of why the pipeline was producing no output, not by the scanner producing anomalous output. The pattern across the four SI-001/003/004a/006 cases holds: the only way to find scanner bugs that produce wrong output is to run the scanner on diverse production data *and* to triage the output honestly. The N1 pre-experiment audit was the discovery path in this instance.
+
+---
+
+**Cluster note updated.** The sequential-commit assumption is a family of bugs in `scanPR()`'s diff reconstruction, not a single bug. SI-003 addressed the create-then-modify variant; SI-006 documents the modify-then-modify variant; SI-004b's classification is pending a total-typescript re-run that may reveal a third variant or place SI-004b into one of the existing two. Any future fix should consider whether a unified sequential-commit-aware reconstruction is worth the complexity, or whether the patchwork of status-aware filters (one per variant) is the right shape given that each variant has slightly different semantics.

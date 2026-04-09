@@ -271,13 +271,51 @@ function summarize(results: PreflightResult[]): PreflightSummary {
   };
 }
 
+/**
+ * Parse CLI arguments:
+ *   bun preflight.ts                              — default mode: candidates-source-b.jsonl → preflight-results.jsonl
+ *   bun preflight.ts --input X.jsonl --output Y.jsonl  — custom input/output
+ *
+ * The --input/--output flags exist so pre-flight can run on subsets
+ * (like the 3 replacement candidates after a §13 contingency draw)
+ * without overwriting the original 40-case Phase 1c results. The
+ * original preflight-results.jsonl is immutable once committed.
+ */
+interface PreflightCliArgs {
+  inputPath: string;
+  outputPath: string;
+  phaseLabel: string;
+}
+
+function parsePreflightArgs(argv: string[]): PreflightCliArgs {
+  let inputPath = join(import.meta.dir, 'candidates-source-b.jsonl');
+  let outputPath = join(import.meta.dir, 'preflight-results.jsonl');
+  let phaseLabel = 'N1 Phase 1c (Pre-flight check)';
+
+  for (let i = 2; i < argv.length; i++) {
+    if (argv[i] === '--input' && argv[i + 1]) {
+      inputPath = argv[i + 1];
+      i++;
+    } else if (argv[i] === '--output' && argv[i + 1]) {
+      outputPath = argv[i + 1];
+      i++;
+    } else if (argv[i] === '--phase' && argv[i + 1]) {
+      phaseLabel = argv[i + 1];
+      i++;
+    }
+  }
+  return { inputPath, outputPath, phaseLabel };
+}
+
 async function main(): Promise<void> {
-  const candidatesPath = join(import.meta.dir, 'candidates-source-b.jsonl');
-  const outPath = join(import.meta.dir, 'preflight-results.jsonl');
+  const { inputPath, outputPath, phaseLabel } = parsePreflightArgs(process.argv);
+  const candidatesPath = inputPath;
+  const outPath = outputPath;
   const demoAppFixture = join(import.meta.dir, '..', '..', 'fixtures', 'demo-app');
 
-  console.log('N1 Phase 1c — Pre-flight check');
+  console.log('N1 Pre-flight check');
   console.log('================================');
+  console.log(`  Phase label:     ${phaseLabel}`);
   console.log(`  Candidates file: ${candidatesPath}`);
   console.log(`  Demo-app fixture: ${demoAppFixture}`);
   console.log(`  Results file:    ${outPath}`);
@@ -326,12 +364,12 @@ async function main(): Promise<void> {
   // Emit results
   const preflightMetadata = {
     __metadata: true,
-    phase: 'N1 Phase 1c (Pre-flight check)',
-    candidates_file: 'candidates-source-b.jsonl',
+    phase: phaseLabel,
+    candidates_file: candidatesPath.split(/[\\/]/).pop() ?? candidatesPath,
     candidates_metadata: metadata,
     demo_app_fixture: 'fixtures/demo-app/',
     generated_at: new Date().toISOString(),
-    design_md_version: 'v1 + Amendment 1 + Amendment 2',
+    design_md_version: 'v1 + Amendment 1 + Amendment 2 + Amendment 3',
     gate_config: {
       staging: false,
       browser: false,

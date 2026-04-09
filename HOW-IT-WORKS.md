@@ -35,6 +35,21 @@ For multi-agent setups, `verifyBatch()` runs agents in sequence. Each agent sees
 
 ---
 
+## Predicate Extraction
+
+A predicate is a structured claim about what should be true after an edit — "this file should exist," "this CSS class should be present in the rendered output," "the JSON in package.json should still parse." Gates consume predicates and check them against reality. `verify()` and `govern()` both consume predicates and are downstream of extraction.
+
+Predicates can be supplied by the caller, or generated from the edit itself. The extractor lives in [src/extractor/](src/extractor/) and composes four tiers:
+
+- **Tier 1 (diff):** deterministic predicates from the edit content — new files, deleted files, added/removed strings.
+- **Tier 2 (context):** cross-file predicates when an identifier is removed from one file and may still be referenced in another.
+- **Tier 3 (intent):** heuristic extraction from PR title, description, and commit messages — quoted values, CSS classes, route paths.
+- **Tier 4 (static):** file-extension heuristics that wake up dormant gates — `.json` triggers serialization, code files trigger security, `.html` triggers a11y.
+
+Each tier is independently callable. Callers compose what they need; the [facade](src/extractor/index.ts) provides a bundled default for callers that want all four.
+
+---
+
 ## Learning From Failure
 
 A single pass is useful. But the real power is the loop.

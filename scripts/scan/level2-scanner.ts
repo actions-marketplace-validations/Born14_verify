@@ -20,6 +20,7 @@ import { join } from 'path';
 import { execSync } from 'child_process';
 import { tmpdir } from 'os';
 import { classifyFinding, type FindingClassification, type ScanFinding } from './classifier.js';
+import { tier4Static } from '../../src/extractor/index.js';
 
 const DATA_DIR = join(import.meta.dir, '../../data/aidev-pop');
 const OUTPUT_DIR = join(import.meta.dir, '../../data/aidev-scan/level2');
@@ -205,7 +206,7 @@ function cleanupRepo(repoDir: string): void {
 }
 
 // =============================================================================
-// AUTO-PREDICATE GENERATOR — wakes up dormant gates
+// SI-003 COMMIT FILTER — pure transform on commit list
 // =============================================================================
 
 /**
@@ -229,53 +230,6 @@ export function filterCommitsForSI003(commits: CommitInfo[]): CommitInfo[] {
   return commits.filter(c => !(createdFiles.has(c.filename) && c.status !== 'added'));
 }
 
-export function generatePredicates(appDir: string, edits: Array<{ file: string; search: string; replace: string }>): any[] {
-  const predicates: any[] = [];
-
-  // filesystem_exists — every file the agent modifies should exist pre-edit
-  for (const edit of edits) {
-    if (edit.search) {  // modified file, not new
-      predicates.push({ type: 'filesystem_exists', file: edit.file });
-    }
-  }
-
-  // serialization — if agent edits JSON, validate structure (SI-004a: gate is JSON-only,
-  // emitting against .yaml/.yml guaranteed a JSON.parse error on the first non-JSON token).
-  for (const edit of edits) {
-    const lower = edit.file.toLowerCase();
-    if (lower.endsWith('.json')) {
-      predicates.push({ type: 'serialization', file: edit.file, comparison: 'structural' });
-    }
-  }
-
-  // security — auto-generate for code files
-  const codeExts = new Set(['js', 'ts', 'py', 'rb', 'go', 'rs', 'java', 'php', 'mjs', 'cjs', 'jsx', 'tsx']);
-  if (edits.some(e => codeExts.has(e.file.split('.').pop()?.toLowerCase() ?? ''))) {
-    predicates.push(
-      { type: 'security', securityCheck: 'secrets_in_code', expected: 'no_findings' },
-      { type: 'security', securityCheck: 'xss', expected: 'no_findings' },
-      { type: 'security', securityCheck: 'sql_injection', expected: 'no_findings' },
-    );
-  }
-
-  // a11y — if HTML files edited
-  if (edits.some(e => /\.html?$/i.test(e.file))) {
-    predicates.push({ type: 'a11y', a11yCheck: 'alt_text' });
-  }
-
-  // performance — if package.json edited (bundle size concern)
-  if (edits.some(e => e.file === 'package.json' || e.file.endsWith('/package.json'))) {
-    predicates.push({ type: 'performance', perfCheck: 'bundle_size' });
-  }
-
-  // config — if config files edited
-  const configFiles = ['.env', '.env.local', 'tsconfig.json', 'webpack.config.js', 'vite.config.ts', 'next.config.js'];
-  if (edits.some(e => configFiles.some(c => e.file.endsWith(c)))) {
-    predicates.push({ type: 'config' });
-  }
-
-  return predicates;
-}
 
 // =============================================================================
 // GATE CONFIG — Level 2 enables grounding + F9
@@ -352,8 +306,8 @@ async function scanPR(
     return { result: null, skipped: true, skipReason: 'no_edits' };
   }
 
-  // Auto-generate predicates from real file tree
-  const predicates = generatePredicates(repoDir, edits);
+  // Auto-generate predicates from file extensions (tier 4 of the extractor)
+  const predicates = tier4Static(edits);
 
   // Run verify with Level 2 gate config against real repo
   const prStart = Date.now();

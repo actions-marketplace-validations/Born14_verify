@@ -11,7 +11,7 @@
  */
 
 import { parseDiff } from '../parsers/git-diff.js';
-import { extractDiffPredicates, extractCrossFilePredicates, extractIntentPredicates } from '../parsers/pr-predicates.js';
+import { tier1Diff, tier2Context, tier3Intent } from '../extractor/index.js';
 import { verify } from '../verify.js';
 import { getPRDiff, getPRMetadata, postPRComment } from './github.js';
 import { formatComment } from './comment.js';
@@ -79,8 +79,11 @@ async function run(): Promise<void> {
   const tiers: string[] = [];
 
   // Tier 1: Deterministic from diff (always)
-  const diffPreds = extractDiffPredicates(edits);
-  predicates.push(...diffPreds.filter(p => (p as any).expected !== 'absent'));
+  const diffPreds = tier1Diff(edits);
+  // Drop absent-predicates: the inversion machinery downstream isn't wired,
+  // so absent-expectation predicates are emitted but not consumed today.
+  // (Filed gap: absent-predicate consumer path is half-built.)
+  predicates.push(...diffPreds.filter(p => p.expected !== 'absent'));
   tiers.push('diff');
   console.log(`  Tier 1 (diff): ${diffPreds.length} predicates`);
 
@@ -88,8 +91,9 @@ async function run(): Promise<void> {
   try {
     const { readdirSync } = await import('fs');
     const existingFiles = listFiles(appDir, readdirSync);
-    const crossFilePreds = extractCrossFilePredicates(edits, existingFiles);
-    predicates.push(...crossFilePreds.filter(p => (p as any).expected !== 'absent'));
+    const crossFilePreds = tier2Context(edits, existingFiles);
+    // Drop absent-predicates: same reason as Tier 1 above.
+    predicates.push(...crossFilePreds.filter(p => p.expected !== 'absent'));
     tiers.push('cross-file');
     console.log(`  Tier 2 (cross-file): ${crossFilePreds.length} predicates`);
   } catch {
@@ -100,7 +104,7 @@ async function run(): Promise<void> {
   if (intentEnabled) {
     console.log('  Reading PR metadata...');
     const metadata = await getPRMetadata(token, owner, repo, prNumber);
-    const intentPreds = extractIntentPredicates(edits, {
+    const intentPreds = tier3Intent(edits, {
       title: metadata.title,
       description: metadata.body,
       issueTitle: metadata.issueTitle,

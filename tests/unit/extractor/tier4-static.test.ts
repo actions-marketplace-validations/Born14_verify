@@ -1,20 +1,24 @@
 import { describe, test, expect } from 'bun:test';
-import { generatePredicates } from '../../scripts/scan/level2-scanner.js';
+import { tier4Static } from '../../../src/extractor/index.js';
 
-// Regression tests for the Level 2 auto-predicate generator.
+// Regression tests for tier4Static (the static-heuristic extraction tier).
+//
+// Moved from tests/unit/level2-predicate-generator.test.ts as part of the
+// extractor consolidation. The assertions are unchanged — only the import
+// and the call signature (tier4Static takes no appDir parameter; the legacy
+// generatePredicates did, but never consulted it).
+//
 // SI-004a: serialization predicate must NOT be emitted for YAML files,
 // because the serialization gate is JSON-only (src/gates/serialization.ts
 // uses JSON.parse). Emitting against .yaml/.yml guarantees a parse error
 // on the first non-JSON token in the file.
 
-describe('generatePredicates — serialization (SI-004a regression)', () => {
-  const APP_DIR = '/tmp/fake'; // unused by generatePredicates
-
+describe('tier4Static — serialization (SI-004a regression)', () => {
   test('emits serialization predicate for .json files', () => {
     const edits = [
       { file: 'package.json', search: '"foo": 1', replace: '"foo": 2' },
     ];
-    const preds = generatePredicates(APP_DIR, edits);
+    const preds = tier4Static(edits);
     const ser = preds.filter((p) => p.type === 'serialization');
     expect(ser).toHaveLength(1);
     expect(ser[0].file).toBe('package.json');
@@ -29,7 +33,7 @@ describe('generatePredicates — serialization (SI-004a regression)', () => {
       },
       { file: 'config.yaml', search: 'a: 1', replace: 'a: 2' },
     ];
-    const preds = generatePredicates(APP_DIR, edits);
+    const preds = tier4Static(edits);
     const ser = preds.filter((p) => p.type === 'serialization');
     expect(ser).toHaveLength(0);
   });
@@ -40,7 +44,7 @@ describe('generatePredicates — serialization (SI-004a regression)', () => {
       { file: 'docker-compose.yml', search: 'image: x', replace: 'image: y' },
       { file: 'src/index.ts', search: 'foo()', replace: 'bar()' },
     ];
-    const preds = generatePredicates(APP_DIR, edits);
+    const preds = tier4Static(edits);
     const ser = preds.filter((p) => p.type === 'serialization');
     expect(ser).toHaveLength(1);
     expect(ser[0].file).toBe('tsconfig.json');
@@ -51,7 +55,7 @@ describe('generatePredicates — serialization (SI-004a regression)', () => {
       { file: 'Config.JSON', search: '{}', replace: '{"a":1}' },
       { file: 'Settings.YAML', search: 'a: 1', replace: 'a: 2' },
     ];
-    const preds = generatePredicates(APP_DIR, edits);
+    const preds = tier4Static(edits);
     const ser = preds.filter((p) => p.type === 'serialization');
     expect(ser).toHaveLength(1);
     expect(ser[0].file).toBe('Config.JSON');

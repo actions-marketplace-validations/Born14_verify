@@ -167,6 +167,55 @@ export interface Predicate {
 }
 
 /**
+ * Compile-time exhaustiveness check over Predicate['type'].
+ *
+ * This is a WEAK form of exhaustiveness: it proves that every type literal
+ * in the Predicate union is known, but it does NOT prove that gates narrow
+ * predicate fields correctly by type. The strong form (assertNever over
+ * variant interfaces in a gate switch) requires the discriminated union
+ * refactor, which is filed as a known gap (see src/extractor/GAPS.md #6)
+ * and deferred to a follow-up branch.
+ *
+ * If a new predicate type is added to Predicate['type'] without updating
+ * this switch, the `const _exhaustive: never = t` assignment in the default
+ * branch will fail to compile because `t` is narrowed to the unhandled
+ * literal rather than `never`. That's the whole point. The function has no
+ * runtime callers and is not exported.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _exhaustivePredicateTypeCheck(t: Predicate['type']): void {
+  switch (t) {
+    case 'css':
+    case 'html':
+    case 'content':
+    case 'db':
+    case 'http':
+    case 'http_sequence':
+    case 'filesystem_exists':
+    case 'filesystem_absent':
+    case 'filesystem_unchanged':
+    case 'filesystem_count':
+    case 'infra_resource':
+    case 'infra_attribute':
+    case 'infra_manifest':
+    case 'serialization':
+    case 'config':
+    case 'security':
+    case 'a11y':
+    case 'performance':
+    case 'hallucination':
+      return;
+    default: {
+      // If a new predicate type is added to Predicate['type'] without a
+      // matching case above, `t` is narrowed to the unhandled literal here
+      // rather than `never`, and this assignment will fail to compile.
+      const _exhaustive: never = t;
+      return _exhaustive;
+    }
+  }
+}
+
+/**
  * A database migration to apply during staging.
  */
 export interface Migration {

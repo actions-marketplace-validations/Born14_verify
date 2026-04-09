@@ -746,11 +746,11 @@ An amendment commit must:
 
 ## Document status
 
-- **Version:** 1 (initial pre-registration) + Amendment 1 (2026-04-09) + Amendment 2 (2026-04-09)
+- **Version:** 1 (initial pre-registration) + Amendment 1 (2026-04-09) + Amendment 2 (2026-04-09) + Amendment 3 (2026-04-09)
 - **Author:** builder Claude (execution), operator (approval)
 - **Date:** 2026-04-09
-- **Status:** committed as `d581838` + Amendment 1 + Amendment 2 appended
-- **Commit:** `d581838` (initial) + Amendment 1 commit (`2adf908`) + Amendment 2 commit (see git log)
+- **Status:** committed as `d581838` + Amendment 1 + Amendment 2 + Amendment 3 appended
+- **Commit:** `d581838` (initial) + Amendment 1 commit (`2adf908`) + Amendment 2 commit (`e881221`) + Amendment 3 commit (see git log)
 
 Once committed, this document is frozen per §26 unless amended via the amendment protocol.
 
@@ -1094,3 +1094,158 @@ Phase 1b was halted at the candidate distribution reporting checkpoint when the 
 4. **Proceed to Phase 1c (pre-flight check)** only after operator approval of the new distribution.
 
 The pre-flight checkpoint at Phase 1e — report drop count `k` to operator before committing `case-list.jsonl` — is unchanged by Amendment 2. Amendment 1 and Amendment 2 both preserve the operator-builder pause at the pre-flight checkpoint regardless of other changes.
+
+---
+
+## Pre-registration amendment 3 (2026-04-09)
+
+**Title:** Clarify §13's "same category distribution" replacement rule for primary-family drops under Amendment 2 Change 2's family-level allocation; preserve §13's literal text for stratified remainder drops.
+
+**Authored by:** builder Claude
+**Approved by:** operator (explicit ruling delivered during Phase 1f replacement-draw checkpoint, 2026-04-09)
+**Authorization reference:** Operator's ruling delivered in the N1 session immediately following the `computeSwaps` halt for the propagation-http drop, titled "Three rulings, fast — yes §26 amendment situation, Reading 1, draft Amendment 3 immediately." The full operator response is the authorization of record.
+**Amendment commit:** see git log for the commit landing this amendment.
+
+### Interaction with prior amendments
+
+**Amendment 3 is independent of Amendment 1 and Amendment 2.** Per §26's amendment chain requirement, this is the first three-amendment chain in the pre-registration, and the interaction section is named explicitly so a future reader auditing the chain can see how the three amendments compose:
+
+- **Amendment 1** struck §8 (the N1-B supplementary narrowing quality track) in its entirety after the `bad_hint` intent was found to be unpopulated in the Source B corpus. Amendment 1 affects the supplementary track only and does not interact with Source B selection or §13.
+
+- **Amendment 2** modified §7's primary-category reporting list (struck `hallucination`), restructured the Source B selection algorithm for the N1-A primary track from category-level stratified sampling to shape-family-aware allocation followed by stratified remainder, pre-specified the content-family small-sample disclaimer, and updated §7's reporting table schema. Amendment 2 created the algorithmic surface that Amendment 3 now clarifies. The §13 ↔ Amendment 2 Change 2 interaction gap that Amendment 3 resolves did not exist before Amendment 2 — under the v1 stratified-only algorithm, §13's "same category distribution" rule had only one possible reading.
+
+- **Amendment 3** clarifies how §13's replacement rule operates when a dropped case belongs to a primary family allocated under Amendment 2 Change 2. Amendment 3 does not modify §7, Amendment 1, or Amendment 2. It resolves an interaction gap that emerged when Amendment 2's algorithm reshaped the meaning of "category" for primary-family drops.
+
+All three amendments remain binding per §26. None of the three modifies or supersedes any of the others. Future amendments must include an "Interaction with prior amendments" section that lists Amendments 1, 2, and 3 in order and states whether and how the new amendment modifies or supersedes each of their effects.
+
+### What changed
+
+§13 (pre-flight contingency rule) is **not modified** in its original location. The original rule remains exactly as written and continues to govern stratified remainder drops. Amendment 3 adds a clarification that applies only to primary-family drops, where the Amendment 2 Change 2 algorithm and §13's literal text interact in a way the original pre-registration did not specify.
+
+Under Amendment 3, §13's "same category distribution" rule is interpreted as follows:
+
+**Primary-family drops (cases drawn from one of the Amendment 2 Change 2 primary families: f9, content, propagation, access, state):**
+
+- Replacement is drawn from the **same primary family** as the dropped case.
+- Replacement need NOT be from the same file-level category (sub-file). A drop from `propagation-http` may be replaced by a case from `propagation-cli`, `propagation-browser`, or any other propagation sub-file, as determined by the deterministic post-shuffle filter that the v2 selection algorithm produces under `--skip`.
+- The audit trail in `candidates-source-b-replacements.jsonl` MUST surface the relaxation by setting `category_match: false` and `primary_family_match: true` on the swap record. A reader scanning the swap history immediately sees that a primary-family relaxation was applied and is not left wondering whether the script silently bypassed §13.
+- The audit trail MUST include a `substitution_reason` field on swap records where `category_match: false` that names Amendment 3 as the authority for the relaxation. The exact substitution reason language is:
+
+  > "Amendment 3 primary-family replacement rule: same primary family ({family_name}), different sub-file category ({original_sub_file} → {replacement_sub_file}). §13's strict category match is not preserved for primary-family drops; §13 + Amendment 3 explicitly permits sub-file flexibility within primary families."
+
+  Where `{family_name}`, `{original_sub_file}`, and `{replacement_sub_file}` are populated from the dropped and replacement candidates.
+
+**Stratified remainder drops (cases drawn from any non-primary category by the proportional + round-robin stratified sampler):**
+
+- §13 is **unchanged**. Replacement is drawn from the same file-level category as the dropped case. Strict matching applies. Amendment 3 does not modify this code path.
+- The audit trail records `category_match: true` and `primary_family_match: null` (or `false` if the dropped case has no primary family, which is always the case for stratified remainder drops) on these swap records. No `substitution_reason` is required because no relaxation was applied.
+
+**Two separate rules for two separate code paths.** The implementation in `computeSwaps` must distinguish primary-family drops from stratified-remainder drops by inspecting `dropped.primary_family` (non-null vs null), apply Reading 1 to the former, and apply §13's literal text to the latter. Conflating the two code paths would defeat Amendment 3's two-rule structure.
+
+### Why
+
+This is a **different class of audit gap** than Amendments 1 and 2. The first two amendments were data-level gaps — the corpus did not match what DESIGN.md assumed about it (Amendment 1: `bad_hint` intent unpopulated; Amendment 2: stratified sampling produced 0 cases in 4 of 6 §7-named primary shape families). Amendment 3 is an **interaction-level gap** — two pre-registered rules (§13 and Amendment 2 Change 2) compose in a way the original pre-registration did not fully specify.
+
+Naming this distinction matters for future readers trying to understand what kind of discipline prevented the gap from corrupting the experiment. The discipline isn't just "verify data against assumptions" but also "verify that pre-registered rules compose cleanly when one rule is amended." The first kind of gap is caught by data audits at the start of Phase 1. The second kind of gap is caught when pre-registered rules are exercised against each other in code, which is what happened in `computeSwaps` when it tried to honor §13's category-distribution rule against an Amendment 2 family-level allocation.
+
+The specific gap, named precisely:
+
+The §13 rule reads: *"Draw `k` replacement Source B cases from the **same category distribution** as the dropped cases (if 2 dropped cases were from f9 and 3 were from access-fs, draw 2 new f9 + 3 new access-fs)."*
+
+§13 was written before Amendment 2 existed. At the time, the v1 selection algorithm operated at the file-level category — every staged file was its own category, and "same category distribution" meant strict file-level matching. Under v1, a `propagation-http` drop would be replaced by another `propagation-http` case, full stop.
+
+Amendment 2 Change 2 reshaped the selection algorithm to operate at the **primary family** level for the 5 families named in §7 (f9, content, propagation, access, state). The v2 algorithm pools all `propagation-*` files into a single propagation family pool, shuffles the pool, and takes the first 5 — the algorithm is no longer aware of the sub-file partitioning at the allocation level. When `--skip` is applied to a primary-family drop and the deterministic post-shuffle filter promotes the next candidate from the shuffled pool, that candidate may come from a different sub-file than the dropped case.
+
+This is the interaction gap. §13 says "same category." Amendment 2 says "same family, sub-file flexible." Both are pre-registered. Both are binding. They produce different replacement candidates for primary-family drops. The original pre-registration did not specify which interpretation governs when they conflict.
+
+**The Phase 1c k=3 report I gave the operator implicitly assumed Reading 2 (strict file-level match)** without verifying whether the Amendment 2 v2 algorithm could deliver same-sub-file replacements. The Phase 1c report stated: "The 3 drops break down by **original drawing category**: 1. `access-cli` — needs 1 replacement from `access-cli`; 2. `postcss-edge-cases` — needs 1 replacement from `postcss-edge-cases`; 3. `propagation-http` — needs 1 replacement from `propagation-http`." That framing was wrong for the two primary-family drops (`access-cli` and `propagation-http`) because the v2 algorithm's primary-family allocation does not track sub-file allocations. The framing was correct for the stratified remainder drop (`postcss-edge-cases`) because that drop was made by the per-category stratified sampler, which does honor strict file-level matching.
+
+**The script halted on the propagation-http drop when `computeSwaps` tried to find a same-category replacement and found zero new candidates from `propagation-http` in the replacement-aware run.** The halt is the §26 protocol working at exactly the right granularity: a pre-registered rule (§13's strict category matching) hit a post-amendment reality (Amendment 2's family-level allocation) and the discipline routed the conflict through the amendment protocol instead of allowing a unilateral interpretation.
+
+### What was considered and rejected
+
+**Reading 2 — Strict file-level category matching for primary-family drops.**
+
+Under Reading 2, §13's literal text is preserved for all drops, including primary-family drops. A drop from `propagation-http` must be replaced by another `propagation-http` case.
+
+Rejected because:
+
+1. **It would require a large algorithm change to the v2 selection script.** The v2 algorithm's primary-family allocation pools all sub-files together and takes 5 from the shuffled family pool. To deliver a same-sub-file replacement, the algorithm would need to track sub-file allocations within each primary family, re-shuffle each sub-file pool, and apply per-sub-file allocation logic. This is a significant restructuring of Amendment 2 Change 2's algorithm, and it would itself be a §26 amendment because it changes the meaning of "5 cases per primary family" — the count would now be distributed across sub-files in some specific way, which Amendment 2 deliberately left to the seeded shuffle.
+
+2. **Or it would reduce primary-family coverage below 5.** If the algorithm cannot deliver a same-sub-file replacement from within the primary-family allocation, the only fallback under Reading 2 is to draw the replacement from outside the primary allocation entirely — which would mean the primary family ends up with 4 cases instead of 5 plus a substituted case from somewhere else. This violates Amendment 2 Change 2's coverage guarantee that each primary family gets 5 cases (or 4 for content), which is the entire reason Amendment 2 exists.
+
+3. **Reading 2's audit trail would be misleading.** A `category_match: true` flag on a propagation-http → propagation-http replacement would suggest that the replacement was drawn cleanly from the same shuffled sub-pool, when in reality the algorithm doesn't have a sub-pool for it. The audit trail would either lie or require even more complex tracking to be honest.
+
+Both options are worse than Reading 1 (relax category matching for primary-family drops, preserve §13 strict matching for stratified remainder drops, surface the relaxation in the audit trail with the `category_match: false` flag and the `substitution_reason` field).
+
+**Reading 1 (the chosen path)** preserves Amendment 2's primary-family coverage guarantee, honors §13's literal text for stratified remainder drops where strict matching is achievable, and surfaces the relaxation honestly in the audit trail rather than hiding it. The cost of Reading 1 is that primary-family drops are replaced with weaker category matching than the original pre-registration implied — but this cost is paid in disclosure, not in silent algorithm modification.
+
+### What this invalidates
+
+- **§13's interpretation for primary-family drops.** Under Amendment 3, §13's "same category distribution" rule is read as "same primary family with sub-file flexibility" when applied to primary-family drops. The literal text of §13 in its original location is unchanged; Amendment 3 adds the interpretive clarification.
+- **The implicit assumption in the Phase 1c k=3 report** that all three drops would be replaced from their respective file-level categories. The report's framing was wrong for the `access-cli` and `propagation-http` drops; it was correct for the `postcss-edge-cases` drop.
+- **The original `computeSwaps` implementation in `select-cases.ts`** that throws when no same-category replacement is found. Under Amendment 3, `computeSwaps` must distinguish primary-family drops from stratified-remainder drops and apply the relaxed matching rule to the former. This is a code change required to implement Amendment 3, not a separate amendment.
+
+### What this does NOT invalidate
+
+- **§13 in its original location.** The literal text of §13 is unchanged. Amendment 3 adds an interpretive clarification for the primary-family drop case; the stratified remainder rule continues to read exactly as §13 originally stated.
+- **§13 for stratified remainder drops.** Strict file-level category matching still applies. The `postcss-edge-cases` drop must be replaced by another `postcss-edge-cases` case under §13 unmodified. Amendment 3 explicitly preserves this code path.
+- **§7** (per-category reporting list, primary track structure, reporting table schema, Amendment 2 Change 4 source column).
+- **§8** (struck by Amendment 1; not re-introduced).
+- **§9-§16** (source classification, cal.com exclusion, threats to validity, pre-flight methodology, contingency rule original text, pre-flight artifact specification, random seed, calibration oracle).
+- **§17-§26** (inter-rater protocol, pilot phase, model choice, API key source, stateDir hygiene, cost budget, outcome mapping, "what would change our mind," cross-reference, freeze protocol).
+- **Amendment 1 (struck N1-B).** Amendment 3 does not affect the supplementary track question because the supplementary track no longer exists.
+- **Amendment 2 (struck hallucination, restructured Source B selection, content disclaimer, source column).** Amendment 3 does not modify any of Amendment 2's four changes. Specifically: the primary-family allocation rule, the per-family counts (f9=5, content=4, propagation=5, access=5, state=5), the content small-sample disclaimer language, and the §7 reporting table schema all remain exactly as Amendment 2 specified.
+- **The 40-case live set from the initial selection.** The Phase 1b draw committed in `a84c26e` is unchanged. Amendment 3 clarifies how replacements are drawn after the initial selection, not what the initial selection contains.
+- **The pre-flight results from Phase 1c.** k=3 is unchanged. The three dropped cases are unchanged. The pass/fail status of the 37 non-dropped cases is unchanged. Amendment 3 only affects how the 3 replacements are drawn.
+- **The content-family Amendment 2 edge case.** Not triggered by k=3, not affected by Amendment 3. Content remains at 4 cases.
+- **The pre-flight contingency buckets** (k ≤ 5, 6 ≤ k ≤ 15, k > 15). The current k=3 is in the k ≤ 5 bucket per §13, and Amendment 3 does not modify the bucket boundaries or their semantics.
+- **The random seed (20260409).** Unchanged.
+
+### Impact on the primary experiment
+
+**Zero direct impact.** The N1-A 52-case target, the 312-run total, the per-loop split, the success criteria, the denominator rule, the §17 inter-rater protocol, the pilot phase, the model choice, the cost budget, the outcome mapping, and the "what would change our mind" section are all unchanged. The 40-case Source B initial draw is unchanged. The k=3 pre-flight result is unchanged.
+
+The only thing that changes is the interpretation of how the 3 replacement candidates are drawn. Under Amendment 3, two of the three replacements (for the `access-cli` and `propagation-http` drops, both primary-family drops) are drawn under Reading 1's relaxed sub-file matching, and one (for the `postcss-edge-cases` drop, a stratified remainder drop) is drawn under §13's strict matching. The post-replacement live set is then 40 cases as planned, with the `category_match: false` flag set on the two primary-family swap records and `category_match: true` set on the stratified remainder swap record.
+
+Phase 1f resumes immediately after Amendment 3 commits with the updated `computeSwaps` logic. No experimental runs are affected because no experimental runs have happened yet — Amendment 3 lands during Phase 1, before Phase 2 (harness construction) begins.
+
+### A named expectation for future amendments
+
+This is the first instance of an interaction-level gap (as opposed to the data-level gaps that Amendments 1 and 2 resolved). The pattern that produced Amendment 3 is: a pre-registered rule (§13) was written assuming a specific selection algorithm structure, that algorithm was later replaced by an amendment (Amendment 2 Change 2), and the original rule's interpretation under the new structure was not specified by the amending document.
+
+**The same pattern may apply to other §13-era rules.** Specifically, the pre-flight contingency buckets (k ≤ 5, 6 ≤ k ≤ 15, k > 15) were written when "category" meant file-level category, and they may have similar interaction gaps with Amendment 2's family-level allocation. For example: if a future pre-flight produces drops that span multiple primary families (e.g., 2 from `propagation`, 3 from `access`, 5 from various stratified categories), the bucket interpretation might be straightforward, OR it might require clarification about whether the 10 total drops trigger the `6 ≤ k ≤ 15` bucket regardless of family origin, or whether the family-level drops are counted separately from the stratified-remainder drops.
+
+**Amendment 3 does not resolve these potential future gaps.** It is naming them here so the audit trail shows that the issue was considered during Amendment 3 drafting and explicitly deferred. If a future pre-flight produces a drop pattern that exposes one of these gaps, an Amendment 4 (or later) should be drafted to resolve it, following the same template as Amendments 1, 2, and 3. The bilateral §26 refusal clause applies — neither the operator nor the builder may silently interpret the §13-era rules under Amendment 2's algorithm without explicit pre-registration clarification.
+
+### Amendment freeze clause
+
+**Amendment 3 is now part of the pre-registration.** It is subject to §26 equally with the original DESIGN.md sections and with Amendments 1 and 2. Specifically:
+
+1. **Amendment 3 cannot be reverted without another amendment.** If a future session decides to restore strict file-level matching for primary-family drops, that change requires a **Pre-registration Amendment 4** that explicitly references Amendments 1, 2, and 3 and explains how the four interact.
+
+2. **Future amendments must acknowledge Amendment 3.** Any Amendment N for N ≥ 4 must include an "Interaction with prior amendments" section that lists Amendments 1, 2, and 3 in order and states whether and how Amendment N modifies or supersedes their effects.
+
+3. **The §26 bilateral refusal clause applies to Amendment 3.** Neither the operator nor the builder may silently change how primary-family drops are replaced, silently relax §13 for stratified remainder drops, or silently modify the audit trail flags. Pressure to do any of these things must be refused and routed through the amendment protocol.
+
+4. **Amendment 3's audit gap is committed to the public record.** The interaction-level gap (§13 ↔ Amendment 2 Change 2) and the implicit assumption in the Phase 1c k=3 report are named in the "Why" section above and cannot be retroactively rewritten to minimize the error. Future readers should see the gap as it was named on 2026-04-09, including the named distinction between data-level and interaction-level gaps.
+
+5. **The two-rule structure is binding.** Primary-family drops use Reading 1; stratified remainder drops use §13's literal text. Conflating the two rules into a single relaxed rule (or a single strict rule) would be a substantive change to Amendment 3 and requires a further amendment.
+
+6. **The audit trail flag requirements are binding.** Swap records produced by `computeSwaps` MUST set `category_match: false` and include a `substitution_reason` field for primary-family drops where the replacement comes from a different sub-file. Records with `category_match: true` MUST come from the same file-level category as the dropped case. Any `computeSwaps` implementation that produces audit records inconsistent with these rules violates Amendment 3 and requires correction (and a follow-up amendment if the inconsistency is intentional).
+
+A pre-registration protocol that allows unlimited silent amendments is no protocol at all. Amendment 3 is binding.
+
+---
+
+### Phase 1f resumption note (Amendment 3)
+
+Phase 1f was halted at the `computeSwaps` execution step when the propagation-http drop could not be matched to a same-category replacement. Under Amendment 3, Phase 1f resumes with:
+
+1. **Update `computeSwaps` in `select-cases.ts`** to implement Reading 1 for primary-family drops while preserving §13's strict matching for stratified remainder drops. The updated function distinguishes the two cases by inspecting `dropped.primary_family`: non-null → Reading 1 (relaxed sub-file matching, `category_match` flag honest), null → §13 strict matching.
+2. **Populate the `substitution_reason` field** on swap records where `category_match: false`, using the verbatim language from the "What changed" section above.
+3. **Re-run `select-cases.ts` with `--skip access-cli:hc-docker-007,postcss-edge-cases:postcss-007,propagation-http:ph-apiui-006`** against corpus SHA at the Amendment 3 commit. The script produces a new `candidates-source-b-replacements.jsonl` file recording the three swaps. The original `candidates-source-b.jsonl` is NOT modified — replacement mode is delta-only.
+4. **Report the swap history to the operator** for the eyeball checkpoint per the Phase 1f-7 plan. The eyeball confirms (a) all three swaps populated the audit trail correctly, (b) the two primary-family swaps have `category_match: false` and `primary_family_match: true`, (c) the stratified remainder swap has `category_match: true`, and (d) the deterministic replacement candidates produced under `--skip` are correct.
+5. **Proceed to Phase 1f-6 (re-run pre-flight on the 3 replacement candidates)** after operator approval of the swap eyeball.
+
+The pre-flight checkpoint at Phase 1e — report drop count `k` to operator before committing `case-list.jsonl` — is unchanged by Amendment 3. The replacement pre-flight is a separate, smaller checkpoint for the 3 replacement cases only, and any drops among the 3 trigger the §13 contingency rule recursively (with Reading 1 for primary-family re-drops).

@@ -746,11 +746,11 @@ An amendment commit must:
 
 ## Document status
 
-- **Version:** 1 (initial pre-registration) + Amendment 1 (2026-04-09)
+- **Version:** 1 (initial pre-registration) + Amendment 1 (2026-04-09) + Amendment 2 (2026-04-09)
 - **Author:** builder Claude (execution), operator (approval)
 - **Date:** 2026-04-09
-- **Status:** committed as `d581838` + Amendment 1 appended
-- **Commit:** `d581838` (initial) + Amendment 1 commit (see below)
+- **Status:** committed as `d581838` + Amendment 1 + Amendment 2 appended
+- **Commit:** `d581838` (initial) + Amendment 1 commit (`2adf908`) + Amendment 2 commit (see git log)
 
 Once committed, this document is frozen per §26 unless amended via the amendment protocol.
 
@@ -871,3 +871,226 @@ A pre-registration protocol that allows unlimited silent amendments is no protoc
 Phase 1 was halted at step 1a (Source B inventory) when the empty `bad_hint` pool was discovered. Under Amendment 1, Phase 1 resumes at step 1b (build the selection script) on the amended design. The selection script draws only from the `false_negative` non-zero-edit pool for the 40 Source B cases targeting N1-A. No `bad_hint` draw step runs. All other Phase 1 substeps (pre-flight check, contingency rule application, synthetic seed construction, case-list.jsonl emission) proceed as originally designed.
 
 The pre-flight checkpoint at Phase 1e — report drop count `k` to operator before committing `case-list.jsonl` — is unchanged. The operator and builder have agreed to pause at that checkpoint regardless of this amendment.
+
+---
+
+## Pre-registration amendment 2 (2026-04-09)
+
+**Title:** Strike `hallucination` from the §7 primary-category reporting list; restructure the Source B selection algorithm to guarantee per-family coverage; pre-specify content-family small-sample disclaimer.
+
+**Authored by:** builder Claude
+**Approved by:** operator (explicit ruling delivered during Phase 1b distribution checkpoint, 2026-04-09)
+**Authorization reference:** Operator's ruling delivered in the N1 session immediately following the Phase 1b candidate distribution report, titled "Four rulings, all aligned with your leans" (strike hallucination, content Option A, seeded shuffle, update §7 reporting row list from 10 to 9). The full operator response is the authorization of record.
+**Amendment commit:** see git log for the commit landing this amendment.
+
+### Interaction with prior amendments
+
+**Amendment 2 is independent of Amendment 1.** Per §26's amendment chain requirement, this interaction is named explicitly so a future reader auditing the amendment sequence can see that neither amendment modifies or supersedes the other:
+
+- **Amendment 1** struck §8 (the N1-B supplementary narrowing quality track) in its entirety after the `bad_hint` intent was found to be unpopulated in the Source B corpus. Amendment 1 does not affect the N1-A primary track's case selection or reporting.
+- **Amendment 2** modifies the §7 primary-category reporting list (strikes `hallucination`), changes the Source B selection algorithm for the N1-A primary track (from category-level stratified sampling to shape-family-aware allocation with stratified remainder), and pre-specifies a small-sample disclaimer for the content-family reporting row. Amendment 2 does not affect the N1-B track (which no longer exists under Amendment 1) or any other pre-registration specification unrelated to §7.
+
+Both amendments remain binding per §26. Neither amendment can be reverted without a further amendment that explicitly references the prior amendment chain and explains how the reversal interacts with both.
+
+### What changed
+
+**§7 (N1-A primary track) is modified in four specific ways under Amendment 2.** §7 is not struck in full; it is clarified and restructured. The following sub-changes apply:
+
+**Change 1: `hallucination` is struck from the §7 primary-category reporting list.**
+
+The current §7 language reads:
+
+> **Per-category:** convergence rate delta (governed − raw), per gate category (f9, content, propagation, access, state, hallucination, config, grounding, security, a11y)
+
+Under Amendment 2, the amended reading is:
+
+> **Per-category:** convergence rate delta (governed − raw), per gate category (f9, content, propagation, access, state, config, grounding, security, a11y)
+
+The list is reduced from 10 categories to 9. `hallucination` is removed entirely.
+
+**Change 2: Source B selection algorithm is restructured to guarantee per-family coverage.**
+
+The original §7 language committed to "distributed across ≥6 gate categories for coverage" without specifying the distribution algorithm. The implementation in `select-cases.ts` v1 used proportional stratified sampling across all 90 file-level categories, which produced a distribution where 4 of 6 primary shape families (content, propagation, state, hallucination) had 0 representation. This violated §7's per-category reporting commitment because 4 of the 10 RESULTS.md rows would be empty.
+
+Under Amendment 2, the Source B selection algorithm is replaced with **shape-family-aware allocation followed by stratified remainder**:
+
+1. **Load all qualifying scenarios** (`false_negative` intent, non-zero edits, conformity filter matching `loadStagedScenarios()`).
+2. **Partition into primary-family pools** by filename prefix matching:
+   - `f9` family: scenarios from `f9-staged.json`
+   - `content` family: scenarios from `content-staged.json` and `content-advanced-staged.json` (not `contention-*-staged.json`)
+   - `propagation` family: scenarios from files matching `propagation-*-staged.json`
+   - `access` family: scenarios from files matching `access-*-staged.json`
+   - `state` family: scenarios from files matching `state-*-staged.json`
+3. **For each primary family, sort the family's scenarios by `case_id` (deterministic)**, then shuffle with the pinned mulberry32 seed (20260409), then take the first N scenarios where N is:
+   - `f9`: 5
+   - `content`: **4** (all qualifying scenarios — the universe is exactly 4)
+   - `propagation`: 5
+   - `access`: 5
+   - `state`: 5
+   - Total primary allocation: **5 + 4 + 5 + 5 + 5 = 24 cases**
+4. **Remove the allocated primary-family cases from the remaining pool.** The remaining pool contains 1279 − 24 = **1255 scenarios** from non-primary categories.
+5. **Run the existing stratified sampling algorithm** (proportional with ≤12-per-category cap and ≥3-per-category floor) on the remaining pool for **16** leftover slots.
+6. **Merge primary + stratified** into the final 40-case draw.
+7. **Sort the final draw by `case_id`** for deterministic ordering in `candidates-source-b.jsonl`.
+
+This algorithm is deterministic given the pinned seed. The within-family shuffle happens after sorting by `case_id` to remove any dependency on file iteration order.
+
+**Edge case: primary-family universe exhaustion under pre-flight drops.** The content family has exactly 4 qualifying scenarios in the corpus, and Amendment 2 allocates all 4 to N1-A. If pre-flight (§12) drops any content-family case, the §13 "same category distribution" replacement rule cannot be satisfied from within the content family because the universe is exhausted by the initial allocation. In this specific scenario, Phase 1 halts at the pre-flight `k` checkpoint and the specific dropped content case is surfaced to the operator for an explicit ruling on whether to (a) accept content-family under-representation at 3 or fewer cases with an updated small-sample disclaimer, (b) substitute from a different source, or (c) trigger an Amendment 3 to revise the Source B selection rules. **No silent substitution is permitted.** This edge case applies only to primary families whose total qualifying universe is exhausted by the initial Amendment 2 allocation; as of the Phase 1b feasibility inventory (2026-04-09), content is the only such family. If future Source B corpus updates reduce another primary family's universe below its Amendment 2 allocation (currently f9, propagation, access, state all have ≥15 qualifying scenarios, well above the allocation), this edge case extends to that family as well.
+
+**Change 3: Content family is pre-specified with a small-sample disclaimer.**
+
+The content family has exactly 4 qualifying scenarios in the corpus (`content-staged.json`: 4, `content-advanced-staged.json`: 0). Allocating all 4 to N1-A yields 4 cases × 3 runs × 2 loops = **24 data points per loop**, which is below the statistical interpretability floor of 30 data points per loop named during the Amendment 2 ruling.
+
+**Amendment 2 pre-commits the following disclaimer language to be used verbatim in RESULTS.md's content-family reporting row:**
+
+> **Content family N1-A sample:** 4 cases × 3 runs × 2 loops = 24 data points per loop. Below the 30-point floor named as the statistical interpretability threshold in Amendment 2. Per-category delta reported for completeness; any claim about content-family convergence behavior is **provisional** and requires a follow-up N1.1 with a larger content sample before publication.
+
+This disclaimer binds the reporting in both directions. If the content delta comes in favoring the governed loop, the disclaimer prevents writing "governed wins decisively on content" without first citing the sample-size caveat. If the delta comes in showing equivalence, the disclaimer prevents writing "content shows equivalence" without the caveat either. The disclaimer is pre-specified, not deferred to RESULTS.md drafting, to remove the post-hoc softening temptation.
+
+**Change 4: §7 reporting table schema is updated to distinguish sources.**
+
+The original §7 per-category reporting table conflated all 10 categories into a single list without indicating which categories came from Source B (pre-labeled ground truth) and which came from Source D (hand-constructed synthetic seeds). Amendment 2 updates the reporting table schema to make the source explicit. The amended §7 reporting table has these columns:
+
+| Category | Source | Count | Convergence rate (raw) | Convergence rate (governed) | Delta | Notes |
+|---|---|---|---|---|---|---|
+
+Where **Source** is one of:
+- `B-primary` — category is a primary shape family under the Amendment 2 selection algorithm (f9, content, propagation, access, state)
+- `B-stratified` — category is drawn from the stratified remainder pool after primary-family allocation (any non-primary category that received ≥1 case)
+- `D-synthetic` — category is filled by hand-constructed Source D synthetic seeds (config, grounding, security, a11y per Report 3)
+
+A reader of RESULTS.md can immediately see which categories came from pre-labeled ground truth versus which came from hand-construction, and any interpretation of the delta for a given category should weight the source appropriately.
+
+### Why
+
+The operator ruling on the Phase 1b candidate distribution found that the stratified sampling algorithm in `select-cases.ts` v1 produced a distribution where 4 of 6 §7-named primary shape families had zero representation. Specifically:
+
+- **f9**: 2 cases (represented, but under-allocated)
+- **content**: 0 cases
+- **propagation**: 0 cases (0 across all 8 propagation-* files)
+- **access**: 1 case (only `access-browser`)
+- **state**: 0 cases (0 across all 6 state-* files)
+- **hallucination**: 0 cases
+
+The root cause is that the stratified sampling treats each staged file as its own category, so shape families that span multiple sub-categorized files (propagation has 8 sub-files, access has 8, state has 6) get 0-1 cases at the proportional allocation stage because no individual sub-file is large enough to receive a proportional slot. The round-robin fill then prioritizes the file-level largest categories (`mdn-compat` at 119, `secrets` at 93, `a11y` at 60), none of which are primary shape families.
+
+The result is that §7's per-category reporting commitment — "convergence rate delta per gate category (f9, content, propagation, access, state, hallucination, config, grounding, security, a11y)" — cannot be satisfied from the current draw. Four of the 10 RESULTS.md rows would be empty, and no number in those rows would be reportable.
+
+This is the second pre-registration audit gap discovered during Phase 1 execution, following Amendment 1's `bad_hint` gap. Both gaps are structurally identical: a pre-registered commitment in DESIGN.md turns out to be unsatisfiable from the data under the current implementation. Both are caught before any experimental runs.
+
+**The specific audit gap named explicitly:** The original Phase 0b ground-truth audit counted `false_negative` vs `false_positive` distributions in 6 sampled files and inferred that all §7 primary categories had adequate representation. It did not verify at the shape-family level, and it did not verify that primary families spanning multiple sub-categorized files would be picked up by the stratified sampling algorithm. The gap is that the audit tested category availability at the file level but the §7 commitment was at the shape-family level. These are different questions, and conflating them produced the current situation.
+
+**A separate finding** surfaced during feasibility verification: the `hallucination-staged.json` file contains 30 `false_negative` scenarios, but **all 30 have zero edits**. They are pure predicate-check scenarios (verify that certain claims are grounded in reality) that do not have an agent-edit action for the N1 convergence loop to iterate on. Under the "non-zero edits" requirement, all 30 are filtered out, making the hallucination family structurally absent from the N1-eligible pool. This is not a fixable gap — N1 measures convergence behavior on edit-producing scenarios, and hallucination-class failures in the corpus are not edit-producing. Hallucination is a real shape family that N1 cannot measure under its current design.
+
+### What was considered and rejected
+
+Five alternative responses were considered and rejected before Amendment 2 was adopted.
+
+**Option R1 — Weaken §7 to "illustrative not required" for the primary-category list.**
+
+Rejected because:
+1. The §7 list was specifically chosen to guarantee that primary shape families would be reported. Weakening the list to "illustrative" retroactively waters down the coverage commitment in the same way weakening Amendment 1 would have. The refusal clause from §26 binds against this exact rationalization.
+2. RESULTS.md readers would lose the ability to verify that the experiment tested the shape families verify claims to catch. A weakened list turns the per-category table into "whatever we happened to draw" rather than "the shape families we committed to measuring."
+3. The test from §26's clarification is: "if the choice could be swapped for a different choice without changing any number in DESIGN.md, it's implementation detail." Weakening §7 changes the meaning of a DESIGN.md commitment; it is not implementation detail.
+
+**Option R2 — Hand-construct hallucination cases in Source D.**
+
+Rejected because:
+1. The hallucination family in the corpus is predicate-only (zero-edit). Hand-crafted hallucination-shaped cases would have to be invented as edit-producing scenarios, which would not exercise the same failure mode as the predicate-only corpus they'd be filed under. They would be hand-crafted *action* scenarios dressed up as hallucination cases, which is methodologically misleading.
+2. This parallels Amendment 1's rejection of hand-crafted `bad_hint` cases — synthetic substitutes for missing data sources concentrate on demo-app and lose the pre-labeled ground truth that justified Source B as primary.
+3. Hallucination is structurally different from other primary families. Other families (f9, content, propagation, access, state) have edit-producing scenarios in the corpus. Hallucination does not. Substituting hand-crafted edit scenarios for predicate-only corpus scenarios would misrepresent what N1 measures.
+
+**Option R3 — Strike content alongside hallucination.**
+
+Rejected because:
+1. The content family has 4 qualifying scenarios in the corpus. Striking it because the sample is small loses signal that exists, unlike hallucination where the sample is structurally zero. Amendment 1's N1-B strike was justified by 0 cases; content's 4 cases do not meet the same bar.
+2. Weak-but-present evidence with a disclosed sample-size caveat is more honest than no evidence with the category silently removed. The small-sample disclaimer (Change 3) is the right way to express "we have weak evidence here" without throwing the evidence away.
+3. The cost of the disclaimer is disclosed; the cost of silent removal would be a reader looking at the §7 list and wondering why content isn't reported. The disclaimer path is more auditable.
+
+**Option R4 — Hand-construct 1 additional content case in Source D to bring content-family coverage to 5.**
+
+Rejected because:
+1. Mixing Source B and Source D within the same category introduces a confound that makes the per-category delta harder to interpret. A reader seeing "content: 5 cases, delta 12%" cannot distinguish whether the delta came from the 4 real scenarios or the 1 synthetic one.
+2. Keeping Source B and Source D disjoint by category preserves the interpretability of the per-category numbers. The Amendment 2 reporting table schema (Change 4) makes the source visible per row; mixing sources within a row defeats that visibility.
+3. Source D has a fixed 12-case budget earmarked for coverage gaps (config, grounding, security, a11y). Adding a 13th case for content expands Source D beyond its Report 3 specification, which would itself require justification.
+
+**Option R5 — Proportional within-family distribution for sub-file allocation.**
+
+Rejected because:
+1. Distributing cases within a family proportional to sub-file size oversamples the sub-categories that happen to have the most scenarios, which correlates with how actively that sub-category has been developed. This introduces a hidden selection bias: the best-developed sub-categories get the most weight, and the less-developed ones get the least.
+2. The experiment wants a mix of well-understood and less-understood cases, not a concentration in the former. Proportional distribution within a family defeats that goal.
+
+**Option R6 — Round-robin within-family distribution for sub-file allocation.**
+
+Rejected because:
+1. Round-robin fails for families where sub-files have wildly different sizes. The state family has `state-browser`=5, `state-config`=1, `state-db`=0, `state-fs`=3, `state-http`=3, `state-multistep`=3. Round-robin across non-empty sub-files gives each sub-file 1 case, which means state-browser (5 scenarios) and state-config (1 scenario) get equal weight. That's not a signal about convergence; it's a signal about sub-file partitioning.
+2. The selected approach (seeded shuffle over the sorted full family pool) is agnostic to sub-file partitioning. The seed governs the selection deterministically, and the sub-file distribution within the family is a seed-determined output that can be inspected in the candidates file.
+
+### What this invalidates
+
+- **§7's per-category reporting list.** Reduced from 10 categories to 9 (hallucination removed).
+- **§7's Source B selection algorithm language** ("distributed across ≥6 gate categories for coverage"). Replaced with the shape-family-aware algorithm specified in Change 2.
+- **§7's per-category reporting table schema.** Updated to include the `Source` column (B-primary, B-stratified, D-synthetic).
+- **The current `candidates-source-b.jsonl` file** (produced by `select-cases.ts` v1 on 2026-04-09). This file does not satisfy the Amendment 2 selection algorithm and must be regenerated by `select-cases.ts` v2.
+- **The current `select-cases.ts` implementation.** The v1 algorithm is file-level stratified sampling; the v2 algorithm is shape-family-aware allocation with stratified remainder. The v1 file must be updated before the next selection run.
+- **Any claim about hallucination-family convergence behavior in RESULTS.md.** RESULTS.md must include a scope limit stating "N1 did not test hallucination-family scenarios. The `hallucination-staged.json` corpus file contains 30 `false_negative` scenarios, all of which are predicate-only (zero-edit) and therefore filtered out by the N1 oracle. Hallucination-class failures require a separate experiment design that does not rely on agent-edit iteration."
+- **The content-family row in RESULTS.md.** Must include the pre-specified small-sample disclaimer from Change 3 verbatim.
+
+### What this does NOT invalidate
+
+- **§1-§6 (question, hypotheses, success criteria, denominator rule, shared prompt shell, context renderers, retry budget, stop reasons).** All unchanged. The success criteria thresholds are unchanged; they still apply to N1-A as a whole, not to individual categories.
+- **§8 (N1-B supplementary narrowing quality track).** Already struck by Amendment 1; Amendment 2 does not re-introduce N1-B.
+- **§9-§16 (source classification beyond the §7 primary list, cal.com exclusion, threats to validity, pre-flight methodology, contingency rule, pre-flight artifact, random seed, calibration oracle).** All unchanged. The cal.com exclusion, pre-flight contingency rule, pre-flight artifact schema, and random seed (20260409) are unchanged.
+- **§11 threats to validity.** The existing entries are unchanged. Amendment 2 adds a new threat-to-validity note (the hallucination exclusion) that will be incorporated into RESULTS.md's limitations section verbatim.
+- **§13 pre-flight contingency rule.** Unchanged. The rule applies only to pre-flight drops, and the new selection algorithm does not affect how drops are handled.
+- **§14 pre-flight artifact specification.** Unchanged. The case-list.jsonl schema is the same; only the cases flowing through it differ.
+- **§15 random seed (20260409).** Unchanged.
+- **§17 inter-rater narrowing quality protocol.** Unchanged beyond the sample-size scoping already done by Amendment 1.
+- **§18-§21 (pilot phase, model choice, API key source, stateDir hygiene).** All unchanged.
+- **§22 cost budget and alert threshold.** Unchanged. The total run count is already bounded by the 52-case budget which is unchanged.
+- **§23-§25 (outcome-to-next-action mapping, "what would change our mind," cross-reference).** All unchanged.
+- **§26 (Pre-registration freeze protocol).** Unchanged, and now governs Amendment 2 as well as Amendment 1.
+- **The case budget for N1-A (40 Source B + 12 Source D = 52 cases).** Unchanged. Only the internal distribution of the 40 Source B cases changes under Amendment 2.
+
+### Impact on the primary experiment
+
+N1-A at 52 cases and 312 runs is unchanged in total count. What changes is:
+
+1. **Which 40 cases are selected from Source B.** The new algorithm allocates 24 cases to primary shape families (f9, content, propagation, access, state) and 16 cases to the stratified remainder across non-primary categories. The category coverage of N1-A now matches §7's reporting commitment.
+
+2. **The hallucination row in the §7 reporting table is struck.** RESULTS.md reports 9 per-category rows instead of 10.
+
+3. **The content row in the §7 reporting table carries a pre-specified small-sample disclaimer.** The disclaimer is not optional and cannot be removed post-hoc.
+
+4. **The §7 reporting table schema includes a source column.** Each row is labeled B-primary, B-stratified, or D-synthetic so a reader can weight the source appropriately.
+
+The primary success criteria (Strong Path B / Weak Path B / Path A / Regression / Ambiguous) are unchanged. They apply to the N1-A aggregate, not to individual categories. A per-category delta is a secondary finding; the primary finding is the aggregate convergence rate delta across all 52 cases.
+
+### Amendment freeze clause
+
+**Amendment 2 is now part of the pre-registration.** It is subject to §26 equally with the original DESIGN.md sections and with Amendment 1. Specifically:
+
+1. **Amendment 2 cannot be reverted without another amendment.** If a future session decides to change the Source B selection algorithm, restore hallucination to the §7 reporting list, or remove the content small-sample disclaimer, that change requires a **Pre-registration Amendment 3** that explicitly references both Amendment 1 and Amendment 2 and explains how the three interact.
+
+2. **Future amendments must acknowledge Amendment 2.** Any Amendment N for N ≥ 3 must include a section titled "Interaction with prior amendments" that lists Amendment 1, Amendment 2, and any other preceding amendments, and states whether and how Amendment N modifies or supersedes their effects.
+
+3. **The §26 bilateral refusal clause applies to Amendment 2.** Neither the operator nor the builder may silently reverse or modify Amendment 2 under a "small change" rationalization. If pressure arises to relax the per-family coverage guarantee, restore hallucination, or soften the content disclaimer, §26 requires that pressure to be refused and routed through the amendment protocol.
+
+4. **Amendment 2's rationale is itself audit-gated.** The audit gap named in the "Why" section ("the audit tested category availability at the file level but the §7 commitment was at the shape-family level") is committed to the public record and cannot be retroactively rewritten to minimize the error. Future readers should see the gap as it was named on 2026-04-09, not as it might be re-framed later.
+
+5. **The pre-specified content disclaimer language is binding.** The disclaimer text in Change 3 is committed verbatim to Amendment 2 and must appear in RESULTS.md's content-family reporting row without alteration. Any softening, conditionalization, or reformulation of the disclaimer requires an Amendment 3. This is the strongest form of pre-commitment and is the direct consequence of the operator's ruling that the disclaimer binds the reporting in both directions.
+
+A pre-registration protocol that allows unlimited silent amendments is no protocol at all. Amendment 2 is binding.
+
+---
+
+### Phase 1b resumption note (Amendment 2)
+
+Phase 1b was halted at the candidate distribution reporting checkpoint when the per-category coverage gap was discovered. Under Amendment 2, Phase 1b resumes with:
+
+1. **Update `select-cases.ts`** to implement the shape-family-aware allocation algorithm (Change 2). The v1 implementation is replaced by a v2 implementation that partitions the qualifying scenario pool into primary-family pools, allocates per-family, and runs stratified sampling on the remainder.
+2. **Re-run `select-cases.ts` v2** with the unchanged seed (20260409) and the unchanged corpus SHA (the Amendment 2 commit SHA, once landed). The output is a new `candidates-source-b.jsonl` that replaces the v1 file.
+3. **Report the new distribution** to the operator for approval before proceeding to pre-flight. The new distribution should show: 5 cases from f9, 4 cases from content, 5 cases from propagation, 5 cases from access, 5 cases from state, and 16 cases distributed via stratified remainder across non-primary categories.
+4. **Proceed to Phase 1c (pre-flight check)** only after operator approval of the new distribution.
+
+The pre-flight checkpoint at Phase 1e — report drop count `k` to operator before committing `case-list.jsonl` — is unchanged by Amendment 2. Amendment 1 and Amendment 2 both preserve the operator-builder pause at the pre-flight checkpoint regardless of other changes.

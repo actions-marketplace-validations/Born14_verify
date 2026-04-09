@@ -6,6 +6,8 @@ A catalog of scanner resilience bugs discovered during real-world Level 2/3 scan
 
 **Naming:** Incidents use the prefix `SI-` (Scanner Incident) and are numbered sequentially. Each entry is a 60-second read with diagnosis, fix, and detection method in one place.
 
+**Note:** SI-006 includes a correction to the 2026-04-08 cal.com validation interpretation. See SI-006 § "Correction to the 2026-04-08 cal.com validation interpretation".
+
 ---
 
 ## SI-001 — extractCSS pathological on backtick-free large files

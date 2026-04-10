@@ -804,3 +804,334 @@ describe('N1 harness — metrics', () => {
     expect(round).toEqual(m);
   });
 });
+
+describe('N1 harness — run-case parsing & prompt shell', () => {
+  it('parseAgentOutput: accepts plain JSON object', async () => {
+    const { parseAgentOutput } = await import('./run-case.js');
+    const plan = parseAgentOutput('{"edits":[{"file":"a","search":"b","replace":"c"}],"predicates":[]}');
+    expect(plan).not.toBeNull();
+    expect(plan!.edits.length).toBe(1);
+    expect(plan!.predicates.length).toBe(0);
+  });
+
+  it('parseAgentOutput: strips ```json fences', async () => {
+    const { parseAgentOutput } = await import('./run-case.js');
+    const text = '```json\n{"edits":[],"predicates":[]}\n```';
+    const plan = parseAgentOutput(text);
+    expect(plan).not.toBeNull();
+    expect(plan!.edits).toEqual([]);
+  });
+
+  it('parseAgentOutput: strips ``` (no language tag) fences', async () => {
+    const { parseAgentOutput } = await import('./run-case.js');
+    const text = '```\n{"edits":[],"predicates":[]}\n```';
+    const plan = parseAgentOutput(text);
+    expect(plan).not.toBeNull();
+  });
+
+  it('parseAgentOutput: tolerates leading prose', async () => {
+    const { parseAgentOutput } = await import('./run-case.js');
+    const text = 'Here is my plan:\n{"edits":[],"predicates":[]}\nHope this helps.';
+    const plan = parseAgentOutput(text);
+    expect(plan).not.toBeNull();
+    expect(plan!.edits).toEqual([]);
+  });
+
+  it('parseAgentOutput: returns null on non-JSON', async () => {
+    const { parseAgentOutput } = await import('./run-case.js');
+    expect(parseAgentOutput('not json at all')).toBeNull();
+    expect(parseAgentOutput('')).toBeNull();
+    expect(parseAgentOutput('{{malformed')).toBeNull();
+  });
+
+  it('parseAgentOutput: missing edits/predicates default to empty arrays', async () => {
+    const { parseAgentOutput } = await import('./run-case.js');
+    const plan = parseAgentOutput('{"something":"else"}');
+    expect(plan).not.toBeNull();
+    expect(plan!.edits).toEqual([]);
+    expect(plan!.predicates).toEqual([]);
+  });
+
+  it('parseAgentOutput: handles nested braces in edit content', async () => {
+    const { parseAgentOutput } = await import('./run-case.js');
+    const text = '{"edits":[{"file":"a.json","search":"{\\"x\\":1}","replace":"{\\"x\\":2}"}],"predicates":[]}';
+    const plan = parseAgentOutput(text);
+    expect(plan).not.toBeNull();
+    expect(plan!.edits[0]!.search).toBe('{"x":1}');
+  });
+
+  it('combinePrompt: includes §2 shell verbatim and body', async () => {
+    const { combinePrompt, SYSTEM_PROMPT_SHELL } = await import('./run-case.js');
+    const out = combinePrompt('BODY HERE');
+    expect(out.startsWith(SYSTEM_PROMPT_SHELL)).toBe(true);
+    expect(out.endsWith('BODY HERE')).toBe(true);
+    expect(out.indexOf('\n\nBODY HERE')).toBeGreaterThan(-1);
+  });
+
+  it('SYSTEM_PROMPT_SHELL: matches §2 verbatim first and last lines', async () => {
+    const { SYSTEM_PROMPT_SHELL } = await import('./run-case.js');
+    expect(SYSTEM_PROMPT_SHELL.startsWith('You are an AI coding agent.')).toBe(true);
+    expect(SYSTEM_PROMPT_SHELL.endsWith('The goal remains the same across retries.')).toBe(true);
+    expect(SYSTEM_PROMPT_SHELL).toContain('"search": "exact text to find"');
+    expect(SYSTEM_PROMPT_SHELL).toContain('Rules:');
+    expect(SYSTEM_PROMPT_SHELL).toContain('Output JSON only.');
+  });
+
+  it('MAX_ATTEMPTS: is 5 per §5', async () => {
+    const { MAX_ATTEMPTS } = await import('./run-case.js');
+    expect(MAX_ATTEMPTS).toBe(5);
+  });
+});
+
+describe('N1 harness — runCase end-to-end (mocked LLM, real verify)', () => {
+  const demoAppFixture = join(import.meta.dir, '..', '..', '..', 'fixtures', 'demo-app');
+
+  // A mock that returns a plan known to pass verify() against demo-app.
+  // Edit: change "Demo App" → "Demo App Renamed" in config.json.
+  const convergingPlan = JSON.stringify({
+    edits: [
+      {
+        file: 'config.json',
+        search: '"name": "Demo App"',
+        replace: '"name": "Demo App Renamed"',
+      },
+    ],
+    predicates: [
+      {
+        type: 'content',
+        file: 'config.json',
+        pattern: 'Demo App Renamed',
+      },
+    ],
+  });
+
+  const convergingMock: CallLLMImpl = async () => convergingPlan;
+
+  const brokenPlan = JSON.stringify({
+    edits: [
+      {
+        file: 'config.json',
+        search: 'NONEXISTENT_STRING_THAT_WONT_MATCH',
+        replace: 'whatever',
+      },
+    ],
+    predicates: [],
+  });
+  const brokenMock: CallLLMImpl = async () => brokenPlan;
+
+  const malformedMock: CallLLMImpl = async () => 'this is not JSON at all';
+
+  const emptyPlan = JSON.stringify({ edits: [], predicates: [] });
+  const emptyMock: CallLLMImpl = async () => emptyPlan;
+
+  const hermeticGates = {
+    staging: false,
+    browser: false,
+    http: false,
+    invariants: false,
+    vision: false,
+  };
+
+  it('raw loop: converges on attempt 1 when the plan is already good', async () => {
+    const { runCase } = await import('./run-case.js');
+    const tracker = createCostTracker(30, 20);
+    const metrics = await runCase({
+      caseRecord: {
+        case_id: 'test:raw-converge',
+        source: 'D',
+        category: 'config',
+        goal: 'rename config.json app.name to Demo App Renamed',
+        reference_edits: [],
+        reference_predicates: [],
+        expected_success: true,
+      },
+      loop: 'raw',
+      run_idx: 0,
+      fixtureAppDir: demoAppFixture,
+      tracker,
+      callLLMImpl: convergingMock,
+      apiKey: 'test-key',
+      provider: 'gemini',
+      gates: hermeticGates,
+    });
+
+    expect(metrics.loop).toBe('raw');
+    expect(metrics.converged).toBe(true);
+    expect(metrics.stop_reason).toBe('converged');
+    expect(metrics.retry_count).toBe(1);
+    expect(metrics.final_gates_failed).toEqual([]);
+    expect(metrics.attempts.length).toBe(1);
+    expect(metrics.attempts[0]!.verifyResult.success).toBe(true);
+    expect(metrics.total_cost_usd).toBeGreaterThan(0);
+  }, 30_000);
+
+  it('raw loop: exhausts after 5 attempts with broken plan', async () => {
+    const { runCase } = await import('./run-case.js');
+    const tracker = createCostTracker(30, 20);
+    const metrics = await runCase({
+      caseRecord: {
+        case_id: 'test:raw-exhaust',
+        source: 'D',
+        category: 'config',
+        goal: 'will never converge',
+        reference_edits: [],
+        reference_predicates: [],
+        expected_success: false,
+      },
+      loop: 'raw',
+      run_idx: 0,
+      fixtureAppDir: demoAppFixture,
+      tracker,
+      callLLMImpl: brokenMock,
+      apiKey: 'test-key',
+      provider: 'gemini',
+      gates: hermeticGates,
+    });
+
+    expect(metrics.converged).toBe(false);
+    expect(metrics.stop_reason).toBe('exhausted');
+    expect(metrics.retry_count).toBe(5);
+    expect(metrics.attempts.length).toBe(5);
+  }, 60_000);
+
+  it('raw loop: empty_plan_stall after 3 consecutive empty plans', async () => {
+    const { runCase } = await import('./run-case.js');
+    const tracker = createCostTracker(30, 20);
+    const metrics = await runCase({
+      caseRecord: {
+        case_id: 'test:raw-empty-stall',
+        source: 'D',
+        category: 'config',
+        goal: 'agent will produce empty plans',
+        reference_edits: [],
+        reference_predicates: [],
+        expected_success: false,
+      },
+      loop: 'raw',
+      run_idx: 0,
+      fixtureAppDir: demoAppFixture,
+      tracker,
+      callLLMImpl: emptyMock,
+      apiKey: 'test-key',
+      provider: 'gemini',
+      gates: hermeticGates,
+    });
+
+    expect(metrics.stop_reason).toBe('empty_plan_stall');
+    expect(metrics.retry_count).toBe(3);
+  }, 30_000);
+
+  it('raw loop: all-malformed responses → agent_error', async () => {
+    const { runCase } = await import('./run-case.js');
+    const tracker = createCostTracker(30, 20);
+    const metrics = await runCase({
+      caseRecord: {
+        case_id: 'test:raw-malformed',
+        source: 'D',
+        category: 'config',
+        goal: 'agent will produce malformed output',
+        reference_edits: [],
+        reference_predicates: [],
+        expected_success: false,
+      },
+      loop: 'raw',
+      run_idx: 0,
+      fixtureAppDir: demoAppFixture,
+      tracker,
+      callLLMImpl: malformedMock,
+      apiKey: 'test-key',
+      provider: 'gemini',
+      gates: hermeticGates,
+    });
+
+    expect(metrics.converged).toBe(false);
+    expect(metrics.stop_reason).toBe('agent_error');
+    expect(metrics.retry_count).toBe(5);
+  }, 30_000);
+
+  it('governed loop: runs through govern() with mocked LLM', async () => {
+    const { runCase } = await import('./run-case.js');
+    const tracker = createCostTracker(30, 20);
+    const metrics = await runCase({
+      caseRecord: {
+        case_id: 'test:gov-converge',
+        source: 'D',
+        category: 'config',
+        goal: 'rename config.json app.name to Demo App Renamed',
+        reference_edits: [],
+        reference_predicates: [],
+        expected_success: true,
+      },
+      loop: 'governed',
+      run_idx: 0,
+      fixtureAppDir: demoAppFixture,
+      tracker,
+      callLLMImpl: convergingMock,
+      apiKey: 'test-key',
+      provider: 'gemini',
+      gates: hermeticGates,
+    });
+
+    expect(metrics.loop).toBe('governed');
+    // First-attempt convergence → no narrowing samples.
+    expect(metrics.narrowing_samples.length).toBe(0);
+    expect(metrics.retry_count).toBeGreaterThanOrEqual(1);
+    expect(metrics.total_cost_usd).toBeGreaterThan(0);
+  }, 60_000);
+
+  it('governed loop: broken plan records narrowing samples on retries ≥ 2', async () => {
+    const { runCase } = await import('./run-case.js');
+    const tracker = createCostTracker(30, 20);
+    const metrics = await runCase({
+      caseRecord: {
+        case_id: 'test:gov-narrowing',
+        source: 'D',
+        category: 'config',
+        goal: 'broken plan will generate narrowing',
+        reference_edits: [],
+        reference_predicates: [],
+        expected_success: false,
+      },
+      loop: 'governed',
+      run_idx: 0,
+      fixtureAppDir: demoAppFixture,
+      tracker,
+      callLLMImpl: brokenMock,
+      apiKey: 'test-key',
+      provider: 'gemini',
+      gates: hermeticGates,
+    });
+
+    expect(metrics.converged).toBe(false);
+    expect(metrics.narrowing_samples.length).toBeGreaterThanOrEqual(0);
+    expect(metrics.attempts.length).toBeGreaterThanOrEqual(1);
+  }, 60_000);
+
+  it('runCase: hard cap during a run aborts cleanly', async () => {
+    const { runCase } = await import('./run-case.js');
+    const tracker = createCostTracker(30, 20);
+    tracker.recordCall({ text: '', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 31 });
+
+    await expect(
+      runCase({
+        caseRecord: {
+          case_id: 'test:raw-cap',
+          source: 'D',
+          category: 'config',
+          goal: 'anything',
+          reference_edits: [],
+          reference_predicates: [],
+          expected_success: false,
+        },
+        loop: 'raw',
+        run_idx: 0,
+        fixtureAppDir: demoAppFixture,
+        tracker,
+        callLLMImpl: convergingMock,
+        apiKey: 'test-key',
+        provider: 'gemini',
+        gates: hermeticGates,
+      })
+    ).rejects.toThrow(/§22 hard cap/);
+  }, 30_000);
+});

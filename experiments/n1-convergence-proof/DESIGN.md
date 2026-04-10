@@ -79,11 +79,14 @@ Rules:
 2. Predicates assert claims about the codebase after your edits are applied.
 3. Produce the minimum number of edits required to achieve the goal.
 4. Do not add commentary, explanation, or markdown. Output JSON only.
+5. The APP FILES: manifest at the top of every prompt is the complete set of files in the app. You may only emit edits targeting files listed in that manifest. File paths not in the manifest do not exist and will cause the F9 gate to fail. Do not fabricate file paths.
 
 On retry: you will receive feedback about why your previous attempt failed. Use that feedback to revise your edits and predicates. The goal remains the same across retries.
 ```
 
 This prompt is committed verbatim. No substitutions. No per-case variations. Both loops render the same system prompt bytes on every request.
+
+**Codebase visibility (added by Amendment 6).** On every prompt (attempt 1 and retries), the agent is provided with a flat file manifest of the app directory it must edit. The manifest is a newline-separated list of file paths relative to the app root, sorted lexicographically, with **any path excluded if any of its path segments (after splitting on `/`) begins with `.`**. This catches state directories (`.verify/`, `.verify-k5-*/`), environment files (`.env`, `.env.prod`, `.env.staging`), and deliberately-hidden fixture files (`test-data/.hidden`) in a single uniform rule. The manifest is prepended to the body of every prompt under the literal header `APP FILES:` followed by a blank line, followed by the §3 or §4 retry template body. The manifest is **not filtered by relevance to the goal** — the agent receives the full post-exclusion file list and must select the correct target file(s) itself. This matches the deployment-time behavior of real coding agents (Cursor, Claude Code, Aider, Cline) which surface the full workspace tree rather than pre-selecting relevant files. The manifest does not include file contents; it includes only paths. The agent discovers contents by proposing an edit with a `search` field and observing the gate failure detail on retry (existing attempt-N mechanism).
 
 ---
 
@@ -127,7 +130,7 @@ Your previous attempt failed. Here are the raw gate failure messages:
 Revise your edits and try again.
 ```
 
-On attempt 1, the raw loop sends the system prompt + `GOAL: {goal_string}` with no "previous attempt" section.
+**Attempt-1 shape (updated by Amendment 6).** On attempt 1, the raw loop sends the system prompt + `APP FILES:` manifest + `GOAL: {goal_string}` with no "previous attempt" section. The `APP FILES:` manifest is the deterministic output of `buildAppManifest(appDir)` (defined in `experiments/n1-convergence-proof/harness/manifest.ts` per Amendment 6 Change 5), formatted by `formatAppManifest(files: string[])` as the literal header `APP FILES:` followed by a newline, then one path per line, then a blank line, then `GOAL: {goal_string}`. On attempt N ≥ 2, the `APP FILES:` manifest is prepended to the existing §3 retry template in the same position (before the `ATTEMPT {N} of {max_attempts}` line). The manifest is byte-identical between attempts within a single run — it is built once at run start from the staged app directory (§21) and reused for every attempt.
 
 The renderer is a pure function `renderRawRetryContext(goal: string, attempt: number, maxAttempts: number, priorResult: VerifyResult): string`. It will be implemented in `experiments/n1-convergence-proof/harness/raw-loop.ts` and its exact bytes will match this specification.
 
@@ -213,6 +216,8 @@ Revise your edits and try again.
 The renderer is a pure function `renderGovernedRetryContext(goal: string, context: GovernContext, maxAttempts: number): string`. It will be implemented in `experiments/n1-convergence-proof/harness/governed-loop.ts`.
 
 **Note:** in the actual N1 harness, the governed loop does NOT manually render this — `govern()` calls the agent's `plan()` function and passes the `GovernContext` directly. The harness-supplied agent adapter is what calls the renderer. The renderer runs inside the agent adapter, translating `GovernContext` to the prompt body that goes to the LLM. This is the architecturally honest shape of the experiment.
+
+**Attempt-1 shape (explicit under Amendment 6).** On attempt 1 (or when `context.priorResult` is undefined), the governed loop produces bytes identical to the raw loop's attempt-1 output: system prompt (from §2, including Rule 5) + `APP FILES:` manifest + `GOAL: {goal_string}`, with no NARROWING / CONSTRAINTS / FAILURE SHAPES / CONVERGENCE PROGRESS sections. Both loops prepend the `APP FILES:` manifest via the shared `formatAppManifest` helper, guaranteeing that the raw and governed attempt-1 prompts are byte-identical on both the §2 shell and the `APP FILES:` manifest. The only difference between loops remains what appears after the `GOAL:` line on attempts N ≥ 2 — the governed renderer adds the §4-specific NARROWING / CONSTRAINTS / FAILURE SHAPES / CONVERGENCE PROGRESS sections. On attempt N ≥ 2, the governed renderer prepends the same `APP FILES:` manifest before the §4 retry template in the same position the raw renderer prepends it.
 
 ### Invariant: the only difference between loops is the context renderer
 
@@ -1540,3 +1545,272 @@ After Amendment 5 lands, the following must hold:
 3. **The §26 bilateral refusal clause applies to Amendment 5.** Neither the operator nor the builder may silently change the `callLLM` export contract, silently introduce a harness-local copy, or silently modify `callLLM`'s function body. Pressure to do any of these must be refused and routed through the amendment protocol.
 
 A pre-registration protocol that allows unlimited silent amendments is no protocol at all. Amendment 5 is binding.
+
+---
+
+## Pre-registration amendment 6 (2026-04-10)
+
+**Title:** §2/§3/§4 fixture visibility — add `APP FILES:` manifest to every prompt; define path-segment exclusion rule.
+
+**Class:** Meta-drafting gap (same class as Amendment 4 and Amendment 5). **Third instance in the amendment chain.**
+
+**Authored by:** operator (draft), builder Claude (v2 draft synthesis per operator rulings 2026-04-10)
+**Approved by:** operator (explicit ruling delivered during Phase 2.5 pilot halt, 2026-04-10, titled "Decision: path-segment rule, exactly as you specified. Committing Amendment 6 v2.")
+**Authorization reference:** Operator's three-ruling message delivered in the N1 session immediately following the Amendment 6 v1 draft review + fixture manifest ground-truth read. The full operator response is the authorization of record.
+**Amendment commit:** see git log for the commit landing this amendment.
+
+### Preamble
+
+§2 specifies a static system prompt that refers to "a codebase" without defining how the agent sees it. §3 specifies the attempt-1 raw-loop prompt as "system prompt + `GOAL: {goal_string}` with no 'previous attempt' section." §4 specifies the attempt-1 governed-loop prompt as byte-identical to the raw loop's attempt-1 output (inherited implicitly through the §4 "Invariant: the only difference between loops is the context renderer" block). The three sections jointly and implicitly assume the agent has some means of seeing the codebase it must edit. None of the three sections specifies such a means.
+
+§2 simultaneously requires that each edit's `search` field "match the file content EXACTLY, character for character, including whitespace." This requirement is not satisfiable without fixture visibility — the agent cannot produce an exact-match search string against a file it has never seen.
+
+Phase 2.5 pilot execution on 2026-04-10 exposed this gap empirically. Both raw and governed loops ran **0/15 converged**. Failure detail showed the agent fabricating plausible-looking file paths (`f9.py`, `src/App.js`, `frontend/src/App.jsx`, `api/src/services/items/items.ts`, `src/index.ts`, `src/config.ts`) against a fixture containing `config.json` and `server.js`. The model had no mechanism to discover the fixture's actual structure because none of §2, §3, or §4 specifies one. The raw loop is therefore not a fair control under §3's requirement that it represent "what a reasonable agent developer would build." A loop that cannot see the code it edits is not what a reasonable agent developer would build.
+
+Builder Claude inspected the three harness files (`render-raw.ts`, `render-governed.ts`, `run-case.ts`) and re-read §2 and §3 verbatim, then reported **Verdict B**: the harness is faithful to the spec and the spec is incomplete. The harness conforms to §2 and §3 byte-exactly, verified by pre-existing deliverable 2 and deliverable 3 byte-exactness tests. The degenerate pilot result is a direct and foreseeable consequence of the specified prompt content.
+
+Per §26, this is a pre-registration change. The operator drafted v1, builder Claude reviewed v1 and executed a scope-authorized one-command fixture read for ground-truth manifest text, operator ruled on the three substantive review items, builder Claude synthesized v2, builder Claude halted on a Change 4 drafting defect (v1/v2 both quoted a sentence that existed in harness code comments rather than DESIGN.md §4), operator ruled Option X (make the implicit §4 attempt-1 specification explicit via a new sentence rather than a replacement), builder Claude committed v2 with the Change 4 fix. Amendment 6 v2 is the result.
+
+### Change 1 — §2 text addition
+
+In §2, after the existing closing sentence ("Both loops render the same system prompt bytes on every request."), append a new "Codebase visibility" paragraph specifying the `APP FILES:` manifest mechanism. The paragraph has been applied inline to §2 in this commit (see the diff). It defines the path-segment exclusion rule ("any path segment beginning with `.`"), the manifest header and format, the non-filtering property, and the comparison to real-agent deployment-time behavior.
+
+### Change 2 — §2 system prompt shell rule addition
+
+Append one new rule to the numbered rules list inside the §2 verbatim shell block:
+
+> Rule 5. The `APP FILES:` manifest at the top of every prompt is the complete set of files in the app. You may only emit edits targeting files listed in that manifest. File paths not in the manifest do not exist and will cause the F9 gate to fail. Do not fabricate file paths.
+
+This rule has been applied inline to the §2 shell text in this commit. The change modifies the bytes of the system prompt the LLM receives on every call, which is a substantive change to the pre-registered prompt. It is the minimum addition that makes Rule 1 ("each edit's `search` field must match the file content EXACTLY, character for character, including whitespace") jointly satisfiable with the rest of the spec.
+
+### Change 3 — §3 attempt-1 prompt specification replacement
+
+Replace the existing §3 attempt-1 sentence:
+
+> "On attempt 1, the raw loop sends the system prompt + `GOAL: {goal_string}` with no 'previous attempt' section."
+
+with the Amendment-6 attempt-1 specification that prepends the `APP FILES:` manifest. The replacement has been applied inline to §3 in this commit. The new sentence is marked with "**Attempt-1 shape (updated by Amendment 6).**" per the Amendment 6 audit-trail convention established in Change 4 below.
+
+### Change 4 — §4 attempt-1 prompt specification (addition, Option X)
+
+§4 as originally drafted does not contain an explicit attempt-1 sentence. The attempt-1 shape is inherited implicitly from the §4 "Invariant: the only difference between loops is the context renderer" block, which states both loops share the same system prompt (§2), the same LLM model, the same retry budget, the same `verify()` call, the same success/failure oracle, and the same edit/predicate output format. Under that invariant, §4's attempt-1 shape has always been "whatever §3's attempt-1 shape is."
+
+Amendment 6 makes the attempt-1 specification explicit in §4 by adding a new sentence immediately before the existing "Invariant" subsection. The added sentence, marked with the "**Attempt-1 shape (explicit under Amendment 6).**" heading, specifies the byte-identical attempt-1 output between raw and governed loops, the shared `formatAppManifest` helper, the byte-identity guarantee on both the §2 shell and the `APP FILES:` manifest, and the attempt-N ≥ 2 prepending behavior for the governed renderer.
+
+This addition has been applied inline to §4 in this commit.
+
+**Audit-trail convention established by Amendment 6 Change 4**: The "Attempt-1 shape (explicit under Amendment 6)" heading in §4 is a marker that this sentence was added post-freeze. Future readers of DESIGN.md should treat any "(explicit under Amendment N)", "(updated by Amendment N)", or "(added by Amendment N)" marker as a signal that the surrounding text is the result of an amendment and the amendment's preamble should be consulted for context. This convention is introduced going forward from Amendment 6; it is not retroactively applied to Amendments 4 or 5. Amendment 7+ drafters should use the same convention when adding or modifying sections post-freeze.
+
+### Change 5 — Harness implementation notes (non-binding guidance for builder Claude)
+
+The following notes do not change any pre-registered number and are provided to guide the harness fix that lands in a subsequent commit after this amendment:
+
+1. A new file `experiments/n1-convergence-proof/harness/manifest.ts` exports two functions:
+   - `buildAppManifest(appDir: string): string[]` — reads the staged app directory recursively, returns a sorted array of POSIX-style relative paths (forward slashes, even on Windows), **excluding any path where any path segment (after splitting on `/`) begins with `.`**. No file contents are read. The function is deterministic: identical input directory → identical output array. No `Date.now()`, no `Math.random()`, no environment reads.
+   - `formatAppManifest(files: string[]): string` — formats the array as `APP FILES:\n<path1>\n<path2>\n...\n\n`. The trailing blank line separates the manifest from the next section.
+
+2. `render-raw.ts` and `render-governed.ts` each take a new parameter `appManifest: string` (the pre-formatted string from `formatAppManifest`). They prepend it to every returned body, on attempt 1 and on attempt N ≥ 2, in the same position.
+
+3. `run-case.ts` calls `buildAppManifest` once per run (after `stageRun` and before the attempt loop) and passes the formatted result into both renderers. The manifest is built against the staged copy in the temp directory, not the source fixture. The current pilot flow does not pre-apply `reference_edits`, so the manifest describes the untouched demo-app structure as staged — which is correct for the experimental design.
+
+4. The shared-fairness invariant (raw and governed share `formatGateFailures`) is extended to the manifest: both renderers call the same `formatAppManifest` function. This must be enforced by a test in the spirit of the existing `raw/governed parity: gate-failures block is byte-identical` test. Add a new test `raw/governed parity: APP FILES manifest block is byte-identical between loops`.
+
+5. Two new byte-exactness tests are added to match the existing renderer test pattern:
+   - `render-raw attempt-1 with manifest matches §3 worked example byte-exactly`
+   - `render-governed attempt-1 with manifest matches §4 first-attempt shape byte-exactly`
+
+6. A new hermetic test is added to exercise `buildAppManifest` against `fixtures/demo-app/` and assert the exact 19-file list (see Change 6 below for the verbatim list). This is the test class that would have caught the Verdict B gap if it had existed during Phase 2. The RESULTS.md emergences section must flag this: **tests that validate mechanics cannot validate semantics**. The 77 hermetic tests all passed because they mocked the LLM and never exercised the real-model path against the real fixture.
+
+7. No changes to `metrics.ts`, `llm-adapter.ts`, `state-dir.ts`, or `run-pilot.ts` are required. The manifest flows through the existing renderer → `combinePrompt` → `callLLMWithTracking` path without any adapter or metrics schema changes.
+
+8. The §2 shell constant in `run-case.ts` (`SYSTEM_PROMPT_SHELL`) must be updated to include Rule 5, matching the inline §2 shell modification in Change 2 above. The existing `SYSTEM_PROMPT_SHELL: matches §2 verbatim first and last lines` test in `harness.test.ts` must be updated to assert the presence of Rule 5.
+
+### Change 6 — §3 and §4 worked examples (manifest ground truth)
+
+The existing §3 attempt-2 worked example is updated to include an `APP FILES:` section at the top showing the demo-app manifest, and a new §3 attempt-1 worked example is added to show the full first-attempt prompt body. The §4 attempt-1 worked example is byte-identical to the §3 attempt-1 worked example per the Change 4 byte-identity invariant.
+
+The exact manifest text is verified ground truth from `find fixtures/demo-app -type f | grep -vE 'node_modules|\.git|\.venv|dist|build|\.next' | sort` executed on 2026-04-10, then filtered through the path-segment exclusion rule from Change 1. The resulting 19-file manifest is:
+
+```
+Dockerfile
+config.json
+config.prod.json
+config.staging.json
+docker-compose.test.yml
+docker-compose.yml
+infra/manifest.json
+infra/terraform.tfstate
+init.sql
+no-infra-test/server.js
+server.js
+test-data/binary-sample.bin
+test-data/bom-sample.txt
+test-data/crlf-sample.txt
+test-data/empty.txt
+test-data/invalid.json
+test-data/nul-sample.txt
+test-data/sample.txt
+test-data/valid.json
+```
+
+**§3 attempt-1 worked example (new)** — showing the full first-attempt prompt body the raw loop sends on attempt 1:
+
+```
+[system prompt shell verbatim from §2, including Rule 5 per Change 2]
+
+APP FILES:
+Dockerfile
+config.json
+config.prod.json
+config.staging.json
+docker-compose.test.yml
+docker-compose.yml
+infra/manifest.json
+infra/terraform.tfstate
+init.sql
+no-infra-test/server.js
+server.js
+test-data/binary-sample.bin
+test-data/bom-sample.txt
+test-data/crlf-sample.txt
+test-data/empty.txt
+test-data/invalid.json
+test-data/nul-sample.txt
+test-data/sample.txt
+test-data/valid.json
+
+GOAL: F9 exact match: change port number in server.js
+```
+
+**§3 attempt-2 worked example (updated — was goal+retry, now manifest+goal+retry)**:
+
+```
+[system prompt shell verbatim from §2, including Rule 5 per Change 2]
+
+APP FILES:
+Dockerfile
+config.json
+config.prod.json
+config.staging.json
+docker-compose.test.yml
+docker-compose.yml
+infra/manifest.json
+infra/terraform.tfstate
+init.sql
+no-infra-test/server.js
+server.js
+test-data/binary-sample.bin
+test-data/bom-sample.txt
+test-data/crlf-sample.txt
+test-data/empty.txt
+test-data/invalid.json
+test-data/nul-sample.txt
+test-data/sample.txt
+test-data/valid.json
+
+GOAL: F9 exact match: change port number in server.js
+
+ATTEMPT 2 of 5.
+
+Your previous attempt failed. Here are the raw gate failure messages:
+
+- [F9]: server.js: search string not found; searched for "const PORT = process.env.PORT || 9999;" in server.js
+
+Revise your edits and try again.
+```
+
+**§4 attempt-1 worked example**: byte-identical to the §3 attempt-1 worked example above, per the byte-identical-first-attempt invariant enforced by Change 4.
+
+**Footnote on `infra/terraform.tfstate`**: The manifest above contains `infra/terraform.tfstate`, which is a file class that is sensitive-by-default in general (real Terraform state files often contain resource IDs, ARNs, and occasionally embedded credentials). In `fixtures/demo-app/` this file is synthetic test data, not live infrastructure state, and its presence in the manifest is acceptable for the N1 experimental design. The path-segment exclusion rule from Change 1 is deliberately scoped to dotfiles only, not to file-extension-based sensitivity classes. A broader fixture-hygiene policy (covering `.tfstate`, `.pem`, `.key`, `.p12`, `.env.production`, etc.) belongs in a future `FIXTURE-HYGIENE.md` document, not in Amendment 6. This footnote is a forward-pointer to that future discipline, committed here so a reader of the amendment can see the tradeoff was considered and deferred intentionally.
+
+### Interaction with prior amendments
+
+- **Amendment 1** (struck N1-B supplementary narrowing quality track): no interaction. Amendment 6 does not affect the supplementary track question because the supplementary track no longer exists.
+- **Amendment 2** (struck `hallucination` from §7 reporting, restructured Source B selection, content-family disclaimer, §7 reporting table schema): no interaction. Amendment 6 does not modify §7 or the Source B selection algorithm.
+- **Amendment 3** (§13 Reading 1 for primary-family drops, strict §13 for stratified remainder drops): no interaction. Amendment 6 does not modify §13 or the replacement-draw mechanism.
+- **Amendment 4** (§9 arithmetic reconciliation, three-class taxonomy naming): **same class of gap (meta-drafting).** Amendment 4 resolved a spec contradiction via redistribution (content-family count rebalanced to match Amendment 2's structural principle). Amendment 6 resolves a spec omission via addition (fixture visibility mechanism added to §2/§3/§4). Both are meta-drafting, different sub-shapes — contradiction vs. omission.
+- **Amendment 5** (§20 importability correction): **same class of gap (meta-drafting).** Amendment 5 resolved a spec contradiction (code-reuse requirement vs. modification prohibition) via minimum-diff code change. Amendment 6 resolves a spec omission (no fixture visibility mechanism specified) via minimum-diff spec addition. Both are meta-drafting, both detected by execution, both resolved by minimum-diff corrections that preserve original intent.
+
+**No interaction with the locked case-list.** Amendment 6 does not add, remove, or reorder cases. It does not change the random seed, the family allocation, the Source D synthetic seeds, or any §18 threshold. All 52 case records at `case-list.jsonl` remain binding as of commit `2d4458b`. The pilot cases re-selected after Amendment 6 are the same five `case_id` values: `f9:f9-edge-089`, `content:content-edit-034`, `propagation-browser:pb-apifrontend-012`, `access-browser:hb-cors-011`, `state-browser:sb-bolster-109`.
+
+**No interaction with §22 cost budget.** The manifest adds a small number of input tokens per prompt. For demo-app's 19-file post-exclusion manifest the expected token overhead is approximately 50–100 input tokens per LLM call. At Gemini 2.0 Flash pricing ($0.10/1M input), that is roughly $0.00001 per call × 109 calls = $0.0011 additional for a re-run pilot. Expected pilot cost remains well under §22's $2 estimate and $20 alert threshold.
+
+**No interaction with §18 thresholds.** The four pilot gate thresholds are unchanged: raw convergence band [20%, 80%], zero crashes, ≤5000 tokens/run, ≤30s/run. These are the same numbers the pilot will be re-evaluated against after the harness fix.
+
+**No interaction with §20 LLM adapter pin (as amended by Amendment 5).** Amendment 6 does not modify `callLLM` or the llm-adapter wrapper. The manifest flows through the existing `combinePrompt` → `callLLMWithTracking` path unchanged.
+
+**No interaction with §21 stateDir hygiene.** Amendment 6 reads the staged app directory for the manifest but does not write to it. The `stageRun` → cleanup lifecycle is unchanged.
+
+All six amendments remain binding per §26. None of the six modifies or supersedes any of the others. Future amendments (Amendment 7+) must include an "Interaction with prior amendments" section that lists Amendments 1, 2, 3, 4, 5, and 6 in order and states whether and how the new amendment modifies or supersedes their effects.
+
+### Why
+
+§2 and §3 were drafted with the implicit assumption that "the agent sees the codebase" in the same intuitive way a developer opens a text editor and browses files. The drafting carried that assumption forward into §3's attempt-1 specification without making it explicit, and §4 inherited the same omission through the byte-identity requirement. The implicit assumption survived the §26 freeze, the eight Phase 2 deliverables, the 77 hermetic tests, and the readiness review because none of those checkpoints exercised the real-model path against the real fixture. The 77 tests validated that the harness produces the bytes the spec requires. They did not validate that the bytes the spec requires describe a feasible experimental setup.
+
+**The three-class audit-gap taxonomy (introduced in Amendment 3's interaction section and elaborated in Amendment 4 and Amendment 5) now has three instances in the meta-drafting class:**
+
+1. **Amendment 4**: §9 arithmetic contradicted by Amendment 2's content ban. Detected by execution (Phase 1g seed construction). Resolved by redistribution.
+2. **Amendment 5**: §20 code-reuse requirement contradicted by §20 modification prohibition. Detected by execution (Phase 2 deliverable 5 import attempt). Resolved by minimum-diff code change.
+3. **Amendment 6**: §2/§3/§4 implicit fixture-visibility assumption never made explicit. Detected by execution (Phase 2.5 pilot against real model). Resolved by minimum-diff spec addition.
+
+Three out of six amendments in the meta-drafting class is no longer "a recurring failure mode." It is the **plurality class in this pre-registration**, and across three independent detection mechanisms (arithmetic audit in Phase 1g, code import failure in Phase 2, real-model execution in Phase 2.5). The generalization beyond this pre-registration — whether meta-drafting is the plurality class in pre-registered experiments more broadly — requires replication in a second experiment before any universal claim can be defended. **What N1 establishes is that meta-drafting gaps are detectable, classifiable, and recurring within a single experimental setup, which is itself a methodology finding worth preserving.**
+
+**Pre-commitment to replication**: any future pre-registered experiment conducted under the N1 methodology (N1.1, a follow-up experiment, or an independent N-series experiment by a different operator-builder pair) is explicitly designated as a taxonomy replication test. If a future experiment surfaces meta-drafting gaps at a different rate (substantially lower or substantially higher), the taxonomy claim is updated based on the pooled evidence. If a future experiment runs to completion with zero meta-drafting amendments, the N1 finding is downgraded from "plurality class across three independent detection mechanisms" to "plurality class in N1 specifically, not observed to generalize." This pre-commitment is binding: neither operator nor builder may silently revise the taxonomy claim upward or downward without citing the replication evidence explicitly.
+
+**Pre-registration literature focuses on operational discipline** ("write down what you will measure and when you will measure it") **and pays little attention to spec internal consistency** ("check that the spec you wrote is jointly satisfiable by a realizable experimental apparatus"). All three meta-drafting gaps in N1 were cases where the spec was operationally disciplined — success criteria, case selection, retry budget, cost budget were all defined — but the spec was not internally consistent with itself or with the physical reality of the experimental apparatus. This is a genuine methodology finding that should be named and preserved in RESULTS.md.
+
+**Fixture contamination observation (minor finding worth preserving):** Drafting Amendment 6 also surfaced that `fixtures/demo-app/` contains pre-existing state-like files from unrelated test fixtures — specifically `.verify/memory.jsonl` and `.verify-k5-07/08/09/11/memory.jsonl`, which are K5 gate unit test fixtures unrelated to N1. These files were not created by the N1 pilot (the N1 stateDir-hygiene protocol correctly stages to a temp directory per §21 and never writes to the source fixture), but they would have appeared in the `APP FILES:` manifest without the path-segment exclusion rule, leaking gate-internal state filenames into the agent prompt and creating a second source of confusion on top of the original hallucination problem. **The path-segment exclusion rule is therefore not only a fix for the N1 pilot's hallucination problem; it is also a fix for cross-project fixture noise that the manifest-less design would have concealed.** This is a minor finding compared to the three-class taxonomy, but it is worth preserving in RESULTS.md emergences as a specific example of the class: "shared fixture directories accumulate noise from unrelated test suites over time, and any experiment that exposes the fixture tree to its agent must filter that noise explicitly." A future `FIXTURE-HYGIENE.md` document is the natural home for the broader discipline.
+
+### Verification
+
+After Amendment 6 lands and the harness fix commits:
+
+1. `bun test experiments/n1-convergence-proof/harness/harness.test.ts` passes with all new manifest tests green. Total test count increases from 77 to approximately 82:
+   - `buildAppManifest: returns the exact 19-file list for fixtures/demo-app/`
+   - `buildAppManifest: excludes any path with a dotfile segment (path-segment rule)`
+   - `render-raw attempt-1 with manifest matches §3 worked example byte-exactly`
+   - `render-governed attempt-1 with manifest matches §4 first-attempt shape byte-exactly`
+   - `raw/governed parity: APP FILES manifest block is byte-identical between loops`
+2. The `SYSTEM_PROMPT_SHELL: matches §2 verbatim first and last lines` test is updated to assert the presence of Rule 5.
+3. `buildAppManifest(fixtures/demo-app/)` output is dumped once during the harness fix commit and the result pasted into a comment in `manifest.ts` as the ground-truth reference, so future test drift is immediately visible in code review.
+4. The pilot re-run against the same five cases produces non-zero raw convergence. If raw convergence is still 0/15 after the fix, that is a separate diagnosis event and requires re-halt under §26.
+5. The cost of the re-run pilot is logged and compared against the original pilot's $0.0075. The manifest addition should produce a modest token increase (~50–100 input tokens per call, ~$0.0011 total for 109 calls); anything above $0.05 for the 30-run pilot is flagged for inspection.
+
+### Scope of this amendment
+
+Amendment 6 modifies DESIGN.md §2, §3, and §4 only. It does not modify §1, §5–§18, §19–§22, or §23–§26. It does not touch `case-list.jsonl`. It does not change any pre-registered number. It changes what is in the prompt body on every attempt, defines the mechanism by which the change is computed, and specifies the tests that enforce the change. The §18 decision gate, §22 cost budget, §20 LLM adapter pin (as amended by Amendment 5), and §21 stateDir hygiene are all unchanged and remain binding.
+
+### Freeze protocol status
+
+**Amendment 6 is now part of the pre-registration.** It is subject to §26 equally with the original DESIGN.md sections and with Amendments 1, 2, 3, 4, and 5. Specifically:
+
+1. **Amendment 6 cannot be reverted without another amendment.** If a future session decides to remove the `APP FILES:` manifest, change the path-segment exclusion rule, or alter the Rule 5 shell text, that change requires a **Pre-registration Amendment 7** that explicitly references Amendments 1 through 6 and explains how the seven interact.
+2. **Future amendments must acknowledge Amendment 6.** Any Amendment N for N ≥ 7 must include an "Interaction with prior amendments" section that lists Amendments 1, 2, 3, 4, 5, and 6 in order and states whether and how Amendment N modifies or supersedes their effects.
+3. **The §26 bilateral refusal clause applies to Amendment 6.** Neither the operator nor the builder may silently change the manifest format, the exclusion rule, Rule 5 of the §2 shell, or the byte-identity invariant between raw and governed attempt-1 outputs. Pressure to do any of these must be refused and routed through the amendment protocol.
+4. **The pre-commitment to replication is binding.** The taxonomy claim (three meta-drafting instances across three detection mechanisms = plurality class in N1) is scoped to N1 until replicated. Future experiments are designated as taxonomy replication tests by this amendment, and the taxonomy claim must be updated based on pooled evidence from those replications.
+5. **The path-segment exclusion rule is binding and uniform.** It is not a list of dotfile names to exclude. It is a path-segment rule that applies uniformly to any path segment beginning with `.`. Adding named exceptions, allowlists, or file-extension carve-outs requires a new amendment.
+6. **The fixture contamination observation is a committed finding.** The pre-existing `.verify/` and `.verify-k5-*/` state files discovered during Amendment 6 drafting are part of the audit trail. Cleaning them out of `fixtures/demo-app/` in a future commit is acceptable but does not retroactively rewrite the finding in RESULTS.md. A reader of the amendment chain must be able to see that the fixture contamination was discovered during Phase 2.5 diagnosis.
+7. **The Amendment 6 Change 4 audit-trail convention is binding going forward.** Any text added to DESIGN.md by an amendment must be marked with "(added by Amendment N)", "(updated by Amendment N)", or "(explicit under Amendment N)" so future readers can identify amendment-sourced text without cross-referencing git history. This applies to Amendment 7+; it is not retroactively applied to Amendments 1-5.
+
+A pre-registration protocol that allows unlimited silent amendments is no protocol at all. Amendment 6 is binding.
+
+---
+
+### Phase 2.5 resumption note (Amendment 6)
+
+Phase 2.5 was halted at the §18 decision gate failure on 2026-04-10, with the raw convergence rate at 0.0% and the governed loop halting at `stuck` on every run. Under Amendment 6, Phase 2.5 resumes with:
+
+1. **Implement the harness fix** per Change 5 guidance:
+   - Create `experiments/n1-convergence-proof/harness/manifest.ts` with `buildAppManifest` and `formatAppManifest`.
+   - Update `render-raw.ts` and `render-governed.ts` to accept and prepend the manifest.
+   - Update `run-case.ts` to build the manifest once per run and pass it to both renderers.
+   - Update `SYSTEM_PROMPT_SHELL` in `run-case.ts` to include Rule 5 verbatim per Change 2.
+   - Update the existing `SYSTEM_PROMPT_SHELL` test and add the new tests enumerated in Change 5 items 4, 5, and 6.
+2. **Run the 77+5 ≈ 82-test suite on Windows** to verify no hermetic regression.
+3. **Push the harness fix commit** to `origin/main`.
+4. **Fast-forward verify-l2 on Lenovo** to the new HEAD.
+5. **Re-run the pilot** against the same five cases per the existing pilot driver. The case selection is unchanged (deterministic first-Source-B-per-primary-family from the locked `case-list.jsonl`).
+6. **Evaluate §18 decision gate** on the re-run results.
+7. **Report pass/fail per the post-pilot protocol.** If all four gates pass, halt and await Phase 3 authorization. If any gate fails, halt and escalate — a second pilot failure is a substantially different signal and warrants its own ruling.
+
+The pre-flight checkpoint at Phase 1e (report drop count `k`) is preserved by Amendment 6 (Phase 1 is complete and unchanged). The §18 decision gate thresholds are preserved by Amendment 6 (no changes to §18). The §22 cost budget is preserved by Amendment 6 (no changes to §22). The re-run pilot is a clean second attempt at the same pilot spec, against the same five cases, under a harness that now implements the updated §2/§3/§4.

@@ -34,8 +34,9 @@
  */
 
 import { describe, it, expect } from 'bun:test';
-import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync, rmSync } from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 import { renderRawRetryContext, formatGateFailures } from './render-raw.js';
 import {
   renderGovernedRetryContext,
@@ -50,6 +51,13 @@ import {
   callLLMWithTracking,
   type CallLLMImpl,
 } from './llm-adapter.js';
+import {
+  createRunMetrics,
+  finalizeRunMetrics,
+  appendRunMetrics,
+  buildAttemptRecord,
+  type RunMetrics,
+} from './metrics.js';
 import type { VerifyResult, Narrowing, GroundingContext } from '../../../src/types.js';
 import type { GovernContext } from '../../../src/govern.js';
 
@@ -637,5 +645,162 @@ describe('N1 harness — llm-adapter', () => {
     } finally {
       if (originalKey !== undefined) process.env.INPUT_API_KEY = originalKey;
     }
+  });
+});
+
+describe('N1 harness — metrics', () => {
+  it('createRunMetrics: initializes with zeroed aggregates and correct ids', () => {
+    const m = createRunMetrics('case:foo', 'governed', 2, 'scanner-abc', 'extractor-xyz');
+    expect(m.case_id).toBe('case:foo');
+    expect(m.loop).toBe('governed');
+    expect(m.run_idx).toBe(2);
+    expect(m.scanner_sha).toBe('scanner-abc');
+    expect(m.extractor_sha).toBe('extractor-xyz');
+    expect(m.attempts).toEqual([]);
+    expect(m.narrowing_samples).toEqual([]);
+    expect(m.total_cost_usd).toBe(0);
+    expect(m.converged).toBe(false);
+    expect(m.retry_count).toBe(0);
+    expect(m.started_at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('createRunMetrics: omits optional sha fields when undefined', () => {
+    const m = createRunMetrics('case:bar', 'raw', 0);
+    expect('scanner_sha' in m).toBe(false);
+    expect('extractor_sha' in m).toBe(false);
+  });
+
+  it('buildAttemptRecord: captures prompt length, token counts, and failed gates', () => {
+    const verifyResult = {
+      success: false,
+      gates: [
+        { gate: 'F9', passed: false, detail: 'F9 detail xx' },
+        { gate: 'access', passed: true, detail: '' },
+        { gate: 'state', passed: false, detail: 'state detail' },
+      ],
+    };
+    const record = buildAttemptRecord(
+      3,
+      'RETRY CONTEXT STRING',
+      verifyResult,
+      42,
+      17,
+      0.000123,
+      150
+    );
+    expect(record.attempt).toBe(3);
+    expect(record.promptChars).toBe('RETRY CONTEXT STRING'.length);
+    expect(record.retryContext).toBe('RETRY CONTEXT STRING');
+    expect(record.verifyResult.success).toBe(false);
+    expect(record.verifyResult.gatesFailed).toEqual(['F9', 'state']);
+    expect(record.verifyResult.failureDetails).toEqual(['F9 detail xx', 'state detail']);
+    expect(record.inputTokens).toBe(42);
+    expect(record.outputTokens).toBe(17);
+    expect(record.costUsd).toBe(0.000123);
+    expect(record.durationMs).toBe(150);
+  });
+
+  it('buildAttemptRecord: truncates failureDetails at 300 chars (§3 parity)', () => {
+    const longDetail = 'y'.repeat(400);
+    const verifyResult = {
+      success: false,
+      gates: [{ gate: 'F9', passed: false, detail: longDetail }],
+    };
+    const record = buildAttemptRecord(1, '', verifyResult, 0, 0, 0, 0);
+    expect(record.verifyResult.failureDetails[0]!.length).toBe(300);
+  });
+
+  it('finalizeRunMetrics: rolls up per-attempt tallies correctly', () => {
+    const m = createRunMetrics('case:rollup', 'governed', 1);
+    m.attempts.push(
+      buildAttemptRecord(1, 'a', { success: false, gates: [] }, 100, 50, 0.01, 200),
+      buildAttemptRecord(2, 'b', { success: false, gates: [] }, 150, 75, 0.02, 300),
+      buildAttemptRecord(3, 'c', { success: true, gates: [] }, 200, 100, 0.03, 400)
+    );
+    finalizeRunMetrics(m, 'converged', 900, [], true);
+
+    expect(m.stop_reason).toBe('converged');
+    expect(m.wall_time_ms).toBe(900);
+    expect(m.converged).toBe(true);
+    expect(m.retry_count).toBe(3);
+    expect(m.total_input_tokens).toBe(450);
+    expect(m.total_output_tokens).toBe(225);
+    expect(m.total_cost_usd).toBeCloseTo(0.06, 10);
+    expect(m.final_gates_failed).toEqual([]);
+  });
+
+  it('appendRunMetrics: writes one JSONL line per call, append semantics', () => {
+    const path = `${tmpdir()}/n1-metrics-test-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.jsonl`;
+    try {
+      const m1 = createRunMetrics('case:A', 'raw', 0);
+      finalizeRunMetrics(m1, 'exhausted', 100, ['F9'], false);
+      appendRunMetrics(path, m1);
+
+      const m2 = createRunMetrics('case:B', 'governed', 1);
+      finalizeRunMetrics(m2, 'converged', 200, [], true);
+      appendRunMetrics(path, m2);
+
+      const content = readFileSync(path, 'utf-8');
+      const lines = content.split('\n').filter((l) => l.length > 0);
+      expect(lines.length).toBe(2);
+
+      const parsed1 = JSON.parse(lines[0]!) as RunMetrics;
+      const parsed2 = JSON.parse(lines[1]!) as RunMetrics;
+      expect(parsed1.case_id).toBe('case:A');
+      expect(parsed1.loop).toBe('raw');
+      expect(parsed1.stop_reason).toBe('exhausted');
+      expect(parsed2.case_id).toBe('case:B');
+      expect(parsed2.loop).toBe('governed');
+      expect(parsed2.converged).toBe(true);
+    } finally {
+      try { rmSync(path, { force: true }); } catch { /* best-effort */ }
+    }
+  });
+
+  it('appendRunMetrics: creates parent directory if missing', () => {
+    const dir = `${tmpdir()}/n1-metrics-nested-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const path = `${dir}/sub/results.jsonl`;
+    try {
+      const m = createRunMetrics('case:nested', 'raw', 0);
+      finalizeRunMetrics(m, 'converged', 1, [], true);
+      appendRunMetrics(path, m);
+      expect(readFileSync(path, 'utf-8')).toContain('case:nested');
+    } finally {
+      try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+    }
+  });
+
+  it('narrowing_samples: governed runs can accumulate, raw runs leave empty', () => {
+    const governed = createRunMetrics('case:g', 'governed', 0);
+    governed.narrowing_samples.push({
+      attempt: 2,
+      narrowing_content: 'HINT: check whitespace',
+      verify_failure_summary: 'F9: search string not found',
+    });
+    governed.narrowing_samples.push({
+      attempt: 3,
+      narrowing_content: 'EVIDENCE: file contains 3000 not 9999',
+      verify_failure_summary: 'F9: search string not found',
+    });
+    expect(governed.narrowing_samples.length).toBe(2);
+
+    const raw = createRunMetrics('case:r', 'raw', 0);
+    expect(raw.narrowing_samples).toEqual([]);
+  });
+
+  it('round-trip: JSON.parse(JSON.stringify(metrics)) preserves all fields', () => {
+    const m = createRunMetrics('case:rt', 'governed', 1, 'sha-a', 'sha-b');
+    m.attempts.push(
+      buildAttemptRecord(1, 'ctx1', { success: false, gates: [{ gate: 'F9', passed: false, detail: 'd' }] }, 10, 5, 0.001, 50)
+    );
+    m.narrowing_samples.push({
+      attempt: 1,
+      narrowing_content: 'narrowing',
+      verify_failure_summary: 'summary',
+    });
+    finalizeRunMetrics(m, 'converged', 50, [], true);
+
+    const round = JSON.parse(JSON.stringify(m)) as RunMetrics;
+    expect(round).toEqual(m);
   });
 });

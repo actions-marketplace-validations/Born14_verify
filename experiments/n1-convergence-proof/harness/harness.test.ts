@@ -45,6 +45,11 @@ import {
   formatConvergenceSummary,
 } from './render-governed.js';
 import { stageRun } from './state-dir.js';
+import {
+  createCostTracker,
+  callLLMWithTracking,
+  type CallLLMImpl,
+} from './llm-adapter.js';
 import type { VerifyResult, Narrowing, GroundingContext } from '../../../src/types.js';
 import type { GovernContext } from '../../../src/govern.js';
 
@@ -490,10 +495,147 @@ describe('N1 harness — renderer byte-exactness', () => {
 });
 
 describe('N1 harness — cost tracker', () => {
-  it.todo('budget cap: recordCall above $30 throws', pending);
-  it.todo('alert threshold: crossing $20 sets overAlert', pending);
+  it('fresh tracker: zero spend, zero calls, not over alert, not over cap', () => {
+    const t = createCostTracker(30, 20);
+    expect(t.totalSpentUsd).toBe(0);
+    expect(t.totalCalls).toBe(0);
+    expect(t.overAlert).toBe(false);
+    expect(t.overCap).toBe(false);
+  });
+
+  it('recordCall: accumulates spend + call count', () => {
+    const t = createCostTracker(30, 20);
+    t.recordCall({ text: 'x', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 5 });
+    t.recordCall({ text: 'y', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 3 });
+    expect(t.totalSpentUsd).toBe(8);
+    expect(t.totalCalls).toBe(2);
+  });
+
+  it('alert threshold: crossing $20 sets overAlert', () => {
+    const t = createCostTracker(30, 20);
+    t.recordCall({ text: '', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 19.99 });
+    expect(t.overAlert).toBe(false);
+    t.recordCall({ text: '', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 0.02 });
+    expect(t.overAlert).toBe(true);
+    expect(t.overCap).toBe(false);
+  });
+
+  it('hard cap: checkBudget throws when cumulative spend reaches $30', () => {
+    const t = createCostTracker(30, 20);
+    t.recordCall({ text: '', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 30 });
+    expect(() => t.checkBudget()).toThrow(/§22 hard cap/);
+    expect(t.overCap).toBe(true);
+  });
+
+  it('hard cap: checkBudget does NOT throw at $29.99 (one-call headroom)', () => {
+    const t = createCostTracker(30, 20);
+    t.recordCall({ text: '', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 29.99 });
+    expect(() => t.checkBudget()).not.toThrow();
+  });
+
+  it('tracker config: alertThreshold > hardCap throws at construction', () => {
+    expect(() => createCostTracker(20, 30)).toThrow(/alertThreshold/);
+  });
+
+  it('snapshot: returns a frozen view of the tracker state', () => {
+    const t = createCostTracker(30, 20);
+    t.recordCall({ text: '', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 21 });
+    const snap = t.snapshot();
+    expect(snap.totalSpentUsd).toBe(21);
+    expect(snap.totalCalls).toBe(1);
+    expect(snap.overAlert).toBe(true);
+    expect(snap.overCap).toBe(false);
+  });
 });
 
 describe('N1 harness — llm-adapter', () => {
-  it.todo('all self-tests use a mocked callLLM — no network', pending);
+  /** A mock callLLM that never hits the network. Per the kickoff brief:
+   *  "No harness tests against production models without the budget
+   *   tracker wired first. Mock the LLM in self-tests." */
+  const mockCallLLM: CallLLMImpl = async (prompt, apiKey, provider) => {
+    // Assert the adapter passes through the args untouched.
+    if (typeof prompt !== 'string') throw new Error('mock: prompt not a string');
+    if (apiKey !== 'test-key') throw new Error(`mock: wrong apiKey ${apiKey}`);
+    if (provider !== 'gemini') throw new Error(`mock: wrong provider ${provider}`);
+    return 'mocked-response';
+  };
+
+  it('callLLMWithTracking: calls the injected mock and records cost', async () => {
+    const tracker = createCostTracker(30, 20);
+    const result = await callLLMWithTracking('hello prompt', tracker, {
+      callLLMImpl: mockCallLLM,
+      apiKey: 'test-key',
+      provider: 'gemini',
+    });
+    expect(result.text).toBe('mocked-response');
+    expect(result.inputTokens).toBeGreaterThan(0);
+    expect(result.outputTokens).toBeGreaterThan(0);
+    expect(result.estimatedCostUsd).toBeGreaterThan(0);
+    expect(tracker.totalCalls).toBe(1);
+    expect(tracker.totalSpentUsd).toBe(result.estimatedCostUsd);
+  });
+
+  it('callLLMWithTracking: throws on missing apiKey', async () => {
+    const tracker = createCostTracker(30, 20);
+    // Clear env override by passing empty string explicitly.
+    await expect(
+      callLLMWithTracking('prompt', tracker, {
+        callLLMImpl: mockCallLLM,
+        apiKey: '',
+        provider: 'gemini',
+      })
+    ).rejects.toThrow(/INPUT_API_KEY not set/);
+  });
+
+  it('callLLMWithTracking: refuses to call when over cap (§22)', async () => {
+    const tracker = createCostTracker(30, 20);
+    // Force the tracker over cap.
+    tracker.recordCall({ text: '', inputTokens: 1, outputTokens: 1, estimatedCostUsd: 30.01 });
+    await expect(
+      callLLMWithTracking('prompt', tracker, {
+        callLLMImpl: mockCallLLM,
+        apiKey: 'test-key',
+        provider: 'gemini',
+      })
+    ).rejects.toThrow(/§22 hard cap/);
+  });
+
+  it('callLLMWithTracking: Gemini pricing is ~$0.0000001/input token and ~$0.0000004/output token', async () => {
+    // Deterministic cost calculation check. A 1000-char prompt ≈ 250 input
+    // tokens; the mock returns 'mocked-response' (15 chars ≈ 4 output
+    // tokens). Cost should be tiny but predictable.
+    const tracker = createCostTracker(30, 20);
+    const longPrompt = 'x'.repeat(1000);
+    const result = await callLLMWithTracking(longPrompt, tracker, {
+      callLLMImpl: mockCallLLM,
+      apiKey: 'test-key',
+      provider: 'gemini',
+    });
+    // inputTokens = ceil(1000 / 4) = 250
+    expect(result.inputTokens).toBe(250);
+    // outputTokens = ceil(15 / 4) = 4
+    expect(result.outputTokens).toBe(4);
+    // Cost = 250 * 1e-7 + 4 * 4e-7 = 2.5e-5 + 1.6e-6 = ~2.66e-5
+    expect(result.estimatedCostUsd).toBeCloseTo(250 * 0.0000001 + 4 * 0.0000004, 10);
+  });
+
+  it('callLLMWithTracking: never reaches the real network in tests (mock injection is mandatory)', async () => {
+    // Sanity: if a test forgets to pass callLLMImpl AND env has no key,
+    // the adapter throws before calling the real callLLM. This prevents
+    // accidental network calls from tests.
+    const tracker = createCostTracker(30, 20);
+    const originalKey = process.env.INPUT_API_KEY;
+    try {
+      delete process.env.INPUT_API_KEY;
+      await expect(
+        callLLMWithTracking('prompt', tracker, {
+          callLLMImpl: mockCallLLM,
+          provider: 'gemini',
+          // deliberately no apiKey override
+        })
+      ).rejects.toThrow(/INPUT_API_KEY not set/);
+    } finally {
+      if (originalKey !== undefined) process.env.INPUT_API_KEY = originalKey;
+    }
+  });
 });

@@ -1135,3 +1135,198 @@ describe('N1 harness — runCase end-to-end (mocked LLM, real verify)', () => {
     ).rejects.toThrow(/§22 hard cap/);
   }, 30_000);
 });
+
+describe('N1 harness — pilot driver (case selection + decision gate)', () => {
+  const caseListPath = join(import.meta.dir, '..', 'case-list.jsonl');
+
+  it('loadCaseList: reads case-list.jsonl and skips metadata header', async () => {
+    const { loadCaseList } = await import('./run-pilot.js');
+    const cases = loadCaseList(caseListPath);
+    // The locked case-list contains 52 N1-A cases.
+    expect(cases.length).toBe(52);
+    // First record should not be the metadata header.
+    expect(cases[0]).toBeDefined();
+    expect('case_id' in cases[0]!).toBe(true);
+  });
+
+  it('loadCaseList: throws on missing file', async () => {
+    const { loadCaseList } = await import('./run-pilot.js');
+    expect(() => loadCaseList('/nonexistent/path/case-list.jsonl')).toThrow(/not found/);
+  });
+
+  it('selectPilotCases: deterministic — picks first Source B case per primary family', async () => {
+    const { loadCaseList, selectPilotCases } = await import('./run-pilot.js');
+    const allCases = loadCaseList(caseListPath);
+    const picked = selectPilotCases(allCases);
+
+    // Exactly 5 cases, in primary-family order.
+    expect(picked.length).toBe(5);
+    expect(picked[0]!.primary_family).toBe('f9');
+    expect(picked[1]!.primary_family).toBe('content');
+    expect(picked[2]!.primary_family).toBe('propagation');
+    expect(picked[3]!.primary_family).toBe('access');
+    expect(picked[4]!.primary_family).toBe('state');
+
+    // All are Source B (per §18).
+    for (const c of picked) {
+      expect(c.source).toBe('B');
+    }
+  });
+
+  it('selectPilotCases: runs twice and produces the same 5 cases (determinism)', async () => {
+    const { loadCaseList, selectPilotCases } = await import('./run-pilot.js');
+    const allCases = loadCaseList(caseListPath);
+    const a = selectPilotCases(allCases);
+    const b = selectPilotCases(allCases);
+    for (let i = 0; i < a.length; i++) {
+      expect(a[i]!.case_id).toBe(b[i]!.case_id);
+    }
+  });
+
+  it('selectPilotCases: throws if a primary family has zero matching Source B cases', async () => {
+    const { selectPilotCases } = await import('./run-pilot.js');
+    const missingFamily = [
+      { case_id: 'x:1', source: 'B', primary_family: 'f9', category: 'f9', goal: 'g',
+        reference_edits: [], reference_predicates: [], expected_success: true,
+        intent: 'false_negative', track: 'N1-A' },
+      // No content/propagation/access/state entries.
+    ] as any;
+    expect(() => selectPilotCases(missingFamily)).toThrow(/no Source B case found/);
+  });
+
+  it('summarizePilot: computes convergence rates on the §1 denominator', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    // 3 raw runs: 1 converged, 1 exhausted, 1 agent_error.
+    // Denominator (converged + exhausted + stuck + empty_plan_stall) = 2.
+    // Convergence rate = 1/2 = 0.5. agent_error NOT in denominator.
+    const metrics = [
+      buildMetric('raw', 'converged', 100, 50, 1000),
+      buildMetric('raw', 'exhausted', 200, 100, 2000),
+      buildMetric('raw', 'agent_error', 50, 25, 500),
+      buildMetric('governed', 'converged', 150, 75, 1500),
+      buildMetric('governed', 'stuck', 250, 125, 2500),
+      buildMetric('governed', 'converged', 180, 90, 1800),
+    ];
+    const summary = summarizePilot(metrics, 0);
+    expect(summary.total_runs).toBe(6);
+    expect(summary.runs_per_loop.raw).toBe(3);
+    expect(summary.runs_per_loop.governed).toBe(3);
+    expect(summary.convergence_rates.raw).toBeCloseTo(0.5, 10);
+    expect(summary.convergence_rates.governed).toBeCloseTo(2 / 3, 10);
+    expect(summary.stop_reasons.raw.converged).toBe(1);
+    expect(summary.stop_reasons.raw.exhausted).toBe(1);
+    expect(summary.stop_reasons.raw.agent_error).toBe(1);
+    expect(summary.stop_reasons.governed.converged).toBe(2);
+    expect(summary.stop_reasons.governed.stuck).toBe(1);
+  });
+
+  it('summarizePilot gate: raw convergence in band [20%, 80%] passes', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    // 10 raw runs, 5 converged, 5 exhausted → 50% convergence.
+    const metrics = [];
+    for (let i = 0; i < 5; i++) metrics.push(buildMetric('raw', 'converged', 500, 200, 5000));
+    for (let i = 0; i < 5; i++) metrics.push(buildMetric('raw', 'exhausted', 500, 200, 5000));
+    const summary = summarizePilot(metrics, 0);
+    expect(summary.gate_results.raw_convergence_in_band.pass).toBe(true);
+    expect(summary.gate_results.raw_convergence_in_band.observed).toBe(0.5);
+  });
+
+  it('summarizePilot gate: raw convergence <20% fails (model too weak)', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    // 10 raw, 1 converged, 9 exhausted → 10% convergence.
+    const metrics = [];
+    metrics.push(buildMetric('raw', 'converged', 100, 50, 1000));
+    for (let i = 0; i < 9; i++) metrics.push(buildMetric('raw', 'exhausted', 100, 50, 1000));
+    const summary = summarizePilot(metrics, 0);
+    expect(summary.gate_results.raw_convergence_in_band.pass).toBe(false);
+    expect(summary.all_gates_passed).toBe(false);
+  });
+
+  it('summarizePilot gate: raw convergence >80% fails (model too strong)', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    const metrics = [];
+    for (let i = 0; i < 9; i++) metrics.push(buildMetric('raw', 'converged', 100, 50, 1000));
+    metrics.push(buildMetric('raw', 'exhausted', 100, 50, 1000));
+    const summary = summarizePilot(metrics, 0);
+    expect(summary.gate_results.raw_convergence_in_band.pass).toBe(false);
+    expect(summary.all_gates_passed).toBe(false);
+  });
+
+  it('summarizePilot gate: any crash fails the zero-crashes gate', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    const metrics = [
+      buildMetric('raw', 'converged', 100, 50, 1000),
+      buildMetric('raw', 'exhausted', 100, 50, 1000),
+    ];
+    const summary = summarizePilot(metrics, 1);
+    expect(summary.gate_results.zero_crashes.pass).toBe(false);
+    expect(summary.all_gates_passed).toBe(false);
+  });
+
+  it('summarizePilot gate: avg tokens > 5000 fails', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    // 5 converged, 5 exhausted → 50% convergence (raw gate pass).
+    // But avg tokens = 6000 (fails token gate).
+    const metrics = [];
+    for (let i = 0; i < 5; i++) metrics.push(buildMetric('raw', 'converged', 5000, 1000, 1000));
+    for (let i = 0; i < 5; i++) metrics.push(buildMetric('raw', 'exhausted', 5000, 1000, 1000));
+    const summary = summarizePilot(metrics, 0);
+    expect(summary.gate_results.avg_tokens_within_budget.pass).toBe(false);
+    expect(summary.gate_results.raw_convergence_in_band.pass).toBe(true); // other gate still passes
+    expect(summary.all_gates_passed).toBe(false);
+  });
+
+  it('summarizePilot gate: avg wall time > 30s fails', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    const metrics = [];
+    for (let i = 0; i < 5; i++) metrics.push(buildMetric('raw', 'converged', 100, 50, 35_000));
+    for (let i = 0; i < 5; i++) metrics.push(buildMetric('raw', 'exhausted', 100, 50, 35_000));
+    const summary = summarizePilot(metrics, 0);
+    expect(summary.gate_results.avg_wall_time_within_budget.pass).toBe(false);
+    expect(summary.all_gates_passed).toBe(false);
+  });
+
+  it('summarizePilot gate: all four gates pass in the happy path', async () => {
+    const { summarizePilot } = await import('./run-pilot.js');
+    // 30 runs, 15 raw (7 converged, 8 exhausted → 46.7% in band),
+    // 15 governed (10 converged, 5 exhausted → 66.7%).
+    const metrics = [];
+    for (let i = 0; i < 7; i++) metrics.push(buildMetric('raw', 'converged', 500, 200, 2000));
+    for (let i = 0; i < 8; i++) metrics.push(buildMetric('raw', 'exhausted', 500, 200, 2000));
+    for (let i = 0; i < 10; i++) metrics.push(buildMetric('governed', 'converged', 600, 250, 2500));
+    for (let i = 0; i < 5; i++) metrics.push(buildMetric('governed', 'exhausted', 600, 250, 2500));
+    const summary = summarizePilot(metrics, 0);
+    expect(summary.gate_results.raw_convergence_in_band.pass).toBe(true);
+    expect(summary.gate_results.zero_crashes.pass).toBe(true);
+    expect(summary.gate_results.avg_tokens_within_budget.pass).toBe(true);
+    expect(summary.gate_results.avg_wall_time_within_budget.pass).toBe(true);
+    expect(summary.all_gates_passed).toBe(true);
+    expect(summary.convergence_rates.governed).toBeGreaterThan(summary.convergence_rates.raw);
+  });
+});
+
+/** Helper: build a synthetic RunMetrics for pilot summary tests. */
+function buildMetric(
+  loop: 'raw' | 'governed',
+  stopReason: import('./metrics.js').RunMetrics['stop_reason'],
+  inputTokens: number,
+  outputTokens: number,
+  wallTimeMs: number
+): import('./metrics.js').RunMetrics {
+  return {
+    case_id: `test:${loop}-${stopReason}`,
+    loop,
+    run_idx: 0,
+    stop_reason: stopReason,
+    retry_count: 1,
+    converged: stopReason === 'converged',
+    total_input_tokens: inputTokens,
+    total_output_tokens: outputTokens,
+    total_cost_usd: 0.001,
+    wall_time_ms: wallTimeMs,
+    final_gates_failed: [],
+    attempts: [],
+    narrowing_samples: [],
+    started_at: '2026-04-10T00:00:00.000Z',
+  };
+}

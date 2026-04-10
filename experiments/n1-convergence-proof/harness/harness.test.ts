@@ -35,7 +35,22 @@
 
 import { describe, it, expect } from 'bun:test';
 import { renderRawRetryContext, formatGateFailures } from './render-raw.js';
-import type { VerifyResult } from '../../../src/types.js';
+import {
+  renderGovernedRetryContext,
+  formatNarrowing,
+  formatConstraints,
+  formatFailureShapes,
+  formatConvergenceSummary,
+} from './render-governed.js';
+import type { VerifyResult, Narrowing, GroundingContext } from '../../../src/types.js';
+import type { GovernContext } from '../../../src/govern.js';
+
+/** Minimal empty GroundingContext for test fixtures. */
+const emptyGrounding: GroundingContext = {
+  routeCSSMap: new Map(),
+  htmlElements: new Map(),
+  routes: [],
+};
 
 /** Placeholder body for .todo() tests under bun:test's Test<> signature. */
 const pending = (): void => { /* scaffold — implemented in deliverable 8 */ };
@@ -146,8 +161,238 @@ describe('N1 harness — renderer byte-exactness', () => {
     expect(a).toBe(b);
   });
 
-  it.todo('governed renderer matches DESIGN.md §4 worked example', pending);
-  it.todo('raw/governed parity: gate-failures block is byte-identical', pending);
+  it('governed renderer matches DESIGN.md §4 worked example', () => {
+    // Verbatim §4 worked example, copy-pasted from DESIGN.md lines 184-210.
+    const expected =
+      'GOAL: F9 exact match: change port number in server.js\n' +
+      '\n' +
+      'ATTEMPT 2 of 5.\n' +
+      '\n' +
+      'Your previous attempt failed. Here are the raw gate failure messages:\n' +
+      '\n' +
+      '- [F9]: server.js: search string not found; searched for "const PORT = process.env.PORT || 9999;" in server.js\n' +
+      '\n' +
+      'NARROWING (guidance from the verification system):\n' +
+      '\n' +
+      'HINT: The search string did not match any content in the file. Check the exact text in the file and match whitespace and punctuation precisely.\n' +
+      'EVIDENCE: Expected "const PORT = process.env.PORT || 9999;" but file contains "const PORT = process.env.PORT || 3000;"\n' +
+      '\n' +
+      'CONSTRAINTS currently active (1 total):\n' +
+      '\n' +
+      '- [search-string] Edit search field must exactly match existing file content before substitution\n' +
+      '\n' +
+      'FAILURE SHAPES observed across attempts:\n' +
+      '\n' +
+      '- F9-001\n' +
+      '\n' +
+      'CONVERGENCE PROGRESS:\n' +
+      '\n' +
+      '1 new shape(s)\n' +
+      '\n' +
+      'Revise your edits and try again.';
+
+    const narrowing: Narrowing = {
+      constraints: [],
+      resolutionHint:
+        'The search string did not match any content in the file. Check the exact text in the file and match whitespace and punctuation precisely.',
+      fileEvidence:
+        'Expected "const PORT = process.env.PORT || 9999;" but file contains "const PORT = process.env.PORT || 3000;"',
+    };
+
+    const priorResult: VerifyResult = {
+      success: false,
+      gates: [
+        {
+          gate: 'F9',
+          passed: false,
+          detail:
+            'server.js: search string not found; searched for "const PORT = process.env.PORT || 9999;" in server.js',
+          durationMs: 1,
+        },
+      ],
+      narrowing,
+      attestation: '',
+      timing: { totalMs: 1, perGate: {} },
+    };
+
+    const context: GovernContext = {
+      grounding: emptyGrounding,
+      attempt: 2,
+      priorResult,
+      narrowing,
+      constraints: [
+        {
+          id: 'c1',
+          type: 'search-string',
+          reason: 'Edit search field must exactly match existing file content before substitution',
+        },
+      ],
+      failureShapes: ['F9-001'],
+      convergence: {
+        shapesProgressing: true,
+        gatesProgressing: true,
+        uniqueShapes: ['F9-001'],
+        shapeHistory: [['F9-001']],
+        gateFailureHistory: [['F9']],
+        emptyPlanCount: 0,
+        gateRepeatCount: 0,
+        constraintSaturation: false,
+        progressSummary: '1 new shape(s)',
+      },
+    };
+
+    const actual = renderGovernedRetryContext(
+      'F9 exact match: change port number in server.js',
+      context,
+      5
+    );
+
+    expect(actual).toBe(expected);
+  });
+
+  it('governed renderer attempt 1: no previous-attempt section (parity with raw)', () => {
+    const context: GovernContext = {
+      grounding: emptyGrounding,
+      attempt: 1,
+      constraints: [],
+    };
+    const out = renderGovernedRetryContext('goal string', context, 5);
+    expect(out).toBe('GOAL: goal string');
+  });
+
+  it('raw/governed parity: attempt-1 output is byte-identical', () => {
+    const goal = 'some goal';
+    const rawOut = renderRawRetryContext(goal, 1, 5, undefined);
+    const governedOut = renderGovernedRetryContext(
+      goal,
+      { grounding: emptyGrounding, attempt: 1, constraints: [] },
+      5
+    );
+    expect(governedOut).toBe(rawOut);
+  });
+
+  it('raw/governed parity: gate-failures block is byte-identical between loops', () => {
+    // Both renderers should emit the same gate-failures substring for the
+    // same priorResult. This is the adversarial-fairness enforcement: the
+    // governed loop cannot gain advantage by reformatting the block both
+    // loops share.
+    const priorResult: VerifyResult = {
+      success: false,
+      gates: [
+        { gate: 'F9', passed: false, detail: 'F9 failed here', durationMs: 1 },
+        { gate: 'content', passed: false, detail: 'content mismatch', durationMs: 1 },
+      ],
+      attestation: '',
+      timing: { totalMs: 1, perGate: {} },
+    };
+
+    const rawBlock = formatGateFailures(priorResult);
+
+    const context: GovernContext = {
+      grounding: emptyGrounding,
+      attempt: 2,
+      priorResult,
+      constraints: [],
+    };
+    const governedOut = renderGovernedRetryContext('g', context, 5);
+
+    // The governed output must contain the raw block verbatim.
+    expect(governedOut).toContain(rawBlock);
+    // And the raw block must appear before any §4-specific header.
+    expect(governedOut.indexOf(rawBlock)).toBeLessThan(governedOut.indexOf('NARROWING'));
+  });
+
+  it('formatNarrowing: undefined narrowing renders the no-narrowing placeholder', () => {
+    expect(formatNarrowing(undefined)).toBe('(no narrowing produced for this failure)');
+  });
+
+  it('formatNarrowing: empty narrowing object renders the no-narrowing placeholder', () => {
+    const empty: Narrowing = { constraints: [] };
+    expect(formatNarrowing(empty)).toBe('(no narrowing produced for this failure)');
+  });
+
+  it('formatNarrowing: all five sub-sections render in §4 order', () => {
+    const n: Narrowing = {
+      constraints: [],
+      resolutionHint: 'hint text',
+      fileEvidence: 'evidence text',
+      patternRecall: ['pattern-a', 'pattern-b'],
+      nextMoves: [
+        { type: 't', predicate: {}, score: 0.9, rationale: 'rat', kind: 'k1' },
+      ],
+      bannedFingerprints: ['fp1', 'fp2', 'fp3', 'fp4', 'fp5', 'fp6-not-shown'],
+    };
+    const out = formatNarrowing(n);
+    const lines = out.split('\n');
+    expect(lines[0]).toBe('HINT: hint text');
+    expect(lines[1]).toBe('EVIDENCE: evidence text');
+    expect(lines[2]).toBe('PRIOR SUCCESSFUL PATTERNS: pattern-a; pattern-b');
+    expect(lines[3]).toBe('SUGGESTED NEXT MOVES:');
+    expect(lines[4]).toBe('  - k1 (score 0.9): rat');
+    // Last line: AVOID with first 5 only — fp6 must not appear.
+    expect(lines[5]).toBe('AVOID: these predicate patterns have failed before: fp1, fp2, fp3, fp4, fp5');
+    expect(out).not.toContain('fp6');
+  });
+
+  it('formatConstraints: empty → (none)', () => {
+    expect(formatConstraints([])).toBe('(none)');
+  });
+
+  it('formatConstraints: one line per constraint with [type] reason', () => {
+    const c = [
+      { id: 'a', type: 'search-string', reason: 'must match' },
+      { id: 'b', type: 'predicate', reason: 'banned pattern' },
+    ];
+    expect(formatConstraints(c)).toBe('- [search-string] must match\n- [predicate] banned pattern');
+  });
+
+  it('formatFailureShapes: empty → (none)', () => {
+    expect(formatFailureShapes(undefined)).toBe('(none)');
+    expect(formatFailureShapes([])).toBe('(none)');
+  });
+
+  it('formatFailureShapes: one line per shape id', () => {
+    expect(formatFailureShapes(['F9-001', 'F9-002'])).toBe('- F9-001\n- F9-002');
+  });
+
+  it('formatConvergenceSummary: uses convergence.progressSummary when present', () => {
+    const convergence = {
+      shapesProgressing: true,
+      gatesProgressing: true,
+      uniqueShapes: [],
+      shapeHistory: [],
+      gateFailureHistory: [],
+      emptyPlanCount: 0,
+      gateRepeatCount: 0,
+      constraintSaturation: false,
+      progressSummary: '2 new shape(s)',
+    };
+    expect(formatConvergenceSummary(convergence)).toBe('2 new shape(s)');
+  });
+
+  it('formatConvergenceSummary: undefined → first-attempt fallback', () => {
+    expect(formatConvergenceSummary(undefined)).toBe('first attempt — no convergence history');
+  });
+
+  it('governed renderer: missing narrowing/constraints/shapes render placeholders', () => {
+    const priorResult: VerifyResult = {
+      success: false,
+      gates: [{ gate: 'F9', passed: false, detail: 'broken', durationMs: 1 }],
+      attestation: '',
+      timing: { totalMs: 1, perGate: {} },
+    };
+    const context: GovernContext = {
+      grounding: emptyGrounding,
+      attempt: 2,
+      priorResult,
+      constraints: [],
+    };
+    const out = renderGovernedRetryContext('g', context, 5);
+    expect(out).toContain('(no narrowing produced for this failure)');
+    expect(out).toContain('CONSTRAINTS currently active (0 total):\n\n(none)');
+    expect(out).toContain('FAILURE SHAPES observed across attempts:\n\n(none)');
+    expect(out).toContain('CONVERGENCE PROGRESS:\n\nfirst attempt — no convergence history');
+  });
 });
 
 describe('N1 harness — cost tracker', () => {

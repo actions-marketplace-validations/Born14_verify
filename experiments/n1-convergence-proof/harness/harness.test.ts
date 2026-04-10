@@ -34,6 +34,8 @@
  */
 
 import { describe, it, expect } from 'bun:test';
+import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { join } from 'path';
 import { renderRawRetryContext, formatGateFailures } from './render-raw.js';
 import {
   renderGovernedRetryContext,
@@ -42,6 +44,7 @@ import {
   formatFailureShapes,
   formatConvergenceSummary,
 } from './render-governed.js';
+import { stageRun } from './state-dir.js';
 import type { VerifyResult, Narrowing, GroundingContext } from '../../../src/types.js';
 import type { GovernContext } from '../../../src/govern.js';
 
@@ -71,8 +74,99 @@ const f9WorkedExampleResult: VerifyResult = {
 };
 
 describe('N1 harness — canaries', () => {
-  it.todo('stateDir wipe: fresh stageRun produces an empty stateDir', pending);
-  it.todo('fixture isolation: mutating staged appDir does not touch the fixture root', pending);
+  const demoAppFixture = join(import.meta.dir, '..', '..', '..', 'fixtures', 'demo-app');
+
+  it('stateDir wipe: fresh stageRun produces an empty stateDir', () => {
+    const staged = stageRun(demoAppFixture, 'canary:wipe-test', 'governed', 0);
+    try {
+      expect(existsSync(staged.stateDir)).toBe(true);
+      const entries = readdirSync(staged.stateDir);
+      expect(entries).toEqual([]);
+    } finally {
+      staged.cleanup();
+    }
+  });
+
+  it('stateDir wipe: second stageRun after writing canary file is empty again', () => {
+    // Run 1: stage, write a canary file into stateDir, cleanup.
+    const run1 = stageRun(demoAppFixture, 'canary:wipe-test', 'governed', 0);
+    const canaryPath = join(run1.stateDir, 'canary.txt');
+    writeFileSync(canaryPath, 'should-not-survive');
+    expect(existsSync(canaryPath)).toBe(true);
+    run1.cleanup();
+
+    // Run 2: fresh stage for the SAME case_id. The new stateDir must
+    // not contain the canary — it's in a different tmp dir entirely,
+    // AND the emptiness check in stageRun() would have thrown if it did.
+    const run2 = stageRun(demoAppFixture, 'canary:wipe-test', 'governed', 0);
+    try {
+      const entries = readdirSync(run2.stateDir);
+      expect(entries).toEqual([]);
+      // And the run1 canary is definitely not present.
+      expect(existsSync(join(run2.stateDir, 'canary.txt'))).toBe(false);
+      // And the two stateDirs are different paths (unique suffix).
+      expect(run2.stateDir).not.toBe(run1.stateDir);
+    } finally {
+      run2.cleanup();
+    }
+  });
+
+  it('fixture isolation: mutating staged appDir does not touch the fixture root', () => {
+    // Read the original fixture config.json (a file that definitely exists
+    // per fixtures/demo-app/ directory listing).
+    const fixtureConfigPath = join(demoAppFixture, 'config.json');
+    const originalContent = readFileSync(fixtureConfigPath, 'utf-8');
+
+    const staged = stageRun(demoAppFixture, 'canary:isolation', 'raw', 0);
+    try {
+      // The copy should exist inside the staged appDir.
+      const stagedConfigPath = join(staged.appDir, 'config.json');
+      expect(existsSync(stagedConfigPath)).toBe(true);
+
+      // Mutate the copy aggressively.
+      writeFileSync(stagedConfigPath, '{"mutated":"by-canary"}');
+
+      // The copy is mutated...
+      expect(readFileSync(stagedConfigPath, 'utf-8')).toBe('{"mutated":"by-canary"}');
+      // ...but the original fixture is untouched.
+      expect(readFileSync(fixtureConfigPath, 'utf-8')).toBe(originalContent);
+    } finally {
+      staged.cleanup();
+    }
+  });
+
+  it('stateDir hygiene: throws on missing fixture dir (no silent continuation)', () => {
+    expect(() =>
+      stageRun('/nonexistent/path/does/not/exist', 'canary:missing', 'raw', 0)
+    ).toThrow(/fixture dir does not exist/);
+  });
+
+  it('stateDir hygiene: excludes node_modules / .git / .verify from copy', () => {
+    const staged = stageRun(demoAppFixture, 'canary:exclude', 'governed', 0);
+    try {
+      // These directories should NOT be in the staged copy even if they
+      // exist in the fixture (they don't in demo-app but the filter runs).
+      expect(existsSync(join(staged.appDir, 'node_modules'))).toBe(false);
+      expect(existsSync(join(staged.appDir, '.git'))).toBe(false);
+      expect(existsSync(join(staged.appDir, '.verify'))).toBe(false);
+      // But real fixture files ARE present.
+      expect(existsSync(join(staged.appDir, 'server.js'))).toBe(true);
+    } finally {
+      staged.cleanup();
+    }
+  });
+
+  it('stateDir hygiene: each run has a unique base path (no collision across runs)', () => {
+    const a = stageRun(demoAppFixture, 'canary:collision', 'raw', 0);
+    const b = stageRun(demoAppFixture, 'canary:collision', 'raw', 0);
+    try {
+      expect(a.appDir).not.toBe(b.appDir);
+      expect(a.stateDir).not.toBe(b.stateDir);
+    } finally {
+      a.cleanup();
+      b.cleanup();
+    }
+  });
 });
 
 describe('N1 harness — renderer byte-exactness', () => {

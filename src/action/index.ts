@@ -254,7 +254,7 @@ Only include specific, testable assertions. Max 5.`;
 // MULTI-PROVIDER LLM CALL
 // =============================================================================
 
-async function callLLM(prompt: string, apiKey: string, provider: string): Promise<string> {
+export async function callLLM(prompt: string, apiKey: string, provider: string): Promise<string> {
   switch (provider) {
     case 'gemini': {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
@@ -344,8 +344,13 @@ function listFiles(dir: string, readdirSync: any, prefix = ''): string[] {
   return files;
 }
 
-// Run
-run().catch(err => {
-  console.log(`::error::${err.message}`);
-  process.exit(1);
-});
+// Run — only when executed as an entry point, not when imported.
+// Per DESIGN.md §20 + Amendment 5: the harness imports callLLM from this
+// file, and importing must not trigger run() (which calls process.exit(1)
+// when GitHub Actions env vars are absent).
+if (import.meta.main) {
+  run().catch(err => {
+    console.log(`::error::${err.message}`);
+    process.exit(1);
+  });
+}

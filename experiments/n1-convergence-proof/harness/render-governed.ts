@@ -125,28 +125,36 @@ export function formatConvergenceSummary(
 }
 
 /**
- * Render the governed-loop retry context per DESIGN.md §4.
+ * Render the governed-loop retry context per DESIGN.md §4 (as amended
+ * by Amendment 6).
  *
  * On attempt 1 OR when context.priorResult is undefined, the output is
- * just `GOAL: {goal}` — §4's "first attempt" case matches the raw loop's
- * attempt-1 behavior and both loops' system prompts are identical per §2.
+ * `{appManifest}GOAL: {goal}` — byte-identical to the raw renderer's
+ * attempt-1 output per the §4 "Attempt-1 shape (explicit under
+ * Amendment 6)" specification.
  *
- * On attempt N ≥ 2, renders the full §4 template with all five content
- * blocks (gate failures, narrowing, constraints, failure shapes,
- * convergence summary).
+ * On attempt N ≥ 2, the manifest is prepended to the full §4 template
+ * with all five content blocks (gate failures, narrowing, constraints,
+ * failure shapes, convergence summary).
+ *
+ * Amendment 6: the appManifest parameter is required and is the same
+ * pre-formatted string passed to renderRawRetryContext. This is the
+ * byte-identity guarantee from Change 4 — both renderers receive the
+ * same manifest string and prepend it identically.
  */
 export function renderGovernedRetryContext(
   goal: string,
   context: GovernContext,
-  maxAttempts: number
+  maxAttempts: number,
+  appManifest: string
 ): string {
   // First-attempt shape: identical bytes to the raw renderer's attempt-1
   // output so both loops share a fair starting point.
   if (context.attempt === 1 || context.priorResult === undefined) {
-    return `GOAL: ${goal}`;
+    return `${appManifest}GOAL: ${goal}`;
   }
 
-  // Attempt N ≥ 2: render the §4 verbatim template.
+  // Attempt N ≥ 2: manifest + §4 verbatim template.
   const priorResult: VerifyResult = context.priorResult;
   const gateFailures = formatGateFailures(priorResult);
   const narrowing = formatNarrowing(context.narrowing);
@@ -155,7 +163,7 @@ export function renderGovernedRetryContext(
   const failureShapes = formatFailureShapes(context.failureShapes);
   const convergenceSummary = formatConvergenceSummary(context.convergence);
 
-  return [
+  const body = [
     `GOAL: ${goal}`,
     '',
     `ATTEMPT ${context.attempt} of ${maxAttempts}.`,
@@ -182,4 +190,6 @@ export function renderGovernedRetryContext(
     '',
     'Revise your edits and try again.',
   ].join('\n');
+
+  return `${appManifest}${body}`;
 }

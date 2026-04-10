@@ -60,34 +60,53 @@ export function formatGateFailures(priorResult: VerifyResult): string {
 }
 
 /**
- * Render the raw-loop retry context per DESIGN.md §3.
+ * Render the raw-loop retry context per DESIGN.md §3 (as amended by
+ * Amendment 6).
  *
- * On attempt 1, priorResult is undefined and the output is just
- * `GOAL: {goal}` (with no trailing newline — §3 says "system prompt +
- * `GOAL: {goal_string}` with no 'previous attempt' section").
+ * On attempt 1, priorResult is undefined and the output is:
+ *   <appManifest>GOAL: {goal}
+ * where appManifest is the pre-formatted APP FILES: block from
+ * formatAppManifest (includes its own trailing blank line).
  *
- * On attempt N ≥ 2, the output includes the "previous attempt" section
- * with one line per failed gate from priorResult, per the §3 template.
+ * On attempt N ≥ 2, the output includes the APP FILES: manifest at the
+ * top, then the "previous attempt" section with one line per failed
+ * gate from priorResult, per the §3 template.
  *
  * Byte-exactness: the output of this function for the §3 worked example
  * input must equal the §3 worked example output exactly. See the
- * byte-exactness test in harness.test.ts.
+ * byte-exactness tests in harness.test.ts (the pre-Amendment-6 worked
+ * example tests still pass when called with an empty manifest string).
+ *
+ * Amendment 6: the appManifest parameter is required. The same formatted
+ * string is passed to both renderers per Change 5 bullet 2, so the raw
+ * and governed manifest blocks are byte-identical for the same run.
  */
 export function renderRawRetryContext(
   goal: string,
   attempt: number,
   maxAttempts: number,
-  priorResult: VerifyResult | undefined
+  priorResult: VerifyResult | undefined,
+  appManifest: string
 ): string {
-  // Attempt 1: no previous attempt section per §3 final paragraph.
+  // Attempt 1: manifest + GOAL line, no previous-attempt section per §3.
+  // The appManifest string owns its own trailing blank line separator,
+  // so direct concatenation with `GOAL: {goal}` produces the correct
+  // worked-example shape:
+  //   APP FILES:
+  //   <paths>
+  //   <blank>
+  //   GOAL: <goal>
   if (attempt === 1 || priorResult === undefined) {
-    return `GOAL: ${goal}`;
+    return `${appManifest}GOAL: ${goal}`;
   }
 
-  // Attempt N ≥ 2: render the §3 verbatim template.
+  // Attempt N ≥ 2: manifest + §3 retry template. Same manifest
+  // separation convention — appManifest ends with a blank line, then
+  // the body starts with GOAL: and continues through the retry
+  // template.
   const gateFailures = formatGateFailures(priorResult);
 
-  return [
+  const body = [
     `GOAL: ${goal}`,
     '',
     `ATTEMPT ${attempt} of ${maxAttempts}.`,
@@ -98,4 +117,6 @@ export function renderRawRetryContext(
     '',
     'Revise your edits and try again.',
   ].join('\n');
+
+  return `${appManifest}${body}`;
 }

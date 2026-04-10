@@ -59,6 +59,7 @@ import {
   formatNarrowing,
 } from './render-governed.js';
 import { stageRun } from './state-dir.js';
+import { buildAppManifest, formatAppManifest } from './manifest.js';
 import { callLLMWithTracking, type CostTracker, type CallLLMImpl } from './llm-adapter.js';
 import {
   createRunMetrics,
@@ -92,6 +93,7 @@ Rules:
 2. Predicates assert claims about the codebase after your edits are applied.
 3. Produce the minimum number of edits required to achieve the goal.
 4. Do not add commentary, explanation, or markdown. Output JSON only.
+5. The APP FILES: manifest at the top of every prompt is the complete set of files in the app. You may only emit edits targeting files listed in that manifest. File paths not in the manifest do not exist and will cause the F9 gate to fail. Do not fabricate file paths.
 
 On retry: you will receive feedback about why your previous attempt failed. Use that feedback to revise your edits and predicates. The goal remains the same across retries.`;
 
@@ -220,12 +222,18 @@ async function runRawCase(params: RunCaseParams): Promise<RunMetrics> {
   let emptyPlanCount = 0;
   let allAttemptsErrored = true;
 
+  // Amendment 6: build the APP FILES manifest once per run, after
+  // stageRun but before the attempt loop. The same formatted string is
+  // passed to the renderer on every attempt (byte-identical across
+  // attempts within a run per §3 attempt-1 + attempt-N specification).
+  const appManifest = formatAppManifest(buildAppManifest(staged.appDir));
+
   try {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       const attemptStart = Date.now();
 
       // Build the body via §3 renderer, then wrap with §2 system prompt.
-      const body = renderRawRetryContext(caseRecord.goal, attempt, MAX_ATTEMPTS, priorResult);
+      const body = renderRawRetryContext(caseRecord.goal, attempt, MAX_ATTEMPTS, priorResult, appManifest);
       const fullPrompt = combinePrompt(body);
 
       // Call the LLM (mock or real).
@@ -376,6 +384,13 @@ async function runGovernedCase(params: RunCaseParams): Promise<RunMetrics> {
 
   const staged = stageRun(fixtureAppDir, caseRecord.case_id, 'governed', run_idx);
 
+  // Amendment 6: build the APP FILES manifest once per run, after
+  // stageRun but before the govern() call. The agent adapter closure
+  // captures this manifest and passes it to renderGovernedRetryContext
+  // on every attempt (byte-identical across attempts within a run,
+  // and byte-identical to the raw loop's manifest for the same case).
+  const appManifest = formatAppManifest(buildAppManifest(staged.appDir));
+
   // Build the agent adapter. govern() calls plan(goal, context) each
   // attempt. Our adapter:
   //   1. Renders the §4 retry context from GovernContext
@@ -387,7 +402,7 @@ async function runGovernedCase(params: RunCaseParams): Promise<RunMetrics> {
   const agent: GovernAgent = {
     async plan(goal: string, context: GovernContext): Promise<AgentPlan> {
       const attemptStart = Date.now();
-      const body = renderGovernedRetryContext(goal, context, MAX_ATTEMPTS);
+      const body = renderGovernedRetryContext(goal, context, MAX_ATTEMPTS, appManifest);
       const fullPrompt = combinePrompt(body);
 
       // §17 narrowing sample capture: on attempts ≥ 2 (where narrowing

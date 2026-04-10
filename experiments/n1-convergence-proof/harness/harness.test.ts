@@ -68,6 +68,12 @@ const emptyGrounding: GroundingContext = {
   routes: [],
 };
 
+/** Empty manifest string for pre-Amendment-6 byte-exact tests that
+ *  validate the §3/§4 template semantics without the manifest block.
+ *  Passing '' makes `${appManifest}GOAL: ...` degenerate to `GOAL: ...`,
+ *  preserving the pre-Amendment-6 worked-example byte output. */
+const emptyManifest = '';
+
 /** Placeholder body for .todo() tests under bun:test's Test<> signature. */
 const pending = (): void => { /* scaffold — implemented in deliverable 8 */ };
 
@@ -200,7 +206,8 @@ describe('N1 harness — renderer byte-exactness', () => {
       'F9 exact match: change port number in server.js',
       2,
       5,
-      f9WorkedExampleResult
+      f9WorkedExampleResult,
+      emptyManifest
     );
 
     expect(actual).toBe(expected);
@@ -209,7 +216,9 @@ describe('N1 harness — renderer byte-exactness', () => {
   it('raw renderer attempt 1: no previous-attempt section (§3 final paragraph)', () => {
     // §3: "On attempt 1, the raw loop sends the system prompt +
     //      `GOAL: {goal_string}` with no 'previous attempt' section."
-    const out = renderRawRetryContext('goal string', 1, 5, undefined);
+    // With emptyManifest the output degenerates to the pre-Amendment-6
+    // attempt-1 shape, preserving byte-exactness.
+    const out = renderRawRetryContext('goal string', 1, 5, undefined, emptyManifest);
     expect(out).toBe('GOAL: goal string');
   });
 
@@ -220,7 +229,7 @@ describe('N1 harness — renderer byte-exactness', () => {
       attestation: '',
       timing: { totalMs: 1, perGate: {} },
     };
-    const out = renderRawRetryContext('g', 2, 5, priorResult);
+    const out = renderRawRetryContext('g', 2, 5, priorResult, emptyManifest);
     expect(out).toContain('- [unknown]: verify returned success: false with no specific gate failure.');
   });
 
@@ -232,7 +241,7 @@ describe('N1 harness — renderer byte-exactness', () => {
       attestation: '',
       timing: { totalMs: 1, perGate: {} },
     };
-    const out = renderRawRetryContext('g', 2, 5, priorResult);
+    const out = renderRawRetryContext('g', 2, 5, priorResult, emptyManifest);
     // Line is `- [F9]: {300 x's}`; count the x's in the output.
     const xCount = (out.match(/x/g) ?? []).length;
     expect(xCount).toBe(300);
@@ -250,7 +259,7 @@ describe('N1 harness — renderer byte-exactness', () => {
       attestation: '',
       timing: { totalMs: 1, perGate: {} },
     };
-    const out = renderRawRetryContext('g', 3, 5, priorResult);
+    const out = renderRawRetryContext('g', 3, 5, priorResult, emptyManifest);
     const stateIdx = out.indexOf('[state]');
     const f9Idx = out.indexOf('[F9]');
     const contentIdx = out.indexOf('[content]');
@@ -351,7 +360,8 @@ describe('N1 harness — renderer byte-exactness', () => {
     const actual = renderGovernedRetryContext(
       'F9 exact match: change port number in server.js',
       context,
-      5
+      5,
+      emptyManifest
     );
 
     expect(actual).toBe(expected);
@@ -363,17 +373,18 @@ describe('N1 harness — renderer byte-exactness', () => {
       attempt: 1,
       constraints: [],
     };
-    const out = renderGovernedRetryContext('goal string', context, 5);
+    const out = renderGovernedRetryContext('goal string', context, 5, emptyManifest);
     expect(out).toBe('GOAL: goal string');
   });
 
   it('raw/governed parity: attempt-1 output is byte-identical', () => {
     const goal = 'some goal';
-    const rawOut = renderRawRetryContext(goal, 1, 5, undefined);
+    const rawOut = renderRawRetryContext(goal, 1, 5, undefined, emptyManifest);
     const governedOut = renderGovernedRetryContext(
       goal,
       { grounding: emptyGrounding, attempt: 1, constraints: [] },
-      5
+      5,
+      emptyManifest
     );
     expect(governedOut).toBe(rawOut);
   });
@@ -401,7 +412,7 @@ describe('N1 harness — renderer byte-exactness', () => {
       priorResult,
       constraints: [],
     };
-    const governedOut = renderGovernedRetryContext('g', context, 5);
+    const governedOut = renderGovernedRetryContext('g', context, 5, emptyManifest);
 
     // The governed output must contain the raw block verbatim.
     expect(governedOut).toContain(rawBlock);
@@ -494,7 +505,7 @@ describe('N1 harness — renderer byte-exactness', () => {
       priorResult,
       constraints: [],
     };
-    const out = renderGovernedRetryContext('g', context, 5);
+    const out = renderGovernedRetryContext('g', context, 5, emptyManifest);
     expect(out).toContain('(no narrowing produced for this failure)');
     expect(out).toContain('CONSTRAINTS currently active (0 total):\n\n(none)');
     expect(out).toContain('FAILURE SHAPES observed across attempts:\n\n(none)');
@@ -868,13 +879,16 @@ describe('N1 harness — run-case parsing & prompt shell', () => {
     expect(out.indexOf('\n\nBODY HERE')).toBeGreaterThan(-1);
   });
 
-  it('SYSTEM_PROMPT_SHELL: matches §2 verbatim first and last lines', async () => {
+  it('SYSTEM_PROMPT_SHELL: matches §2 verbatim first and last lines + Rule 5 (Amendment 6)', async () => {
     const { SYSTEM_PROMPT_SHELL } = await import('./run-case.js');
     expect(SYSTEM_PROMPT_SHELL.startsWith('You are an AI coding agent.')).toBe(true);
     expect(SYSTEM_PROMPT_SHELL.endsWith('The goal remains the same across retries.')).toBe(true);
     expect(SYSTEM_PROMPT_SHELL).toContain('"search": "exact text to find"');
     expect(SYSTEM_PROMPT_SHELL).toContain('Rules:');
     expect(SYSTEM_PROMPT_SHELL).toContain('Output JSON only.');
+    // Amendment 6 Change 2: Rule 5 must be present verbatim in the shell.
+    expect(SYSTEM_PROMPT_SHELL).toContain('5. The APP FILES: manifest at the top of every prompt is the complete set of files in the app.');
+    expect(SYSTEM_PROMPT_SHELL).toContain('Do not fabricate file paths.');
   });
 
   it('MAX_ATTEMPTS: is 5 per §5', async () => {
@@ -1330,3 +1344,196 @@ function buildMetric(
     started_at: '2026-04-10T00:00:00.000Z',
   };
 }
+
+describe('N1 harness — Amendment 6 APP FILES manifest', () => {
+  const demoAppFixture = join(import.meta.dir, '..', '..', '..', 'fixtures', 'demo-app');
+
+  // Ground-truth 19-file manifest for fixtures/demo-app/ verified
+  // 2026-04-10 against the actual filesystem via the authorized
+  // `find` command documented in Amendment 6 Change 6. This is the
+  // exact list that DESIGN.md §3/§4 worked examples reference.
+  const demoAppGroundTruthManifest = [
+    'Dockerfile',
+    'config.json',
+    'config.prod.json',
+    'config.staging.json',
+    'docker-compose.test.yml',
+    'docker-compose.yml',
+    'infra/manifest.json',
+    'infra/terraform.tfstate',
+    'init.sql',
+    'no-infra-test/server.js',
+    'server.js',
+    'test-data/binary-sample.bin',
+    'test-data/bom-sample.txt',
+    'test-data/crlf-sample.txt',
+    'test-data/empty.txt',
+    'test-data/invalid.json',
+    'test-data/nul-sample.txt',
+    'test-data/sample.txt',
+    'test-data/valid.json',
+  ];
+
+  it('buildAppManifest: returns the exact 19-file list for fixtures/demo-app/', async () => {
+    const { buildAppManifest } = await import('./manifest.js');
+    const files = buildAppManifest(demoAppFixture);
+    expect(files).toEqual(demoAppGroundTruthManifest);
+  });
+
+  it('buildAppManifest: excludes any path with a dotfile segment (path-segment rule)', async () => {
+    const { buildAppManifest } = await import('./manifest.js');
+    const files = buildAppManifest(demoAppFixture);
+
+    // No output path may contain a segment beginning with "."
+    for (const f of files) {
+      const segments = f.split('/');
+      for (const seg of segments) {
+        expect(seg.startsWith('.')).toBe(false);
+      }
+    }
+
+    // Specific known dotfiles that MUST be excluded per Amendment 6 Change 1:
+    expect(files).not.toContain('.env');
+    expect(files).not.toContain('.env.prod');
+    expect(files).not.toContain('.env.staging');
+    expect(files).not.toContain('.verify/memory.jsonl');
+    expect(files).not.toContain('.verify-k5-07/memory.jsonl');
+    expect(files).not.toContain('.verify-k5-08/memory.jsonl');
+    expect(files).not.toContain('.verify-k5-09/memory.jsonl');
+    expect(files).not.toContain('.verify-k5-11/memory.jsonl');
+    expect(files).not.toContain('test-data/.hidden');
+
+    // And confirm the path-segment rule catches file-in-dotdir (exclude)
+    // independent of whether the file name itself begins with a dot.
+    const allPaths = files.join('|');
+    expect(allPaths).not.toContain('.verify');
+    expect(allPaths).not.toContain('.hidden');
+  });
+
+  it('buildAppManifest: is deterministic (identical input → identical output)', async () => {
+    const { buildAppManifest } = await import('./manifest.js');
+    const a = buildAppManifest(demoAppFixture);
+    const b = buildAppManifest(demoAppFixture);
+    expect(a).toEqual(b);
+  });
+
+  it('formatAppManifest: emits APP FILES: header + paths + trailing blank line', async () => {
+    const { formatAppManifest } = await import('./manifest.js');
+    const out = formatAppManifest(['a.txt', 'sub/b.txt']);
+    expect(out).toBe('APP FILES:\na.txt\nsub/b.txt\n\n');
+  });
+
+  it('formatAppManifest: empty files array still produces a well-formed block', async () => {
+    const { formatAppManifest } = await import('./manifest.js');
+    const out = formatAppManifest([]);
+    expect(out).toBe('APP FILES:\n\n');
+  });
+
+  it('render-raw attempt-1 with manifest matches §3 Amendment 6 worked example byte-exactly', async () => {
+    const { buildAppManifest, formatAppManifest } = await import('./manifest.js');
+    const manifest = formatAppManifest(buildAppManifest(demoAppFixture));
+    const out = renderRawRetryContext(
+      'F9 exact match: change port number in server.js',
+      1,
+      5,
+      undefined,
+      manifest
+    );
+
+    // Verbatim from DESIGN.md Amendment 6 Change 6 §3 attempt-1 worked example.
+    const expected =
+      'APP FILES:\n' +
+      'Dockerfile\n' +
+      'config.json\n' +
+      'config.prod.json\n' +
+      'config.staging.json\n' +
+      'docker-compose.test.yml\n' +
+      'docker-compose.yml\n' +
+      'infra/manifest.json\n' +
+      'infra/terraform.tfstate\n' +
+      'init.sql\n' +
+      'no-infra-test/server.js\n' +
+      'server.js\n' +
+      'test-data/binary-sample.bin\n' +
+      'test-data/bom-sample.txt\n' +
+      'test-data/crlf-sample.txt\n' +
+      'test-data/empty.txt\n' +
+      'test-data/invalid.json\n' +
+      'test-data/nul-sample.txt\n' +
+      'test-data/sample.txt\n' +
+      'test-data/valid.json\n' +
+      '\n' +
+      'GOAL: F9 exact match: change port number in server.js';
+
+    expect(out).toBe(expected);
+  });
+
+  it('render-governed attempt-1 with manifest matches §4 first-attempt shape byte-exactly', async () => {
+    const { buildAppManifest, formatAppManifest } = await import('./manifest.js');
+    const manifest = formatAppManifest(buildAppManifest(demoAppFixture));
+    const context: GovernContext = {
+      grounding: emptyGrounding,
+      attempt: 1,
+      constraints: [],
+    };
+    const governedOut = renderGovernedRetryContext(
+      'F9 exact match: change port number in server.js',
+      context,
+      5,
+      manifest
+    );
+
+    // §4 attempt-1 is byte-identical to §3 attempt-1 per Amendment 6 Change 4.
+    const rawOut = renderRawRetryContext(
+      'F9 exact match: change port number in server.js',
+      1,
+      5,
+      undefined,
+      manifest
+    );
+    expect(governedOut).toBe(rawOut);
+  });
+
+  it('raw/governed parity: APP FILES manifest block is byte-identical between loops', async () => {
+    const { buildAppManifest, formatAppManifest } = await import('./manifest.js');
+    const manifest = formatAppManifest(buildAppManifest(demoAppFixture));
+
+    // Both loops on attempt 1 (identical outputs).
+    const rawAttempt1 = renderRawRetryContext('g', 1, 5, undefined, manifest);
+    const govAttempt1 = renderGovernedRetryContext(
+      'g',
+      { grounding: emptyGrounding, attempt: 1, constraints: [] },
+      5,
+      manifest
+    );
+    expect(rawAttempt1).toBe(govAttempt1);
+
+    // Both loops on attempt N ≥ 2 with a prior failure (manifest block must match).
+    const priorResult: VerifyResult = {
+      success: false,
+      gates: [{ gate: 'F9', passed: false, detail: 'broken', durationMs: 1 }],
+      attestation: '',
+      timing: { totalMs: 1, perGate: {} },
+    };
+    const rawAttempt2 = renderRawRetryContext('g', 2, 5, priorResult, manifest);
+    const govContext: GovernContext = {
+      grounding: emptyGrounding,
+      attempt: 2,
+      priorResult,
+      constraints: [],
+    };
+    const govAttempt2 = renderGovernedRetryContext('g', govContext, 5, manifest);
+
+    // Both must start with the same manifest block (exact prefix).
+    expect(rawAttempt2.startsWith(manifest)).toBe(true);
+    expect(govAttempt2.startsWith(manifest)).toBe(true);
+
+    // And the manifest block itself is byte-identical between loops —
+    // extract by slicing off the manifest from each and asserting equality
+    // of the prefix.
+    const rawManifestPrefix = rawAttempt2.slice(0, manifest.length);
+    const govManifestPrefix = govAttempt2.slice(0, manifest.length);
+    expect(rawManifestPrefix).toBe(govManifestPrefix);
+    expect(rawManifestPrefix).toBe(manifest);
+  });
+});

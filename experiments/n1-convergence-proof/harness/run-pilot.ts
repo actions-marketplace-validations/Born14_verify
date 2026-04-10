@@ -299,7 +299,7 @@ async function main(): Promise<void> {
       avg_tokens_max: GATE_AVG_TOKENS_MAX,
       avg_wall_time_ms_max: GATE_AVG_WALL_TIME_MS_MAX,
     },
-    hermetic_gates: HERMETIC_GATES,
+    disabled_gates: HERMETIC_GATES,
   };
   const { appendFileSync, writeFileSync } = await import('fs');
   writeFileSync(RESULTS_PATH, JSON.stringify(metadata) + '\n', 'utf-8');

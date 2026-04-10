@@ -582,7 +582,7 @@ The combined classification feeds the narrowing quality interpretation:
 - Primary model (Gemini): `INPUT_API_KEY` with provider set to `gemini`
 - Sanity check model (Haiku): `INPUT_API_KEY` with provider set to `anthropic`
 
-The harness reads the key from `process.env.INPUT_API_KEY` on startup. If not set, the harness exits with a clear error. No code changes to `src/action/index.ts` — the existing code is reused verbatim.
+The harness reads the key from `process.env.INPUT_API_KEY` on startup. If not set, the harness exits with a clear error. The `callLLM` function in `src/action/index.ts` is exported and reused verbatim. The function body, its call sites inside `src/action/index.ts`, and its behavior when `src/action/index.ts` is executed as an entry point are unchanged. Two mechanical edits are permitted: (a) adding `export` to the `async function callLLM` declaration, and (b) wrapping the bottom-of-file `run().catch(...)` invocation in an `if (import.meta.main)` guard so side-effect execution only fires when the file is run directly, not when imported by the harness. See Amendment 5.
 
 **Key management:** the operator provides the key via environment variable at execution time. The key is never committed to the repo, never logged, and never included in any experiment output.
 
@@ -1476,3 +1476,67 @@ Phase 1g was halted at the seed-construction step when the builder attempted to 
 5. **Emit `case-list.jsonl` after operator approval.** The final `case-list.jsonl` combines the 40 Source B live cases (37 original pre-flight passes + 3 Phase 1f-6 replacement passes) with the 12 Source D synthetic seeds, for a total of 52 live N1-A cases. `case-list.jsonl` is the Phase 1 lock artifact and is committed as the Phase 1h closure.
 
 The pre-flight checkpoint at Phase 1e (report drop count `k`) is preserved by Amendment 4. No further pre-flight runs are required — the Source B pool is locked at 40 live cases and synthetic seeds are not pre-flighted per §14. Phase 1 ends with Phase 1h's `case-list.jsonl` commit.
+
+---
+
+## Pre-registration amendment 5 (2026-04-09)
+
+**Title:** §20 importability correction — `callLLM` export + entry-point guard.
+
+**Class:** Meta-drafting gap (same class as Amendment 4).
+
+**Authored by:** builder Claude
+**Approved by:** operator (explicit ruling delivered during Phase 2 halt, 2026-04-09, titled "Ruling: Amendment 5, Option A")
+**Authorization reference:** Operator's ruling delivered in the N1 session immediately following the Phase 2 scaffolding halt on the §20 importability tripwire. The full operator response is the authorization of record.
+**Amendment commit:** see git log for the commit landing this amendment.
+
+### Preamble
+
+§20 as originally drafted required re-use of `callLLM()` from `src/action/index.ts` lines 253-310 AND prohibited code changes to `src/action/index.ts`. During Phase 2 scaffolding, builder Claude discovered these requirements are not jointly satisfiable as written: `callLLM` is a non-exported function inside an entry-point file that calls `run()` at import time. It cannot be imported without triggering `run()`, which calls `process.exit(1)` when GitHub Actions env vars are absent. The spec contains a latent self-contradiction that must be resolved before Phase 2 can proceed.
+
+Builder Claude halted per §26 rather than picking a resolution unilaterally. The operator ruled Option A: export `callLLM` and guard the bottom-of-file `run()` invocation behind `if (import.meta.main)`, which is the minimum diff that makes §20 jointly satisfiable without creating drift risk (Option C, byte-for-byte copy) or over-scoping the production change (Option B, extract to new module).
+
+### Change 1 — §20 text replacement
+
+In §20, the sentence "No code changes to `src/action/index.ts` — the existing code is reused verbatim" is replaced with:
+
+> The `callLLM` function in `src/action/index.ts` is exported and reused verbatim. The function body, its call sites inside `src/action/index.ts`, and its behavior when `src/action/index.ts` is executed as an entry point are unchanged. Two mechanical edits are permitted: (a) adding `export` to the `async function callLLM` declaration, and (b) wrapping the bottom-of-file `run().catch(...)` invocation in an `if (import.meta.main)` guard so side-effect execution only fires when the file is run directly, not when imported by the harness.
+
+This replacement has been applied in the §20 text above.
+
+### Change 2 — reuse contract clarification
+
+The harness imports `callLLM` from `src/action/index.js` directly. Any future change to `callLLM`'s body, signature, or behavior is a production change that independently affects both the action entry point and the N1 harness. This is the intended coupling and is the reason re-use was pinned in the first place. Raw and governed loops in the harness both call the same imported `callLLM`, eliminating any adapter-level confound between loops.
+
+### Interaction with prior amendments
+
+- **Amendment 1** (struck N1-B): no interaction.
+- **Amendment 2** (content ban in Source D): no interaction.
+- **Amendment 3** (Reading 1, relaxed sub-file matching): no interaction.
+- **Amendment 4** (§9 arithmetic redistribution): Amendment 5 is structurally the same class of gap — spec internally inconsistent, detected by execution, resolved by minimum-diff correction that preserves original intent. The three-class audit-gap taxonomy now has **two instances in the meta-drafting class**: Amendment 4 (arithmetic) and Amendment 5 (importability). This is worth noting in RESULTS.md as evidence that meta-drafting gaps recur — two instances out of five amendments is not a one-off drafting error, it is a recurring failure mode in pre-registration worth calling out in the emergences section.
+
+All five amendments remain binding per §26. None of the five modifies or supersedes any of the others. Future amendments (Amendment 6+) must include an "Interaction with prior amendments" section that lists Amendments 1, 2, 3, 4, and 5 in order and states whether and how the new amendment modifies or supersedes each of their effects.
+
+### Why Option A, not B or C
+
+- **Option C (byte-for-byte copy into harness)** was rejected because it creates a drift hazard that §20's "reuse" clause exists specifically to prevent. The whole point of pinning the adapter is that raw and governed loops call the same function so any LLM-adapter-level confound is eliminated. Two copies defeat that guarantee the moment anyone touches either one.
+- **Option B (extract to `src/llm/call.ts`)** was rejected as over-scoped. Cleaner architecturally, but it changes more surface area than the drafting flaw requires. §20's intent was "the adapter is pinned, do not reimplement it." A refactor that moves the function to a new module and updates imports in production code is a larger production change than fixing the importability flaw in place.
+- **Option A (export + entry-point guard)** is the minimum diff that makes §20 jointly satisfiable. The drafting flaw was assuming `callLLM` was already importable when it was not. Option A fixes that flaw and nothing else. The function body is unchanged. The call sites inside `src/action/index.ts` are unchanged. Only two mechanical edits land in production.
+
+### Verification
+
+After Amendment 5 lands, the following must hold:
+
+1. `src/action/index.ts` executed as an entry point behaves identically to its pre-amendment behavior.
+2. `import { callLLM } from '../../src/action/index.js'` succeeds from the harness without triggering `run()`.
+3. No changes to `callLLM`'s function body.
+
+### Freeze protocol status
+
+**Amendment 5 is now part of the pre-registration.** It is subject to §26 equally with the original DESIGN.md sections and with Amendments 1, 2, 3, and 4. Specifically:
+
+1. **No further changes to §20's importability contract without Amendment 6.** If a future builder wants to change how `callLLM` is imported, that is a new amendment.
+2. **No silent drift of the harness's LLM adapter away from `callLLM`.** The harness must call the exported `callLLM` directly. Any wrapper that changes request shape, response parsing, or error handling is a reimplementation and violates §20.
+3. **The §26 bilateral refusal clause applies to Amendment 5.** Neither the operator nor the builder may silently change the `callLLM` export contract, silently introduce a harness-local copy, or silently modify `callLLM`'s function body. Pressure to do any of these must be refused and routed through the amendment protocol.
+
+A pre-registration protocol that allows unlimited silent amendments is no protocol at all. Amendment 5 is binding.

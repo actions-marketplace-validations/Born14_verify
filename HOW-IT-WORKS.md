@@ -389,6 +389,108 @@ Each provider is ~50 lines wrapping a platform API. The gates, K5 constraints, G
 
 ---
 
+## Migration Verification (April 12, 2026)
+
+When a PR contains `.sql` migration files, verify also runs a separate **migration verification pipeline** alongside the original 26-gate code-edit checks. This is the first vertical of verify's three-vertical product strategy (code edits, migrations, HTTP contracts).
+
+### How it works
+
+```
+PR opens with migrations/20260412_add_role.sql
+  ↓
+Action detects .sql files in the changed file list
+  ↓
+Group by migration root: each independent migration directory gets its own schema
+  (packages/api/migrations and packages/web/migrations are NEVER unioned)
+  ↓
+For each group:
+  ├─ Pin to PR base SHA (immutable, deterministic)
+  ├─ Read all prior migrations from that root on the base branch
+  ├─ Replay them in order to build the pre-migration schema in memory
+  │   (with reverse FK index — every column knows which other columns reference it)
+  └─ For each new migration in this PR:
+       ├─ Parse with libpg-query → typed MigrationOp[]
+       ├─ Run grounding gate (DM-01..05): does the operation reference real tables/columns?
+       ├─ Run safety gate (DM-15..19): is the operation operationally dangerous?
+       └─ Apply the operation to the working schema for the next file
+  ↓
+Post findings as a PR comment with shape IDs, line numbers, and ack instructions
+  ↓
+DM-18 (NOT NULL without default) blocks merge.
+Other DM shapes are warning-only while they're calibrated.
+```
+
+No database connection. No shadow DB. Pure static analysis of the migration file against the replayed schema. The whole pipeline is deterministic — same PR + same base SHA → same result, every time.
+
+### What's measured
+
+DM-18 is the first calibrated shape in verify's entire taxonomy.
+
+| Metric | Value |
+|---|---|
+| Corpus | 761 production migrations from cal.com, formbricks, supabase |
+| True positives | 19 |
+| False positives | 0 |
+| Precision | 100% on this corpus |
+| Real-world proof point | Cal.com shipped a `NOT NULL` migration on April 4, 2024; reverted it the next day in a migration named `make_guest_company_and_email_optional`. Verify would have caught the original. |
+
+See [scripts/mvp-migration/MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) for the full methodology and reproduction steps.
+
+### How agents fail differently than humans
+
+Across 75 migration tasks given to Claude Sonnet, Gemini 2.5 Flash, and GPT-4o on the same prompts:
+
+| Source | DM-18 hit rate on probe tasks |
+|---|---|
+| Human (backtest of 761 production migrations) | 2.5% |
+| Claude Sonnet | 17.1% |
+| GPT-4o | 14.3% |
+| Gemini 2.5 Flash | 46.9% |
+
+All three models are 6-19x worse than the human baseline on this specific failure class. The same prompt phrased differently produces safe SQL or unsafe SQL depending on the model. This isn't fixable with prompt engineering — the safe pattern is structural, and verify is the structural check.
+
+False-positive sanity check: across 60 migrations on tasks designed to be safe (`ADD COLUMN` with `DEFAULT`, optional columns, etc.), the gate fired zero times on any model.
+
+### The 10 DM-* shapes
+
+| ID | What it catches | Status |
+|---|---|---|
+| DM-01 | Target table not found | shipped |
+| DM-02 | Target column not found | shipped |
+| DM-03 | FK references unknown table or column | shipped |
+| DM-04 | Create target already exists | shipped |
+| DM-05 | Rename source missing or target conflict | shipped |
+| DM-15 | DROP COLUMN with incoming FK references | shipped (warning-only) |
+| DM-16 | DROP TABLE with incoming FK references | shipped (warning-only) |
+| DM-17 | Column type change is narrowing | shipped (warning-only) |
+| **DM-18** | **NOT NULL without safe preconditions** | **calibrated, blocking in CI** |
+| DM-19 | DROP INDEX backing a constraint | shipped (warning-only) |
+
+See the [Database Migration Failures section of FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md#database-migration-failures) for the full catalog.
+
+### Where it lives in the codebase
+
+```
+src/types-migration.ts                — typed schema, MigrationOp, MigrationFinding
+src/action/migration-check.ts          — Action integration (group, parse, gate, format)
+scripts/mvp-migration/
+  ├─ schema-loader.ts                  — schema replay + reverse FK index
+  ├─ spec-from-ast.ts                  — libpg-query AST → MigrationSpec
+  ├─ grounding-gate.ts                 — DM-01..05 with per-op progressive schema
+  ├─ safety-gate.ts                    — DM-15..19 with ack mechanism
+  ├─ replay-engine.ts                  — corpus-wide backtest runner
+  ├─ agent-corpus-expanded.ts          — three-model agent comparison (75 tasks)
+  ├─ historical-followup.ts            — cross-reference findings with subsequent migrations
+  ├─ MEASURED-CLAIMS.md                — frozen DM-18 calibration claim
+  └─ fixtures/                          — 7 golden migration fixtures
+```
+
+### Architectural relationship to the rest of verify
+
+The migration vertical is built on the same primitives as the original 26 gates: claim ↔ evidence binding, deterministic checks, schema-grounded verification. The difference is the surface (SQL migrations) and the calibration discipline (measured precision against an external corpus). DM-18 is the proof that the architecture can produce calibrated shapes; the rest of the existing taxonomy will follow the same path one shape at a time.
+
+---
+
 ## The Bet
 
 Most AI governance today focuses on what goes *into* the agent — prompt filtering, guardrails, content policies. Nobody systematically checks what comes *out* — the actual changes the agent made to the actual system, verified against ground truth.

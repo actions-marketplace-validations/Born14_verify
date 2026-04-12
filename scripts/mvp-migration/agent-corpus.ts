@@ -272,6 +272,34 @@ ${task.schemaSql}`;
     return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
   }
 
+  if (agent === 'openai') {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) throw new Error('OPENAI_API_KEY not set');
+
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        temperature: 0,
+        max_tokens: 1024,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`OpenAI API error ${res.status}: ${body.slice(0, 200)}`);
+    }
+    const data = await res.json() as any;
+    return data.choices?.[0]?.message?.content ?? '';
+  }
+
   throw new Error(`Unknown agent: ${agent}`);
 }
 
@@ -370,6 +398,7 @@ async function main() {
   const agents: string[] = [];
   if (process.env.ANTHROPIC_API_KEY) agents.push('claude');
   if (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY) agents.push('gemini');
+  if (process.env.OPENAI_API_KEY) agents.push('openai');
 
   if (agents.length === 0) {
     console.error('No API keys found. Set ANTHROPIC_API_KEY or GOOGLE_API_KEY.');

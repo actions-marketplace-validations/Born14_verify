@@ -83,6 +83,42 @@ export async function getPRMetadata(token: string, owner: string, repo: string, 
 }
 
 /**
+ * Get the list of changed files in a PR.
+ */
+export async function getPRFiles(token: string, owner: string, repo: string, prNumber: number): Promise<Array<{ filename: string; status: string }>> {
+  const files: Array<{ filename: string; status: string }> = [];
+  let page = 1;
+  while (true) {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/files?per_page=100&page=${page}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!res.ok) throw new Error(`Failed to get PR files: ${res.status}`);
+    const batch = await res.json() as any[];
+    if (batch.length === 0) break;
+    files.push(...batch.map((f: any) => ({ filename: f.filename, status: f.status })));
+    if (batch.length < 100) break;
+    page++;
+  }
+  return files;
+}
+
+/**
+ * Get file content from a specific git ref (branch, tag, or SHA).
+ * Returns null if the file doesn't exist at that ref.
+ */
+export async function getFileContent(token: string, owner: string, repo: string, path: string, ref: string): Promise<string | null> {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${ref}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' },
+  });
+  if (!res.ok) return null;
+  const data = await res.json() as any;
+  if (data.encoding === 'base64' && data.content) {
+    return Buffer.from(data.content, 'base64').toString('utf-8');
+  }
+  return null;
+}
+
+/**
  * Post a comment on a PR. Updates existing verify comment if found.
  */
 export async function postPRComment(token: string, owner: string, repo: string, prNumber: number, body: string): Promise<void> {

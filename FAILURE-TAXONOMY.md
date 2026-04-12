@@ -21,6 +21,22 @@ A reference catalog of failure shapes verify's gates can detect, organized by su
 - **designed** — has a documented rule and a planned gate, but no implementation yet.
 - **deprecated** — was in scope at some point, but the current three-vertical product strategy says not to invest further. Marked explicitly so the history is preserved.
 
+**2a. Promotion criteria — how a shape moves from `shipped` to `calibrated`.** These thresholds are written down BEFORE measuring any new shape, so calibration can never become a goalpost-moving exercise where the bar is set after the data comes back.
+
+A shape promotes from `shipped` → `calibrated` only when **all** of these hold:
+
+- **Corpus.** Findings are measured against a real, externally-sourced corpus of at least several hundred items the rule was not designed against. For migration shapes, the canonical corpus is the 761-migration set used for DM-18 (cal.com 590 + formbricks 140 + supabase 31). Synthetic test fixtures and the agent-corpus experiment do **not** count as calibration corpora — they are supplementary evidence at best.
+- **Manual review.** Every finding the rule produces on the corpus is hand-classified as TP, FP, or ambiguous by a human reviewer. The classification reasoning is recorded in a calibration JSONL file alongside the report. Ambiguous findings are reported separately and never silently bucketed into TP or FP.
+- **Sample size.** At minimum 10 findings on the corpus. Below 10, precision is too noisy to publish — the rule needs a larger corpus, a broader rule, or both. Shapes that produce zero findings on the canonical corpus are not "100% precision" — they are "untested at this scale" and stay in `shipped`.
+- **Precision threshold for tier and severity:**
+  - **≥ 80% precision** (TP / (TP + FP), excluding ambiguous) → promotes to `calibrated` and ships as **error-severity / blocking** in CI. The DM-18 measurement (19/19 = 100%) is the current example.
+  - **50–79% precision** → promotes to `calibrated` and ships as **warning-severity / non-blocking**. The published claim must include the measured rate, not just "shipped." A warning-only calibrated shape is still a real claim — it just says "this rule fires on a real risk pattern, but you should expect noise."
+  - **< 50% precision** → does NOT promote. The rule stays in `shipped` (or moves back to `designed` if removal is preferable). Publishing a sub-50% rule as calibrated would actively mislead partners about what verify catches. Improve the rule and re-measure, or accept that the rule isn't ready.
+- **Reproducibility.** The corpus is publicly accessible (or, for private corpora, the methodology is documented well enough that an external reviewer could reproduce the precision number against an equivalent corpus). The calibration script is committed to the repo. The exact precision number, sample size, and any caveats are written into [scripts/mvp-migration/MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) (for migration shapes) or the equivalent claim doc for other verticals.
+- **No goalpost moves after measurement.** If a calibration run produces a precision number below the threshold for the severity the operator hoped for, the rule does not get promoted to that severity by adjusting the threshold downward. The rule either gets improved and re-measured, or accepts the lower-severity tier the data actually supports, or stays in `shipped` until the next attempt. Thresholds in this document are stable; only the *measurements against them* move.
+
+These criteria apply to all shapes in all verticals, not just migrations. Vertical #1 (code-edit) and vertical #3 (HTTP contract) shapes promote under the same rules when their calibration arcs begin.
+
 **3. The original three-vertical strategy guides what's load-bearing.** Verify's product direction commits to three verticals: code-edit verification, database migration verification, and HTTP contract verification. Sections that map to those verticals are load-bearing. Sections outside those verticals are still in the doc for completeness but are explicitly deprioritized — see the deprecation markers in the relevant sections.
 
 ---

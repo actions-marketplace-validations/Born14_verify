@@ -13,9 +13,11 @@
 import { parseDiff } from '../parsers/git-diff.js';
 import { tier1Diff, tier2Context, tier3Intent } from '../extractor/index.js';
 import { verify } from '../verify.js';
-import { getPRDiff, getPRMetadata, postPRComment } from './github.js';
+import { getPRDiff, getPRMetadata, postPRComment, getPRFiles, getFileContent } from './github.js';
 import { formatComment } from './comment.js';
+import { checkMigrations, formatMigrationComment, detectMigrationFiles } from './migration-check.js';
 import type { Predicate } from '../types.js';
+import type { MigrationCheckResult } from './migration-check.js';
 
 // =============================================================================
 // ACTION ENTRY POINT
@@ -179,27 +181,96 @@ async function run(): Promise<void> {
     if (!g.passed) console.log(`  \u274C ${g.gate}: ${g.detail?.substring(0, 80)}`);
   }
 
+  // ─── Step 3b: Migration verification ───────────────────────────────────
+  console.log('\n[3b/4] Checking migrations...');
+  let migrationResult: MigrationCheckResult | null = null;
+
+  try {
+    const prFiles = await getPRFiles(token, owner, repo, prNumber);
+    const migrationPaths = detectMigrationFiles(prFiles.map(f => f.filename));
+
+    if (migrationPaths.length > 0) {
+      console.log(`  Found ${migrationPaths.length} migration file(s): ${migrationPaths.join(', ')}`);
+
+      // Get PR metadata for base branch ref
+      const metadata = await getPRMetadata(token, owner, repo, prNumber);
+
+      // Read migration file content from head branch
+      const migrationFiles = new Map<string, string>();
+      for (const path of migrationPaths) {
+        const content = await getFileContent(token, owner, repo, path, metadata.headSha);
+        if (content) migrationFiles.set(path, content);
+      }
+
+      // Find prior migrations in the same directory (from base branch)
+      // to build the pre-migration schema
+      const priorSql: string[] = [];
+      for (const migPath of migrationPaths) {
+        const migDir = migPath.replace(/\/[^/]+$/, '');
+        // List all files in the migration directory from the base branch
+        try {
+          const dirRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(migDir)}?ref=${metadata.baseBranch}`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' },
+          });
+          if (dirRes.ok) {
+            const dirContents = await dirRes.json() as any[];
+            const priorFiles = dirContents
+              .filter((f: any) => f.name.endsWith('.sql') && f.type === 'file')
+              .map((f: any) => f.path)
+              .filter((p: string) => !migrationPaths.includes(p))
+              .sort();
+
+            for (const pf of priorFiles) {
+              const sql = await getFileContent(token, owner, repo, pf, metadata.baseBranch);
+              if (sql) priorSql.push(sql);
+            }
+          }
+        } catch { /* directory listing failed — schema will start empty */ }
+        break; // Only need to scan the migration dir once
+      }
+
+      console.log(`  Schema bootstrap: ${priorSql.length} prior migration(s)`);
+      migrationResult = await checkMigrations(migrationFiles, priorSql);
+      console.log(`  Migration result: ${migrationResult.passed ? 'PASS' : 'FAIL'} (${migrationResult.findings.length} findings)`);
+    } else {
+      console.log('  No migration files in this PR.');
+    }
+  } catch (err: any) {
+    console.log(`  Migration check error: ${err.message}`);
+  }
+
   // ─── Step 4: Post comment ─────────────────────────────────────────────
   if (commentEnabled) {
     console.log('\n[4/4] Posting PR comment...');
-    const comment = formatComment(result, {
+    let comment = formatComment(result, {
       prNumber,
       predicateCount: predicates.length,
       tiers,
       durationMs: Date.now() - startTime,
     });
+
+    // Append migration results if any
+    if (migrationResult) {
+      comment += '\n\n' + formatMigrationComment(migrationResult);
+    }
+
     await postPRComment(token, owner, repo, prNumber, comment);
     console.log('  Comment posted.');
   }
 
   // ─── Set outputs ──────────────────────────────────────────────────────
-  setOutput('success', String(result.success));
+  const overallSuccess = result.success && (migrationResult?.passed ?? true);
+  setOutput('success', String(overallSuccess));
   setOutput('gates-passed', result.gates.filter(g => g.passed).map(g => g.gate).join(','));
   setOutput('gates-failed', result.gates.filter(g => !g.passed).map(g => g.gate).join(','));
-  setOutput('summary', `${passed}/${passed + failed} gates passed${failed > 0 ? ` — ${result.gates.filter(g => !g.passed).map(g => g.gate).join(', ')} failed` : ''}`);
+
+  const migSummary = migrationResult
+    ? `, ${migrationResult.findings.length} migration finding(s)`
+    : '';
+  setOutput('summary', `${passed}/${passed + failed} gates passed${failed > 0 ? ` — ${result.gates.filter(g => !g.passed).map(g => g.gate).join(', ')} failed` : ''}${migSummary}`);
 
   // Exit with failure if configured
-  if (failOn === 'error' && !result.success) {
+  if (failOn === 'error' && !overallSuccess) {
     process.exit(1);
   }
 }

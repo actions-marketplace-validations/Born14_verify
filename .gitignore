@@ -60,3 +60,8 @@ fixtures/http-server.js
 fixtures/http-server.js.map
 fixtures/http-server.d.ts
 fixtures/http-server.d.ts.map
+
+# Migration MVP — cloned OSS repos for backtest (large, never committed)
+scripts/mvp-migration/corpus/_repos/
+# Migration MVP — generated reports (regenerated on demand)
+scripts/mvp-migration/reports/

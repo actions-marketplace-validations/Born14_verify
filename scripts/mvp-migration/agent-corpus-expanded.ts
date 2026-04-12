@@ -177,11 +177,14 @@ async function runTask(task: MigrationTask, agent: string): Promise<AgentRun & {
     shapeId: f.shapeId, severity: f.severity, message: f.message,
   }));
   const hasErrors = allFindings.some(f => f.severity === 'error');
+  const hasWarnings = allFindings.some(f => f.severity === 'warning');
+  const finalLabel: 'unsafe' | 'safe_with_warning' | 'safe' =
+    hasErrors ? 'unsafe' : hasWarnings ? 'safe_with_warning' : 'safe';
 
   return {
     taskId: task.id, repo: task.repo, prompt: task.prompt, agent,
     generatedSql, parseSuccess: true, parseError: null,
-    findings, finalLabel: hasErrors ? 'unsafe' : 'safe',
+    findings, finalLabel,
     targetShapes: task.targetShapes,
     category,
   };
@@ -221,8 +224,12 @@ async function main() {
       process.stdout.write(`  [${i}/${EXPANDED_TASKS.length}] ${task.id}... `);
       const run = await runTask(task, agent);
       allRuns.push(run);
-      const status = run.finalLabel === 'unsafe' ? '⚠ unsafe' : run.finalLabel === 'parse_error' ? '✗ parse error' : '✓ safe';
-      const findings = run.findings.length > 0 ? ` (${run.findings.map(f => f.shapeId).join(',')})` : '';
+      const status =
+        run.finalLabel === 'unsafe' ? '⚠ unsafe (error)' :
+        run.finalLabel === 'safe_with_warning' ? '⚠ safe + warning' :
+        run.finalLabel === 'parse_error' ? '✗ parse error' :
+        '✓ clean';
+      const findings = run.findings.length > 0 ? ` (${run.findings.map(f => `${f.shapeId}/${f.severity[0]}`).join(',')})` : '';
       console.log(`${status}${findings}`);
     }
   }
@@ -239,15 +246,17 @@ async function main() {
     const runs = allRuns.filter(r => r.agent === agent);
     const parsed = runs.filter(r => r.parseSuccess);
     const unsafe = runs.filter(r => r.finalLabel === 'unsafe');
-    const safe = runs.filter(r => r.finalLabel === 'safe');
+    const safeWithWarning = runs.filter(r => r.finalLabel === 'safe_with_warning');
+    const clean = runs.filter(r => r.finalLabel === 'safe');
     const errors = runs.filter(r => r.finalLabel === 'parse_error');
 
     console.log(`\n${agent}:`);
-    console.log(`  Total runs:    ${runs.length}`);
-    console.log(`  Parsed OK:     ${parsed.length}`);
-    console.log(`  Parse errors:  ${errors.length}`);
-    console.log(`  Unsafe:        ${unsafe.length} (${(unsafe.length / parsed.length * 100).toFixed(1)}% of parsed)`);
-    console.log(`  Safe:          ${safe.length}`);
+    console.log(`  Total runs:        ${runs.length}`);
+    console.log(`  Parsed OK:         ${parsed.length}`);
+    console.log(`  Parse errors:      ${errors.length}`);
+    console.log(`  Unsafe (error):    ${unsafe.length} (${(unsafe.length / parsed.length * 100).toFixed(1)}% of parsed)`);
+    console.log(`  Safe + warning:    ${safeWithWarning.length}`);
+    console.log(`  Clean (no finds):  ${clean.length}`);
 
     const shapeCounts: Record<string, { error: number; warning: number }> = {};
     for (const r of runs) {
@@ -296,21 +305,27 @@ async function main() {
   // Headline comparison
   // ---------------------------------------------------------------------------
 
+  // Definitions:
+  //   "DM-18 (any)"      — finding of any severity. Measures structural risk rate.
+  //   "DM-18 (blocking)" — error-severity only. Measures CI-blocking rate.
+  // Both columns shown so warning-only hits are never silently bucketed as safe.
   console.log('\n\n=== HUMAN vs AGENT (DM-18) ===\n');
-  console.log('Source            | Tasks | DM-18 hits | Rate');
-  console.log('------------------|-------|------------|--------');
-  console.log('Human (backtest)  | 761   | 19         | 2.5%');
+  console.log('Source            | Tasks | DM-18 (any) | DM-18 (block) | Any rate');
+  console.log('------------------|-------|-------------|---------------|---------');
+  console.log('Human (backtest)  | 761   | 19          | 19            | 2.5%');
 
   // For DM-18, only count tasks designed to probe DM-18
   const dm18Categories = ['add_required', 'set_not_null'];
   for (const agent of agents) {
     const dm18Runs = allRuns.filter(r => dm18Categories.includes(r.category) && r.agent === agent && r.parseSuccess);
-    const dm18Hits = dm18Runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
+    const dm18Any = dm18Runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
+    const dm18Block = dm18Runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18' && f.severity === 'error'));
     console.log(
       agent.padEnd(18) + '| ' +
       String(dm18Runs.length).padEnd(6) + '| ' +
-      String(dm18Hits.length).padEnd(11) + '| ' +
-      (dm18Runs.length ? (dm18Hits.length / dm18Runs.length * 100).toFixed(1) + '%' : 'N/A')
+      String(dm18Any.length).padEnd(12) + '| ' +
+      String(dm18Block.length).padEnd(14) + '| ' +
+      (dm18Runs.length ? (dm18Any.length / dm18Runs.length * 100).toFixed(1) + '%' : 'N/A')
     );
   }
 
@@ -347,11 +362,22 @@ async function main() {
     taskCount: EXPANDED_TASKS.length,
     totalRuns: allRuns.length,
     humanBaseline: { migrations: 761, dm18Hits: 19, hitRate: '2.5%' },
+    labelDefinitions: {
+      unsafe: 'at least one error-severity finding (blocking in CI)',
+      safe_with_warning: 'no errors, but at least one warning-severity finding',
+      safe: 'zero findings of any severity',
+      parse_error: 'generated SQL failed to parse',
+    },
+    metricDefinitions: {
+      dm18HitsAny: 'DM-18 finding of any severity — measures structural risk rate',
+      dm18HitsBlocking: 'DM-18 finding of error severity — measures CI-blocking rate',
+    },
     perAgent: agents.map(agent => {
       const runs = allRuns.filter(r => r.agent === agent);
       const parsed = runs.filter(r => r.parseSuccess);
       const dm18Runs = parsed.filter(r => dm18Categories.includes(r.category));
-      const dm18Hits = dm18Runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
+      const dm18Any = dm18Runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
+      const dm18Block = dm18Runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18' && f.severity === 'error'));
       const allShapeCounts: Record<string, { error: number; warning: number }> = {};
       for (const r of runs) for (const f of r.findings) {
         if (!allShapeCounts[f.shapeId]) allShapeCounts[f.shapeId] = { error: 0, warning: 0 };
@@ -363,10 +389,13 @@ async function main() {
         parsed: parsed.length,
         parseErrors: runs.filter(r => !r.parseSuccess).length,
         unsafe: runs.filter(r => r.finalLabel === 'unsafe').length,
+        safe_with_warning: runs.filter(r => r.finalLabel === 'safe_with_warning').length,
         safe: runs.filter(r => r.finalLabel === 'safe').length,
         dm18ProbeTasks: dm18Runs.length,
-        dm18Hits: dm18Hits.length,
-        dm18Rate: dm18Runs.length ? (dm18Hits.length / dm18Runs.length * 100).toFixed(1) + '%' : 'N/A',
+        dm18HitsAny: dm18Any.length,
+        dm18HitsBlocking: dm18Block.length,
+        dm18RateAny: dm18Runs.length ? (dm18Any.length / dm18Runs.length * 100).toFixed(1) + '%' : 'N/A',
+        dm18RateBlocking: dm18Runs.length ? (dm18Block.length / dm18Runs.length * 100).toFixed(1) + '%' : 'N/A',
         shapeCounts: allShapeCounts,
       };
     }),

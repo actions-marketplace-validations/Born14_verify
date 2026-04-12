@@ -39,6 +39,7 @@ interface FollowupRow {
   shape_id: string;
   table: string;
   column: string;
+  target_resolution: 'reason' | 'sql_second_pass' | 'unresolved';
   followup_found: boolean;
   evidence_type: string | null;
   evidence_ref: string | null;
@@ -187,18 +188,65 @@ function extractLine(sql: string, needle: string): string {
 // Parse table.column from calibration reason
 // ---------------------------------------------------------------------------
 
-function parseTarget(reason: string): { table: string; column: string } {
+/**
+ * Parse target table.column from a calibration row's reason field.
+ * Only returns a result when BOTH table and column are present in explicit
+ * `table.column` form. Returns null otherwise — caller must do a second-pass
+ * lookup against the migration SQL to recover the table name.
+ *
+ * Integrity rule: never return an empty table name. Empty table names produce
+ * regexes that match unrelated statements across the corpus and inflate
+ * follow-up counts.
+ */
+function parseTarget(reason: string): { table: string; column: string } | null {
   // "ADD COLUMN schedule.name NOT NULL without DEFAULT"
   // "SET NOT NULL on users.email without default"
-  // "ADD COLUMN guestcompany NOT NULL without DEFAULT" (missing table prefix)
-  let match = reason.match(/(?:ADD COLUMN|SET NOT NULL on)\s+(\w+)\.(\w+)/i);
-  if (match) return { table: match[1], column: match[2] };
+  const match = reason.match(/(?:ADD COLUMN|SET NOT NULL on)\s+(\w+)\.(\w+)/i);
+  if (match && match[1] && match[2]) {
+    return { table: match[1], column: match[2] };
+  }
+  return null;
+}
 
-  // Fallback: just grab the first word after ADD COLUMN
-  match = reason.match(/ADD COLUMN\s+(\w+)/i);
-  if (match) return { table: '', column: match[1] };
+/**
+ * Second-pass: when the calibration reason lacks `table.column` form,
+ * extract the column from the reason and find its enclosing table by
+ * parsing the actual migration SQL. Returns null if either piece can't
+ * be recovered with confidence.
+ */
+function extractTargetFromSql(reason: string, sql: string): { table: string; column: string } | null {
+  // Pull a column hint from the reason — first identifier after a known verb.
+  const colMatch = reason.match(/(?:ADD COLUMN|SET NOT NULL(?:\s+on)?|ALTER COLUMN)\s+["']?(\w+)["']?/i);
+  if (!colMatch || !colMatch[1]) return null;
+  const column = colMatch[1];
 
-  return { table: '', column: '' };
+  // Walk the SQL looking for an ALTER TABLE / CREATE TABLE block that contains
+  // an ADD COLUMN / SET NOT NULL / ALTER COLUMN reference to this column.
+  // Pattern: capture the table name from the nearest preceding
+  //   ALTER TABLE [schema.]"?table"?  or  CREATE TABLE [IF NOT EXISTS] [schema.]"?table"?
+  const tableStmtRe = /(?:ALTER\s+TABLE(?:\s+IF\s+EXISTS)?|CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?)\s+(?:["']?\w+["']?\.)?["']?(\w+)["']?/gi;
+  const colRe = new RegExp(
+    `(?:ADD\\s+COLUMN(?:\\s+IF\\s+NOT\\s+EXISTS)?|ALTER\\s+COLUMN|SET\\s+NOT\\s+NULL\\s+on)\\s+["']?${escapeRegex(column)}["']?\\b`,
+    'i'
+  );
+
+  // Find every table-introducing statement and the slice of SQL it owns
+  // (until the next such statement). If our column reference appears in that
+  // slice, the table is our match.
+  const matches: Array<{ table: string; start: number }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = tableStmtRe.exec(sql)) !== null) {
+    matches.push({ table: m[1], start: m.index });
+  }
+  for (let i = 0; i < matches.length; i++) {
+    const start = matches[i].start;
+    const end = i + 1 < matches.length ? matches[i + 1].start : sql.length;
+    const slice = sql.slice(start, end);
+    if (colRe.test(slice)) {
+      return { table: matches[i].table, column };
+    }
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -227,8 +275,14 @@ async function main() {
   const results: FollowupRow[] = [];
 
   for (const tp of tps) {
-    const { table, column } = parseTarget(tp.reason);
-    console.log(`--- ${tp.repo} | ${table}.${column} ---`);
+    // First pass: try to resolve target from the calibration reason text
+    let resolved = parseTarget(tp.reason);
+    let resolution: 'reason' | 'sql_second_pass' | 'unresolved' =
+      resolved ? 'reason' : 'unresolved';
+    let table = resolved?.table ?? '';
+    let column = resolved?.column ?? '';
+
+    console.log(`--- ${tp.repo} | ${table || '?'}.${column || '?'} ---`);
     console.log(`  Source: ${tp.file}`);
 
     // Find which sequence and index this migration belongs to
@@ -255,11 +309,35 @@ async function main() {
       console.log(`  ⚠ Could not locate migration in sequence`);
       results.push({
         repo: tp.repo, migration_file: tp.file, shape_id: tp.shapeId,
-        table, column, followup_found: false,
+        table, column, target_resolution: resolution,
+        followup_found: false,
         evidence_type: null, evidence_ref: null, evidence_excerpt: null,
         confidence: 'none',
       });
       continue;
+    }
+
+    // Second pass: if reason-based parse failed, try to recover the table
+    // from the migration SQL itself.
+    if (!resolved) {
+      const sourceSql = foundSeq.migrations[foundIdx].sql as string;
+      const fromSql = extractTargetFromSql(tp.reason, sourceSql);
+      if (fromSql) {
+        table = fromSql.table;
+        column = fromSql.column;
+        resolution = 'sql_second_pass';
+        console.log(`  ↪ second-pass resolved target: ${table}.${column}`);
+      } else {
+        console.log(`  ⚠ Target unresolved — excluding from headline metrics`);
+        results.push({
+          repo: tp.repo, migration_file: tp.file, shape_id: tp.shapeId,
+          table: '', column: '', target_resolution: 'unresolved',
+          followup_found: false,
+          evidence_type: null, evidence_ref: null, evidence_excerpt: null,
+          confidence: 'none',
+        });
+        continue;
+      }
     }
 
     console.log(`  Found at index ${foundIdx}/${foundSeq.migrations.length} in ${foundSeq.name}`);
@@ -295,7 +373,8 @@ async function main() {
 
       results.push({
         repo: tp.repo, migration_file: tp.file, shape_id: tp.shapeId,
-        table, column, followup_found: true,
+        table, column, target_resolution: resolution,
+        followup_found: true,
         evidence_type: best.type, evidence_ref: best.ref, evidence_excerpt: best.excerpt,
         confidence: best.confidence,
       });
@@ -308,7 +387,8 @@ async function main() {
       console.log(`  ✗ No followup evidence found in next ${LOOKAHEAD} migrations`);
       results.push({
         repo: tp.repo, migration_file: tp.file, shape_id: tp.shapeId,
-        table, column, followup_found: false,
+        table, column, target_resolution: resolution,
+        followup_found: false,
         evidence_type: null, evidence_ref: null, evidence_excerpt: null,
         confidence: 'none',
       });
@@ -323,20 +403,32 @@ async function main() {
   console.log('HISTORICAL FOLLOW-UP SUMMARY');
   console.log('='.repeat(70));
 
-  const withFollowup = results.filter(r => r.followup_found);
-  const withoutFollowup = results.filter(r => !r.followup_found);
-  const strong = results.filter(r => r.confidence === 'strong');
-  const moderate = results.filter(r => r.confidence === 'moderate');
-  const weak = results.filter(r => r.confidence === 'weak');
+  // Integrity rule: rows with unresolved targets never contribute to
+  // headline metrics. They get their own bucket so the count stays honest.
+  const unresolved = results.filter(r => r.target_resolution === 'unresolved');
+  const resolved = results.filter(r => r.target_resolution !== 'unresolved');
+  const reasonResolved = results.filter(r => r.target_resolution === 'reason');
+  const sqlResolved = results.filter(r => r.target_resolution === 'sql_second_pass');
+
+  const withFollowup = resolved.filter(r => r.followup_found);
+  const withoutFollowup = resolved.filter(r => !r.followup_found);
+  const strong = resolved.filter(r => r.confidence === 'strong');
+  const moderate = resolved.filter(r => r.confidence === 'moderate');
+  const weak = resolved.filter(r => r.confidence === 'weak');
 
   console.log(`\nTotal TPs reviewed:    ${results.length}`);
+  console.log(`  Resolved (counted):  ${resolved.length}`);
+  console.log(`    via reason:        ${reasonResolved.length}`);
+  console.log(`    via SQL 2nd pass:  ${sqlResolved.length}`);
+  console.log(`  Unresolved (excluded from headline): ${unresolved.length}`);
+  console.log(`\n--- Headline metrics (resolved targets only) ---`);
   console.log(`Has followup evidence: ${withFollowup.length}`);
   console.log(`No followup evidence:  ${withoutFollowup.length}`);
   console.log(`\nBy confidence:`);
   console.log(`  Strong:   ${strong.length}`);
   console.log(`  Moderate: ${moderate.length}`);
   console.log(`  Weak:     ${weak.length}`);
-  console.log(`  None:     ${results.filter(r => r.confidence === 'none').length}`);
+  console.log(`  None:     ${resolved.filter(r => r.confidence === 'none').length}`);
 
   if (strong.length > 0) {
     console.log(`\n=== STRONG EVIDENCE (team had to act) ===`);
@@ -357,13 +449,23 @@ async function main() {
   writeFileSync(summaryPath, JSON.stringify({
     timestamp: new Date().toISOString(),
     total_tps: results.length,
+    target_resolution: {
+      reason: reasonResolved.length,
+      sql_second_pass: sqlResolved.length,
+      unresolved: unresolved.length,
+    },
+    headline_note: 'Headline metrics below exclude unresolved-target rows.',
+    resolved_count: resolved.length,
     has_followup: withFollowup.length,
     no_followup: withoutFollowup.length,
-    by_confidence: { strong: strong.length, moderate: moderate.length, weak: weak.length, none: results.filter(r => r.confidence === 'none').length },
+    by_confidence: { strong: strong.length, moderate: moderate.length, weak: weak.length, none: resolved.filter(r => r.confidence === 'none').length },
     strong_evidence: strong.map(r => ({
       repo: r.repo, table: r.table, column: r.column,
       evidence_type: r.evidence_type, evidence_ref: r.evidence_ref,
       evidence_excerpt: r.evidence_excerpt,
+    })),
+    unresolved_rows: unresolved.map(r => ({
+      repo: r.repo, migration_file: r.migration_file,
     })),
   }, null, 2));
   console.log(`Summary written to: ${summaryPath}`);

@@ -41,7 +41,18 @@ export interface AgentRun {
   parseSuccess: boolean;
   parseError: string | null;
   findings: Array<{ shapeId: string; severity: string; message: string }>;
-  finalLabel: 'safe' | 'unsafe' | 'parse_error';
+  /**
+   * Three-state run outcome:
+   *   - 'unsafe'            — at least one error-severity finding (blocking in CI)
+   *   - 'safe_with_warning' — no errors, but at least one warning-severity finding
+   *   - 'safe'              — zero findings of any severity
+   *   - 'parse_error'       — generated SQL failed to parse
+   *
+   * A warning-bearing run must NEVER be described as simply 'safe'. Headline
+   * tables that group by safety should treat 'safe_with_warning' as its own
+   * column, not bucket it with 'safe'.
+   */
+  finalLabel: 'safe' | 'safe_with_warning' | 'unsafe' | 'parse_error';
   targetShapes: string[];
 }
 
@@ -368,6 +379,9 @@ async function runTask(task: MigrationTask, agent: string): Promise<AgentRun> {
   }));
 
   const hasErrors = allFindings.some(f => f.severity === 'error');
+  const hasWarnings = allFindings.some(f => f.severity === 'warning');
+  const finalLabel: 'unsafe' | 'safe_with_warning' | 'safe' =
+    hasErrors ? 'unsafe' : hasWarnings ? 'safe_with_warning' : 'safe';
 
   if (findings.length > 0) {
     for (const f of findings) {
@@ -380,7 +394,7 @@ async function runTask(task: MigrationTask, agent: string): Promise<AgentRun> {
   return {
     taskId: task.id, repo: task.repo, prompt: task.prompt, agent,
     generatedSql, parseSuccess: true, parseError: null,
-    findings, finalLabel: hasErrors ? 'unsafe' : 'safe',
+    findings, finalLabel,
     targetShapes: task.targetShapes,
   };
 }
@@ -432,15 +446,17 @@ async function main() {
     const runs = allRuns.filter(r => r.agent === agent);
     const parsed = runs.filter(r => r.parseSuccess);
     const unsafe = runs.filter(r => r.finalLabel === 'unsafe');
-    const safe = runs.filter(r => r.finalLabel === 'safe');
+    const safeWithWarning = runs.filter(r => r.finalLabel === 'safe_with_warning');
+    const clean = runs.filter(r => r.finalLabel === 'safe');
     const errors = runs.filter(r => r.finalLabel === 'parse_error');
 
     console.log(`\n${agent}:`);
-    console.log(`  Total runs:    ${runs.length}`);
-    console.log(`  Parsed OK:     ${parsed.length}`);
-    console.log(`  Parse errors:  ${errors.length}`);
-    console.log(`  Unsafe:        ${unsafe.length} (${(unsafe.length / parsed.length * 100).toFixed(0)}% of parsed)`);
-    console.log(`  Safe:          ${safe.length}`);
+    console.log(`  Total runs:        ${runs.length}`);
+    console.log(`  Parsed OK:         ${parsed.length}`);
+    console.log(`  Parse errors:      ${errors.length}`);
+    console.log(`  Unsafe (error):    ${unsafe.length} (${(unsafe.length / parsed.length * 100).toFixed(0)}% of parsed)`);
+    console.log(`  Safe + warning:    ${safeWithWarning.length}`);
+    console.log(`  Clean (no finds):  ${clean.length}`);
 
     // Shape breakdown
     const shapeCounts: Record<string, number> = {};
@@ -458,16 +474,23 @@ async function main() {
   }
 
   // Comparison table
+  // Definitions:
+  //   "DM-18 hits (any)"      — finding of any severity. Measures structural risk rate.
+  //   "DM-18 hits (blocking)" — error-severity only. Measures CI-blocking rate.
+  // Both columns shown so warning-only hits are never silently bucketed as safe.
   console.log('\n=== HUMAN vs AGENT COMPARISON ===');
   console.log('');
-  console.log('Source            | Migrations | DM-18 hits | Hit rate');
-  console.log('-----------------|------------|------------|--------');
-  console.log('Human (backtest) | 761        | 19         | 2.5%');
+  console.log('Source            | Migrations | DM-18 (any) | DM-18 (block) | Any rate');
+  console.log('------------------|------------|-------------|---------------|---------');
+  console.log('Human (backtest)  | 761        | 19          | 19            | 2.5%');
 
   for (const agent of agents) {
     const runs = allRuns.filter(r => r.agent === agent && r.parseSuccess);
-    const dm18 = runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
-    console.log(`${agent.padEnd(17)}| ${String(runs.length).padEnd(11)}| ${String(dm18.length).padEnd(11)}| ${(dm18.length / runs.length * 100).toFixed(1)}%`);
+    const dm18Any = runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
+    const dm18Block = runs.filter(r => r.findings.some(f => f.shapeId === 'DM-18' && f.severity === 'error'));
+    console.log(
+      `${agent.padEnd(18)}| ${String(runs.length).padEnd(11)}| ${String(dm18Any.length).padEnd(12)}| ${String(dm18Block.length).padEnd(14)}| ${(dm18Any.length / runs.length * 100).toFixed(1)}%`
+    );
   }
 
   // Write outputs
@@ -481,19 +504,29 @@ async function main() {
     agents,
     taskCount: TASKS.length,
     humanBaseline: { migrations: 761, dm18Hits: 19, hitRate: '2.5%' },
+    labelDefinitions: {
+      unsafe: 'at least one error-severity finding (blocking in CI)',
+      safe_with_warning: 'no errors, but at least one warning-severity finding',
+      safe: 'zero findings of any severity',
+      parse_error: 'generated SQL failed to parse',
+    },
     agentResults: agents.map(agent => {
       const runs = allRuns.filter(r => r.agent === agent);
       const parsed = runs.filter(r => r.parseSuccess);
-      const dm18 = parsed.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
+      const dm18Any = parsed.filter(r => r.findings.some(f => f.shapeId === 'DM-18'));
+      const dm18Block = parsed.filter(r => r.findings.some(f => f.shapeId === 'DM-18' && f.severity === 'error'));
       return {
         agent,
         totalRuns: runs.length,
         parsed: parsed.length,
         parseErrors: runs.filter(r => !r.parseSuccess).length,
         unsafe: runs.filter(r => r.finalLabel === 'unsafe').length,
+        safe_with_warning: runs.filter(r => r.finalLabel === 'safe_with_warning').length,
         safe: runs.filter(r => r.finalLabel === 'safe').length,
-        dm18Hits: dm18.length,
-        dm18Rate: parsed.length ? (dm18.length / parsed.length * 100).toFixed(1) + '%' : 'N/A',
+        dm18HitsAny: dm18Any.length,
+        dm18HitsBlocking: dm18Block.length,
+        dm18RateAny: parsed.length ? (dm18Any.length / parsed.length * 100).toFixed(1) + '%' : 'N/A',
+        dm18RateBlocking: parsed.length ? (dm18Block.length / parsed.length * 100).toFixed(1) + '%' : 'N/A',
       };
     }),
   }, null, 2));

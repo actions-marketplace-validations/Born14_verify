@@ -167,15 +167,17 @@ export function formatMigrationComment(result: MigrationCheckResult): string {
 
   // Findings table
   if (result.findings.length > 0) {
-    lines.push('| Shape | Severity | File | Line | Finding |');
-    lines.push('|-------|----------|------|------|---------|');
+    // "Target" = the schema object the finding is about (table name today,
+    // derived from f.operation.table — NOT the source file path).
+    lines.push('| Shape | Severity | Target | Line | Finding |');
+    lines.push('|-------|----------|--------|------|---------|');
 
     for (const f of result.findings) {
       const sevIcon = f.severity === 'error' ? '\u274C' : '\u26A0\uFE0F';
-      const file = f.operation && 'table' in f.operation ? f.operation.table : '';
+      const target = f.operation && 'table' in f.operation ? f.operation.table : '';
       const line = f.location?.line ?? '';
       const msg = f.message.length > 120 ? f.message.slice(0, 117) + '...' : f.message;
-      lines.push(`| \`${f.shapeId}\` | ${sevIcon} ${f.severity} | ${file} | ${line} | ${msg} |`);
+      lines.push(`| \`${f.shapeId}\` | ${sevIcon} ${f.severity} | ${target} | ${line} | ${msg} |`);
     }
     lines.push('');
 

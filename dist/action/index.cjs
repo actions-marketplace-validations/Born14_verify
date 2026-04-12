@@ -14269,14 +14269,14 @@ function formatMigrationComment(result) {
     return lines.join("\n");
   }
   if (result.findings.length > 0) {
-    lines.push("| Shape | Severity | File | Line | Finding |");
-    lines.push("|-------|----------|------|------|---------|");
+    lines.push("| Shape | Severity | Target | Line | Finding |");
+    lines.push("|-------|----------|--------|------|---------|");
     for (const f of result.findings) {
       const sevIcon = f.severity === "error" ? "\u274C" : "\u26A0\uFE0F";
-      const file = f.operation && "table" in f.operation ? f.operation.table : "";
+      const target = f.operation && "table" in f.operation ? f.operation.table : "";
       const line = f.location?.line ?? "";
       const msg = f.message.length > 120 ? f.message.slice(0, 117) + "..." : f.message;
-      lines.push(`| \`${f.shapeId}\` | ${sevIcon} ${f.severity} | ${file} | ${line} | ${msg} |`);
+      lines.push(`| \`${f.shapeId}\` | ${sevIcon} ${f.severity} | ${target} | ${line} | ${msg} |`);
     }
     lines.push("");
     const blocking = result.findings.filter((f) => f.severity === "error");
@@ -14449,10 +14449,22 @@ async function run() {
   }
   console.log("\n[3b/4] Checking migrations...");
   let migrationResult = null;
+  let migrationInternalError = null;
+  let migrationsWereExpected = false;
+  let migrationPaths = [];
   try {
     const prFiles = await getPRFiles(token, owner, repo, prNumber);
-    const migrationPaths = detectMigrationFiles(prFiles.map((f) => f.filename));
-    if (migrationPaths.length > 0) {
+    migrationPaths = detectMigrationFiles(prFiles.map((f) => f.filename));
+  } catch (err) {
+    migrationInternalError = `Could not list PR files to detect migrations: ${err.message}`;
+    console.log(`  ::error::${migrationInternalError}`);
+  }
+  if (!migrationInternalError && migrationPaths.length === 0) {
+    console.log("  No migration files in this PR.");
+  } else if (!migrationInternalError) {
+    migrationsWereExpected = true;
+    console.log(`  Found ${migrationPaths.length} migration file(s)`);
+    try {
       let migrationRoot2 = function(p) {
         if (/\/migration\.sql$/i.test(p)) {
           return { root: p.replace(/\/[^/]+\/migration\.sql$/i, ""), isPrisma: true };
@@ -14460,7 +14472,6 @@ async function run() {
         return { root: p.replace(/\/[^/]+$/, ""), isPrisma: false };
       };
       var migrationRoot = migrationRoot2;
-      console.log(`  Found ${migrationPaths.length} migration file(s)`);
       const metadata = await getPRMetadata(token, owner, repo, prNumber);
       const baseRef = metadata.baseSha || metadata.baseBranch;
       console.log(`  Schema pin: ${metadata.baseSha ? `base SHA ${metadata.baseSha.slice(0, 7)}` : `base branch ${metadata.baseBranch} (no SHA)`}`);
@@ -14514,11 +14525,11 @@ async function run() {
       }
       migrationResult = await checkMigrations(groups);
       console.log(`  Migration result: ${migrationResult.passed ? "PASS" : "FAIL"} (${migrationResult.findings.length} findings)`);
-    } else {
-      console.log("  No migration files in this PR.");
+    } catch (err) {
+      migrationInternalError = `Migration verifier failed to run: ${err.message}`;
+      console.log(`  ::error::${migrationInternalError}`);
+      if (err.stack) console.log(err.stack);
     }
-  } catch (err) {
-    console.log(`  Migration check error: ${err.message}`);
   }
   if (commentEnabled) {
     console.log("\n[4/4] Posting PR comment...");
@@ -14531,16 +14542,29 @@ async function run() {
     if (migrationResult) {
       comment += "\n\n" + formatMigrationComment(migrationResult);
     }
+    if (migrationInternalError) {
+      comment += "\n\n### \u274C Migration Verification \u2014 Internal Error\n\n";
+      comment += "Verify could not complete migration verification on this PR. ";
+      comment += "This is a system-level failure in the verifier itself, **not** a finding about your migration.\n\n";
+      comment += "```\n" + migrationInternalError + "\n```\n\n";
+      comment += "Because this PR contains migration files and verify cannot determine whether they are safe, ";
+      comment += "the migration check is being failed closed. ";
+      comment += "Please report this error so we can fix the verifier.\n";
+    }
     await postPRComment(token, owner, repo, prNumber, comment);
     console.log("  Comment posted.");
   }
-  const overallSuccess = result.success && (migrationResult?.passed ?? true);
+  const migrationPassed = !migrationInternalError && (migrationResult?.passed ?? true);
+  const overallSuccess = result.success && migrationPassed;
   setOutput("success", String(overallSuccess));
   setOutput("gates-passed", result.gates.filter((g) => g.passed).map((g) => g.gate).join(","));
   setOutput("gates-failed", result.gates.filter((g) => !g.passed).map((g) => g.gate).join(","));
-  const migSummary = migrationResult ? `, ${migrationResult.findings.length} migration finding(s)` : "";
+  const migSummary = migrationInternalError ? `, migration verifier internal error (failing closed)` : migrationResult ? `, ${migrationResult.findings.length} migration finding(s)` : "";
   setOutput("summary", `${passed}/${passed + failed} gates passed${failed > 0 ? ` \u2014 ${result.gates.filter((g) => !g.passed).map((g) => g.gate).join(", ")} failed` : ""}${migSummary}`);
   if (failOn === "error" && !overallSuccess) {
+    if (migrationInternalError && migrationsWereExpected) {
+      console.log("::error::Failing closed: migration verifier could not complete on a PR containing migration files.");
+    }
     process.exit(1);
   }
 }

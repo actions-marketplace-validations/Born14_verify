@@ -182,16 +182,46 @@ async function run(): Promise<void> {
   }
 
   // ─── Step 3b: Migration verification ───────────────────────────────────
+  //
+  // Two-class error model:
+  //   Result-level (gate findings, per-file parse failures) → reported in
+  //     migrationResult, do not fail closed on their own.
+  //   System-level (libpg-query load failure, schema bootstrap throw, any
+  //     exception escaping checkMigrations) → fail closed when migrations
+  //     exist. We never silently swallow these.
+  //
+  // Detection of zero migration files is NOT an error of either kind —
+  // it just means there's nothing to verify. No fail-closed in that case.
+  //
   console.log('\n[3b/4] Checking migrations...');
   let migrationResult: MigrationCheckResult | null = null;
+  let migrationInternalError: string | null = null;
+  let migrationsWereExpected = false;
 
+  // Phase A: detect whether we even have migrations to check.
+  // A failure here is a system-level error only if it prevents us from
+  // determining whether migrations exist at all.
+  let migrationPaths: string[] = [];
   try {
     const prFiles = await getPRFiles(token, owner, repo, prNumber);
-    const migrationPaths = detectMigrationFiles(prFiles.map(f => f.filename));
+    migrationPaths = detectMigrationFiles(prFiles.map(f => f.filename));
+  } catch (err: any) {
+    // Couldn't even list PR files. We don't know if migrations exist.
+    // Be conservative: treat as system-level error so the check is visible.
+    migrationInternalError = `Could not list PR files to detect migrations: ${err.message}`;
+    console.log(`  ::error::${migrationInternalError}`);
+  }
 
-    if (migrationPaths.length > 0) {
-      console.log(`  Found ${migrationPaths.length} migration file(s)`);
+  if (!migrationInternalError && migrationPaths.length === 0) {
+    console.log('  No migration files in this PR.');
+  } else if (!migrationInternalError) {
+    migrationsWereExpected = true;
+    console.log(`  Found ${migrationPaths.length} migration file(s)`);
 
+    // Phase B: build groups + run checkMigrations. Anything that throws here
+    // is a system-level error — verification was supposed to run and could
+    // not complete. Fail closed.
+    try {
       // Pin to the PR's base SHA so the same PR always gets the same answer.
       // Using baseBranch (a mutable ref) would mean the schema can shift if main
       // advances after the PR opens, making CI results non-deterministic.
@@ -232,6 +262,9 @@ async function run(): Promise<void> {
       for (const [root, info] of rootMap) {
         const priorSql: string[] = [];
 
+        // Directory listing failure for prior migrations is recoverable —
+        // the group just bootstraps from an empty schema. That's a known
+        // tradeoff, not a system-level error.
         try {
           const dirRes = await fetch(
             `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(root)}?ref=${baseRef}`,
@@ -283,13 +316,18 @@ async function run(): Promise<void> {
         console.log(`    ${root}: ${priorSql.length} prior migration(s) for bootstrap`);
       }
 
+      // The actual verification call. If this throws, the verifier itself
+      // could not run — fail closed.
       migrationResult = await checkMigrations(groups);
       console.log(`  Migration result: ${migrationResult.passed ? 'PASS' : 'FAIL'} (${migrationResult.findings.length} findings)`);
-    } else {
-      console.log('  No migration files in this PR.');
+    } catch (err: any) {
+      // System-level: verification was supposed to run and could not complete.
+      // The user's PR contains migrations; we cannot tell them whether those
+      // migrations are safe. The only correct answer is fail closed.
+      migrationInternalError = `Migration verifier failed to run: ${err.message}`;
+      console.log(`  ::error::${migrationInternalError}`);
+      if (err.stack) console.log(err.stack);
     }
-  } catch (err: any) {
-    console.log(`  Migration check error: ${err.message}`);
   }
 
   // ─── Step 4: Post comment ─────────────────────────────────────────────
@@ -307,23 +345,48 @@ async function run(): Promise<void> {
       comment += '\n\n' + formatMigrationComment(migrationResult);
     }
 
+    // Surface system-level migration verifier failures explicitly. The user
+    // shipped migrations and we couldn't verify them — they need to know.
+    if (migrationInternalError) {
+      comment += '\n\n### \u274C Migration Verification — Internal Error\n\n';
+      comment += 'Verify could not complete migration verification on this PR. ';
+      comment += 'This is a system-level failure in the verifier itself, **not** a finding about your migration.\n\n';
+      comment += '```\n' + migrationInternalError + '\n```\n\n';
+      comment += 'Because this PR contains migration files and verify cannot determine whether they are safe, ';
+      comment += 'the migration check is being failed closed. ';
+      comment += 'Please report this error so we can fix the verifier.\n';
+    }
+
     await postPRComment(token, owner, repo, prNumber, comment);
     console.log('  Comment posted.');
   }
 
   // ─── Set outputs ──────────────────────────────────────────────────────
-  const overallSuccess = result.success && (migrationResult?.passed ?? true);
+  // Migration "pass" requires both: result-level passed AND no system-level
+  // internal error. A system-level error when migrations were expected fails
+  // the migration check regardless of whether any findings exist.
+  const migrationPassed =
+    !migrationInternalError && (migrationResult?.passed ?? true);
+  const overallSuccess = result.success && migrationPassed;
+
   setOutput('success', String(overallSuccess));
   setOutput('gates-passed', result.gates.filter(g => g.passed).map(g => g.gate).join(','));
   setOutput('gates-failed', result.gates.filter(g => !g.passed).map(g => g.gate).join(','));
 
-  const migSummary = migrationResult
-    ? `, ${migrationResult.findings.length} migration finding(s)`
-    : '';
+  const migSummary = migrationInternalError
+    ? `, migration verifier internal error (failing closed)`
+    : migrationResult
+      ? `, ${migrationResult.findings.length} migration finding(s)`
+      : '';
   setOutput('summary', `${passed}/${passed + failed} gates passed${failed > 0 ? ` — ${result.gates.filter(g => !g.passed).map(g => g.gate).join(', ')} failed` : ''}${migSummary}`);
 
-  // Exit with failure if configured
+  // Exit with failure if configured.
+  // This now also fires when the migration verifier had an internal error
+  // and migrations were expected — system-level failures fail closed.
   if (failOn === 'error' && !overallSuccess) {
+    if (migrationInternalError && migrationsWereExpected) {
+      console.log('::error::Failing closed: migration verifier could not complete on a PR containing migration files.');
+    }
     process.exit(1);
   }
 }

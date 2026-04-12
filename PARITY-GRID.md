@@ -512,3 +512,20 @@ Systematic depth expansion: every non-WPT staged fixture file brought to 30+ sce
 **FAILURE-TAXONOMY.md** is the **dictionary** — defines individual shapes, their status, and technical details.
 
 Every shape in FAILURE-TAXONOMY.md should reference its grid cell. Every grid cell should reference its shapes in FAILURE-TAXONOMY.md. The grid drives priorities; the taxonomy provides depth.
+
+---
+
+## Sibling Verticals (April 12, 2026)
+
+The 8×10 parity grid above describes verify's **code-edit verification** vertical — the original 26-gate pipeline that operates on agent-authored source files. As of April 12, 2026, verify also runs a separate **database migration verification** vertical with its own shape namespace (DM-* instead of cell coordinates) and its own corpus calibration discipline.
+
+The migration vertical does not fit on the 8 capability × 10 failure-class axis because:
+- Its capability axis is "things you can do in a SQL migration" (CREATE/ALTER/DROP/RENAME/INDEX), not "things an agent does at the system level"
+- Its failure axis is "ways a migration can be structurally or operationally wrong given the schema state," which is closer to a single-class coverage (Selection × Database) than the broader 10-class taxonomy
+- Its calibration unit is precision against an external corpus, not cell coverage
+
+In the three-vertical product strategy, the parity grid is the map for **vertical #1 (code edits)**. **Vertical #2 (migrations)** has its own catalog in the [Database Migration Failures section of FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md#database-migration-failures), with one calibrated shape today (DM-18 — 19 TP / 0 FP / 761 migrations). **Vertical #3 (HTTP contracts)** is designed but not built; when it ships, it will get its own catalog and its own calibration claim.
+
+The slow-taxonomy discipline going forward is that each shape — in any vertical — earns calibration before it earns the upgrade from `shipped` to `calibrated`. The parity grid will eventually have a "calibration column" alongside the coverage column once the legacy 26-gate shapes start being measured against external corpora the way DM-18 was.
+
+Until then, the parity grid measures **structural coverage** of vertical #1 (every cell has at least one shape backed by a generator), and the migration vertical separately measures **calibrated precision** of one shape (DM-18). They're complementary metrics on different surfaces.

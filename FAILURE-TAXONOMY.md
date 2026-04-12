@@ -1,26 +1,40 @@
 # Verify Failure Taxonomy
 
-A finite, composable algebra of failure shapes — every known way that a predicate can produce wrong results. Either passing when it should fail (false confidence), or failing when it should pass (false rejection). Every shape is a generator target.
+A reference catalog of failure shapes verify's gates can detect, organized by surface and claim type. This document is a working artifact, not a finished product — shapes are added when they're implemented in code, and the calibration status of each section reflects what verify actually catches today versus what is designed but not yet measured.
 
-**See also:** [PARITY-GRID.md](PARITY-GRID.md) — the strategic map. This file is the dictionary. The grid drives priorities; this file provides depth. Every shape should reference its grid cell (Capability × Failure Class).
+**See also:** [PARITY-GRID.md](PARITY-GRID.md) — the strategic map. This file is the catalog; the grid drives priorities.
 
-**Why this matters:** Verify gets better by closing failure classes, not by bigger models. Each generator produces 2-50 scenarios from one failure shape. This taxonomy is the map of what's been closed and what's still open.
+**Why this matters:** Verify gets better by closing specific failure classes with deterministic, schema-grounded gates — not by bigger models or pattern-matching heuristics. Each calibrated shape is one more class verify can detect with measured precision.
 
-**Coverage formula:** `(shapes with generators / total known shapes) = coverage %`
+---
+
+## How to Read This Document
+
+**Three things to know before reading further:**
+
+**1. Two kinds of failures live in this catalog.** Most shapes describe a way an *agent* (or human author) can produce code that doesn't match reality — wrong table name, missing column, hallucinated function, scope leak. A smaller number describe ways the *verifier itself* can be wrong — pattern matched in a comment instead of code, evidence stale, observer effect from a verification probe. Both belong here, because verify catches the first kind by avoiding the second kind. The honest naming convention going forward: shapes that describe agent/author errors are the **detection target**, shapes that describe verifier errors are the **detector calibration**. Existing sections don't yet label this distinction explicitly — that's known cleanup work.
+
+**2. Calibration status varies by section.** A shape being listed here does NOT mean verify catches it with measured precision today. The current calibration tiers are:
+
+- **calibrated** — implemented in code, measured against a real corpus, false-positive rate published. Today only **DM-18 (NOT NULL without default)** sits in this tier, with 19 true positives and 0 false positives across 761 production migrations from cal.com, formbricks, and supabase. See [scripts/mvp-migration/MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md).
+- **shipped** — implemented in code, has unit tests, fires in CI, but precision has not been measured against an external corpus. The legacy 26 gates and most existing shapes in this document live here.
+- **designed** — has a documented rule and a planned gate, but no implementation yet.
+- **deprecated** — was in scope at some point, but the current three-vertical product strategy says not to invest further. Marked explicitly so the history is preserved.
+
+**3. The original three-vertical strategy guides what's load-bearing.** Verify's product direction commits to three verticals: code-edit verification, database migration verification, and HTTP contract verification. Sections that map to those verticals are load-bearing. Sections outside those verticals are still in the doc for completeness but are explicitly deprioritized — see the deprecation markers in the relevant sections.
 
 ---
 
 ## Foundational Framework
 
-### The Failure Algebra
+### Working Properties
 
-This taxonomy is not a test suite. It is a **finite, composable set of failure shapes** — the "periodic table" of ways reality can be misrepresented to a verification system. Like chemical elements, these shapes are:
+This catalog is organized around a small set of working properties. They are not axioms; they are observations about the kinds of failures verify is built to detect. They have held up well enough in practice to be useful, but the catalog is not "closed" in any formal sense — new failure modes get added when code catches them.
 
-- **Finite:** There is a bounded number of ways a predicate can disagree with reality
-- **Composable:** Multi-surface failures are products of single-surface shapes (C-07 × P-02 = "case-normalized CSS passes but HTTP body check is case-sensitive")
-- **Enumerable:** New bugs map to existing shapes or extend the taxonomy cleanly (closure property)
-- **Surface-bound:** Every shape lives on exactly one reality surface, or explicitly crosses surfaces
-- **Decomposable:** New bugs must first attempt decomposition into existing shapes before creating a new shape (closure enforcement)
+- **Composable in practice:** Multi-surface failures often factor into single-surface shapes (e.g., C-07 × P-02 = "case-normalized CSS passes but HTTP body check is case-sensitive"). Not every multi-surface failure decomposes cleanly — when it doesn't, it gets its own entry.
+- **Surface-bound where possible:** Most shapes live on a single reality surface (CSS, HTML, HTTP, DB, filesystem, etc.). Cross-surface shapes are listed explicitly under "Cross-Predicate Interaction Failures."
+- **Decomposition before extension:** When a new bug appears, the first question is whether it factors into existing shapes. Only if it doesn't does it become a new entry. This is discipline, not a guarantee — there are more ways things can go wrong than this catalog enumerates.
+- **No closure claim:** Earlier versions of this document called the shape set "finite" and "enumerable." That was overclaiming. The set is open. Entries are added as gates are built; entries are deprecated when the underlying surface is dropped from the product.
 
 ### Three Axioms
 
@@ -778,6 +792,42 @@ DB predicates assert schema structure and data state. The gap between expected s
 
 ---
 
+## Database Migration Failures
+
+Failures specific to **agent-authored or human-authored database migration files** — distinct from the `D-*` domain above, which catches runtime predicate-vs-schema mismatches. The DM-* domain catches structural and operational risks in migration SQL **before it executes**, by parsing the migration with libpg-query and grounding it against a schema replayed from prior migrations on the base branch.
+
+The DM-* shapes are the first vertical of verify's three-vertical product strategy (database migration verification). The architecture uses claim↔evidence binding identical to the rest of this taxonomy: the migration file is the *claim* about a schema change, the replayed schema is the *evidence* of current state, and a finding fires when the claim cannot be reconciled with the evidence.
+
+**Predicate type:** `migration`. **Gate:** `scripts/mvp-migration/grounding-gate.ts` (DM-01..05) and `scripts/mvp-migration/safety-gate.ts` (DM-15..19). Wired into the GitHub Action via `src/action/migration-check.ts`.
+
+**Suppression:** Every safety-class finding can be acknowledged in the migration file with a comment of the form `-- verify: ack DM-XX <reason>`. Acknowledged findings are downgraded to warnings and become an audit trail rather than a block.
+
+### Grounding (does the operation make sense given the schema?)
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| DM-01 | Target table not found | **shipped** | Operation references a table that doesn't exist in the replayed schema. Includes Levenshtein closest-match suggestion. Caught all three agents (Claude/Gemini/GPT-4o) hallucinating the same nonexistent table on probe tasks. |
+| DM-02 | Target column not found | **shipped** | Operation references a column that doesn't exist on the target table. |
+| DM-03 | FK references unknown table or column | **shipped** | `ADD CONSTRAINT ... FOREIGN KEY` references a table or column that doesn't exist. Includes platform-table exclusion for `auth.*`, `storage.*`, etc. (Supabase framework tables). |
+| DM-04 | Create target already exists | **shipped** | `CREATE TABLE foo` when `foo` already exists, or `ADD COLUMN x` when `x` already exists on the table. Suppressed by `IF NOT EXISTS`. |
+| DM-05 | Rename source missing or target conflict | **shipped** | `RENAME TO` where the source doesn't exist or the target name is already taken. |
+
+### Safety (is the operation operationally dangerous?)
+
+| # | Failure Shape | Status | Notes |
+|---|---|---|---|
+| DM-15 | DROP COLUMN with incoming FK references | **shipped (warning-only in CI)** | Dropping a column that has FKs from other tables. Currently warning-only because the constraint-name matching has known edge cases on Prisma migrations; will flip to blocking after wider corpus calibration. |
+| DM-16 | DROP TABLE with incoming FK references | **shipped (warning-only in CI)** | Dropping a table that has FKs from other tables. Will fail at runtime without `CASCADE` or prior constraint removal. |
+| DM-17 | Column type change is narrowing | **shipped (warning-only in CI)** | `ALTER COLUMN ... TYPE` where the new type narrows the domain (TEXT→VARCHAR(N), BIGINT→INT, TIMESTAMPTZ→DATE, NUMERIC→FLOAT4, etc.). Silent data loss risk. |
+| DM-18 | NOT NULL without default (ADD COLUMN or SET NOT NULL) | **calibrated, blocking in CI** | `ADD COLUMN x NOT NULL` without a `DEFAULT`, or `ALTER COLUMN x SET NOT NULL` on a column that is currently nullable with no default. Will fail on any non-empty table. **Measured precision: 19 true positives, 0 false positives across 761 production migrations from cal.com, formbricks, and supabase.** Historical follow-up identified 3 explicit NOT NULL reverts in subsequent migrations and 5 same-migration backfill UPDATEs, including a 24-hour turnaround revert at cal.com (`make_guest_company_and_email_optional`). Three-model agent comparison showed Gemini hits this rule on 83% of probe tasks vs a 2.5% human baseline. |
+| DM-19 | DROP INDEX backing a constraint | **shipped (warning-only in CI)** | `DROP INDEX` where the index backs a PRIMARY KEY or UNIQUE constraint. Breaks the invariant the constraint relies on. Index-name matching is currently fragile and is the reason this rule is warning-only. |
+
+**DM total: 10 shapes. Calibrated: 1 (DM-18). Shipped (uncalibrated): 9. See [scripts/mvp-migration/MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) for the full DM-18 measurement methodology and reproduction steps.**
+
+**Why this section is structurally important:** DM-18 is currently the only shape in this entire taxonomy with a published false-positive rate measured against an external corpus. The migration vertical is the first place where verify graduated from "implements a check" to "publishes calibrated precision on real production code." The slow-taxonomy discipline going forward is that new shapes earn calibration before they earn the upgrade from `shipped` to `calibrated`.
+
+---
+
 ## Temporal / Stateful Failures
 
 Failures where the same predicate produces different results depending on WHEN it's evaluated. Most other categories assume static snapshot comparison — temporal failures break that assumption.
@@ -954,6 +1004,8 @@ Invariants are system-scoped checks that must hold after EVERY mutation. Unlike 
 ---
 
 ## Browser Runtime Failures
+
+> **DEPRECATED for active development.** Per the three-vertical product strategy, this section is not load-bearing for the current product direction. Existing shapes are preserved for reference and the existing browser gate continues to ship; no new browser-runtime shapes will be added unless a partner specifically requires it. Reasoning: Playwright-dependent, expensive to test, low buyer overlap with the three target verticals (code edits, migrations, HTTP contracts). Browser tests are typically owned by QA, not by agent-ops.
 
 Browser is a stateful runtime environment, not just CSS + HTML. These failures live in the behavioral layer — event handling, navigation, storage, lifecycle — that falls through the cracks between CSS (style truth) and HTML (structure truth). The browser domain captures: "does the app actually work?"
 
@@ -1481,6 +1533,8 @@ Configuration predicates assert that runtime configuration matches expected stat
 
 ## Accessibility (a11y) Predicate Failures
 
+> **MAINTENANCE ONLY.** Per the three-vertical product strategy, accessibility is a breadth-coverage section, not a depth investment. The existing gate continues to ship and the existing shapes are preserved, but new a11y shapes are not on the roadmap. Reasoning: this is owned by QA/design teams and existing tools (axe-core, Lighthouse, Pa11y) cover the space well. Keep verify's a11y output as an "also does" capability for RFP responses; do not invest in expanding it.
+
 Accessibility predicates assert that the application is usable by assistive technology. The gap between visual DOM and the accessibility tree — what screen readers and keyboard navigation actually see — is where failures live. Predicate type: `a11y`. Gate: `src/gates/a11y.ts` — static HTML analysis for ARIA labels, heading hierarchy, landmark regions, alt text, focus management. Supports bidirectional assertions (`no_findings` = clean, `has_findings` = expected issue detected).
 
 | # | Failure Shape | Status | Notes |
@@ -1499,6 +1553,8 @@ Accessibility predicates assert that the application is usable by assistive tech
 ---
 
 ## Performance Predicate Failures
+
+> **MAINTENANCE ONLY.** Per the three-vertical product strategy, performance is a breadth-coverage section, not a depth investment. The existing gate continues to ship and the existing shapes are preserved, but new performance shapes are not on the roadmap. Reasoning: deep performance analysis (query plans, runtime profiling, load testing) requires runtime evidence that is outside verify's static-analysis wedge, and existing tools (Lighthouse, k6, Datadog APM) cover the space. Keep verify's performance output as an "also does" capability; do not invest in expanding it.
 
 Performance predicates assert that the application meets response time and resource budgets. The gap between "functionally correct" and "acceptably fast" is where failures live. Predicate type: `performance`. Gate: `src/gates/performance.ts` — static analysis for bundle size, image optimization, lazy loading patterns, connection count. Threshold-based comparison with sensible defaults. Response time predicates deferred (need live server).
 
@@ -1561,6 +1617,8 @@ Serialization predicates assert that data format and structure comply with decla
 
 ## Injection Predicate Failures
 
+> **DEPRECATED for active development.** Per the three-vertical product strategy, this is a "trust surface" that does not compose with verify's grounding/containment/determinism primitives the way the three target verticals do. Existing competitors (Guardrails AI, NeMo Guardrails, LangSmith, others) cover this category. Existing shapes are preserved here for completeness; no new injection shapes will be added unless the strategy changes. The injection gate is not currently shipping in CI.
+
 Failures where untrusted input hijacks the agent's intent. The agent processes input containing adversarial instructions that alter its planned behavior. This is G5 containment applied to input channels — "every action traces to the operator's intent, not an injected instruction." Predicate type: `injection`. Gate: detects injection patterns in input sources and verifies agent output matches original intent, not injected directives.
 
 **Claim type:** Invariance — the agent's output action should be invariant to adversarial input embedded in data it processes.
@@ -1601,6 +1659,8 @@ Failures where untrusted input hijacks the agent's intent. The agent processes i
 ---
 
 ## Hallucination Predicate Failures
+
+> **DEPRECATED for active development.** Per the three-vertical product strategy, this is a "trust surface" deprioritized in favor of structural verification. The hallucination gate is not currently implemented in shipping code. Hallucinations that *do* matter to verify show up as concrete grounding failures in the three target verticals — DM-01 catches hallucinated tables in migrations, the existing grounding gate catches hallucinated functions and selectors in code edits, etc. This section is preserved as a reference for the framing, but the standalone hallucination detector is not on the roadmap.
 
 Failures where the agent fabricates claims not grounded in evidence. This is G5 containment applied to information instead of code — "every claim traces to a source" just as "every mutation traces to a predicate." Predicate type: `hallucination`. Gate: verifies that every assertion in the agent's output can be traced back to provided source material.
 
@@ -1643,6 +1703,8 @@ Failures where the agent fabricates claims not grounded in evidence. This is G5 
 ---
 
 ## Budget / Resource Bound Failures
+
+> **DEPRECATED for active development.** Per the three-vertical product strategy, budget tracking is a "trust surface" outside the deterministic verification wedge. Cost and rate-limit tracking is well-served by existing observability tools (Helicone, Langfuse, OpenAI usage dashboards, vendor billing). Verify's moat is structural correctness, not cost telemetry. This section is preserved for completeness but is not on the roadmap.
 
 Failures where cumulative resource consumption across a workflow exceeds declared bounds. Distinct from per-action capacity checks — budget failures are aggregate across the entire chain. Predicate type: `budget`. Gate: tracks cumulative counters (API calls, tokens, cost, time, retries) and compares against policy thresholds.
 

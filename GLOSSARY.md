@@ -244,11 +244,62 @@ A parent class that produces hundreds of failures, all same gate, same root caus
 
 ---
 
+---
+
+## Migration Verification (DM-* shapes)
+
+The migration verification pipeline is the first vertical of verify's three-vertical product strategy. It runs alongside the original 26-gate code-edit pipeline whenever a PR contains `.sql` migration files.
+
+### Migration Group
+A bundle of migration files that share a single bootstrap schema. Each migration root in a PR (e.g., `packages/api/migrations` and `packages/web/migrations`) becomes its own MigrationGroup with its own prior migrations and its own checked schema. Schemas are never shared across groups — tables in one root can't satisfy lookups in another.
+
+### MigrationSpec
+The structured representation of a parsed migration file. Produced by `spec-from-ast.ts` from libpg-query AST. A list of typed `LocatedOp` entries (one per DDL operation) with source line numbers for triage.
+
+### Schema Replay
+Building the pre-migration schema by applying every prior migration in order, in memory. The migration check uses this to know what tables and columns existed before the new migration ran. No database connection required.
+
+### Reverse FK Index
+For every column referenced by a foreign key, the schema loader maintains a list of incoming references (`fkIn`). This is what powers DM-15 ("DROP COLUMN with N FK dependents") — the gate looks up `fkIn` for the column being dropped and reports the dependents.
+
+### Per-Op Progressive Schema
+The grounding and safety gates apply each operation's schema effect to a working copy as they go. This means a migration that does `CREATE TABLE foo` followed by `CREATE INDEX ON foo(bar)` in the same file passes correctly — the index check sees the table created by the prior op.
+
+### DM-18
+The first calibrated shape in verify's entire taxonomy. Catches `ADD COLUMN x NOT NULL` without a `DEFAULT` and `SET NOT NULL` on a nullable column with no default — both will fail on any non-empty production table. Measured precision: 19 true positives, 0 false positives across 761 production migrations from cal.com, formbricks, and supabase.
+
+### Calibration Tier
+The status of a shape relative to measured precision. Four tiers:
+- **calibrated** — implemented, measured against external corpus, false-positive rate published
+- **shipped** — implemented, has tests, fires in CI, but no external corpus measurement
+- **designed** — documented rule, no implementation
+- **deprecated** — was in scope at some point, dropped per the three-vertical strategy
+
+DM-18 is the only shape in tier `calibrated` today. Most existing shapes in FAILURE-TAXONOMY.md are `shipped`.
+
+### Ack Mechanism
+A migration file can suppress a safety finding by adding a comment of the form `-- verify: ack DM-XX <reason>`. The finding is downgraded to a warning and becomes an audit trail entry instead of a block. This prevents the gate from becoming noise when teams have legitimate reasons to override.
+
+### Base SHA Pinning
+The migration check uses the PR's `base.sha` (immutable commit hash) to fetch prior migrations from the base branch, not the branch ref itself. This means the same PR always produces the same findings, even if `main` advances after the PR opens. Determinism is the whole pitch.
+
+### Three-Vertical Strategy
+Verify's product direction commits to three verticals built on the same architecture:
+1. **Code-edit verification** — the original 26-gate pipeline. Largest market.
+2. **Database migration verification** — DM-* shapes. Highest-leverage wedge, weakest competition. **Shipped April 12, 2026.**
+3. **HTTP contract verification** — OpenAPI grounding. Designed but not built.
+
+Sections of FAILURE-TAXONOMY.md outside these three verticals are explicitly deprioritized (browser, injection, hallucination, budget) or in maintenance-only mode (a11y, performance).
+
+---
+
 ## Document Map
 
 | Document | Role |
 |----------|------|
-| **PARITY-GRID.md** | The map — what must be covered (8×10 grid, priorities, metrics) |
-| **FAILURE-TAXONOMY.md** | The dictionary — 668+ shapes, 30 domains, technical detail |
+| **PARITY-GRID.md** | The map — what must be covered (8×10 grid, priorities, metrics). *Internal doc, not in public repo.* |
+| **FAILURE-TAXONOMY.md** | The reference catalog of failure shapes verify catches, with calibration status per section. Includes the new Database Migration Failures section (DM-01..19). |
+| **scripts/mvp-migration/MEASURED-CLAIMS.md** | The first frozen calibration claim — DM-18 measured precision (19 TP / 0 FP / 761 migrations) with full methodology. The template all future calibration claims will follow. |
 | **GLOSSARY.md** | This file — plain-language definitions |
-| **ASSESSMENT.md** | The settled view — what verify is, what not to say about it |
+| **ASSESSMENT.md** | The settled view — what verify is, what not to say about it. *Internal doc, not in public repo.* |
+| **ROADMAP.md** | Implementation sequence and priorities. *Internal doc, not in public repo.* |

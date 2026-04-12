@@ -220,6 +220,18 @@ The checks are domain-agnostic:
 - **Communication agents** — message the right channel, no forbidden content
 - **Document agents** — don't overwrite the wrong cells
 
+## Migration verification (DM-18)
+
+When a PR contains `.sql` migration files, verify also runs the **migration verification pipeline** — a separate set of gates that parse the migration with libpg-query, replay the schema from prior migrations on the base branch, and check the new migration against that schema.
+
+The first shipped rule is **DM-18 (NOT NULL without safe preconditions)**: `ADD COLUMN x NOT NULL` without a `DEFAULT`, or `SET NOT NULL` on a nullable column with no default. Both will fail on any non-empty production table — the classic 3am migration failure.
+
+**Measured precision:** 19 true positives, 0 false positives across 761 production migrations from cal.com, formbricks, and supabase. See [MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) for full methodology and reproduction steps.
+
+DM-18 is the first vertical of verify's three-vertical product strategy (code-edit verification, database migration verification, HTTP contract verification). Eight other migration shapes (DM-01..05 grounding, DM-15..17, DM-19 safety) are implemented and shipping in CI as warnings while they're calibrated against the corpus. See the [Database Migration Failures section of FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md#database-migration-failures) for the full shape catalog.
+
+Findings can be acknowledged in the migration file with `-- verify: ack DM-XX <reason>` to downgrade them to warnings (audit trail) rather than blocks.
+
 ## Real-world validation: 33,056 agent PRs scanned
 
 We scanned every PR in the [AIDev-POP dataset](https://huggingface.co/datasets/hao-li/AIDev) — 33,056 real pull requests from 5 AI coding agents across 2,807 popular open-source repos. Deterministic pipeline, $0 cost, no LLM calls.
@@ -249,10 +261,11 @@ Runs verify on every PR. Posts gate results as a comment. Three modes:
 
 ## Full Documentation
 
-- **[FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md)** — 675+ failure shapes across 30 domains. The classification of how agents fail.
+- **[FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md)** — Reference catalog of failure shapes verify's gates can detect, with calibration status per section. Includes the new Database Migration Failures section (DM-01..19).
+- **[MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md)** — DM-18 measured precision (19 TP / 0 FP / 761 migrations) with full methodology and reproduction steps. The first shape in the taxonomy with a published false-positive rate.
 - **[REFERENCE.md](REFERENCE.md)** — Gates, predicates, configuration, CLI, fault management
-- **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — Architecture, the 8-stage autonomous loop
-- **[METHODOLOGY.md](METHODOLOGY.md)** — AIDev-POP scan methodology and reproducibility
+- **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — Architecture, the 8-stage autonomous loop, migration verification pipeline
+- **[METHODOLOGY.md](METHODOLOGY.md)** — AIDev-POP scan methodology and reproducibility (separate from migration corpus methodology, which is in MEASURED-CLAIMS.md)
 - **[PARITY-GRID.md](PARITY-GRID.md)** — 8×10 capability × failure class coverage matrix
 - **[ASSESSMENT.md](ASSESSMENT.md)** — What verify is and isn't
 - **[ROADMAP.md](ROADMAP.md)** — Current state and priorities

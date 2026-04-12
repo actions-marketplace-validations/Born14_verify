@@ -262,6 +262,100 @@ Predicates declare what should be true after the edits are applied.
 | `a11y` | Accessibility compliance | `{ type: 'a11y', check: 'heading_hierarchy', file: 'index.html', expected: 'no_findings' }` |
 | `performance` | Performance budgets | `{ type: 'performance', check: 'bundle_size', file: 'dist/app.js', threshold: 500000 }` |
 
+## Migration Verification
+
+When a PR contains `.sql` migration files, verify also runs a separate migration verification pipeline alongside the original 26-gate code-edit checks. Implemented in `src/action/migration-check.ts` and `scripts/mvp-migration/`.
+
+### Detection
+
+Migration files are detected by path pattern. Currently matches:
+- `migrations/*.sql`, `migrate/*.sql`, `db/migrate/*.sql`, `supabase/migrations/*.sql`
+- Prisma layout: `migrations/TIMESTAMP_name/migration.sql`
+
+Excluded paths (verify's own dev artifacts): `scripts/`, `fixtures/`, `tests/`, `corpus/`.
+
+### Multi-root partitioning
+
+If a PR touches multiple migration roots (e.g., `packages/api/migrations` and `packages/web/migrations`), each root is processed independently with its own bootstrap schema. Schemas are NEVER unioned across roots — tables in one app cannot satisfy lookups in another.
+
+### Schema bootstrap
+
+Pinned to the PR's `base.sha` (immutable commit hash), not the base branch ref. The same PR always produces the same findings, even if `main` advances after the PR opens.
+
+For each root, prior migrations are fetched from the base SHA via the GitHub Contents API and replayed in order to build the pre-migration schema in memory. The replay engine maintains:
+- Tables, columns (with type, nullability, default)
+- Primary keys, unique constraints, indexes
+- Foreign keys (outgoing) and reverse FK index (incoming references)
+
+Per-op progressive schema updates: each operation's effect is applied to the working schema before the next operation is checked. This means `CREATE TABLE foo; CREATE INDEX ON foo(bar);` in the same migration passes correctly.
+
+### Gates
+
+| Shape | Gate | What it catches | Status |
+|---|---|---|---|
+| **DM-01** | grounding | Target table not found | shipped |
+| **DM-02** | grounding | Target column not found | shipped |
+| **DM-03** | grounding | FK references unknown table or column | shipped |
+| **DM-04** | grounding | Create target already exists | shipped |
+| **DM-05** | grounding | Rename source missing or target conflict | shipped |
+| **DM-15** | safety | DROP COLUMN with incoming FK references | shipped (warning-only) |
+| **DM-16** | safety | DROP TABLE with incoming FK references | shipped (warning-only) |
+| **DM-17** | safety | Column type change is narrowing | shipped (warning-only) |
+| **DM-18** | safety | NOT NULL without safe preconditions | **calibrated, blocking in CI** |
+| **DM-19** | safety | DROP INDEX backing a constraint | shipped (warning-only) |
+
+DM-18 is the only shape with measured precision: 19 true positives, 0 false positives across 761 production migrations. See [scripts/mvp-migration/MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md).
+
+### Acknowledgment mechanism
+
+Any safety finding can be suppressed by adding a comment to the migration file:
+
+```sql
+-- verify: ack DM-18 table is empty during deploy window
+ALTER TABLE "users" ADD COLUMN "name" TEXT NOT NULL;
+```
+
+The finding is downgraded from `error` to `warning` and reported with `[ACKED]` appended to the message. Acknowledged findings become an audit trail entry instead of a block.
+
+### MigrationGroup API
+
+Internal API consumed by the Action. Each independent migration root becomes one `MigrationGroup`:
+
+```typescript
+interface MigrationGroup {
+  /** Migration root directory, used for reporting */
+  root: string;
+  /** SQL content of prior migrations in this root, in order */
+  priorMigrationsSql: string[];
+  /** New migration files in this PR for this root, ordered by path */
+  newFiles: Array<{ path: string; sql: string }>;
+}
+
+const result = await checkMigrations(groups);
+```
+
+`checkMigrations` returns a `MigrationCheckResult` with per-group summaries, all findings (with source line numbers), and an overall pass/fail verdict based on whether any DM-18 errors are present.
+
+### Reproducing the measured claim
+
+```bash
+# Clone the corpus repos (cal.com, formbricks, supabase examples)
+bun scripts/mvp-migration/backtest.ts
+
+# Run the full replay engine: parse + ground + safety against every migration
+bun scripts/mvp-migration/replay-engine.ts
+
+# Run the agent corpus comparison (requires ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY)
+bun scripts/mvp-migration/agent-corpus-expanded.ts
+
+# Run the local Action simulation tests
+bun scripts/mvp-migration/test-action-local.ts
+```
+
+Outputs are written to `scripts/mvp-migration/reports/` (gitignored). The frozen claim doc is at `scripts/mvp-migration/MEASURED-CLAIMS.md`.
+
+---
+
 ## Communication Governance
 
 Agent outbound messages get the same governance as code edits. `governMessage()` checks destination, content, claims, and evidence before a message is sent.

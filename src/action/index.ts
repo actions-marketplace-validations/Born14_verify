@@ -202,18 +202,49 @@ async function run(): Promise<void> {
         if (content) migrationFiles.set(path, content);
       }
 
-      // Find prior migrations in the same directory (from base branch)
-      // to build the pre-migration schema
+      // Find prior migrations from the base branch to build the pre-migration schema.
+      // Handles two layouts:
+      //   Flat:   migrations/20260412_foo.sql (Supabase, hand-written)
+      //   Prisma: migrations/20260412_foo/migration.sql (Prisma, cal.com, formbricks)
       const priorSql: string[] = [];
+      const scannedDirs = new Set<string>();
+
       for (const migPath of migrationPaths) {
-        const migDir = migPath.replace(/\/[^/]+$/, '');
-        // List all files in the migration directory from the base branch
+        // Determine the migration root directory.
+        // For Prisma: packages/prisma/migrations/20260412_foo/migration.sql → packages/prisma/migrations
+        // For flat:   migrations/20260412_foo.sql → migrations
+        const isPrismaLayout = /\/migration\.sql$/i.test(migPath);
+        const migDir = isPrismaLayout
+          ? migPath.replace(/\/[^/]+\/migration\.sql$/i, '')  // go up 2 levels
+          : migPath.replace(/\/[^/]+$/, '');                   // go up 1 level
+
+        if (scannedDirs.has(migDir)) continue;
+        scannedDirs.add(migDir);
+
         try {
-          const dirRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(migDir)}?ref=${metadata.baseBranch}`, {
-            headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' },
-          });
-          if (dirRes.ok) {
-            const dirContents = await dirRes.json() as any[];
+          const dirRes = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(migDir)}?ref=${metadata.baseBranch}`,
+            { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' } },
+          );
+          if (!dirRes.ok) continue;
+          const dirContents = await dirRes.json() as any[];
+
+          if (isPrismaLayout) {
+            // Prisma: each entry is a timestamped subdir containing migration.sql
+            const priorDirs = dirContents
+              .filter((f: any) => f.type === 'dir')
+              .map((f: any) => f.path)
+              .sort();
+
+            for (const subdir of priorDirs) {
+              const sqlPath = `${subdir}/migration.sql`;
+              // Skip if this subdir's migration.sql is one of the new migration files
+              if (migrationPaths.includes(sqlPath)) continue;
+              const sql = await getFileContent(token, owner, repo, sqlPath, metadata.baseBranch);
+              if (sql) priorSql.push(sql);
+            }
+          } else {
+            // Flat: each entry is a .sql file
             const priorFiles = dirContents
               .filter((f: any) => f.name.endsWith('.sql') && f.type === 'file')
               .map((f: any) => f.path)
@@ -225,8 +256,7 @@ async function run(): Promise<void> {
               if (sql) priorSql.push(sql);
             }
           }
-        } catch { /* directory listing failed — schema will start empty */ }
-        break; // Only need to scan the migration dir once
+        } catch { /* directory listing failed — schema will start empty for this dir */ }
       }
 
       console.log(`  Schema bootstrap: ${priorSql.length} prior migration(s)`);

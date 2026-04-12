@@ -14441,14 +14441,28 @@ async function run() {
         if (content) migrationFiles.set(path, content);
       }
       const priorSql = [];
+      const scannedDirs = /* @__PURE__ */ new Set();
       for (const migPath of migrationPaths) {
-        const migDir = migPath.replace(/\/[^/]+$/, "");
+        const isPrismaLayout = /\/migration\.sql$/i.test(migPath);
+        const migDir = isPrismaLayout ? migPath.replace(/\/[^/]+\/migration\.sql$/i, "") : migPath.replace(/\/[^/]+$/, "");
+        if (scannedDirs.has(migDir)) continue;
+        scannedDirs.add(migDir);
         try {
-          const dirRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(migDir)}?ref=${metadata.baseBranch}`, {
-            headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.v3+json" }
-          });
-          if (dirRes.ok) {
-            const dirContents = await dirRes.json();
+          const dirRes = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(migDir)}?ref=${metadata.baseBranch}`,
+            { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.v3+json" } }
+          );
+          if (!dirRes.ok) continue;
+          const dirContents = await dirRes.json();
+          if (isPrismaLayout) {
+            const priorDirs = dirContents.filter((f) => f.type === "dir").map((f) => f.path).sort();
+            for (const subdir of priorDirs) {
+              const sqlPath = `${subdir}/migration.sql`;
+              if (migrationPaths.includes(sqlPath)) continue;
+              const sql = await getFileContent(token, owner, repo, sqlPath, metadata.baseBranch);
+              if (sql) priorSql.push(sql);
+            }
+          } else {
             const priorFiles = dirContents.filter((f) => f.name.endsWith(".sql") && f.type === "file").map((f) => f.path).filter((p) => !migrationPaths.includes(p)).sort();
             for (const pf of priorFiles) {
               const sql = await getFileContent(token, owner, repo, pf, metadata.baseBranch);
@@ -14457,7 +14471,6 @@ async function run() {
           }
         } catch {
         }
-        break;
       }
       console.log(`  Schema bootstrap: ${priorSql.length} prior migration(s)`);
       migrationResult = await checkMigrations(migrationFiles, priorSql);

@@ -207,6 +207,131 @@ bun run scripts/mvp-migration/replay-engine.ts
 
 ---
 
+## Corpus suitability — what the 761-migration corpus can and cannot calibrate
+
+The DM-15 and DM-16 attempts above produced zero findings. A scan of the same `replay-findings-2026-04-12.jsonl` for *all* shapes shows the same result for the rest of the Tier 1 family:
+
+```bash
+$ grep -o '"shapeId":"[^"]*"' reports/replay-findings-2026-04-12.jsonl | sort | uniq -c
+     19 "shapeId":"DM-18"
+```
+
+**Of the 10 Tier 1 migration shapes, exactly one fired against the 761-migration corpus.** DM-01..05 (grounding) produced zero findings. DM-15..17 produced zero. DM-19 produced zero. Only DM-18 produced a measurable sample.
+
+This is documented as a **corpus-suitability conclusion**, not as nine separate held-to-the-bar calibration attempts. The DM-15/DM-16 sections above record those two as genuine attempts because two consecutive zero results from the same shape family are the empirical evidence for the conclusion. Recording DM-01..05 and DM-17/DM-19 as additional held-to-the-bar attempts on this corpus would be padding — the data has already answered the question.
+
+### What the 761-corpus is suited for
+
+- **DM-18 (NOT NULL without DEFAULT).** Calibrated at 19 TP / 0 FP / 100% precision, ships as blocking in CI.
+
+That is the entire list.
+
+### What the 761-corpus is NOT suited for, and why
+
+The 761-migration corpus is composed of **production-merged Prisma migrations** from cal.com, formbricks, and supabase. Two structural properties of the corpus explain the empty results:
+
+1. **Production-merged means already-correct.** A migration that referenced a non-existent table or column would have failed in CI or in code review and never been merged. By construction, the corpus contains zero hallucinated names. The grounding shapes (DM-01 unknown table, DM-02 unknown column, DM-03 unknown FK target, DM-04 create-target-already-exists, DM-05 rename source missing) cannot fire on this corpus because their failure modes are filtered out at merge time.
+
+2. **Prisma-generated means defensively-sequenced.** Prisma's migration generator emits constraint drops before column/table drops, computes type changes through intermediate columns rather than direct narrowings, and manages indexes through named constraint definitions. By construction, the corpus contains zero raw `DROP COLUMN` against FK-bearing columns, zero narrowing `ALTER COLUMN TYPE`, and zero `DROP INDEX` that orphans a constraint. The safety shapes (DM-15 DROP COLUMN with FK, DM-16 DROP TABLE with FK, DM-17 narrowing type, DM-19 DROP INDEX backing constraint) cannot fire on this corpus because their failure modes are pre-empted by the generator.
+
+DM-18 is the exception because **it fires on a runtime data failure**, not a structural failure. `ADD COLUMN x NOT NULL without DEFAULT` parses fine, references real schema, follows the safe Prisma sequence, and *still* fails when applied to a non-empty production table. That's why DM-18 survives in merged migrations: the SQL is structurally correct, the failure only manifests at runtime against data the migration author didn't have at write time. No generator can pre-empt it; no code review can catch it without knowing row counts.
+
+### What this means strategically
+
+The honest framing for partners and future operators:
+
+> The 761-migration canonical corpus is the right corpus for calibrating one specific shape — DM-18 — and the wrong corpus for calibrating the other nine Tier 1 shapes. This is not a failure of the corpus; it is a property of what production-merged Prisma migrations contain. Any additional shapes verify wants to calibrate need a corpus with different properties: hand-written SQL, non-Prisma frameworks, or pre-merge/draft migrations where the failure modes still exist.
+
+The corpus is doing its job. It calibrated the one shape that survives merge. The work of calibrating the other nine shapes is the work of building a *different* corpus, not running this one harder.
+
+See the next section for the spec of what that second corpus needs to be.
+
+---
+
+## Calibration corpus #2 — spec for the next calibration source
+
+The DM-15, DM-16, and broader corpus-suitability results above establish that the 761-migration Prisma corpus calibrates exactly one shape (DM-18). The other nine Tier 1 shapes need a corpus with different properties before any of them can promote to `calibrated`. This section specifies what that second corpus needs to be.
+
+This is a **spec, not an artifact.** No corpus #2 exists yet. The section exists so the next operator (or the next session) starts the corpus-#2 work from a documented starting point rather than re-deriving the requirements.
+
+### The wrong way to expand calibration coverage
+
+> "We need a larger corpus."
+
+This is wrong, and it is the obvious wrong move. If "larger" means more Prisma-generated production-merged migrations, the result is predictable: more DM-18 findings, still zero DM-15/16, still zero DM-01..05, still zero DM-17/19. Volume on the same corpus class produces volume on the same shape distribution. Three more cal.com-style codebases would not move the calibrated count from 1 to 2.
+
+### The right framing
+
+> **We do not primarily need more migrations. We need more failure-bearing migrations.**
+
+The goal of corpus #2 is not to be bigger than corpus #1. It is to *contain failure modes corpus #1 structurally cannot contain*. A corpus #2 that is half the size of corpus #1 but contains 50 raw DROP COLUMN operations against FK-bearing columns is more valuable for calibration than a corpus 3× the size of corpus #1 with zero such operations.
+
+### Required properties of corpus #2
+
+For corpus #2 to support promoting shapes beyond DM-18, it needs to satisfy *all* of the following:
+
+1. **Non-Prisma sources.** The defining property. Prisma's defensive migration generator pre-empts most of the safety-shape failure modes by construction. A corpus dominated by Prisma migrations cannot calibrate the safety family no matter how large it is. Sources that emit less-defensive SQL include:
+   - **Django** (`ALTER TABLE` operations from `RemovedField`, `AlterField` migrations — Django does not always drop FK constraints before dropping columns)
+   - **Rails / ActiveRecord** (`remove_column`, `change_column`, `remove_reference` — varies by adapter)
+   - **Alembic** (Python SQLAlchemy — highly configurable, often hand-edited)
+   - **Hand-written raw SQL migration projects** (highest variance, most likely to contain raw failure patterns)
+   - **Liquibase / Flyway** in their less-managed configurations
+
+2. **Pre-merge or draft-quality where possible.** Production-merged migrations have already passed CI and code review, which filters out the grounding-shape failures (DM-01..05) by definition. Calibrating grounding shapes requires migrations that *had not yet been corrected* when sampled. Sources to consider:
+   - **PR drafts** from open-source repos (closed-without-merge PRs, force-pushed-over commits)
+   - **Pre-CI commits** in repos with public build histories
+   - **Agent-generated migrations** *intended for review*, not "agent-generated test cases" — the difference matters for ground-truth labeling
+   - **First-draft commits** in solo developer workflows where migrations are committed before being run
+   - **Migration history with reverts** — the *first* version of a migration that was later reverted is exactly the kind of failing-but-once-real artifact grounding shapes need to fire on
+
+3. **Diverse enough that non-DM-18 failure modes actually appear.** A corpus that satisfies (1) and (2) but is sourced from a single project with one developer's habits will not produce the variety of failure shapes needed to calibrate 9 shapes. The corpus needs to span at least 5-10 distinct projects or codebases so that shape coverage is not bottlenecked by one author's defensive habits.
+
+4. **Volume sufficient to clear the sample-size floor for the non-DM-18 shapes.** The promotion criterion requires ≥10 findings per shape. If a target corpus is expected to produce ~1-2% finding rates for non-DM-18 shapes (a rough estimate from the DM-18 base rate of 19/761 = 2.5%), then to produce 10 findings per shape the corpus needs to be ~500-1000 migrations *of the right kind*. This is not a hard number — a corpus that fires denser on the target shapes can be smaller. A corpus that fires sparser needs to be larger. The principle is "shapes-per-corpus", not "migrations-per-corpus".
+
+5. **Manually verifiable ground truth.** The promotion criteria require every finding to be hand-classified TP / FP / ambiguous. This means the corpus has to be small enough that manual review is tractable. A corpus of 5000 migrations producing 200 findings is reviewable in a focused day; a corpus of 50000 migrations producing 2000 findings is not. The right size is "enough to clear the sample floor on the target shapes, no larger than necessary."
+
+6. **Reproducible sourcing.** The same way the 761-corpus documents its provenance (cal.com 590 + formbricks 140 + supabase 31 + commit SHAs), corpus #2 needs to document where every migration came from, at what commit, and how it was selected. Otherwise the precision claim has no audit trail.
+
+### What corpus #2 does NOT need to be
+
+- **Public.** Corpus #1 is public because cal.com / formbricks / supabase are public. Corpus #2 can be assembled from any combination of public and private sources. The constraint is reproducibility (any external reviewer can build an equivalent corpus and re-measure), not access (anyone can pull this exact corpus).
+- **Single-source.** Corpus #1 is three repos. Corpus #2 may need to be 5, 10, or 20 sources combined. That's a feature, not a bug — diversity is the point.
+- **As large as corpus #1.** The first useful corpus #2 might be 200 hand-written SQL migrations. That's enough to clear the sample-size floor on one or two shapes, which is the same kind of incremental win DM-18 represented for corpus #1.
+- **Built before any other calibration work.** Corpus #2 work proceeds in parallel with whatever other calibration the operator chooses to attempt against corpus #1's remaining headroom (currently: nothing more on corpus #1 calibrates). It is not a blocker for partner conversations or vertical #1 work.
+
+### The minimum-viable corpus #2 (recommended starting point)
+
+If the next operator wants to ship the smallest possible corpus #2 that produces the next calibrated shape, the recommended target is:
+
+- **Source:** Django migration files from 3-5 mid-sized open-source projects (Sentry, Mailman, Read the Docs, Saleor, Misago — all have public Django migration directories)
+- **Size:** 200-500 migrations, sampled to maintain framework distribution
+- **Target shape:** DM-15 or DM-16 first (the shape family with the strongest evidence for "Prisma is hiding the failure modes")
+- **Expected finding count:** unknown, but ≥10 on at least one of DM-15 or DM-16 is the bar that makes this corpus useful
+- **Effort:** roughly half a day to clone, sample, and load; roughly half a day to run the replay; roughly a day to manually classify findings if the count is in the ~20-100 range
+
+If that minimum-viable run produces ≥10 DM-15 or DM-16 findings, the next calibration becomes a real measurement instead of a held-to-the-bar negative. If it still produces zero, the conclusion would be that even Django pre-empts these failures, and the corpus #2 spec needs to expand into hand-written SQL or agent-generated draft migrations.
+
+### What corpus #2 would NOT solve
+
+- **Calibrating DM-18 better.** DM-18 is already calibrated. Adding it to a new corpus would produce a second precision number on a different sample, which is informative but not necessary for the existing claim.
+- **Making verify a SaaS.** Calibration corpora are an internal verification asset, not a partner-visible feature. Partners care about the published precision number, not the corpus the number was measured against (beyond reproducibility).
+- **The agent-vs-human story.** That's a different experiment with a different methodology — see the agent comparison section below.
+- **Replacing the 761-corpus.** Corpus #1 is the right corpus for DM-18 forever. Corpus #2 supplements; it does not replace.
+
+### Open questions for the next operator
+
+Three questions are not answered here because they require operator judgment, not technical specification:
+
+1. **Is corpus #2 worth building before the first partner conversation, or after?** Argument for "before": the next calibrated shape strengthens the partner pitch. Argument for "after": a single calibrated shape (DM-18) plus a documented forward plan is sufficient signal for a first conversation, and the conversation may reveal which shapes the partner cares most about — narrowing the corpus #2 priority list.
+
+2. **Should corpus #2 be Django-first or hand-written-SQL-first?** Django is easier to source (well-organized migration directories) but produces a more uniform style. Hand-written SQL is the gold standard for failure-bearing diversity but harder to source at scale.
+
+3. **Is the agent corpus a viable corpus #2 if expanded to 200+ tasks?** Currently the promotion criteria explicitly say agent-generated corpora are supplementary evidence, not calibration corpora. That rule was written when the agent corpus was 75 tasks. A larger, more carefully-constructed agent corpus might warrant revisiting that rule — but revising the rule is itself a separate, deliberate decision that should be made *before* measuring against it, the same way the original promotion criteria were committed before DM-15 was attempted.
+
+These questions are documented here so the next session does not have to re-derive them.
+
+---
+
 ## Agent comparison — DM-18 (April 2026, three models)
 
 A separate, smaller experiment: 75 synthetic migration tasks across 8 categories, run against three frontier models at temperature 0. The point of this experiment is **not** to calibrate DM-18 — that's the human-corpus measurement above. The point is to see how often each model produces the structural patterns DM-18 catches, and to compare those rates against the human baseline.

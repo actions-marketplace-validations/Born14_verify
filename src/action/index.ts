@@ -17,7 +17,7 @@ import { getPRDiff, getPRMetadata, postPRComment, getPRFiles, getFileContent } f
 import { formatComment } from './comment.js';
 import { checkMigrations, formatMigrationComment, detectMigrationFiles } from './migration-check.js';
 import type { Predicate } from '../types.js';
-import type { MigrationCheckResult } from './migration-check.js';
+import type { MigrationCheckResult, MigrationGroup } from './migration-check.js';
 
 // =============================================================================
 // ACTION ENTRY POINT
@@ -190,77 +190,100 @@ async function run(): Promise<void> {
     const migrationPaths = detectMigrationFiles(prFiles.map(f => f.filename));
 
     if (migrationPaths.length > 0) {
-      console.log(`  Found ${migrationPaths.length} migration file(s): ${migrationPaths.join(', ')}`);
+      console.log(`  Found ${migrationPaths.length} migration file(s)`);
 
-      // Get PR metadata for base branch ref
+      // Pin to the PR's base SHA so the same PR always gets the same answer.
+      // Using baseBranch (a mutable ref) would mean the schema can shift if main
+      // advances after the PR opens, making CI results non-deterministic.
       const metadata = await getPRMetadata(token, owner, repo, prNumber);
+      const baseRef = metadata.baseSha || metadata.baseBranch;
+      console.log(`  Schema pin: ${metadata.baseSha ? `base SHA ${metadata.baseSha.slice(0, 7)}` : `base branch ${metadata.baseBranch} (no SHA)`}`);
 
-      // Read migration file content from head branch
-      const migrationFiles = new Map<string, string>();
-      for (const path of migrationPaths) {
-        const content = await getFileContent(token, owner, repo, path, metadata.headSha);
-        if (content) migrationFiles.set(path, content);
+      // Compute the migration root for a given file path.
+      //   Prisma: packages/prisma/migrations/20260412_foo/migration.sql → packages/prisma/migrations
+      //   Flat:   db/migrations/20260412_foo.sql                          → db/migrations
+      function migrationRoot(p: string): { root: string; isPrisma: boolean } {
+        if (/\/migration\.sql$/i.test(p)) {
+          return { root: p.replace(/\/[^/]+\/migration\.sql$/i, ''), isPrisma: true };
+        }
+        return { root: p.replace(/\/[^/]+$/, ''), isPrisma: false };
       }
 
-      // Find prior migrations from the base branch to build the pre-migration schema.
-      // Handles two layouts:
-      //   Flat:   migrations/20260412_foo.sql (Supabase, hand-written)
-      //   Prisma: migrations/20260412_foo/migration.sql (Prisma, cal.com, formbricks)
-      const priorSql: string[] = [];
-      const scannedDirs = new Set<string>();
+      // Group migration files by root. Each root becomes an independent
+      // MigrationGroup with its own bootstrap schema.
+      type RootInfo = { isPrisma: boolean; paths: string[] };
+      const rootMap = new Map<string, RootInfo>();
+      for (const p of migrationPaths) {
+        const { root, isPrisma } = migrationRoot(p);
+        const existing = rootMap.get(root);
+        if (existing) existing.paths.push(p);
+        else rootMap.set(root, { isPrisma, paths: [p] });
+      }
 
-      for (const migPath of migrationPaths) {
-        // Determine the migration root directory.
-        // For Prisma: packages/prisma/migrations/20260412_foo/migration.sql → packages/prisma/migrations
-        // For flat:   migrations/20260412_foo.sql → migrations
-        const isPrismaLayout = /\/migration\.sql$/i.test(migPath);
-        const migDir = isPrismaLayout
-          ? migPath.replace(/\/[^/]+\/migration\.sql$/i, '')  // go up 2 levels
-          : migPath.replace(/\/[^/]+$/, '');                   // go up 1 level
+      console.log(`  Detected ${rootMap.size} migration root(s):`);
+      for (const [root, info] of rootMap) {
+        console.log(`    ${root} (${info.isPrisma ? 'Prisma' : 'flat'}): ${info.paths.length} new file(s)`);
+      }
 
-        if (scannedDirs.has(migDir)) continue;
-        scannedDirs.add(migDir);
+      // Build one MigrationGroup per root: bootstrap from prior migrations
+      // in THAT root only, then attach the new files for THAT root sorted.
+      const groups: MigrationGroup[] = [];
+
+      for (const [root, info] of rootMap) {
+        const priorSql: string[] = [];
 
         try {
           const dirRes = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(migDir)}?ref=${metadata.baseBranch}`,
+            `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(root)}?ref=${baseRef}`,
             { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' } },
           );
-          if (!dirRes.ok) continue;
-          const dirContents = await dirRes.json() as any[];
 
-          if (isPrismaLayout) {
-            // Prisma: each entry is a timestamped subdir containing migration.sql
-            const priorDirs = dirContents
-              .filter((f: any) => f.type === 'dir')
-              .map((f: any) => f.path)
-              .sort();
+          if (dirRes.ok) {
+            const dirContents = await dirRes.json() as any[];
 
-            for (const subdir of priorDirs) {
-              const sqlPath = `${subdir}/migration.sql`;
-              // Skip if this subdir's migration.sql is one of the new migration files
-              if (migrationPaths.includes(sqlPath)) continue;
-              const sql = await getFileContent(token, owner, repo, sqlPath, metadata.baseBranch);
-              if (sql) priorSql.push(sql);
-            }
-          } else {
-            // Flat: each entry is a .sql file
-            const priorFiles = dirContents
-              .filter((f: any) => f.name.endsWith('.sql') && f.type === 'file')
-              .map((f: any) => f.path)
-              .filter((p: string) => !migrationPaths.includes(p))
-              .sort();
+            if (info.isPrisma) {
+              // Prisma: each entry is a timestamped subdir containing migration.sql
+              const priorDirs = dirContents
+                .filter((f: any) => f.type === 'dir')
+                .map((f: any) => f.path)
+                .sort();
 
-            for (const pf of priorFiles) {
-              const sql = await getFileContent(token, owner, repo, pf, metadata.baseBranch);
-              if (sql) priorSql.push(sql);
+              for (const subdir of priorDirs) {
+                const sqlPath = `${subdir}/migration.sql`;
+                // Skip new files — they're applied separately, not as bootstrap
+                if (info.paths.includes(sqlPath)) continue;
+                const sql = await getFileContent(token, owner, repo, sqlPath, baseRef);
+                if (sql) priorSql.push(sql);
+              }
+            } else {
+              // Flat: each entry is a .sql file
+              const priorFiles = dirContents
+                .filter((f: any) => f.name.endsWith('.sql') && f.type === 'file')
+                .map((f: any) => f.path)
+                .filter((p: string) => !info.paths.includes(p))
+                .sort();
+
+              for (const pf of priorFiles) {
+                const sql = await getFileContent(token, owner, repo, pf, baseRef);
+                if (sql) priorSql.push(sql);
+              }
             }
           }
-        } catch { /* directory listing failed — schema will start empty for this dir */ }
+        } catch { /* directory listing failed — group will bootstrap from empty schema */ }
+
+        // Read new file content from head SHA, sorted by path for deterministic order
+        const sortedPaths = [...info.paths].sort();
+        const newFiles: Array<{ path: string; sql: string }> = [];
+        for (const path of sortedPaths) {
+          const content = await getFileContent(token, owner, repo, path, metadata.headSha);
+          if (content) newFiles.push({ path, sql: content });
+        }
+
+        groups.push({ root, priorMigrationsSql: priorSql, newFiles });
+        console.log(`    ${root}: ${priorSql.length} prior migration(s) for bootstrap`);
       }
 
-      console.log(`  Schema bootstrap: ${priorSql.length} prior migration(s)`);
-      migrationResult = await checkMigrations(migrationFiles, priorSql);
+      migrationResult = await checkMigrations(groups);
       console.log(`  Migration result: ${migrationResult.passed ? 'PASS' : 'FAIL'} (${migrationResult.findings.length} findings)`);
     } else {
       console.log('  No migration files in this PR.');

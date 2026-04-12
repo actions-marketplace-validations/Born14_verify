@@ -11,6 +11,7 @@ export interface PRMetadata {
   body: string;
   number: number;
   headSha: string;
+  baseSha: string;
   baseBranch: string;
   headBranch: string;
   issueTitle?: string;
@@ -75,6 +76,7 @@ export async function getPRMetadata(token: string, owner: string, repo: string, 
     body: pr.body ?? '',
     number: prNumber,
     headSha: pr.head?.sha ?? '',
+    baseSha: pr.base?.sha ?? '',
     baseBranch: pr.base?.ref ?? 'main',
     headBranch: pr.head?.ref ?? '',
     issueTitle,

@@ -15,32 +15,49 @@ const BLOCKING_SHAPES = new Set(['DM-18']);
 // Warning-only shapes — reported but don't fail the check
 const WARNING_SHAPES = new Set(['DM-15', 'DM-16', 'DM-17']);
 
+/**
+ * One independent group of migrations sharing a schema.
+ *
+ * Each migration root in a repo (e.g., "packages/api/migrations" and
+ * "packages/web/migrations") gets its own MigrationGroup with its own
+ * bootstrap SQL and its own new files. Schemas are NEVER shared across
+ * roots — that would let tables from one app satisfy lookups for another.
+ */
+export interface MigrationGroup {
+  /** Migration root directory, used for reporting */
+  root: string;
+  /** SQL content of prior migrations in this root, in order, for schema bootstrap */
+  priorMigrationsSql: string[];
+  /** New migration files in this PR for this root, ordered by path */
+  newFiles: Array<{ path: string; sql: string }>;
+}
+
 export interface MigrationCheckResult {
-  /** Did any blocking findings occur? */
+  /** Did any blocking findings occur across all groups? */
   passed: boolean;
-  /** All findings (blocking + warning) */
+  /** All findings across all groups (blocking + warning) */
   findings: MigrationFinding[];
-  /** Migration files that were checked */
+  /** Migration files that were checked across all groups */
   filesChecked: string[];
-  /** Schema table count at time of check */
-  schemaTableCount: number;
+  /** Per-group schema sizes for the report */
+  groupSummaries: Array<{ root: string; schemaTableCount: number; fileCount: number; findingCount: number }>;
   /** Any errors during processing */
   errors: string[];
 }
 
 /**
- * Check migration files from a PR diff.
+ * Check migration files from a PR, partitioned by migration root.
  *
- * @param migrationFiles - SQL content keyed by file path
- * @param priorMigrationsSql - SQL content of all prior migrations in order, for schema bootstrapping
+ * Each MigrationGroup is processed independently with its own schema —
+ * tables from one root cannot satisfy lookups in another.
  */
 export async function checkMigrations(
-  migrationFiles: Map<string, string>,
-  priorMigrationsSql: string[],
+  groups: MigrationGroup[],
 ): Promise<MigrationCheckResult> {
   const errors: string[] = [];
   const allFindings: MigrationFinding[] = [];
   const filesChecked: string[] = [];
+  const groupSummaries: MigrationCheckResult['groupSummaries'] = [];
 
   // Lazy-load the heavy modules (WASM init)
   const { loadModule } = await import('libpg-query');
@@ -51,48 +68,60 @@ export async function checkMigrations(
 
   await loadModule();
 
-  // Build schema from prior migrations
-  const schema = createEmptySchema();
-  for (const sql of priorMigrationsSql) {
-    try {
-      applyMigrationSQL(schema, sql);
-    } catch (err: any) {
-      // Non-fatal — prior migration may contain unsupported SQL
-    }
-  }
+  for (const group of groups) {
+    // Each group gets a fresh schema — never shared across roots
+    const schema = createEmptySchema();
 
-  // Check each new migration file
-  for (const [filePath, sql] of migrationFiles) {
-    filesChecked.push(filePath);
-
-    try {
-      const spec = parseMigration(sql, filePath);
-
-      if (spec.meta.parseErrors.length > 0) {
-        errors.push(`${filePath}: parse error — ${spec.meta.parseErrors[0]}`);
-        continue;
-      }
-
-      const grounding = runGroundingGate(spec, schema);
-      const safety = runSafetyGate(spec, schema);
-
-      for (const f of [...grounding, ...safety]) {
-        // Downgrade non-blocking shapes to warnings
-        if (!BLOCKING_SHAPES.has(f.shapeId) && WARNING_SHAPES.has(f.shapeId)) {
-          f.severity = 'warning';
-        }
-        // Skip shapes that aren't in either set (grounding-only findings
-        // like DM-01..05 are real errors and should block)
-        allFindings.push(f);
-      }
-
-      // Apply this migration to schema for subsequent files in the same PR
+    // Bootstrap from this root's prior migrations only
+    for (const sql of group.priorMigrationsSql) {
       try {
         applyMigrationSQL(schema, sql);
-      } catch {}
-    } catch (err: any) {
-      errors.push(`${filePath}: ${err.message}`);
+      } catch {
+        // Non-fatal — prior migration may contain unsupported SQL
+      }
     }
+
+    let groupFindingCount = 0;
+
+    // Check each new migration file in this root, in order
+    for (const file of group.newFiles) {
+      filesChecked.push(file.path);
+
+      try {
+        const spec = parseMigration(file.sql, file.path);
+
+        if (spec.meta.parseErrors.length > 0) {
+          errors.push(`${file.path}: parse error — ${spec.meta.parseErrors[0]}`);
+          continue;
+        }
+
+        const grounding = runGroundingGate(spec, schema);
+        const safety = runSafetyGate(spec, schema);
+
+        for (const f of [...grounding, ...safety]) {
+          // Downgrade non-blocking warning-only shapes
+          if (!BLOCKING_SHAPES.has(f.shapeId) && WARNING_SHAPES.has(f.shapeId)) {
+            f.severity = 'warning';
+          }
+          allFindings.push(f);
+          groupFindingCount++;
+        }
+
+        // Advance schema for subsequent files in the same group
+        try {
+          applyMigrationSQL(schema, file.sql);
+        } catch {}
+      } catch (err: any) {
+        errors.push(`${file.path}: ${err.message}`);
+      }
+    }
+
+    groupSummaries.push({
+      root: group.root,
+      schemaTableCount: schema.tables.size,
+      fileCount: group.newFiles.length,
+      findingCount: groupFindingCount,
+    });
   }
 
   const hasBlockingFindings = allFindings.some(
@@ -103,7 +132,7 @@ export async function checkMigrations(
     passed: !hasBlockingFindings,
     findings: allFindings,
     filesChecked,
-    schemaTableCount: schema.tables.size,
+    groupSummaries,
     errors,
   };
 }
@@ -119,7 +148,16 @@ export function formatMigrationComment(result: MigrationCheckResult): string {
 
   lines.push(`### ${icon} Migration Verification`);
   lines.push('');
-  lines.push(`Checked ${result.filesChecked.length} migration file(s) against ${result.schemaTableCount} tables in schema.`);
+
+  if (result.groupSummaries.length === 1) {
+    const g = result.groupSummaries[0];
+    lines.push(`Checked ${g.fileCount} migration file(s) in \`${g.root}\` against ${g.schemaTableCount} tables.`);
+  } else {
+    lines.push(`Checked ${result.filesChecked.length} migration file(s) across ${result.groupSummaries.length} migration roots:`);
+    for (const g of result.groupSummaries) {
+      lines.push(`- \`${g.root}\` — ${g.fileCount} file(s), ${g.schemaTableCount} tables, ${g.findingCount} finding(s)`);
+    }
+  }
   lines.push('');
 
   if (result.findings.length === 0 && result.errors.length === 0) {

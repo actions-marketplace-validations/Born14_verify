@@ -14020,6 +14020,7 @@ async function getPRMetadata(token, owner, repo, prNumber) {
     body: pr.body ?? "",
     number: prNumber,
     headSha: pr.head?.sha ?? "",
+    baseSha: pr.base?.sha ?? "",
     baseBranch: pr.base?.ref ?? "main",
     headBranch: pr.head?.ref ?? "",
     issueTitle,
@@ -14184,46 +14185,57 @@ function truncate(s, max) {
 // src/action/migration-check.ts
 var BLOCKING_SHAPES = /* @__PURE__ */ new Set(["DM-18"]);
 var WARNING_SHAPES = /* @__PURE__ */ new Set(["DM-15", "DM-16", "DM-17"]);
-async function checkMigrations(migrationFiles, priorMigrationsSql) {
+async function checkMigrations(groups) {
   const errors = [];
   const allFindings = [];
   const filesChecked = [];
+  const groupSummaries = [];
   const { loadModule: loadModule3 } = await Promise.resolve().then(() => __toESM(require_wasm(), 1));
   const { createEmptySchema: createEmptySchema2, applyMigrationSQL: applyMigrationSQL2 } = await Promise.resolve().then(() => (init_schema_loader(), schema_loader_exports));
   const { parseMigration: parseMigration2 } = await Promise.resolve().then(() => (init_spec_from_ast(), spec_from_ast_exports));
   const { runGroundingGate: runGroundingGate2 } = await Promise.resolve().then(() => (init_grounding_gate(), grounding_gate_exports));
   const { runSafetyGate: runSafetyGate2 } = await Promise.resolve().then(() => (init_safety_gate(), safety_gate_exports));
   await loadModule3();
-  const schema = createEmptySchema2();
-  for (const sql of priorMigrationsSql) {
-    try {
-      applyMigrationSQL2(schema, sql);
-    } catch (err) {
-    }
-  }
-  for (const [filePath, sql] of migrationFiles) {
-    filesChecked.push(filePath);
-    try {
-      const spec = parseMigration2(sql, filePath);
-      if (spec.meta.parseErrors.length > 0) {
-        errors.push(`${filePath}: parse error \u2014 ${spec.meta.parseErrors[0]}`);
-        continue;
-      }
-      const grounding = runGroundingGate2(spec, schema);
-      const safety = runSafetyGate2(spec, schema);
-      for (const f of [...grounding, ...safety]) {
-        if (!BLOCKING_SHAPES.has(f.shapeId) && WARNING_SHAPES.has(f.shapeId)) {
-          f.severity = "warning";
-        }
-        allFindings.push(f);
-      }
+  for (const group of groups) {
+    const schema = createEmptySchema2();
+    for (const sql of group.priorMigrationsSql) {
       try {
         applyMigrationSQL2(schema, sql);
       } catch {
       }
-    } catch (err) {
-      errors.push(`${filePath}: ${err.message}`);
     }
+    let groupFindingCount = 0;
+    for (const file of group.newFiles) {
+      filesChecked.push(file.path);
+      try {
+        const spec = parseMigration2(file.sql, file.path);
+        if (spec.meta.parseErrors.length > 0) {
+          errors.push(`${file.path}: parse error \u2014 ${spec.meta.parseErrors[0]}`);
+          continue;
+        }
+        const grounding = runGroundingGate2(spec, schema);
+        const safety = runSafetyGate2(spec, schema);
+        for (const f of [...grounding, ...safety]) {
+          if (!BLOCKING_SHAPES.has(f.shapeId) && WARNING_SHAPES.has(f.shapeId)) {
+            f.severity = "warning";
+          }
+          allFindings.push(f);
+          groupFindingCount++;
+        }
+        try {
+          applyMigrationSQL2(schema, file.sql);
+        } catch {
+        }
+      } catch (err) {
+        errors.push(`${file.path}: ${err.message}`);
+      }
+    }
+    groupSummaries.push({
+      root: group.root,
+      schemaTableCount: schema.tables.size,
+      fileCount: group.newFiles.length,
+      findingCount: groupFindingCount
+    });
   }
   const hasBlockingFindings = allFindings.some(
     (f) => f.severity === "error" && (BLOCKING_SHAPES.has(f.shapeId) || f.shapeId.startsWith("DM-0"))
@@ -14232,7 +14244,7 @@ async function checkMigrations(migrationFiles, priorMigrationsSql) {
     passed: !hasBlockingFindings,
     findings: allFindings,
     filesChecked,
-    schemaTableCount: schema.tables.size,
+    groupSummaries,
     errors
   };
 }
@@ -14242,7 +14254,15 @@ function formatMigrationComment(result) {
   const icon = result.passed ? "\u2705" : "\u274C";
   lines.push(`### ${icon} Migration Verification`);
   lines.push("");
-  lines.push(`Checked ${result.filesChecked.length} migration file(s) against ${result.schemaTableCount} tables in schema.`);
+  if (result.groupSummaries.length === 1) {
+    const g = result.groupSummaries[0];
+    lines.push(`Checked ${g.fileCount} migration file(s) in \`${g.root}\` against ${g.schemaTableCount} tables.`);
+  } else {
+    lines.push(`Checked ${result.filesChecked.length} migration file(s) across ${result.groupSummaries.length} migration roots:`);
+    for (const g of result.groupSummaries) {
+      lines.push(`- \`${g.root}\` \u2014 ${g.fileCount} file(s), ${g.schemaTableCount} tables, ${g.findingCount} finding(s)`);
+    }
+  }
   lines.push("");
   if (result.findings.length === 0 && result.errors.length === 0) {
     lines.push("No issues found. Migration is structurally safe.");
@@ -14433,47 +14453,66 @@ async function run() {
     const prFiles = await getPRFiles(token, owner, repo, prNumber);
     const migrationPaths = detectMigrationFiles(prFiles.map((f) => f.filename));
     if (migrationPaths.length > 0) {
-      console.log(`  Found ${migrationPaths.length} migration file(s): ${migrationPaths.join(", ")}`);
+      let migrationRoot2 = function(p) {
+        if (/\/migration\.sql$/i.test(p)) {
+          return { root: p.replace(/\/[^/]+\/migration\.sql$/i, ""), isPrisma: true };
+        }
+        return { root: p.replace(/\/[^/]+$/, ""), isPrisma: false };
+      };
+      var migrationRoot = migrationRoot2;
+      console.log(`  Found ${migrationPaths.length} migration file(s)`);
       const metadata = await getPRMetadata(token, owner, repo, prNumber);
-      const migrationFiles = /* @__PURE__ */ new Map();
-      for (const path of migrationPaths) {
-        const content = await getFileContent(token, owner, repo, path, metadata.headSha);
-        if (content) migrationFiles.set(path, content);
+      const baseRef = metadata.baseSha || metadata.baseBranch;
+      console.log(`  Schema pin: ${metadata.baseSha ? `base SHA ${metadata.baseSha.slice(0, 7)}` : `base branch ${metadata.baseBranch} (no SHA)`}`);
+      const rootMap = /* @__PURE__ */ new Map();
+      for (const p of migrationPaths) {
+        const { root, isPrisma } = migrationRoot2(p);
+        const existing = rootMap.get(root);
+        if (existing) existing.paths.push(p);
+        else rootMap.set(root, { isPrisma, paths: [p] });
       }
-      const priorSql = [];
-      const scannedDirs = /* @__PURE__ */ new Set();
-      for (const migPath of migrationPaths) {
-        const isPrismaLayout = /\/migration\.sql$/i.test(migPath);
-        const migDir = isPrismaLayout ? migPath.replace(/\/[^/]+\/migration\.sql$/i, "") : migPath.replace(/\/[^/]+$/, "");
-        if (scannedDirs.has(migDir)) continue;
-        scannedDirs.add(migDir);
+      console.log(`  Detected ${rootMap.size} migration root(s):`);
+      for (const [root, info] of rootMap) {
+        console.log(`    ${root} (${info.isPrisma ? "Prisma" : "flat"}): ${info.paths.length} new file(s)`);
+      }
+      const groups = [];
+      for (const [root, info] of rootMap) {
+        const priorSql = [];
         try {
           const dirRes = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(migDir)}?ref=${metadata.baseBranch}`,
+            `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(root)}?ref=${baseRef}`,
             { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.v3+json" } }
           );
-          if (!dirRes.ok) continue;
-          const dirContents = await dirRes.json();
-          if (isPrismaLayout) {
-            const priorDirs = dirContents.filter((f) => f.type === "dir").map((f) => f.path).sort();
-            for (const subdir of priorDirs) {
-              const sqlPath = `${subdir}/migration.sql`;
-              if (migrationPaths.includes(sqlPath)) continue;
-              const sql = await getFileContent(token, owner, repo, sqlPath, metadata.baseBranch);
-              if (sql) priorSql.push(sql);
-            }
-          } else {
-            const priorFiles = dirContents.filter((f) => f.name.endsWith(".sql") && f.type === "file").map((f) => f.path).filter((p) => !migrationPaths.includes(p)).sort();
-            for (const pf of priorFiles) {
-              const sql = await getFileContent(token, owner, repo, pf, metadata.baseBranch);
-              if (sql) priorSql.push(sql);
+          if (dirRes.ok) {
+            const dirContents = await dirRes.json();
+            if (info.isPrisma) {
+              const priorDirs = dirContents.filter((f) => f.type === "dir").map((f) => f.path).sort();
+              for (const subdir of priorDirs) {
+                const sqlPath = `${subdir}/migration.sql`;
+                if (info.paths.includes(sqlPath)) continue;
+                const sql = await getFileContent(token, owner, repo, sqlPath, baseRef);
+                if (sql) priorSql.push(sql);
+              }
+            } else {
+              const priorFiles = dirContents.filter((f) => f.name.endsWith(".sql") && f.type === "file").map((f) => f.path).filter((p) => !info.paths.includes(p)).sort();
+              for (const pf of priorFiles) {
+                const sql = await getFileContent(token, owner, repo, pf, baseRef);
+                if (sql) priorSql.push(sql);
+              }
             }
           }
         } catch {
         }
+        const sortedPaths = [...info.paths].sort();
+        const newFiles = [];
+        for (const path of sortedPaths) {
+          const content = await getFileContent(token, owner, repo, path, metadata.headSha);
+          if (content) newFiles.push({ path, sql: content });
+        }
+        groups.push({ root, priorMigrationsSql: priorSql, newFiles });
+        console.log(`    ${root}: ${priorSql.length} prior migration(s) for bootstrap`);
       }
-      console.log(`  Schema bootstrap: ${priorSql.length} prior migration(s)`);
-      migrationResult = await checkMigrations(migrationFiles, priorSql);
+      migrationResult = await checkMigrations(groups);
       console.log(`  Migration result: ${migrationResult.passed ? "PASS" : "FAIL"} (${migrationResult.findings.length} findings)`);
     } else {
       console.log("  No migration files in this PR.");

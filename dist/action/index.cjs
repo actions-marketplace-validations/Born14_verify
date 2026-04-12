@@ -14291,8 +14291,14 @@ function detectMigrationFiles(changedFiles) {
     /db\/migrate\/.*\.sql$/i,
     /supabase\/migrations\/.*\.sql$/i
   ];
+  const excludes = [
+    /^scripts\//i,
+    /^fixtures\//i,
+    /^tests?\//i,
+    /corpus\//i
+  ];
   return changedFiles.filter(
-    (f) => patterns.some((p) => p.test(f))
+    (f) => patterns.some((p) => p.test(f)) && !excludes.some((e) => e.test(f))
   );
 }
 

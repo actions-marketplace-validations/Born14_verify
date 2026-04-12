@@ -183,7 +183,16 @@ export function detectMigrationFiles(changedFiles: string[]): string[] {
     /supabase\/migrations\/.*\.sql$/i,
   ];
 
+  // Exclude test fixtures, corpus files, and scripts — these are verify's
+  // own development artifacts, not the user's migration files.
+  const excludes = [
+    /^scripts\//i,
+    /^fixtures\//i,
+    /^tests?\//i,
+    /corpus\//i,
+  ];
+
   return changedFiles.filter(f =>
-    patterns.some(p => p.test(f))
+    patterns.some(p => p.test(f)) && !excludes.some(e => e.test(f))
   );
 }

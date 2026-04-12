@@ -14297,7 +14297,6 @@ function detectMigrationFiles(changedFiles) {
 }
 
 // src/action/index.ts
-var import_meta = {};
 async function run() {
   const startTime = Date.now();
   const token = process.env.GITHUB_TOKEN ?? process.env.INPUT_TOKEN ?? "";
@@ -14598,7 +14597,7 @@ function listFiles(dir, readdirSync14, prefix = "") {
   }
   return files;
 }
-if (import_meta.main) {
+if (process.env.GITHUB_ACTIONS) {
   run().catch((err) => {
     console.log(`::error::${err.message}`);
     process.exit(1);

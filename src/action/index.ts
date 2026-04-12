@@ -415,11 +415,12 @@ function listFiles(dir: string, readdirSync: any, prefix = ''): string[] {
   return files;
 }
 
-// Run — only when executed as an entry point, not when imported.
-// Per DESIGN.md §20 + Amendment 5: the harness imports callLLM from this
-// file, and importing must not trigger run() (which calls process.exit(1)
-// when GitHub Actions env vars are absent).
-if (import.meta.main) {
+// Run when in GitHub Actions context.
+// The import.meta.main guard doesn't work in CJS bundles (esbuild empties it).
+// Instead, check for GITHUB_ACTIONS env var which is always set in Actions.
+// When imported as a module (e.g., harness importing callLLM), this won't fire
+// because GITHUB_ACTIONS won't be set in local dev.
+if (process.env.GITHUB_ACTIONS) {
   run().catch(err => {
     console.log(`::error::${err.message}`);
     process.exit(1);

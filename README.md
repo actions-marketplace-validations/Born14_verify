@@ -261,8 +261,9 @@ Runs verify on every PR. Posts gate results as a comment. Three modes:
 
 ## Full Documentation
 
-- **[FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md)** — Reference catalog of failure shapes verify's gates can detect, with calibration status per section. Includes the new Database Migration Failures section (DM-01..19).
-- **[MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md)** — DM-18 measured precision (19 TP / 0 FP / 761 migrations) with full methodology and reproduction steps. The first shape in the taxonomy with a published false-positive rate.
+- **[FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md)** — Reference catalog of failure shapes verify's gates can detect, with calibration status per section. Includes the Database Migration Failures section (DM-01..19) and the promotion criteria (bullet 2a) that govern tier promotion from `shipped` to `calibrated`.
+- **[MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md)** — Vertical #2 (migration) calibration status. DM-18 calibrated at 19 TP / 0 FP / 761 migrations with full methodology and reproduction steps. Also records held-to-the-bar negative results for DM-15 and DM-16, a corpus-suitability analysis of the 761-migration corpus, and the spec for the corpus #2 that would be needed to calibrate the remaining Tier 1 safety shapes.
+- **[VERTICAL-1-CALIBRATION-STATUS.md](VERTICAL-1-CALIBRATION-STATUS.md)** — Vertical #1 (code-edit) calibration status. Zero shapes currently calibrated. Records the first calibration attempt and the two blockers that stopped it (gate-vs-corpus independence on the AIDev-POP scan, and scan output format not preserving per-finding evidence), plus three ordered unblocks for the next operator.
 - **[REFERENCE.md](REFERENCE.md)** — Gates, predicates, configuration, CLI, fault management
 - **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — Architecture, the 8-stage autonomous loop, migration verification pipeline
 - **[METHODOLOGY.md](METHODOLOGY.md)** — AIDev-POP scan methodology and reproducibility (separate from migration corpus methodology, which is in MEASURED-CLAIMS.md)

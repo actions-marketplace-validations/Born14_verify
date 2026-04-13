@@ -52,6 +52,12 @@ bun run scripts/mvp-migration/replay-engine.ts
 | Post-progressive-schema | 40 | 19 | 13 | 8 | 48% |
 | Post-platform-exclusion + per-op + constraint-name fix | 19 | 19 | 0 | 0 | 100% |
 
+### Pre-registration timing note
+
+The calibration promotion criteria in [FAILURE-TAXONOMY.md](../../FAILURE-TAXONOMY.md) bullet 2a were committed in `2b5d1fb` at 17:20 on 2026-04-12, after the DM-18 result in this document was first recorded (`dad8a42` at 09:29 the same day). DM-18 is therefore calibrated under a bar that was formalized after its measurement. The result clears the retroactive bar under all six criteria, but the procedural pre-registration requirement of Component 1 was not satisfied for this specific claim, and this note records that gap so the record is honest about its own structure.
+
+The `2b5d1fb` commit message explicitly scoped the bar to "before DM-15 measurement," not before DM-18. The first shape measured under a fully pre-registered bar is DM-15, recorded as a held-to-bar negative in `19b56b1`.
+
 ---
 
 ## DM-15: DROP COLUMN with FK dependents — calibration attempted, did not promote

@@ -137,6 +137,52 @@ function searchForEvidence(sql: string, table: string, column: string): Evidence
     hits.push({ type: 'backfill_update', confidence: 'strong', excerpt: extractLine(sql, match?.[0] || '') });
   }
 
+  // Path B v2 — evidence patterns for destructive originating events
+  // (drop_column, drop_table, alter_type used as originators, not reverts).
+
+  // add_column_restore — later migration re-adds the same column on same table
+  const addColumnRestorePattern = new RegExp(
+    `alter\\s+(?:table\\s+)?["']?${escapeRegex(tableLower)}["']?.*add\\s+column(?:\\s+if\\s+not\\s+exists)?\\s+["']?${escapeRegex(columnLower)}["']?`,
+    'is',
+  );
+  if (addColumnRestorePattern.test(sql)) {
+    hits.push({ type: 'add_column_restore', confidence: 'strong', excerpt: extractLine(sql, 'ADD COLUMN') });
+  }
+
+  // add_constraint_restore — later migration adds an FK constraint mentioning the column
+  const addConstraintRestorePattern = new RegExp(
+    `alter\\s+(?:table\\s+)?["']?${escapeRegex(tableLower)}["']?.*add\\s+constraint\\s+\\w+.*foreign\\s+key\\s*\\(\\s*["']?${escapeRegex(columnLower)}["']?`,
+    'is',
+  );
+  if (addConstraintRestorePattern.test(sql)) {
+    hits.push({ type: 'add_constraint_restore', confidence: 'strong', excerpt: extractLine(sql, 'FOREIGN KEY') });
+  }
+
+  // create_table_restore — later migration creates a table with the same name
+  // (the "column" slot is unused for drop_table originators; the caller passes
+  // the dropped table name as both table and column, or we just search for the
+  // CREATE TABLE by name).
+  const createTableRestorePattern = new RegExp(
+    `create\\s+table(?:\\s+if\\s+not\\s+exists)?\\s+(?:["']?\\w+["']?\\.)?["']?${escapeRegex(tableLower)}["']?`,
+    'i',
+  );
+  if (createTableRestorePattern.test(sql)) {
+    hits.push({ type: 'create_table_restore', confidence: 'strong', excerpt: extractLine(sql, 'CREATE TABLE') });
+  }
+
+  // alter_type_back — later migration changes type on same column (any direction).
+  // This is the same regex as alter_type_change above; we emit a distinct type
+  // tag so the semantic-match filter can treat it as the v2 originator-pairing.
+  if (/alter\s+column/i.test(sql)) {
+    const alterTypeBackPattern = new RegExp(
+      `alter\\s+(?:table\\s+)?["']?${escapeRegex(tableLower)}["']?.*alter\\s+(?:column\\s+)?["']?${escapeRegex(columnLower)}["']?\\s+(?:set\\s+data\\s+)?type\\s+`,
+      'is',
+    );
+    if (alterTypeBackPattern.test(sql)) {
+      hits.push({ type: 'alter_type_back', confidence: 'strong', excerpt: extractLine(sql, 'TYPE') });
+    }
+  }
+
   return hits;
 }
 
@@ -200,6 +246,22 @@ function extractChanges(sql: string): ColumnChange[] {
         table: currentTable,
         column: dropColMatch[1],
         change_type: 'drop_column',
+        line_excerpt: line.trim(),
+      });
+    }
+
+    // DROP TABLE — standalone statement, table name captured directly
+    // (does not depend on currentTable since DROP TABLE names its own target).
+    const dropTableMatch = line.match(/drop\s+table(?:\s+if\s+exists)?\s+(?:["']?\w+["']?\.)?["']?(\w+)["']?/i);
+    if (dropTableMatch) {
+      const droppedName = dropTableMatch[1];
+      out.push({
+        // For drop_table, both table and column fields hold the table name —
+        // the evidence search for create_table_restore looks up by table, and
+        // this keeps the row shape uniform with other ColumnChange rows.
+        table: droppedName,
+        column: droppedName,
+        change_type: 'drop_table',
         line_excerpt: line.trim(),
       });
     }
@@ -339,11 +401,17 @@ async function main() {
           // this change type. E.g., drop_not_null only reverts set_not_null /
           // add_not_null; drop_column only reverts add_column / add_not_null.
           const semanticMatch =
+            // v1 pairs (additive originators)
             (best.type === 'drop_not_null_revert' && (change.change_type === 'set_not_null' || change.change_type === 'add_not_null')) ||
             (best.type === 'drop_column_revert' && (change.change_type === 'add_column' || change.change_type === 'add_not_null')) ||
             (best.type === 'alter_type_change' && change.change_type === 'alter_type') ||
             (best.type === 'set_default_after' && (change.change_type === 'set_not_null' || change.change_type === 'add_not_null' || change.change_type === 'add_column')) ||
-            (best.type === 'backfill_update' && (change.change_type === 'set_not_null' || change.change_type === 'add_not_null' || change.change_type === 'add_column'));
+            (best.type === 'backfill_update' && (change.change_type === 'set_not_null' || change.change_type === 'add_not_null' || change.change_type === 'add_column')) ||
+            // v2 pairs (destructive originators)
+            (best.type === 'add_column_restore' && change.change_type === 'drop_column') ||
+            (best.type === 'add_constraint_restore' && change.change_type === 'drop_column') ||
+            (best.type === 'create_table_restore' && change.change_type === 'drop_table') ||
+            (best.type === 'alter_type_back' && change.change_type === 'alter_type');
 
           if (!semanticMatch) continue;
 

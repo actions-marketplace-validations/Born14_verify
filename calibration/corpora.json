@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "corpora": [
+    {
+      "id": "prisma-production-v1",
+      "description": "761 production-merged Prisma-style Postgres migrations from three established open-source repositories. First calibration corpus used for verify's migration vertical. Canonical corpus for DM-18.",
+      "status": "active",
+      "sourced_at": "2026-04-12",
+      "total_migrations": 761,
+      "sources": [
+        {
+          "name": "cal.com",
+          "url": "https://github.com/calcom/cal.com.git",
+          "migration_dirs": ["packages/prisma/migrations"],
+          "migration_style": "Prisma-generated",
+          "count": 590,
+          "notes": "Largest slice of the corpus. Prisma-generated Postgres migrations with long history going back to 2021."
+        },
+        {
+          "name": "formbricks",
+          "url": "https://github.com/formbricks/formbricks.git",
+          "migration_dirs": ["packages/database/migration"],
+          "migration_style": "Prisma-generated",
+          "count": 140,
+          "notes": "Prisma-generated Postgres migrations."
+        },
+        {
+          "name": "supabase",
+          "url": "https://github.com/supabase/supabase.git",
+          "migration_dirs": ["examples"],
+          "migration_style": "hand-written SQL",
+          "count": 31,
+          "notes": "Hand-written Supabase migration examples from the supabase repo. Contains native Postgres migrations across multiple example projects."
+        }
+      ],
+      "adapters": [
+        {
+          "function": "prismaAdapter",
+          "file": "scripts/mvp-migration/repo-adapter.ts",
+          "applies_to": ["cal.com", "formbricks"]
+        },
+        {
+          "function": "supabaseAdapter",
+          "file": "scripts/mvp-migration/repo-adapter.ts",
+          "applies_to": ["supabase"]
+        }
+      ],
+      "suitability": {
+        "suitable_for": ["DM-18"],
+        "unsuitable_for": ["DM-01", "DM-02", "DM-03", "DM-04", "DM-05", "DM-15", "DM-16", "DM-17", "DM-19"],
+        "suitability_reason": "Production-merged filters out grounding-shape failures (DM-01..05) because migrations that reference non-existent tables or columns would have failed CI or code review and never been merged. Prisma's defensive migration generator pre-empts safety-shape failures (DM-15, DM-16, DM-17, DM-19) by emitting constraint drops before column or table drops, by computing type changes through intermediate columns rather than direct narrowings, and by managing indexes through named constraint definitions. DM-18 is the exception because it fires on a runtime data failure (NOT NULL without DEFAULT against a non-empty table) that no generator can pre-empt and no code review can catch without knowing row counts."
+      },
+      "reproducibility": {
+        "backtest_script": "scripts/mvp-migration/backtest.ts",
+        "replay_script": "scripts/mvp-migration/replay-engine.ts",
+        "clone_directory": "scripts/mvp-migration/corpus/_repos/",
+        "notes": "The corpus is reproduced by running backtest.ts to clone the three repos, then replay-engine.ts to run the grounding and safety gates against each migration in sequence. Snapshot SHAs for each repo's state at the time of the original calibration are not currently pinned; re-running the clone will pull the latest main branch of each repo, which may differ from the April 2026 snapshot."
+      },
+      "limitations": [
+        "Prisma-heavy: 730 of 761 files are Prisma-generated. Results on hand-written SQL, Django, Rails, or Alembic migrations are not measured.",
+        "Production-merged: the corpus contains only migrations that passed CI and code review, which structurally filters out many failure modes that exist in pre-merge or draft states.",
+        "Single framework family: all three repos use Prisma or hand-written Supabase migrations. The corpus does not exercise migration generators from other ecosystems.",
+        "Commit SHAs for the original April 2026 snapshot are not pinned in this record and the clone reproduces against current main, which will drift over time."
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "id": "django-production-v1",
+      "status": "candidate",
+      "description": "Planned second corpus. Django migrations from 3-5 mid-sized open-source projects (Sentry, Mailman, Read the Docs, Saleor, Misago candidates). Target: 200-500 migrations with less defensive generator pre-emption than Prisma, enabling DM-15, DM-16, and DM-17 calibration attempts under the bar.",
+      "intended_for": ["DM-15", "DM-16", "DM-17"],
+      "spec_reference": "scripts/mvp-migration/MEASURED-CLAIMS.md section 'Calibration corpus #2 — spec for the next calibration source'",
+      "status_notes": "Not yet sourced. Listed as candidate so the registry reflects the documented roadmap."
+    }
+  ]
+}

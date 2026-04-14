@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "shapes": [
+    {
+      "id": "DM-01",
+      "vertical": "migration",
+      "category": "grounding",
+      "title": "Target table not found",
+      "description": "ADD COLUMN, ALTER COLUMN, DROP COLUMN, or similar operation references a table that does not exist in the replayed schema state.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/grounding-gate.ts",
+        "function": "runGroundingGate"
+      },
+      "current_tier": "shipped",
+      "current_severity": "error",
+      "ci_behavior": "blocking",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Production-merged filters out hallucinated table references"}
+      ]
+    },
+    {
+      "id": "DM-02",
+      "vertical": "migration",
+      "category": "grounding",
+      "title": "Target column not found",
+      "description": "Operation references a column that does not exist on the target table in the replayed schema state.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/grounding-gate.ts",
+        "function": "runGroundingGate"
+      },
+      "current_tier": "shipped",
+      "current_severity": "error",
+      "ci_behavior": "blocking",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Production-merged filters out hallucinated column references"}
+      ]
+    },
+    {
+      "id": "DM-03",
+      "vertical": "migration",
+      "category": "grounding",
+      "title": "Foreign key references unknown table or column",
+      "description": "FK constraint references a table or column that does not exist in the replayed schema state.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/grounding-gate.ts",
+        "function": "runGroundingGate"
+      },
+      "current_tier": "shipped",
+      "current_severity": "error",
+      "ci_behavior": "blocking",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Production-merged filters out unknown FK targets"}
+      ]
+    },
+    {
+      "id": "DM-04",
+      "vertical": "migration",
+      "category": "grounding",
+      "title": "Create target already exists",
+      "description": "CREATE TABLE or CREATE INDEX targets a name that already exists in the replayed schema state.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/grounding-gate.ts",
+        "function": "runGroundingGate"
+      },
+      "current_tier": "shipped",
+      "current_severity": "error",
+      "ci_behavior": "blocking",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Production-merged filters out duplicate create attempts"}
+      ]
+    },
+    {
+      "id": "DM-05",
+      "vertical": "migration",
+      "category": "grounding",
+      "title": "Rename source missing or target conflict",
+      "description": "RENAME TABLE or RENAME COLUMN source does not exist, or the target name already exists.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/grounding-gate.ts",
+        "function": "runGroundingGate"
+      },
+      "current_tier": "shipped",
+      "current_severity": "error",
+      "ci_behavior": "blocking",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Production-merged filters out broken rename operations"}
+      ]
+    },
+    {
+      "id": "DM-15",
+      "vertical": "migration",
+      "category": "safety",
+      "title": "DROP COLUMN with FK dependents",
+      "description": "DROP COLUMN targets a column that has incoming foreign key references from other tables, which will cascade or fail at runtime.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/safety-gate.ts",
+        "function": "checkDropColumnSafety"
+      },
+      "current_tier": "shipped",
+      "current_severity": "warning",
+      "ci_behavior": "warning-only",
+      "promoted_attempts": [],
+      "held_attempts": ["dm15-prisma-production-v1-2026-04-12"],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"},
+        {"tier": "shipped", "at": "19b56b1", "reason": "calibration attempted, produced 0 findings on prisma-production-v1, below 10-finding floor", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Prisma migration generator emits DROP CONSTRAINT before DROP COLUMN, so by the time DROP COLUMN runs the FK is already gone"}
+      ]
+    },
+    {
+      "id": "DM-16",
+      "vertical": "migration",
+      "category": "safety",
+      "title": "DROP TABLE with FK dependents",
+      "description": "DROP TABLE targets a table that has incoming foreign key references from other tables.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/safety-gate.ts",
+        "function": "checkDropTableSafety"
+      },
+      "current_tier": "shipped",
+      "current_severity": "warning",
+      "ci_behavior": "warning-only",
+      "promoted_attempts": [],
+      "held_attempts": ["dm16-prisma-production-v1-2026-04-12"],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"},
+        {"tier": "shipped", "at": "19b56b1", "reason": "calibration attempted, produced 0 findings on prisma-production-v1, below 10-finding floor", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Prisma migration generator drops FK constraints before DROP TABLE, same defensive sequence as DM-15"}
+      ]
+    },
+    {
+      "id": "DM-17",
+      "vertical": "migration",
+      "category": "safety",
+      "title": "Column type change is narrowing",
+      "description": "ALTER COLUMN TYPE converts to a narrower type, causing potential data loss (BIGINT to INT, TEXT to VARCHAR(N), TIMESTAMPTZ to DATE, NUMERIC to FLOAT4).",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/safety-gate.ts",
+        "function": "checkNarrowingType"
+      },
+      "current_tier": "shipped",
+      "current_severity": "warning",
+      "ci_behavior": "warning-only",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Prisma computes type changes through intermediate columns rather than direct narrowings"}
+      ],
+      "known_issues": [
+        "Hardcoded narrowing-types table is incomplete. Needs expansion before calibration on any corpus."
+      ]
+    },
+    {
+      "id": "DM-18",
+      "vertical": "migration",
+      "category": "safety",
+      "title": "NOT NULL without safe preconditions",
+      "description": "ADD COLUMN x NOT NULL without DEFAULT, or ALTER COLUMN x SET NOT NULL where x is currently nullable and has no default. Will fail on any non-empty table at runtime.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/safety-gate.ts",
+        "function": "checkNotNullSafety"
+      },
+      "current_tier": "calibrated",
+      "current_severity": "error",
+      "ci_behavior": "blocking",
+      "promoted_attempts": ["dm18-prisma-production-v1-2026-04-12"],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"},
+        {"tier": "calibrated", "at": "dad8a42", "reason": "19/0 precision on prisma-production-v1, clears 80% blocking threshold and 10-finding sample floor", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": true, "reason": "NOT NULL without DEFAULT is a runtime data failure that no generator can pre-empt and code review cannot catch without knowing row counts. Fired on 19 of 761 migrations (2.5% base rate)."}
+      ],
+      "provenance_notes": [
+        "DM-18's classification work (recorded in dad8a42 at 09:29 on 2026-04-12) predates the formal calibration bar commit (2b5d1fb at 17:20 on 2026-04-12) by approximately seven hours and fifty-one minutes. DM-18 is therefore calibrated under a retroactively-formalized bar. The promotion decision matches what the bar would have required (19/19 = 100% clears every threshold), but the procedural pre-registration requirement of Component 1 was not satisfied for this specific claim. This gap is acknowledged in commit 51d767d (2026-04-13). The first shape measured under a fully pre-registered bar is DM-15."
+      ]
+    },
+    {
+      "id": "DM-19",
+      "vertical": "migration",
+      "category": "safety",
+      "title": "DROP INDEX backing a constraint",
+      "description": "DROP INDEX targets an index that is the backing index for a UNIQUE or PRIMARY KEY constraint, which would break the constraint invariant.",
+      "implementation": {
+        "gate_file": "scripts/mvp-migration/safety-gate.ts",
+        "function": "checkDropIndexSafety"
+      },
+      "current_tier": "shipped",
+      "current_severity": "warning",
+      "ci_behavior": "warning-only",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"}
+      ],
+      "corpus_suitability": [
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Prisma manages indexes through named constraint definitions, so DROP INDEX on a constraint-backing index is pre-empted"}
+      ],
+      "known_issues": [
+        "Index-name matching is fragile. Needs hardening before calibration on any corpus."
+      ]
+    }
+  ]
+}

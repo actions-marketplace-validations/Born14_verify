@@ -234,15 +234,19 @@
       "title": "SET NOT NULL without application-compatibility window (deploy-window race)",
       "description": "SET NOT NULL (or ADD COLUMN ... NOT NULL with DEFAULT) on an existing table where application code does not yet tolerate the invariant. The migration completes successfully and existing rows satisfy the constraint, but new writes from application code still running a pre-migration revision fail because they do not provide a value for the column. Distinct from DM-18 (which fires on migrations that cannot even execute against non-empty tables) — DM-28 fires on migrations that execute cleanly and then break writes during the deploy window between migration completion and application code rollout.",
       "implementation": {
-        "gate_file": null,
-        "function": null
+        "gate_file": "scripts/mvp-migration/deploy-window-gate.ts",
+        "function": "runDeployWindowGate",
+        "form": "retrospective-sequence-level",
+        "notes": "Not a per-file CI gate. Takes a whole MigrationSequence, extracts SET NOT NULL and ADD COLUMN NOT NULL DEFAULT events, and scans forward up to 30 migrations for DROP NOT NULL reverts on the same table.column. Only fires on confirmed revert pairs. A static per-file heuristic form for speculative DM-28 risk is not implemented and is not part of this shape's current form."
       },
-      "current_tier": "designed",
+      "current_tier": "shipped",
       "current_severity": "warning",
-      "ci_behavior": "not-implemented",
+      "ci_behavior": "retrospective-audit-only",
+      "calibration_status": "uncalibrated",
       "promoted_attempts": [],
       "tier_history": [
-        {"tier": "designed", "at": "fc2d72e", "reason": "Promoted from prose-only to designed-tier after Path B full-corpus revert discovery scan cleared the pre-locked DM-28 threshold from path-b-scoping-draft.md (two independent incidents of the safe-then-reverted deploy-window shape).", "date": "2026-04-14"}
+        {"tier": "designed", "at": "fc2d72e", "reason": "Promoted from prose-only to designed-tier after Path B full-corpus revert discovery scan cleared the pre-locked DM-28 threshold from path-b-scoping-draft.md (two independent incidents of the safe-then-reverted deploy-window shape).", "date": "2026-04-14"},
+        {"tier": "shipped", "at": "e97a07a", "reason": "Registry honesty: detector implemented in scripts/mvp-migration/deploy-window-gate.ts and re-derived both cited incidents plus one sibling denormalized-table case (3 findings / 210 SET-NOT-NULL events on the 761-migration Prisma corpus, 1.4% retrospective base rate). Moved from designed to shipped so the registry reflects code reality. Explicitly uncalibrated: 3 findings is below the 10-finding sample-size floor and no precision number is claimed. Severity stays warning; CI behavior stays retrospective-audit-only, not a default warning gate.", "date": "2026-04-14"}
       ],
       "corpus_suitability": [],
       "evidence": [

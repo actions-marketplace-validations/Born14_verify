@@ -93,6 +93,28 @@ def extract_field_call(call: ast.Call, name: str) -> ast.AST | None:
     return None
 
 
+def extract_field_nullability(call_node: ast.AST) -> bool | None:
+    """For a models.X(...) field call, return the value of the `null=` kwarg.
+
+    Returns True if `null=True`, False if `null=False` is explicit, and None
+    if the field call is not a Call node, is not a simple kwarg-literal form,
+    or does not specify `null=` at all.
+
+    Django's default when `null=` is unspecified is False (required), but
+    the caller may want to treat None and False differently — e.g., when
+    tracking field-state transitions across migrations, an unspecified value
+    should inherit the existing state rather than override it to False.
+    """
+    if not isinstance(call_node, ast.Call):
+        return None
+    for kw in call_node.keywords:
+        if kw.arg == "null":
+            v = literal(kw.value)
+            if isinstance(v, bool):
+                return v
+    return None
+
+
 def is_safe_after_deploy(value: ast.AST) -> bool:
     """Return True if `value` is `Safe.<attr>()` call chain (Safe.after_deploy,
     Safe.before_deploy, Safe.always, etc.) — any explicit Safe annotation.
@@ -138,7 +160,11 @@ def parse_operations(ops_list: ast.List, app_label: str) -> list[dict[str, Any]]
                         fname = literal(fname_node)
                         ftype = extract_field_type(fcall)
                         if isinstance(fname, str) and ftype:
-                            cols.append({"name": fname, "type": ftype.lower()})
+                            cols.append({
+                                "name": fname,
+                                "type": ftype.lower(),
+                                "nullable": extract_field_nullability(fcall),
+                            })
                             # ForeignKey / OneToOneField — record FK to a target
                             # model. We do not resolve cross-app targets here;
                             # the runner resolves to table name from `to=`.
@@ -171,6 +197,7 @@ def parse_operations(ops_list: ast.List, app_label: str) -> list[dict[str, Any]]
             fcall = extract_field_call(elt, "field")
             ftype = extract_field_type(fcall) if fcall is not None else None
             row["field_type"] = ftype.lower() if ftype else None
+            row["nullable"] = extract_field_nullability(fcall) if fcall is not None else None
             # Record FK target if this AddField creates a relation
             if ftype in ("ForeignKey", "OneToOneField") and isinstance(fcall, ast.Call):
                 to_val = literal(fcall.args[0]) if fcall.args else kwarg_value(fcall, "to")
@@ -197,6 +224,7 @@ def parse_operations(ops_list: ast.List, app_label: str) -> list[dict[str, Any]]
             fcall = extract_field_call(elt, "field")
             ftype = extract_field_type(fcall) if fcall is not None else None
             row["field_type"] = ftype.lower() if ftype else None
+            row["nullable"] = extract_field_nullability(fcall) if fcall is not None else None
 
         elif cls == "RenameField":
             mname = kwarg_value(elt, "model_name")

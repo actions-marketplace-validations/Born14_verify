@@ -62,6 +62,49 @@
         "Single framework family: all three repos use Prisma or hand-written Supabase migrations. The corpus does not exercise migration generators from other ecosystems.",
         "Commit SHAs for the original April 2026 snapshot are not pinned in this record and the clone reproduces against current main, which will drift over time."
       ]
+    },
+    {
+      "id": "django-readthedocs-v1",
+      "description": "345 Django migrations from the Read the Docs project (readthedocs.org), spanning 16 Django apps. First Django corpus used in verify's calibration discipline. Sourced because the three-corpus Django comparison (Saleor, Misago, Read the Docs) identified Read the Docs as the provenance-cleanest source with the fewest false-positive amplifiers (zero SeparateDatabaseAndState state-only ops, zero manual RunSQL DROP CONSTRAINT workarounds).",
+      "status": "active",
+      "sourced_at": "2026-04-14",
+      "total_migrations": 345,
+      "sources": [
+        {
+          "name": "readthedocs",
+          "url": "https://github.com/readthedocs/readthedocs.org.git",
+          "migration_dirs": ["readthedocs/*/migrations"],
+          "migration_style": "Django ORM Python migrations",
+          "count": 345,
+          "notes": "Sparse-checkout of the readthedocs/ subtree. 345 migration files across 16 Django apps (acl, allauth, analytics, api, audit, aws, builds, config, core, doc_builder, domains, embed, filetreediff, forms, gold, integrations, invitations, and more). 100% of migrations declare safe = Safe.<method>() via django_safemigrate, which is independent evidence for the DM-28 candidate shape."
+        }
+      ],
+      "adapters": [
+        {
+          "function": "django-parser.py + django-runner.ts",
+          "file": "scripts/mvp-migration/django-parser.py, scripts/mvp-migration/django-runner.ts",
+          "applies_to": ["readthedocs"]
+        }
+      ],
+      "suitability": {
+        "suitable_for": [],
+        "measured_unsuitable_for": ["DM-15"],
+        "unsuitable_for": [],
+        "suitability_reason": "DM-15 measured under pre-registered bar on 2026-04-14 and produced zero canonical DM-15 findings (incoming-FK dependents sub-case). 4 findings fired on the outgoing-FK warning sub-case but all 4 were classified FP due to a parser modeling gap: Django emits an implicit DROP CONSTRAINT before DROP COLUMN at SQL compile time for FK-bearing columns, which the AST-level parser does not model. See attempt dm15-django-readthedocs-v1-2026-04-14 in attempts.jsonl. Other shapes not yet measured against this corpus."
+      },
+      "reproducibility": {
+        "parser_script": "scripts/mvp-migration/django-parser.py",
+        "runner_script": "scripts/mvp-migration/django-runner.ts",
+        "clone_directory": "scripts/mvp-migration/corpus/_repos/readthedocs",
+        "notes": "Reproduced by running django-parser.py against the readthedocs/ subtree to emit normalized JSONL, then django-runner.ts to topologically order by Migration.dependencies, convert Django ops to typed MigrationOps, build schema state progressively via applyOp, and feed each file through runSafetyGate. Clone SHA is not pinned; re-running will pull the latest main branch and may drift from the April 2026 snapshot."
+      },
+      "limitations": [
+        "Single project: the corpus is one Django project, not a multi-repo aggregate. Results generalize to Read the Docs specifically, not to the broader Django ecosystem.",
+        "Parser modeling gap: Django's implicit DROP CONSTRAINT before DROP COLUMN on FK-bearing columns is not modeled by the AST-level parser, which caused 4 outgoing-FK-sub-case DM-15 findings to fire as false positives. The canonical incoming-FK sub-case is unaffected by this gap because it depends on fkIn at schema state, not on whether an outgoing FK has been dropped.",
+        "AlterField type extraction deferred: DM-17 (narrowing type change) cannot be measured against this corpus until the parser extracts new field types from AlterField operations. 273 AlterField operations are present but currently skipped.",
+        "Clone SHA not pinned: re-running the clone reproduces against current main of readthedocs/readthedocs.org and will drift over time.",
+        "Meta.db_table overrides not handled: the parser assumes Django's default {app_label}_{model_name_lower} table naming convention. Models that override with class Meta: db_table would map to incorrect table names. Spot checks did not surface any but the limitation stands."
+      ]
     }
   ],
   "candidates": [

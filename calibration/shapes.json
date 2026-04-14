@@ -120,13 +120,15 @@
       "current_severity": "warning",
       "ci_behavior": "warning-only",
       "promoted_attempts": [],
-      "held_attempts": ["dm15-prisma-production-v1-2026-04-12"],
+      "held_attempts": ["dm15-prisma-production-v1-2026-04-12", "dm15-django-readthedocs-v1-2026-04-14"],
       "tier_history": [
         {"tier": "shipped", "at": "b7b509c", "reason": "initial sync from sovereign monorepo", "date": "2026-04-12"},
-        {"tier": "shipped", "at": "19b56b1", "reason": "calibration attempted, produced 0 findings on prisma-production-v1, below 10-finding floor", "date": "2026-04-12"}
+        {"tier": "shipped", "at": "19b56b1", "reason": "calibration attempted, produced 0 findings on prisma-production-v1, below 10-finding floor", "date": "2026-04-12"},
+        {"tier": "shipped", "at": "49b7614", "reason": "calibration attempted on django-readthedocs-v1 via new Django AST parser, produced 0 canonical incoming-FK findings and 4 outgoing-FK-sub-case findings (all FP due to parser not modeling Django's implicit DROP CONSTRAINT before DROP COLUMN); 4 below the 10-finding floor", "date": "2026-04-14"}
       ],
       "corpus_suitability": [
-        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Prisma migration generator emits DROP CONSTRAINT before DROP COLUMN, so by the time DROP COLUMN runs the FK is already gone"}
+        {"corpus_id": "prisma-production-v1", "fires": false, "reason": "Prisma migration generator emits DROP CONSTRAINT before DROP COLUMN, so by the time DROP COLUMN runs the FK is already gone"},
+        {"corpus_id": "django-readthedocs-v1", "fires": false, "reason": "Canonical DM-15 sub-case (incoming-FK dependents) produced 0 findings across 345 migrations; 72 RemoveField operations exist but none target a column with live incoming FK references at drop time. Outgoing-FK warning sub-case fires 4 times but all are parser-modeling artifacts, not true DM-15 failures — see attempt dm15-django-readthedocs-v1-2026-04-14 in attempts.jsonl."}
       ]
     },
     {

@@ -226,6 +226,48 @@
       "known_issues": [
         "Index-name matching is fragile. Needs hardening before calibration on any corpus."
       ]
+    },
+    {
+      "id": "DM-28",
+      "vertical": "migration",
+      "category": "deploy-window",
+      "title": "SET NOT NULL without application-compatibility window (deploy-window race)",
+      "description": "SET NOT NULL (or ADD COLUMN ... NOT NULL with DEFAULT) on an existing table where application code does not yet tolerate the invariant. The migration completes successfully and existing rows satisfy the constraint, but new writes from application code still running a pre-migration revision fail because they do not provide a value for the column. Distinct from DM-18 (which fires on migrations that cannot even execute against non-empty tables) — DM-28 fires on migrations that execute cleanly and then break writes during the deploy window between migration completion and application code rollout.",
+      "implementation": {
+        "gate_file": null,
+        "function": null
+      },
+      "current_tier": "designed",
+      "current_severity": "warning",
+      "ci_behavior": "not-implemented",
+      "promoted_attempts": [],
+      "tier_history": [
+        {"tier": "designed", "at": "fc2d72e", "reason": "Promoted from prose-only to designed-tier after Path B full-corpus revert discovery scan cleared the pre-locked DM-28 threshold from path-b-scoping-draft.md (two independent incidents of the safe-then-reverted deploy-window shape).", "date": "2026-04-14"}
+      ],
+      "corpus_suitability": [],
+      "evidence": [
+        {
+          "incident": "cal.com RoutingForms.uuid",
+          "original_migration": "packages/prisma/migrations/20250618151833_add_uuid_to_app_routingforms_formresponse/migration.sql",
+          "revert_migration": "packages/prisma/migrations/20250626092518_app_routing_forms_form_response_uuid_nullable/migration.sql",
+          "pattern": "set_not_null then drop_not_null_revert (gap 1 migration, ~8 days)",
+          "notes": "Original DM-28 hypothesis incident from Path C. Team added NOT NULL to uuid column using a safe three-step pattern, then reverted NOT NULL in a follow-up migration while keeping the column and backfilled data. Revert signature is consistent with new writes from pre-migration application code failing during the deploy window."
+        },
+        {
+          "incident": "cal.com Team.slug",
+          "original_migration": "packages/prisma/migrations/20221011001632_make_team_name_slug_required/migration.sql",
+          "revert_migration": "packages/prisma/migrations/20221107201132_add_team_subscription_cols/migration.sql",
+          "pattern": "set_not_null then drop_not_null_revert (gap 5 migrations, 27 days)",
+          "notes": "Second independent incident found by Path B on 2026-04-14. Different table, different feature area (teams vs routing forms), different time period (2022-10 vs 2025-06) from the first incident. Original migration carried a Prisma 'This step will fail if there are existing NULL values' warning and was shipped anyway; 27 days later a revert dropped NOT NULL on slug while the migration's stated purpose was to add unrelated subscription columns (createdAt, metadata). The revert being buried in an unrelated-purpose migration is the production-pressure-fix signature (not a same-day developer hotfix, not a years-later planned refactor, but the characteristic 'lived in prod for a few weeks, caused write failures, got quietly patched in the next touching migration' window)."
+        }
+      ],
+      "distinction_from_dm25": "DM-25 (designed, not yet promoted here) covers SET NOT NULL failures that manifest at migration execution time on non-empty tables without defaults. DM-28 covers SET NOT NULL that executes cleanly (either the column was nullable-to-NOT NULL with a completed backfill, or ADD COLUMN ... NOT NULL DEFAULT with a working default) but breaks new writes during the deploy window because application code running an older revision does not yet provide the value. DM-25 is a migration-execution failure; DM-28 is a deploy-coordination failure. A single migration can satisfy DM-25 without being vulnerable to DM-28 (if application code is simultaneously updated), and a single migration can be vulnerable to DM-28 without triggering DM-25 (if the column has a safe backfill but the application deploy lags).",
+      "distinction_from_dm18": "DM-18 (calibrated, shipped, error-severity) covers ADD COLUMN NOT NULL without DEFAULT and SET NOT NULL where the column has no default and is currently nullable — both of which will fail at migration execution time on a non-empty table. DM-28 covers the case where the migration succeeds. The failure mode is different (runtime writes failing post-migration vs the migration itself failing to execute) and the fix is different (coordinate application deploy vs add a default or backfill).",
+      "known_issues": [
+        "Not yet implemented. No gate file, no function. Designed-tier means the hypothesis is documented and the evidence meets the threshold; implementation and calibration are future work.",
+        "The detection signal requires looking forward from a migration to the application deploy window and backward from a revert to the originating migration — neither of which the existing single-file safety gates can do. A gate for DM-28 will need corpus-level or sequence-level analysis, not per-file checking.",
+        "Precision claims for DM-28 cannot come from production-merged corpora alone. The shape's suitable corpus class is revert-derived/pre-fix states where the 'broken deploy window was painful enough to trigger a revert' signal is on disk. The pre-fix pipeline v1 queued as follow-up work is the intended corpus class."
+      ]
     }
   ]
 }

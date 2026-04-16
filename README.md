@@ -38,7 +38,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: Born14/verify@main
+      - uses: Born14/verify@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```

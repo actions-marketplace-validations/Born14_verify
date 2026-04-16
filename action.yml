@@ -1,4 +1,4 @@
-name: 'Verify'
+name: 'Verify by Born14'
 description: 'Catches unsafe database migrations before they hit production. Deterministic. No LLM in the check path.'
 author: 'Born14'
 

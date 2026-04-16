@@ -1,213 +1,72 @@
-# AIDev-POP Scan Methodology
+# Verify Methodology
 
-## Reproducibility
+How Verify's claims are made and how you can check them.
 
-Anyone can reproduce these results. Download the dataset, run the scanner, get the same numbers.
+## The problem
 
-```bash
-# 1. Clone verify
-git clone https://github.com/Born14/verify.git
-cd verify
-bun install
+AI agents and humans write database migrations that are syntactically valid but operationally unsafe. A migration that adds `NOT NULL` without a `DEFAULT` will succeed in development (empty table) and fail in production (millions of rows). No test suite catches this. No code reviewer sees it without knowing the production schema state.
 
-# 2. Download AIDev-POP dataset from HuggingFace
-mkdir -p data/aidev-pop
-# Download these two files from https://huggingface.co/datasets/hao-li/AIDev
-#   pr_commit_details.parquet (485 MB) — patches for every file changed in every PR
-#   pull_request.parquet (16 MB) — PR metadata (title, agent, repo, state)
+Verify catches these failures deterministically by parsing the migration SQL against the accumulated schema state from prior migrations.
 
-# 3. Convert parquet to JSONL (requires Python + pandas + pyarrow)
-python -c "
-import pandas as pd, json
-df = pd.read_parquet('data/aidev-pop/pr_commit_details.parquet',
-     columns=['sha','pr_id','filename','status','additions','deletions','changes','patch'])
-with open('data/aidev-pop/pr_commit_details.jsonl','w') as f:
-    for _, row in df.iterrows():
-        f.write(json.dumps(row.to_dict(), default=str) + '\n')
-"
-python -c "
-import pandas as pd, json
-df = pd.read_parquet('data/aidev-pop/pull_request.parquet',
-     columns=['id','number','title','body','agent','user','state','created_at','repo_url','html_url'])
-with open('data/aidev-pop/pull_request.jsonl','w') as f:
-    for _, row in df.iterrows():
-        f.write(json.dumps(row.to_dict(), default=str) + '\n')
-"
+## Why deterministic
 
-# 4. Run the scan (per agent, 500 PRs per batch)
-bun scripts/scan/batch-scanner.ts --agent=Devin --batch=1 --size=500
-bun scripts/scan/batch-scanner.ts --agent=Copilot --batch=1 --size=500
-# ... continue for all batches
+A deterministic detector produces the same output for the same input, every time. No randomness, no model calls, no "confidence scores." When Verify says a migration is unsafe, the reason is a specific SQL pattern matched against a specific schema state. You can read the detector source, trace the logic, and agree or disagree.
 
-# 5. Compile the wiki
-bun scripts/scan/wiki-compiler.ts
-```
+This property is what allows Verify to sit in a blocking CI gate. Probabilistic tools (LLM-based code review) produce false positives that vary between runs. Engineers disable them within a week. Deterministic tools produce consistent verdicts that engineers can evaluate once and trust going forward.
 
-## Dataset
+## The tier lifecycle
 
-**AIDev-POP** — a subset of the AIDev dataset containing pull requests from repositories with 100+ GitHub stars.
+Every failure shape in Verify's taxonomy has a tier that tells you how much to trust it.
 
-| Field | Value |
-|-------|-------|
-| Source | [hao-li/AIDev on HuggingFace](https://huggingface.co/datasets/hao-li/AIDev) |
-| Total PRs | 33,596 (33,056 with parseable patches) |
-| Repositories | 2,807+ |
-| Star threshold | 100+ |
-| Time period | 2024-2026 |
-| Agents | OpenAI Codex, Devin, GitHub Copilot, Cursor, Claude Code |
+### Observed
 
-**Per-agent sample sizes:**
+A failure pattern has been identified and named. No detector exists yet. The shape lives in the taxonomy as a candidate for future development.
 
-| Agent | PRs in dataset | PRs scanned | Avg edits per PR |
-|-------|---------------|-------------|-----------------|
-| OpenAI Codex | 21,799 | 21,764 | 21.7 |
-| Devin | 4,827 | 4,800 | 69.5 |
-| GitHub Copilot | 4,970 | 4,496 | 70.4 |
-| Cursor | 1,541 | 1,539 | 50.6 |
-| Claude Code | 459 | 457 | 111.8 |
+### Shipped
 
-PRs scanned < PRs in dataset due to: missing patches, empty diffs, or parse failures.
+A detector exists, has been tested against internal fixtures, and runs in the GitHub Action. Shipped shapes produce **warnings** in PR comments but do not block merges. They may produce false positives -- that's expected and acceptable at this tier.
 
-## Pipeline
+### Calibrated
 
-```
-PR patch (unified diff)
-  → parseDiff()           — convert to Edit[] (search/replace pairs)
-  → verify(edits, [], {   — run through gate pipeline
-      gates: {
-        grounding: false,   // disabled — needs real repo
-        syntax: false,      // disabled — needs real files
-        staging: false,     // disabled — needs Docker
-        browser: false,     // disabled — needs Playwright
-        http: false,        // disabled — needs running app
-        invariants: false,  // disabled — needs running app
-        vision: false,      // disabled — needs screenshots
-      }
-    })
-  → classifier            — tag each finding as high/low/unknown
-  → wiki compiler          — generate markdown reports
-```
+The detector has been measured against a real-world corpus of production-merged migrations. The measurement produces a precision number (true positives vs false positives) and is published in the calibration registry. Only calibrated shapes with acceptable precision are promoted to **blocking** severity.
 
-**No LLM calls.** The entire pipeline is deterministic. Cost: $0.
+Calibration is the gate for blocking merges. Nothing else.
 
-## Gates Enabled (10 of 26)
+## The calibration bar
 
-These gates analyze the diff content without needing the target repository:
+To promote a shape from shipped to calibrated:
 
-| Gate | What it detects | How it works on diffs |
-|------|----------------|----------------------|
-| **Security** | Hardcoded secrets, SQL injection, XSS, eval | Scans edit replacement text for known patterns |
-| **Containment (G5)** | Undeclared mutations | Checks if edits touch files beyond what predicates cover |
-| **Access** | Path traversal, permission escalation | Scans for `fs.readFile(req.*)`, `chmod`, `sudo`, unsafe paths |
-| **Temporal** | Cross-file staleness | Detects port/config changes without updating dependent files |
-| **Propagation** | Stale cross-file references | Detects renamed identifiers referenced in unmodified files |
-| **State** | Invalid state assumptions | Detects references to entities that don't exist in the diff |
-| **Capacity** | Unbounded queries | Detects `SELECT *` without LIMIT, missing pagination patterns |
-| **Contention** | Race conditions, missing transactions | Detects read-modify-write without atomicity, shared mutable state |
-| **Observation** | Observer effects | Detects verification actions that modify system state |
-| **Triangulation** | Cross-authority synthesis | Compares deterministic vs runtime verdicts |
+1. **Pre-register the bar.** Before running the measurement, write down what precision is required for promotion. The bar does not move after the run.
+2. **Select a corpus.** The corpus must be production-merged migrations from real open-source projects. Synthetic fixtures do not count.
+3. **Run the detector against the corpus.** Record every finding.
+4. **Label every finding.** Each finding is manually reviewed and labeled true positive, false positive, or ambiguous by the author.
+5. **Compute precision.** True positives / (true positives + false positives).
+6. **Record the attempt.** The attempt is recorded in [attempts.jsonl](calibration/attempts.jsonl) regardless of outcome -- including failures and held-to-bar negatives.
+7. **Promote or hold.** If precision meets the pre-registered bar, the shape is promoted to calibrated and its severity changes to blocking. If not, the shape stays at shipped/warning and the held-to-bar negative is published.
 
-## Gates Disabled (16 of 26)
+Publishing held-to-bar negatives is the discipline that makes the registry trustworthy. Anyone can publish successes. Publishing failures proves the bar is real.
 
-These gates require the target repository, Docker, or a running application:
+## The calibration registry
 
-| Gate | Why disabled | What it would add |
-|------|-------------|-------------------|
-| Grounding | Needs repo source files | Fabricated selector/reference detection |
-| F9 (Syntax) | Needs repo files for search string matching | Edit application validation |
-| K5 (Constraints) | No prior failure history | Learned constraint enforcement |
-| Staging | Needs Docker | Build/start verification |
-| Browser | Needs Playwright | Runtime CSS/HTML validation |
-| HTTP | Needs running app | Endpoint response validation |
-| Invariants | Needs running app | Health check validation |
-| Vision | Needs screenshots | Visual verification |
-| + 8 domain gates | Various infrastructure requirements | Additional domain-specific checks |
+Three files, all public:
 
-Enabling grounding and F9 (requires cloning ~2,807 repos) would add fabricated reference detection — potentially doubling the finding rate.
+- **[shapes.json](calibration/shapes.json)** -- every shape in the taxonomy, its current tier, its detector status, and its severity in the Action.
+- **[corpora.json](calibration/corpora.json)** -- every corpus used for calibration, its sources, its limitations, and its suitability for specific shapes. Includes commit SHAs for reproducibility.
+- **[attempts.jsonl](calibration/attempts.jsonl)** -- every calibration attempt. Each line records: the shape, the corpus, the date, the precision, the disposition (promoted or held-to-bar), and the reason.
 
-## Confidence Classifier
+Per-finding evidence (individual TP/FP labels for each finding) is kept private. The aggregate counts and dispositions are public.
 
-Every finding is auto-tagged before reporting. The classifier is deterministic — no LLM, no randomness.
+## Reproducing a claim
 
-### High Confidence (reported as findings)
+Every calibrated shape has a reproducibility section in [MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) that tells you how to re-run the measurement yourself. The corpus sources are public repositories. The detector source is readable. The schema replay logic is in [schema-loader.ts](scripts/mvp-migration/schema-loader.ts).
 
-A finding is high confidence when it matches ALL of:
-- The gate detects a known structural pattern (not just a keyword match)
-- The file is backend/runtime code (not config, types, docs, or tests)
-- The PR has fewer than 10 total findings (high density = noise)
+If you get different numbers, [open an issue](https://github.com/Born14/verify/issues). The claim is falsifiable by design.
 
-Specific rules:
-- Security findings in `.ts`, `.js`, `.py`, `.rb`, `.go`, `.rs`, `.java`, `.php` files
-- Contention findings in backend code (race conditions, missing transactions)
-- Access findings in backend code (not type definitions, not config files)
-- Capacity findings involving SQL or backend code
+## What Verify is not
 
-### Low Confidence (filtered out — known false positive patterns)
+- **Not a security scanner.** Verify does not check for SQL injection, secrets, or vulnerabilities.
+- **Not a code reviewer.** Verify does not read application code or evaluate logic.
+- **Not a linter.** Verify does not check SQL style or formatting.
+- **Not a migration runner.** Verify does not execute migrations. It parses them statically.
 
-| Shape ID | Pattern | Why it's a false positive |
-|----------|---------|--------------------------|
-| GC-651 | Contention gate on `.tsx/.jsx/.vue/.svelte` | Frontend components don't do DB writes |
-| GC-652 | Access gate on `.d.ts` / `types.ts` | Type declarations aren't runtime code |
-| GC-653 | Access gate on `.gitignore`, `package.json`, CI workflows | Config files, not runtime code |
-| GC-654 | Access gate on `.csproj/.sln/.props` | MSBuild XML paths are normal |
-| GC-655 | Access gate on `Dockerfile` | COPY/ADD paths are normal Docker instructions |
-| GC-656 | Access gate on lockfiles | Generated files, not authored code |
-| GC-657 | Access gate on `.h/.hpp` headers | `#include` paths are normal C++ patterns |
-| GC-658 | Access gate on `.yaml/.yml/.toml` config | Config file paths are normal |
-| GC-659 | Access gate on `.bundle/`, `Gemfile` | Ruby bundler paths are normal |
-| GC-660 | Propagation gate on `LICENSE` files | License text isn't cross-file reference |
-| GC-661 | Access gate on `.promptx/`, `.claude/`, `.cursor/` config | Agent config files |
-| GC-662 | Contention gate on `mcp.json`, lockfiles | Config JSON, not transactions |
-| GC-663 | Access gate on shell scripts | Script paths are normal |
-| GC-664 | Access gate on `.env.example` | Template files, not production |
-| GC-665 | Access gate on `.cursorrules` | Agent instruction files |
-| GC-666 | Access gate on `build.gradle` | JVM build system paths |
-| GC-667 | Contention gate on CI workflow YAML | CI steps aren't concurrent transactions |
-| GC-668 | Propagation gate on `.jsonc` config | Tool config, not code references |
-
-Additional low-confidence rules:
-- Any finding in documentation files (`.md`, `.mdx`, `.rst`)
-- Any finding in test files (`*test*`, `*spec*`, `__tests__/`)
-- PRs with >10 findings from a single gate (over-matching)
-
-### Unknown (pending review)
-
-Findings that don't match any high or low pattern. These are accumulated across batches. When 3+ unknowns share the same gate + file-type pattern, they're auto-promoted to candidate shapes for operator review.
-
-## What "Finding Rate" Means
-
-**Raw finding rate:** Percentage of PRs where any gate fires (high + low + unknown).
-
-**High-confidence finding rate:** Percentage of PRs with at least one high-confidence finding. **This is the published number.** It excludes all known false positive patterns.
-
-**Normalized rate (per 1,000 edits):** Total findings divided by total edits × 1,000. Controls for PR size — agents that write bigger PRs mechanically trigger more gates.
-
-## Limitations
-
-1. **Diff-only analysis.** 16 of 26 gates are disabled. The grounding gate (fabricated references) and F9 (edit application) would require cloning each repository. The reported rates are a lower bound — enabling all gates would find more issues.
-
-2. **No runtime verification.** Staging, browser, and HTTP gates require running the application. Behavioral bugs (the code compiles but doesn't work) are not detected.
-
-3. **Classifier calibration.** The confidence classifier was calibrated on the first 1,000 PRs (Devin + Copilot). Later agents (Cursor, Claude Code, Codex) may have patterns not yet classified. 369 unknowns remain across all batches.
-
-4. **Sample size variance.** Claude Code has 457 PRs; Codex has 21,764. Statistical confidence varies by agent. Claude Code's numbers should be interpreted with wider error bars.
-
-5. **No predicate-based checking.** The scan runs `verify(edits, [], config)` — no predicates. Intent alignment (did the agent do what was asked?) is not measured. Only structural correctness.
-
-6. **Static patterns.** The security, access, capacity, and contention gates use regex-based pattern matching. Sophisticated obfuscation or indirect patterns may be missed. The gates catch common agent patterns, not adversarial evasion.
-
-## Reproducibility Guarantee
-
-The scanner is deterministic. Given the same:
-- AIDev-POP dataset files (parquet)
-- Verify version (`git log --oneline -1`)
-- Classifier rules (`scripts/scan/classifier.ts`)
-- Batch parameters (`--agent=X --batch=N --size=500`)
-
-The output is identical. No randomness, no LLM calls, no network dependencies.
-
----
-
-*Methodology documented April 7, 2026. Scan executed April 6-7, 2026.*
-*Scanner: `scripts/scan/batch-scanner.ts`. Classifier: `scripts/scan/classifier.ts`.*
-*Dataset: [hao-li/AIDev](https://huggingface.co/datasets/hao-li/AIDev) (AIDev-POP subset).*
+Verify checks one thing: whether a database migration is structurally safe to run against a production schema. It checks this deterministically, publishes its precision, and lets you verify the claim yourself.

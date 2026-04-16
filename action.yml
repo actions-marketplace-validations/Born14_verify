@@ -1,10 +1,10 @@
-name: 'Verify Agent PR'
-description: 'Deterministic verification of AI agent edits. 26 gates check structural correctness, security, cross-file consistency.'
-author: 'sovereign-labs'
+name: 'Verify'
+description: 'Catches unsafe database migrations before they hit production. Deterministic. No LLM in the check path.'
+author: 'Born14'
 
 branding:
-  icon: 'shield'
-  color: 'blue'
+  icon: 'database'
+  color: 'orange'
 
 inputs:
   app-dir:
@@ -16,7 +16,7 @@ inputs:
     required: false
     default: 'false'
   api-key:
-    description: 'API key for intent-level predicate extraction (Tier 3b). Works with any provider.'
+    description: 'API key for intent-level predicate extraction. Works with any provider.'
     required: false
   provider:
     description: 'LLM provider for intent extraction: gemini (default), openai, anthropic'
@@ -37,11 +37,11 @@ inputs:
 
 outputs:
   success:
-    description: 'Whether all gates passed (true/false)'
+    description: 'Whether all checks passed (true/false)'
   gates-passed:
-    description: 'Comma-separated list of passed gate names'
+    description: 'Comma-separated list of passed check names'
   gates-failed:
-    description: 'Comma-separated list of failed gate names'
+    description: 'Comma-separated list of failed check names'
   summary:
     description: 'One-line summary of results'
 

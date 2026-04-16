@@ -14,7 +14,9 @@
           "migration_dirs": ["packages/prisma/migrations"],
           "migration_style": "Prisma-generated",
           "count": 590,
-          "notes": "Largest slice of the corpus. Prisma-generated Postgres migrations with long history going back to 2021."
+          "snapshot_sha": "d08f4a02156bcea308a97ea8ccde919f56340520",
+          "snapshot_date": "2026-04-11",
+          "notes": "Largest slice of the corpus. Prisma-generated Postgres migrations with long history going back to 2021. NOTE (2026-04-15): cal.com announced closure of their core open-source codebase. This corpus is a frozen artifact from the open-source era. The snapshot SHA should be pinned to the last public commit before closure. formbricks and supabase remain open and reproducible."
         },
         {
           "name": "formbricks",
@@ -22,6 +24,8 @@
           "migration_dirs": ["packages/database/migration"],
           "migration_style": "Prisma-generated",
           "count": 140,
+          "snapshot_sha": "322f0be197b2be12607cde422b2e40e32953e2c6",
+          "snapshot_date": "2026-04-12",
           "notes": "Prisma-generated Postgres migrations."
         },
         {
@@ -30,6 +34,8 @@
           "migration_dirs": ["examples"],
           "migration_style": "hand-written SQL",
           "count": 31,
+          "snapshot_sha": "e95f1cc67c6a15910e1d85c709542100ef650374",
+          "snapshot_date": "2026-04-10",
           "notes": "Hand-written Supabase migration examples from the supabase repo. Contains native Postgres migrations across multiple example projects."
         }
       ],
@@ -54,13 +60,13 @@
         "backtest_script": "scripts/mvp-migration/backtest.ts",
         "replay_script": "scripts/mvp-migration/replay-engine.ts",
         "clone_directory": "scripts/mvp-migration/corpus/_repos/",
-        "notes": "The corpus is reproduced by running backtest.ts to clone the three repos, then replay-engine.ts to run the grounding and safety gates against each migration in sequence. Snapshot SHAs for each repo's state at the time of the original calibration are not currently pinned; re-running the clone will pull the latest main branch of each repo, which may differ from the April 2026 snapshot."
+        "notes": "The corpus is reproduced by running backtest.ts to clone the three repos, then replay-engine.ts to run the grounding and safety gates against each migration in sequence. cal.com closed their core codebase in April 2026; the corpus is a frozen artifact from the open-source era. formbricks and supabase remain publicly clonable. The snapshot SHA for cal.com should be pinned to the last public commit before closure."
       },
       "limitations": [
         "Prisma-heavy: 730 of 761 files are Prisma-generated. Results on hand-written SQL, Django, Rails, or Alembic migrations are not measured.",
         "Production-merged: the corpus contains only migrations that passed CI and code review, which structurally filters out many failure modes that exist in pre-merge or draft states.",
         "Single framework family: all three repos use Prisma or hand-written Supabase migrations. The corpus does not exercise migration generators from other ecosystems.",
-        "Commit SHAs for the original April 2026 snapshot are not pinned in this record and the clone reproduces against current main, which will drift over time."
+        "cal.com closed their core codebase in April 2026. The corpus is a frozen artifact. Snapshot SHA for the last public commit needs to be pinned. formbricks and supabase remain open and reproducible."
       ]
     },
     {

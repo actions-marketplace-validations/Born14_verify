@@ -1,277 +1,137 @@
-# @sovereign-labs/verify
+# Verify
 
-[![npm](https://img.shields.io/npm/v/@sovereign-labs/verify)](https://www.npmjs.com/package/@sovereign-labs/verify)
-[![GitHub Action](https://img.shields.io/badge/GitHub%20Action-Born14%2Fverify-blue)](https://github.com/Born14/verify)
+**Catches unsafe database migrations before they hit production.**
 
-**Your agent says "done." But do you know *how* it fails?**
+Deterministic. No LLM in the check path. The answer is not "probably."
 
-Not whether it fails. *How.*
+## What it catches
 
-`verify()` runs your agent's edits against filesystem reality and tells you what the agent got wrong — the file, the line, the expected value, the actual value. No LLM in the verification path. The answer is not "probably."
+**DM-18: ADD COLUMN NOT NULL without DEFAULT**
 
-Over time, these measurements accumulate into a reliability profile: how *this* agent fails on *this* codebase. What it hallucinates. Where it drops edits. Which patterns it repeats.
+When an AI agent (or a human) writes a migration like this:
 
-No other tool builds this model. Linters know your code has problems. Tests know your code produces wrong output. **Verify knows why the agent was wrong.**
-
-**Using verify? We'd love to hear what you're building.** [Join the discussion](https://github.com/Born14/verify/discussions/40)
-
-## See it in action
-
-```bash
-npx @sovereign-labs/verify demo
+```sql
+ALTER TABLE "users" ADD COLUMN "company" TEXT NOT NULL;
 ```
 
-Three failure modes your current stack misses:
+That migration will fail on any non-empty table. The database tries to apply `NOT NULL` to every existing row, finds no value (no default was provided), and rejects the operation. Your deploy breaks at 3am.
 
-### The Agent Said Done
+Verify catches it before it merges.
 
-The agent claims it saved a file. It didn't. Verify checks the filesystem.
+**Measured precision:** 19 true positives, 0 false positives across 761 production migrations from [cal.com](https://github.com/calcom/cal.com), [formbricks](https://github.com/formbricks/formbricks), and [supabase](https://github.com/supabase/supabase). See [MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) for full methodology and reproducibility steps.
 
-```
-Without verify:
-  Agent says: "Report saved successfully."
-  $ ls reports/weekly.md
-  ls: cannot access 'reports/weekly.md': No such file or directory
+## Install (60 seconds)
 
-With verify:
-  Trace 1: Agent claims completion without creating the file.
-  [FAIL] Filesystem gate: reports/weekly.md does not exist.
-  Trace 2: Injecting constraints and re-running. Agent creates the file.
-  [PASS] All gates passed (12 checks)
-```
-
-### Wrong World Model
-
-The agent writes valid CSS targeting a selector that doesn't exist. Verify knows what's actually in your code.
-
-```
-Without verify:
-  $ grep '.profile-nav' server.js     # CSS rule exists
-  $ grep -c 'class="profile-nav"'     # 0 — element doesn't exist
-
-With verify:
-  Trace 1: Agent uses selector .profile-nav
-  [FAIL] Grounding: .profile-nav does not exist in source
-  Trace 2: Agent uses a.nav-link — exists in reality.
-  [PASS] All gates passed (12 checks)
-```
-
-### The Silent Drift
-
-The agent completed the task. But it also quietly changed your config. Verify catches the undeclared mutation.
-
-```
-Without verify:
-  $ diff config.json.orig config.json
-  - "darkMode": true
-  + "darkMode": false
-  - "analytics": false
-  + "analytics": true
-
-With verify:
-  Trace 1: Agent edits server.js and config.json.
-  [FAIL] Containment: 2 undeclared file mutations detected
-  Trace 2: Agent edits server.js only.
-  [PASS] All gates passed (11 checks)
-```
-
-Run all three: `npx @sovereign-labs/verify demo --scenario=liar|world|drift`
-
-## What it does
-
-```typescript
-import { verify } from '@sovereign-labs/verify';
-
-const result = await verify(edits, predicates, { appDir: './my-app' });
-// result.success → true/false
-// result.attestation → human-readable summary
-// result.narrowing → what to try next (on failure)
-```
-
-26 checks run in sequence. First failure stops the pipeline and tells you exactly what went wrong.
-
-1. **Can the edit be applied?** Does the search string exist in the file?
-2. **Is the edit safe?** No XSS, no SQL injection, no leaked secrets, no broken accessibility.
-3. **Did the edit work?** CSS selector has the right value. HTTP endpoint returns 200. Database column exists. File was created.
-4. **Did the edit break anything else?** Health checks pass. File integrity holds. Config is consistent.
-
-On **failure**: returns the problem + what to try next.
-On **repeat failure**: learns from mistakes — attempt N+1 won't repeat attempt N's error.
-
-## Install
-
-```bash
-npm install @sovereign-labs/verify
-# or
-bun add @sovereign-labs/verify
-```
-
-## Quick Start
-
-### 1. As a library
-
-```typescript
-import { verify } from '@sovereign-labs/verify';
-
-const result = await verify(
-  // Edits: search-and-replace mutations
-  [
-    { file: 'server.js', search: 'color: blue', replace: 'color: red' },
-    { file: 'server.js', search: 'Hello', replace: 'Welcome' },
-  ],
-  // Predicates: what should be true after the edits
-  [
-    { type: 'css', selector: 'h1', property: 'color', expected: 'red' },
-    { type: 'content', file: 'server.js', pattern: 'Welcome' },
-    { type: 'http', path: '/health', method: 'GET', expect: { status: 200 } },
-  ],
-  // Config
-  { appDir: './my-app' }
-);
-
-if (result.success) {
-  console.log(result.attestation);
-} else {
-  console.log(result.narrowing.resolutionHint);
-}
-```
-
-### 2. Convergence loop — `govern()`
-
-`verify()` is a single pass. `govern()` wraps it in a convergence loop — ground reality, plan, verify, narrow, retry. The agent learns from every failure.
-
-```typescript
-import { govern } from '@sovereign-labs/verify';
-
-const result = await govern({
-  appDir: './my-app',
-  goal: 'Change the button color to orange',
-  maxAttempts: 3,
-
-  // Your agent — one method: plan
-  agent: {
-    plan: async (goal, context) => {
-      // context.grounding — CSS, HTML, routes, DB schema
-      // context.narrowing — what failed last time and why
-      // context.constraints — what's banned and why (K5)
-
-      return {
-        edits: [{ file: 'style.css', search: 'blue', replace: 'orange' }],
-        predicates: [{ type: 'css', selector: '.btn', property: 'color', expected: 'orange' }],
-      };
-    },
-  },
-});
-
-if (result.success) {
-  console.log(`Converged in ${result.attempts} attempt(s)`);
-} else {
-  console.log(`Stopped: ${result.stopReason}`);
-  // 'exhausted' | 'stuck' | 'empty_plan_stall' | 'approval_aborted'
-}
-```
-
-### 3. As a CLI
-
-```bash
-npx @sovereign-labs/verify init          # Create .verify/check.json
-npx @sovereign-labs/verify check         # Run verification
-npx @sovereign-labs/verify demo          # See what it catches
-npx @sovereign-labs/verify ground        # Scan CSS/HTML/routes
-npx @sovereign-labs/verify self-test     # Run 2,800+ scenario harness
-git diff | npx @sovereign-labs/verify check --diff   # Pipe git diff
-```
-
-### 4. As an MCP server
-
-```json
-{
-  "mcpServers": {
-    "verify": {
-      "command": "npx",
-      "args": ["@sovereign-labs/verify", "mcp"]
-    }
-  }
-}
-```
-
-Tools: `verify_ground`, `verify_read`, `verify_submit`
-
-## Multi-agent
-
-Multiple agents editing the same codebase? Verify them in sequence — each agent sees the filesystem the previous agent left behind.
-
-```typescript
-import { verifyBatch } from '@sovereign-labs/verify';
-
-const result = await verifyBatch([
-  { agent: 'planner', edits: [...], predicates: [...] },
-  { agent: 'coder', edits: [...], predicates: [...] },
-], { appDir: './my-app', stopOnFailure: true });
-```
-
-If Agent A's changes invalidate Agent B's predicates, the grounding gate catches it. No new infrastructure — the existing gates handle multi-agent conflicts naturally.
-
-## Beyond code edits
-
-The checks are domain-agnostic:
-- **File system agents** — move, rename, organize files
-- **Infrastructure agents** — don't delete the production database
-- **Communication agents** — message the right channel, no forbidden content
-- **Document agents** — don't overwrite the wrong cells
-
-## Migration verification (DM-18)
-
-When a PR contains `.sql` migration files, verify also runs the **migration verification pipeline** — a separate set of gates that parse the migration with libpg-query, replay the schema from prior migrations on the base branch, and check the new migration against that schema.
-
-The first shipped rule is **DM-18 (NOT NULL without safe preconditions)**: `ADD COLUMN x NOT NULL` without a `DEFAULT`, or `SET NOT NULL` on a nullable column with no default. Both will fail on any non-empty production table — the classic 3am migration failure.
-
-**Measured precision:** 19 true positives, 0 false positives across 761 production migrations from cal.com, formbricks, and supabase. See [MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) for full methodology and reproduction steps.
-
-DM-18 is the first vertical of verify's three-vertical product strategy (code-edit verification, database migration verification, HTTP contract verification). Eight other migration shapes (DM-01..05 grounding, DM-15..17, DM-19 safety) are implemented and shipping in CI as warnings while they're calibrated against the corpus. See the [Database Migration Failures section of FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md#database-migration-failures) for the full shape catalog.
-
-Findings can be acknowledged in the migration file with `-- verify: ack DM-XX <reason>` to downgrade them to warnings (audit trail) rather than blocks.
-
-## Real-world validation: 33,056 agent PRs scanned
-
-We scanned every PR in the [AIDev-POP dataset](https://huggingface.co/datasets/hao-li/AIDev) — 33,056 real pull requests from 5 AI coding agents across 2,807 popular open-source repos. Deterministic pipeline, $0 cost, no LLM calls.
-
-**High-confidence structural finding rates:**
-
-| Agent | PRs | Finding Rate | Top Issue |
-|-------|-----|-------------|-----------|
-| Devin | 4,800 | 8.2% | Unbounded queries |
-| Claude Code | 457 | 8.5% | Path/permission |
-| Copilot | 4,496 | 4.8% | Path/permission |
-| Cursor | 1,539 | 4.4% | Unbounded queries |
-| Codex | 21,764 | 1.9% | Unbounded queries |
-
-3.4% of all agent PRs have high-confidence structural issues that existing CI doesn't catch. See [METHODOLOGY.md](METHODOLOGY.md) for full details.
-
-## GitHub Action
+Add this to `.github/workflows/verify.yml`:
 
 ```yaml
-- uses: Born14/verify@v0.8.2
+name: Verify Migrations
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: Born14/verify@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Runs verify on every PR. Posts gate results as a comment. Three modes:
-- **Structural** (default, free) — diff-only analysis, no API key needed
-- **Intent** — extracts predicates from PR title/description (Gemini, OpenAI, or Anthropic)
-- **Staging** — Docker build + runtime verification
+That's it. When a PR contains `.sql` migration files, Verify parses them, replays prior schema state from your base branch, and checks each migration for unsafe patterns. Results appear as a PR comment.
 
-## Full Documentation
+## What it checks
 
-- **[FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md)** — Reference catalog of failure shapes verify's gates can detect, with calibration status per section. Includes the Database Migration Failures section (DM-01..19) and the promotion criteria (bullet 2a) that govern tier promotion from `shipped` to `calibrated`.
-- **[MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md)** — Vertical #2 (migration) calibration status. DM-18 calibrated at 19 TP / 0 FP / 761 migrations with full methodology and reproduction steps. Also records held-to-the-bar negative results for DM-15 and DM-16, a corpus-suitability analysis of the 761-migration corpus, and the spec for the corpus #2 that would be needed to calibrate the remaining Tier 1 safety shapes.
-- **[VERTICAL-1-CALIBRATION-STATUS.md](VERTICAL-1-CALIBRATION-STATUS.md)** — Vertical #1 (code-edit) calibration status. Zero shapes currently calibrated. Records the first calibration attempt and the two blockers that stopped it (gate-vs-corpus independence on the AIDev-POP scan, and scan output format not preserving per-finding evidence), plus three ordered unblocks for the next operator.
-- **[REFERENCE.md](REFERENCE.md)** — Gates, predicates, configuration, CLI, fault management
-- **[HOW-IT-WORKS.md](HOW-IT-WORKS.md)** — Architecture, the 8-stage autonomous loop, migration verification pipeline
-- **[METHODOLOGY.md](METHODOLOGY.md)** — AIDev-POP scan methodology and reproducibility (separate from migration corpus methodology, which is in MEASURED-CLAIMS.md)
-- **[PARITY-GRID.md](PARITY-GRID.md)** — 8×10 capability × failure class coverage matrix
-- **[ASSESSMENT.md](ASSESSMENT.md)** — What verify is and isn't
-- **[ROADMAP.md](ROADMAP.md)** — Current state and priorities
-- **[GLOSSARY.md](GLOSSARY.md)** — Terms and definitions
+| Shape | Name | Severity | Status |
+|-------|------|----------|--------|
+| DM-18 | NOT NULL without DEFAULT | Blocking | Calibrated (19/0) |
+| DM-15 | DROP COLUMN with FK dependents | Warning | Shipped, uncalibrated |
+| DM-16 | DROP TABLE with FK dependents | Warning | Shipped, uncalibrated |
+| DM-17 | ALTER TYPE with implicit data loss | Warning | Shipped, uncalibrated |
+
+Blocking shapes fail the check. Warning shapes appear in the PR comment but don't block merge.
+
+## What it does NOT check
+
+- Application code (JavaScript, Python, Ruby, etc.)
+- Security vulnerabilities or secrets
+- Code style or formatting
+- Anything that requires an LLM to evaluate
+
+Verify checks the structural correctness of database migrations against schema reality. That's it.
+
+## Suppressing a finding
+
+If Verify flags a migration you've reviewed and determined is safe (for example, the table is known to be empty):
+
+```sql
+-- verify: ack DM-18 table is empty at this point in the deploy
+ALTER TABLE "users" ADD COLUMN "company" TEXT NOT NULL;
+```
+
+The `-- verify: ack` comment tells Verify you've reviewed the finding. It will still appear in the PR comment as acknowledged, but it won't block merge.
+
+## Scope and honesty
+
+- **Database support:** PostgreSQL only.
+- **Migration formats:** Prisma-generated SQL and hand-written `.sql` files. Django, Rails, and Alembic support is in development.
+- **Calibration:** DM-18 is calibrated against 761 production migrations with published precision. Other shapes are shipped but uncalibrated — they may produce false positives while being measured.
+- **No runtime knowledge:** Verify parses SQL statically. It doesn't know your table has zero rows. It flags the structural risk regardless.
+- **Deterministic:** Every finding is reproducible. Same migration in, same result out. No probabilities.
+
+## How it works
+
+Verify uses [libpg-query](https://github.com/pganalyze/libpg-query) (PostgreSQL's actual parser, compiled to WASM) to parse migration SQL into an AST. It replays prior migrations from your base branch to build the schema state at the point of each new migration, then runs shape detectors against each operation.
+
+The detector source is readable: [safety-gate.ts](scripts/mvp-migration/safety-gate.ts), [schema-loader.ts](scripts/mvp-migration/schema-loader.ts).
+
+## Calibration and trust
+
+Every shape in Verify's taxonomy goes through a tier lifecycle:
+
+1. **Observed** — a failure pattern has been identified
+2. **Shipped** — a detector exists and runs as a warning
+3. **Calibrated** — the detector has been measured against a real-world corpus with published precision
+
+Only calibrated shapes block merges. The calibration registry is public so claims are falsifiable:
+
+- [shapes.json](calibration/shapes.json) — every shape, its tier, its detector status
+- [corpora.json](calibration/corpora.json) — every corpus, its sources, its limitations
+- [attempts.jsonl](calibration/attempts.jsonl) — every calibration attempt, including failures and held-to-bar negatives
+
+See [METHODOLOGY.md](METHODOLOGY.md) for the full calibration discipline.
+
+## The taxonomy
+
+Verify maintains a catalog of the specific, deterministic ways that database operations fail when they meet production reality. Each entry is a named failure shape — a pattern an operator would recognize from a 3am page.
+
+See [FAILURE-TAXONOMY.md](FAILURE-TAXONOMY.md) for the full catalog.
+
+## Why deterministic
+
+AI code review tools (Qodo, CodeRabbit, Greptile) use LLMs to read your PR and flag issues probabilistically. They're useful for catching logic errors and style issues. They cannot sit in a blocking CI gate because false positives from a probabilistic tool get the tool disabled within a week.
+
+Verify is deterministic. When it says "this migration is unsafe," the reason is a specific SQL pattern matched against a specific schema state. You can read the detector, agree or disagree, and decide. The verdict doesn't change between runs. That's why it can block merges without burning developer trust.
+
+## What's coming
+
+- Django migration support
+- DM-28: Deploy-window safety (SET NOT NULL without application-level coordination)
+- Additional migration shape families
+- More framework parsers (Rails, Alembic)
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).
+
+## Contact
+
+Built by [@Born14](https://github.com/Born14). Questions, bug reports, or "verify caught a real bug" stories: [open an issue](https://github.com/Born14/verify/issues).

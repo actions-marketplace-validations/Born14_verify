@@ -1,67 +1,105 @@
-# Build output
-dist/
+# ============================================================
+# verify public repo — product surface only
+# Everything below is substrate that lives in verify-engine
+# ============================================================
 
-# Self-test runtime artifacts
-data/self-test-*.jsonl
-data/self-test-summary-*.json
-data/improve-baseline-*.jsonl
-data/improvement-ledger.jsonl
-data/subprocess-ledger.jsonl
+# Substrate source (lives in verify-engine, not public)
+src/cli.ts
+src/demo.ts
+src/govern.ts
+src/index.ts
+src/mcp-server.ts
+src/report.ts
+src/verify.ts
+src/vision-helpers.ts
+src/types.ts
+src/gates/
+src/runners/
+src/store/
+src/extractor/
+src/parsers/
 
-# Browser gate temp files
-.verify-tmp/
-fixtures/demo-app/.verify-tmp/
+# Substrate scripts
+scripts/harvest/
+scripts/supply/
+scripts/harness/
+scripts/benchmark/
+scripts/campaign/
+scripts/scan/
+scripts/self-test.ts
+scripts/nightly.sh
+scripts/record-demo.ts
+scripts/filesystem-smoke-test.ts
+scripts/message-smoke-test.ts
+scripts/sync-backup.sh
 
-# Real-world harvest cache (fetched data, 24h TTL, never committed)
-.verify-cache/
-
-# Real-world scenarios (generated from fetched data, not committed)
-fixtures/scenarios/real-world/
-
-# Harvest manifest (runtime metadata)
-data/harvest-manifest.json
-
-# Keep the data directory itself
-!data/.gitkeep
-MARKETING-STRATEGY.md
-data/aidev-scan/tmp/
-
-# Node
-node_modules/
-package-lock.json
-
-# Local development copy of AIDev-POP corpus (3.2GB, lives on Lenovo for real scans)
-data/aidev-pop/
-
-# Generated documentation from scripts/scan/wiki-compiler.ts
-data/wiki/
-
-# discover-shapes output (regenerated on demand; triaged into FAILURE-TAXONOMY.md)
-data/discovered-shapes.jsonl
-
-# Level 2 / k5 scanner working dirs under fixtures
-fixtures/demo-app/.verify/
-fixtures/demo-app/.verify-k5-*/
-
-# Compiled TypeScript output leaking next to sources
-scripts/campaign/*.js
-scripts/campaign/*.js.map
-scripts/campaign/*.d.ts
-scripts/campaign/*.d.ts.map
-scripts/harness/*.js
-scripts/harness/*.js.map
-scripts/harness/*.d.ts
-scripts/harness/*.d.ts.map
-scripts/scan/*.js
-scripts/scan/*.js.map
-scripts/scan/*.d.ts
-scripts/scan/*.d.ts.map
-fixtures/http-server.js
-fixtures/http-server.js.map
-fixtures/http-server.d.ts
-fixtures/http-server.d.ts.map
-
-# Migration MVP — cloned OSS repos for backtest (large, never committed)
-scripts/mvp-migration/corpus/_repos/
-# Migration MVP — generated reports (regenerated on demand)
+# Substrate mvp-migration files (detectors stay, runners don't)
+scripts/mvp-migration/agent-corpus*.ts
+scripts/mvp-migration/backtest.ts
+scripts/mvp-migration/deploy-window-gate.ts
+scripts/mvp-migration/django-parser.py
+scripts/mvp-migration/django-runner.ts
+scripts/mvp-migration/dm28-*.ts
+scripts/mvp-migration/full-corpus-reverts.ts
+scripts/mvp-migration/historical-followup.ts
+scripts/mvp-migration/parse-one.ts
+scripts/mvp-migration/prefix-runner.ts
+scripts/mvp-migration/replay-engine.ts
+scripts/mvp-migration/repo-adapter.ts
+scripts/mvp-migration/test-*.ts
+scripts/mvp-migration/corpus/
+scripts/mvp-migration/fixtures/
 scripts/mvp-migration/reports/
+scripts/mvp-migration/corpus/_repos/
+
+# Substrate data
+data/
+!data/.gitkeep
+
+# Substrate directories
+demo/
+experiments/
+fixtures/
+tests/
+
+# Internal planning docs (private)
+ASSESSMENT.md
+ROADMAP.md
+APRIL-2026-ANALYSIS.md
+GLOSSARY.md
+HOW-IT-WORKS.md
+REFERENCE.md
+SCANNER-INCIDENTS.md
+VERTICAL-1-CALIBRATION-STATUS.md
+calibration-discipline-draft.md
+path-b-scoping-draft.md
+path-b-v2-scoping-draft.md
+pre-fix-pipeline-v1-scope-draft.md
+*.txt
+
+# Calibration internal README (registry files stay, internal docs don't)
+calibration/README.md
+
+# Nightly runner artifacts
+.nightly-last-night/
+
+# Build infrastructure
+node_modules/
+package.json
+package-lock.json
+bun.lock
+tsconfig.json
+tsconfig.build.json
+
+# Dist (except the Action bundle which is tracked)
+dist/*
+!dist/action/
+!dist/action/index.cjs
+!dist/action/libpg-query.wasm
+
+# Nightly workflow (private)
+.github/workflows/nightly-improve.yml
+
+# Runtime artifacts
+.verify-tmp/
+.verify-cache/

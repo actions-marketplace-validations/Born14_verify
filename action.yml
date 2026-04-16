@@ -7,25 +7,10 @@ branding:
   color: 'orange'
 
 inputs:
-  app-dir:
-    description: 'Path to the application directory (default: repo root)'
+  token:
+    description: 'GitHub token with pull-requests: write and contents: read'
     required: false
-    default: '.'
-  intent:
-    description: 'Enable intent checking — extracts predicates from PR title/description (requires api-key)'
-    required: false
-    default: 'false'
-  api-key:
-    description: 'API key for intent-level predicate extraction. Works with any provider.'
-    required: false
-  provider:
-    description: 'LLM provider for intent extraction: gemini (default), openai, anthropic'
-    required: false
-    default: 'gemini'
-  staging:
-    description: 'Enable Docker staging gate (builds and runs the app)'
-    required: false
-    default: 'false'
+    default: ${{ github.token }}
   fail-on:
     description: 'Which severity fails the check: "error" (default), "warning", or "none"'
     required: false
@@ -38,10 +23,6 @@ inputs:
 outputs:
   success:
     description: 'Whether all checks passed (true/false)'
-  gates-passed:
-    description: 'Comma-separated list of passed check names'
-  gates-failed:
-    description: 'Comma-separated list of failed check names'
   summary:
     description: 'One-line summary of results'
 

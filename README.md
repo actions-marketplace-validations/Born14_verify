@@ -38,10 +38,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: Born14/verify@v1
+      - uses: Born14/verify@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```

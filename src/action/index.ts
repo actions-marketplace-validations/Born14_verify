@@ -1,544 +1,301 @@
 /**
- * Verify Action — Entry Point
- * =============================
+ * Verify Action — Migrations-only entry point.
  *
- * Runs verify on a PR diff and posts results as a comment.
- *
- * Three modes:
- *   Mode 1 (default): Structural — diff predicates only, no LLM, free
- *   Mode 2 (intent):  + PR title/description → intent predicates (needs api-key)
- *   Mode 3 (staging): + Docker build/run → behavioral verification
+ * Checks SQL migration files in a PR for unsafe patterns (DM-18 etc.).
+ * No 26-gate pipeline. No LLM. Just SQL parsing via libpg-query.
  */
-
-import { parseDiff } from '../parsers/git-diff.js';
-import { tier1Diff, tier2Context, tier3Intent } from '../extractor/index.js';
-import { verify } from '../verify.js';
-import { getPRDiff, getPRMetadata, postPRComment, getPRFiles, getFileContent } from './github.js';
+import { detectMigrationFiles } from '../action/migration-check.js';
+import type { MigrationGroup } from '../action/migration-check.js';
+import {
+  getPRFiles,
+  getPRMetadata,
+  getFileContent,
+  postPRComment,
+} from '../action/github.js';
+import { parseMigration } from '../../scripts/mvp-migration/spec-from-ast.js';
+import {
+  createEmptySchema,
+  applyMigrationSQL,
+} from '../../scripts/mvp-migration/schema-loader.js';
+import { runGroundingGate } from '../../scripts/mvp-migration/grounding-gate.js';
+import { runSafetyGate } from '../../scripts/mvp-migration/safety-gate.js';
+import { loadModule } from 'libpg-query';
+import type { MigrationFinding, Schema } from '../types-migration.js';
 import { formatComment } from './comment.js';
-import { checkMigrations, formatMigrationComment, detectMigrationFiles } from './migration-check.js';
-import type { Predicate } from '../types.js';
-import type { MigrationCheckResult, MigrationGroup } from './migration-check.js';
 
-// =============================================================================
-// ACTION ENTRY POINT
-// =============================================================================
+export type TaggedFinding = MigrationFinding & { file: string };
+
+// Blocking shapes — these cause the check to fail
+const BLOCKING_SHAPES = new Set(['DM-18']);
+
+// Warning-only shapes — reported but don't fail the check
+const WARNING_SHAPES = new Set(['DM-15', 'DM-16', 'DM-17']);
+
+/**
+ * Run migration gates on grouped migration files.
+ * Returns findings tagged with their source file path.
+ */
+async function runMigrationGates(groups: MigrationGroup[]): Promise<{
+  findings: TaggedFinding[];
+  filesChecked: string[];
+}> {
+  await loadModule();
+  const findings: TaggedFinding[] = [];
+  const filesChecked: string[] = [];
+
+  for (const group of groups) {
+    const schema: Schema = createEmptySchema();
+    let priorIdx = 0;
+    for (const priorSql of group.priorMigrationsSql) {
+      priorIdx++;
+      try {
+        applyMigrationSQL(schema, priorSql);
+      } catch (err: any) {
+        console.log(
+          `::warning::Schema bootstrap incomplete in ${group.root}: prior migration ` +
+            `${priorIdx}/${group.priorMigrationsSql.length} failed to apply ` +
+            `(${err?.message ?? 'unknown error'}). Findings on this group may be incomplete.`,
+        );
+      }
+    }
+
+    for (const file of group.newFiles) {
+      filesChecked.push(file.path);
+      try {
+        const spec = parseMigration(file.sql, file.path);
+        if (spec.meta.parseErrors.length > 0) {
+          console.log(
+            `::warning::Could not parse ${file.path}: ${spec.meta.parseErrors[0]}. Skipping.`,
+          );
+          continue;
+        }
+        const grounding = runGroundingGate(spec, schema);
+        const safety = runSafetyGate(spec, schema);
+        for (const f of [...grounding, ...safety]) {
+          // Tag with file path and apply severity rules
+          if (!BLOCKING_SHAPES.has(f.shapeId) && WARNING_SHAPES.has(f.shapeId)) {
+            f.severity = 'warning';
+          }
+          findings.push({ ...f, file: file.path });
+        }
+        try {
+          applyMigrationSQL(schema, file.sql);
+        } catch (err: any) {
+          console.log(
+            `::warning::Schema state could not advance after ${file.path} ` +
+              `(${err?.message ?? 'unknown error'}). Subsequent files may produce incomplete findings.`,
+          );
+        }
+      } catch (err: any) {
+        console.log(
+          `::warning::Failed to check ${file.path}: ${err?.message ?? 'unknown error'}.`,
+        );
+      }
+    }
+  }
+
+  return { findings, filesChecked };
+}
+
+/**
+ * Returns true if a finding has been suppressed by an in-file ack comment.
+ */
+function isAcked(f: MigrationFinding): boolean {
+  return f.message.includes('[ACKED]');
+}
+
+// ---------------------------------------------------------------------------
+// Environment helpers
+// ---------------------------------------------------------------------------
+
+function env(name: string, fallback = ''): string {
+  return process.env[name] ?? fallback;
+}
+
+// ---------------------------------------------------------------------------
+// Migration root computation
+// ---------------------------------------------------------------------------
+
+function migrationRoot(p: string): { root: string; isPrisma: boolean } {
+  if (/\/migration\.sql$/i.test(p)) {
+    return { root: p.replace(/\/[^/]+\/migration\.sql$/i, ''), isPrisma: true };
+  }
+  return { root: p.replace(/\/[^/]+$/, ''), isPrisma: false };
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
 
 async function run(): Promise<void> {
-  const startTime = Date.now();
+  const token = env('GITHUB_TOKEN') || env('INPUT_TOKEN') || '';
+  const commentEnabled = (env('INPUT_COMMENT', 'true')) === 'true';
+  const failOn = (env('INPUT_FAIL_ON') || env('INPUT_FAIL-ON') || 'error').toLowerCase();
 
-  // Read inputs from environment (GitHub Actions sets INPUT_* env vars)
-  const token = process.env.GITHUB_TOKEN ?? process.env.INPUT_TOKEN ?? '';
-  const appDir = process.env.INPUT_APP_DIR ?? process.env['INPUT_APP-DIR'] ?? '.';
-  const intentEnabled = (process.env.INPUT_INTENT ?? 'false') === 'true';
-  const apiKey = process.env.INPUT_API_KEY ?? process.env['INPUT_API-KEY'] ?? '';
-  const provider = process.env.INPUT_PROVIDER ?? 'gemini';
-  const stagingEnabled = (process.env.INPUT_STAGING ?? 'false') === 'true';
-  const commentEnabled = (process.env.INPUT_COMMENT ?? 'true') === 'true';
-  const failOn = process.env.INPUT_FAIL_ON ?? process.env['INPUT_FAIL-ON'] ?? 'error';
-
-  // Parse GitHub context
-  const eventPath = process.env.GITHUB_EVENT_PATH;
+  const eventPath = env('GITHUB_EVENT_PATH');
   if (!eventPath) {
-    console.log('::error::Not running in GitHub Actions context (GITHUB_EVENT_PATH not set)');
+    console.log('::error::Not running in GitHub Actions context');
     process.exit(1);
   }
 
-  const { readFileSync } = await import('fs');
+  const { readFileSync } = await import('node:fs');
   const event = JSON.parse(readFileSync(eventPath, 'utf-8'));
-  const prNumber = event.pull_request?.number ?? event.number;
-  const [owner, repo] = (process.env.GITHUB_REPOSITORY ?? '').split('/');
+  const prNumber: number | undefined = event.pull_request?.number ?? event.number;
+  const [owner, repo] = (env('GITHUB_REPOSITORY') || '').split('/');
 
   if (!prNumber || !owner || !repo) {
     console.log('::error::Could not determine PR number or repository');
     process.exit(1);
   }
-
   if (!token) {
-    console.log('::error::No GitHub token provided. Set GITHUB_TOKEN or use permissions: pull-requests: write');
+    console.log('::error::No GitHub token. Set GITHUB_TOKEN or use permissions: pull-requests: write, contents: read');
     process.exit(1);
   }
 
-  console.log(`Verify Action: ${owner}/${repo}#${prNumber}`);
-  console.log(`  Mode: ${stagingEnabled ? 'Full (staging)' : intentEnabled ? 'Intent (LLM)' : 'Structural (free)'}`);
-  console.log(`  App dir: ${appDir}`);
+  console.log(`Verify: PR #${prNumber} in ${owner}/${repo}`);
 
-  // ─── Step 1: Get PR diff ──────────────────────────────────────────────
-  console.log('\n[1/4] Reading PR diff...');
-  const diff = await getPRDiff(token, owner, repo, prNumber);
-  const edits = parseDiff(diff);
-  console.log(`  ${edits.length} edit(s) from diff`);
-
-  if (edits.length === 0) {
-    console.log('  No edits found in diff (binary-only or empty PR). Skipping.');
-    setOutput('success', 'true');
-    setOutput('summary', 'No edits to verify');
-    return;
-  }
-
-  // ─── Step 2: Generate predicates ──────────────────────────────────────
-  console.log('\n[2/4] Generating predicates...');
-  const predicates: Predicate[] = [];
-  const tiers: string[] = [];
-
-  // Tier 1: Deterministic from diff (always)
-  const diffPreds = tier1Diff(edits);
-  // Drop absent-predicates: the inversion machinery downstream isn't wired,
-  // so absent-expectation predicates are emitted but not consumed today.
-  // (Filed gap: absent-predicate consumer path is half-built.)
-  predicates.push(...diffPreds.filter(p => p.expected !== 'absent'));
-  tiers.push('diff');
-  console.log(`  Tier 1 (diff): ${diffPreds.length} predicates`);
-
-  // Tier 2: Cross-file (if repo files available)
-  try {
-    const { readdirSync } = await import('fs');
-    const existingFiles = listFiles(appDir, readdirSync);
-    const crossFilePreds = tier2Context(edits, existingFiles);
-    // Drop absent-predicates: same reason as Tier 1 above.
-    predicates.push(...crossFilePreds.filter(p => p.expected !== 'absent'));
-    tiers.push('cross-file');
-    console.log(`  Tier 2 (cross-file): ${crossFilePreds.length} predicates`);
-  } catch {
-    console.log('  Tier 2 (cross-file): skipped (could not read repo files)');
-  }
-
-  // Tier 3a: Heuristic intent (if enabled)
-  if (intentEnabled) {
-    console.log('  Reading PR metadata...');
-    const metadata = await getPRMetadata(token, owner, repo, prNumber);
-    const intentPreds = tier3Intent(edits, {
-      title: metadata.title,
-      description: metadata.body,
-      issueTitle: metadata.issueTitle,
-      commitMessages: metadata.commitMessages,
-    });
-    predicates.push(...intentPreds);
-    tiers.push('intent-heuristic');
-    console.log(`  Tier 3a (intent heuristic): ${intentPreds.length} predicates`);
-
-    // Tier 3b: LLM intent (if api-key provided)
-    if (apiKey) {
-      console.log(`  Tier 3b (LLM intent via ${provider}): generating...`);
-      try {
-        const llmPreds = await extractLLMPredicates(edits, metadata, apiKey, provider);
-        predicates.push(...llmPreds);
-        tiers.push(`intent-llm-${provider}`);
-        console.log(`  Tier 3b (LLM intent): ${llmPreds.length} predicates`);
-      } catch (err: any) {
-        console.log(`  Tier 3b (LLM intent): failed — ${err.message}`);
-      }
-    }
-  }
-
-  console.log(`  Total: ${predicates.length} predicates`);
-
-  // ─── Step 3: Run verify ───────────────────────────────────────────────
-  console.log('\n[3/4] Running verify...');
-
-  // Create a minimal appDir with only PR-changed files for fast scanning.
-  // This prevents gates from scanning 10K+ files in large repos like cal.com.
-  const { mkdirSync: mkdirS, writeFileSync: writeFS, rmSync: rmS } = await import('fs');
-  const { dirname: dirN, join: joinP } = await import('path');
-  const { tmpdir: tmpD } = await import('os');
-  const prAppDir = joinP(tmpD(), `verify-action-${Date.now()}`);
-  mkdirS(prAppDir, { recursive: true });
-
-  for (const edit of edits) {
-    try {
-      const filePath = joinP(prAppDir, edit.file);
-      mkdirS(dirN(filePath), { recursive: true });
-      // Write both search and replace content so gates can scan the full context
-      writeFS(filePath, (edit.search || '') + '\n' + (edit.replace || ''));
-    } catch { /* skip files with problematic paths */ }
-  }
-
-  const result = await verify(edits, predicates, {
-    appDir: prAppDir,
-    gates: {
-      // Diff-only gates — all enabled (these work without Docker/repo cloning)
-      // security, access, temporal, propagation, state, capacity, contention,
-      // observation, containment (G5), constraints (K5) all fire on edits alone
-
-      // Disabled: need Docker, Playwright, or full repo state
-      grounding: false,    // needs real repo source files for selector validation
-      syntax: false,       // needs real files for search string matching
-      staging: stagingEnabled,
-      browser: false,
-      http: stagingEnabled,
-      invariants: false,
-      vision: false,
-    },
-  });
-
-  // Cleanup temp appDir
-  try { rmS(prAppDir, { recursive: true, force: true }); } catch {}
-
-  const passed = result.gates.filter(g => g.passed).length;
-  const failed = result.gates.filter(g => !g.passed).length;
-  console.log(`  Result: ${result.success ? 'PASS' : 'FAIL'} (${passed} passed, ${failed} failed)`);
-
-  for (const g of result.gates) {
-    if (!g.passed) console.log(`  \u274C ${g.gate}: ${g.detail?.substring(0, 80)}`);
-  }
-
-  // ─── Step 3b: Migration verification ───────────────────────────────────
-  //
-  // Two-class error model:
-  //   Result-level (gate findings, per-file parse failures) → reported in
-  //     migrationResult, do not fail closed on their own.
-  //   System-level (libpg-query load failure, schema bootstrap throw, any
-  //     exception escaping checkMigrations) → fail closed when migrations
-  //     exist. We never silently swallow these.
-  //
-  // Detection of zero migration files is NOT an error of either kind —
-  // it just means there's nothing to verify. No fail-closed in that case.
-  //
-  console.log('\n[3b/4] Checking migrations...');
-  let migrationResult: MigrationCheckResult | null = null;
-  let migrationInternalError: string | null = null;
-  let migrationsWereExpected = false;
-
-  // Phase A: detect whether we even have migrations to check.
-  // A failure here is a system-level error only if it prevents us from
-  // determining whether migrations exist at all.
+  // ── Phase 1: detect migration files ────────────────────────────────────
   let migrationPaths: string[] = [];
   try {
     const prFiles = await getPRFiles(token, owner, repo, prNumber);
-    migrationPaths = detectMigrationFiles(prFiles.map(f => f.filename));
+    migrationPaths = detectMigrationFiles(prFiles.map((f) => f.filename));
   } catch (err: any) {
-    // Couldn't even list PR files. We don't know if migrations exist.
-    // Be conservative: treat as system-level error so the check is visible.
-    migrationInternalError = `Could not list PR files to detect migrations: ${err.message}`;
-    console.log(`  ::error::${migrationInternalError}`);
+    console.log(`::error::Could not list PR files: ${err.message}`);
+    process.exit(1);
   }
 
-  if (!migrationInternalError && migrationPaths.length === 0) {
-    console.log('  No migration files in this PR.');
-  } else if (!migrationInternalError) {
-    migrationsWereExpected = true;
-    console.log(`  Found ${migrationPaths.length} migration file(s)`);
+  if (migrationPaths.length === 0) {
+    console.log('No migration files in this PR. Nothing to check.');
+    return;
+  }
 
-    // Phase B: build groups + run checkMigrations. Anything that throws here
-    // is a system-level error — verification was supposed to run and could
-    // not complete. Fail closed.
-    try {
-      // Pin to the PR's base SHA so the same PR always gets the same answer.
-      // Using baseBranch (a mutable ref) would mean the schema can shift if main
-      // advances after the PR opens, making CI results non-deterministic.
-      const metadata = await getPRMetadata(token, owner, repo, prNumber);
-      const baseRef = metadata.baseSha || metadata.baseBranch;
-      console.log(`  Schema pin: ${metadata.baseSha ? `base SHA ${metadata.baseSha.slice(0, 7)}` : `base branch ${metadata.baseBranch} (no SHA)`}`);
+  console.log(`Found ${migrationPaths.length} migration file(s)`);
 
-      // Compute the migration root for a given file path.
-      //   Prisma: packages/prisma/migrations/20260412_foo/migration.sql → packages/prisma/migrations
-      //   Flat:   db/migrations/20260412_foo.sql                          → db/migrations
-      function migrationRoot(p: string): { root: string; isPrisma: boolean } {
-        if (/\/migration\.sql$/i.test(p)) {
-          return { root: p.replace(/\/[^/]+\/migration\.sql$/i, ''), isPrisma: true };
-        }
-        return { root: p.replace(/\/[^/]+$/, ''), isPrisma: false };
-      }
+  // ── Phase 2: build groups + run gates ──────────────────────────────────
+  let allFindings: TaggedFinding[] = [];
+  let filesChecked: string[] = [];
 
-      // Group migration files by root. Each root becomes an independent
-      // MigrationGroup with its own bootstrap schema.
-      type RootInfo = { isPrisma: boolean; paths: string[] };
-      const rootMap = new Map<string, RootInfo>();
-      for (const p of migrationPaths) {
-        const { root, isPrisma } = migrationRoot(p);
-        const existing = rootMap.get(root);
-        if (existing) existing.paths.push(p);
-        else rootMap.set(root, { isPrisma, paths: [p] });
-      }
+  try {
+    const metadata = await getPRMetadata(token, owner, repo, prNumber);
+    const baseRef = metadata.baseSha || metadata.baseBranch;
+    console.log(
+      `Schema pin: ${metadata.baseSha ? `base SHA ${metadata.baseSha.slice(0, 7)}` : `base branch ${metadata.baseBranch}`}`,
+    );
 
-      console.log(`  Detected ${rootMap.size} migration root(s):`);
-      for (const [root, info] of rootMap) {
-        console.log(`    ${root} (${info.isPrisma ? 'Prisma' : 'flat'}): ${info.paths.length} new file(s)`);
-      }
+    type RootInfo = { isPrisma: boolean; paths: string[] };
+    const rootMap = new Map<string, RootInfo>();
+    for (const p of migrationPaths) {
+      const { root, isPrisma } = migrationRoot(p);
+      const existing = rootMap.get(root);
+      if (existing) existing.paths.push(p);
+      else rootMap.set(root, { isPrisma, paths: [p] });
+    }
 
-      // Build one MigrationGroup per root: bootstrap from prior migrations
-      // in THAT root only, then attach the new files for THAT root sorted.
-      const groups: MigrationGroup[] = [];
+    console.log(`Detected ${rootMap.size} migration root(s)`);
 
-      for (const [root, info] of rootMap) {
-        const priorSql: string[] = [];
-
-        // Directory listing failure for prior migrations is recoverable —
-        // the group just bootstraps from an empty schema. That's a known
-        // tradeoff, not a system-level error.
-        try {
-          const dirRes = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(root)}?ref=${baseRef}`,
-            { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' } },
-          );
-
-          if (dirRes.ok) {
-            const dirContents = await dirRes.json() as any[];
-
-            if (info.isPrisma) {
-              // Prisma: each entry is a timestamped subdir containing migration.sql
-              const priorDirs = dirContents
-                .filter((f: any) => f.type === 'dir')
-                .map((f: any) => f.path)
-                .sort();
-
-              for (const subdir of priorDirs) {
-                const sqlPath = `${subdir}/migration.sql`;
-                // Skip new files — they're applied separately, not as bootstrap
-                if (info.paths.includes(sqlPath)) continue;
-                const sql = await getFileContent(token, owner, repo, sqlPath, baseRef);
-                if (sql) priorSql.push(sql);
-              }
-            } else {
-              // Flat: each entry is a .sql file
-              const priorFiles = dirContents
-                .filter((f: any) => f.name.endsWith('.sql') && f.type === 'file')
-                .map((f: any) => f.path)
-                .filter((p: string) => !info.paths.includes(p))
-                .sort();
-
-              for (const pf of priorFiles) {
-                const sql = await getFileContent(token, owner, repo, pf, baseRef);
-                if (sql) priorSql.push(sql);
-              }
+    const groups: MigrationGroup[] = [];
+    for (const [root, info] of rootMap) {
+      const priorSql: string[] = [];
+      try {
+        const dirRes = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(root)}?ref=${baseRef}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          },
+        );
+        if (dirRes.ok) {
+          const dirContents = (await dirRes.json()) as any[];
+          if (info.isPrisma) {
+            const priorDirs = dirContents
+              .filter((f: any) => f.type === 'dir')
+              .map((f: any) => f.path)
+              .sort();
+            for (const subdir of priorDirs) {
+              const sqlPath = `${subdir}/migration.sql`;
+              if (info.paths.includes(sqlPath)) continue;
+              const sql = await getFileContent(token, owner, repo, sqlPath, baseRef);
+              if (sql) priorSql.push(sql);
+            }
+          } else {
+            const priorFiles = dirContents
+              .filter((f: any) => f.name.endsWith('.sql') && f.type === 'file')
+              .map((f: any) => f.path)
+              .filter((p: string) => !info.paths.includes(p))
+              .sort();
+            for (const pf of priorFiles) {
+              const sql = await getFileContent(token, owner, repo, pf, baseRef);
+              if (sql) priorSql.push(sql);
             }
           }
-        } catch { /* directory listing failed — group will bootstrap from empty schema */ }
-
-        // Read new file content from head SHA, sorted by path for deterministic order
-        const sortedPaths = [...info.paths].sort();
-        const newFiles: Array<{ path: string; sql: string }> = [];
-        for (const path of sortedPaths) {
-          const content = await getFileContent(token, owner, repo, path, metadata.headSha);
-          if (content) newFiles.push({ path, sql: content });
         }
-
-        groups.push({ root, priorMigrationsSql: priorSql, newFiles });
-        console.log(`    ${root}: ${priorSql.length} prior migration(s) for bootstrap`);
+      } catch {
+        /* directory listing failed — group bootstraps from empty schema */
       }
 
-      // The actual verification call. If this throws, the verifier itself
-      // could not run — fail closed.
-      migrationResult = await checkMigrations(groups);
-      console.log(`  Migration result: ${migrationResult.passed ? 'PASS' : 'FAIL'} (${migrationResult.findings.length} findings)`);
-    } catch (err: any) {
-      // System-level: verification was supposed to run and could not complete.
-      // The user's PR contains migrations; we cannot tell them whether those
-      // migrations are safe. The only correct answer is fail closed.
-      migrationInternalError = `Migration verifier failed to run: ${err.message}`;
-      console.log(`  ::error::${migrationInternalError}`);
-      if (err.stack) console.log(err.stack);
+      const sortedPaths = [...info.paths].sort();
+      const newFiles: Array<{ path: string; sql: string }> = [];
+      for (const path of sortedPaths) {
+        const content = await getFileContent(token, owner, repo, path, metadata.headSha);
+        if (content) newFiles.push({ path, sql: content });
+      }
+
+      groups.push({ root, priorMigrationsSql: priorSql, newFiles });
+      console.log(`  ${root}: ${priorSql.length} prior migration(s) for bootstrap`);
     }
+
+    const result = await runMigrationGates(groups);
+    allFindings = result.findings;
+    filesChecked = result.filesChecked;
+    console.log(`${allFindings.length} total finding(s)`);
+  } catch (err: any) {
+    console.log(`::error::Migration verifier failed: ${err.message}`);
+    if (err.stack) console.log(err.stack);
+    process.exit(1);
   }
 
-  // ─── Step 4: Post comment ─────────────────────────────────────────────
+  // ── Phase 3: filter acked findings ─────────────────────────────────────
+  const visible = allFindings.filter((f) => !isAcked(f));
+  const ackedCount = allFindings.length - visible.length;
+  if (ackedCount > 0) {
+    console.log(`${ackedCount} finding(s) suppressed by ack comments`);
+  }
+
+  // ── Phase 4: post comment ──────────────────────────────────────────────
   if (commentEnabled) {
-    console.log('\n[4/4] Posting PR comment...');
-    let comment = formatComment(result, {
-      prNumber,
-      predicateCount: predicates.length,
-      tiers,
-      durationMs: Date.now() - startTime,
-    });
-
-    // Append migration results if any
-    if (migrationResult) {
-      comment += '\n\n' + formatMigrationComment(migrationResult);
+    const body = formatComment(visible, filesChecked);
+    if (body) {
+      try {
+        await postPRComment(token, owner, repo, prNumber, body);
+        console.log('Comment posted.');
+      } catch (err: any) {
+        console.log(`::warning::Could not post PR comment: ${err.message}`);
+      }
     }
-
-    // Surface system-level migration verifier failures explicitly. The user
-    // shipped migrations and we couldn't verify them — they need to know.
-    if (migrationInternalError) {
-      comment += '\n\n### \u274C Migration Verification — Internal Error\n\n';
-      comment += 'Verify could not complete migration verification on this PR. ';
-      comment += 'This is a system-level failure in the verifier itself, **not** a finding about your migration.\n\n';
-      comment += '```\n' + migrationInternalError + '\n```\n\n';
-      comment += 'Because this PR contains migration files and verify cannot determine whether they are safe, ';
-      comment += 'the migration check is being failed closed. ';
-      comment += 'Please report this error so we can fix the verifier.\n';
-    }
-
-    await postPRComment(token, owner, repo, prNumber, comment);
-    console.log('  Comment posted.');
   }
 
-  // ─── Set outputs ──────────────────────────────────────────────────────
-  // Migration "pass" requires both: result-level passed AND no system-level
-  // internal error. A system-level error when migrations were expected fails
-  // the migration check regardless of whether any findings exist.
-  const migrationPassed =
-    !migrationInternalError && (migrationResult?.passed ?? true);
-  const overallSuccess = result.success && migrationPassed;
+  // ── Phase 5: exit code ─────────────────────────────────────────────────
+  if (failOn === 'none') return;
 
-  setOutput('success', String(overallSuccess));
-  setOutput('gates-passed', result.gates.filter(g => g.passed).map(g => g.gate).join(','));
-  setOutput('gates-failed', result.gates.filter(g => !g.passed).map(g => g.gate).join(','));
+  const hasError = visible.some((f) => f.severity === 'error');
+  const hasWarning = visible.some((f) => f.severity === 'warning');
 
-  const migSummary = migrationInternalError
-    ? `, migration verifier internal error (failing closed)`
-    : migrationResult
-      ? `, ${migrationResult.findings.length} migration finding(s)`
-      : '';
-  setOutput('summary', `${passed}/${passed + failed} gates passed${failed > 0 ? ` — ${result.gates.filter(g => !g.passed).map(g => g.gate).join(', ')} failed` : ''}${migSummary}`);
-
-  // Exit with failure if configured.
-  // This now also fires when the migration verifier had an internal error
-  // and migrations were expected — system-level failures fail closed.
-  if (failOn === 'error' && !overallSuccess) {
-    if (migrationInternalError && migrationsWereExpected) {
-      console.log('::error::Failing closed: migration verifier could not complete on a PR containing migration files.');
-    }
+  if (failOn === 'error' && hasError) {
+    console.log('::error::Blocking migration findings present — failing check');
+    process.exit(1);
+  }
+  if (failOn === 'warning' && (hasError || hasWarning)) {
+    console.log('::error::Migration findings present — failing check (fail-on: warning)');
     process.exit(1);
   }
 }
 
-// =============================================================================
-// TIER 3b: LLM Intent Extraction
-// =============================================================================
-
-async function extractLLMPredicates(
-  edits: Array<{ file: string; search: string; replace: string }>,
-  metadata: { title: string; body: string; commitMessages: string[] },
-  apiKey: string,
-  provider: string = 'gemini',
-): Promise<Predicate[]> {
-  const diffSummary = edits.map(e =>
-    `${e.file}: "${e.search.substring(0, 60)}" → "${e.replace.substring(0, 60)}"`
-  ).join('\n');
-
-  const prompt = `Given this PR:
-Title: ${metadata.title}
-Description: ${(metadata.body || '').substring(0, 500)}
-
-Diff summary:
-${diffSummary}
-
-What should be true about the codebase AFTER this PR is applied?
-Return a JSON array of assertions. Each assertion: { "file": "path", "pattern": "text that should exist", "reason": "why" }
-Only include specific, testable assertions. Max 5.`;
-
-  const text = await callLLM(prompt, apiKey, provider);
-
-  // Extract JSON array from response
-  const jsonMatch = text.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) return [];
-
-  try {
-    const assertions = JSON.parse(jsonMatch[0]) as Array<{ file: string; pattern: string; reason: string }>;
-    return assertions
-      .filter(a => a.file && a.pattern)
-      .map(a => ({
-        type: 'content' as const,
-        file: a.file,
-        pattern: a.pattern,
-        description: a.reason || `LLM: "${a.pattern}" should exist in ${a.file}`,
-      }));
-  } catch {
-    return [];
-  }
-}
-
-// =============================================================================
-// MULTI-PROVIDER LLM CALL
-// =============================================================================
-
-export async function callLLM(prompt: string, apiKey: string, provider: string): Promise<string> {
-  switch (provider) {
-    case 'gemini': {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0, maxOutputTokens: 500 },
-        }),
-      });
-      if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
-      const data = await res.json() as any;
-      return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    }
-
-    case 'openai': {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0,
-          max_tokens: 500,
-        }),
-      });
-      if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
-      const data = await res.json() as any;
-      return data.choices?.[0]?.message?.content ?? '';
-    }
-
-    case 'anthropic': {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 500,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-      if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`);
-      const data = await res.json() as any;
-      return data.content?.[0]?.text ?? '';
-    }
-
-    default:
-      throw new Error(`Unknown provider: ${provider}. Use gemini, openai, or anthropic.`);
-  }
-}
-
-// =============================================================================
-// HELPERS
-// =============================================================================
-
-function setOutput(name: string, value: string): void {
-  const outputFile = process.env.GITHUB_OUTPUT;
-  if (outputFile) {
-    const { appendFileSync } = require('fs');
-    appendFileSync(outputFile, `${name}=${value}\n`);
-  }
-  console.log(`::set-output name=${name}::${value}`);
-}
-
-function listFiles(dir: string, readdirSync: any, prefix = ''): string[] {
-  const files: string[] = [];
-  const skip = new Set(['node_modules', '.git', '.next', 'dist', '.verify', '__pycache__']);
-  try {
-    const entries = readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (skip.has(entry.name)) continue;
-      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
-      if (entry.isDirectory()) {
-        files.push(...listFiles(`${dir}/${entry.name}`, readdirSync, rel));
-      } else {
-        files.push(rel);
-      }
-    }
-  } catch { /* unreadable */ }
-  return files;
-}
-
-// Run when in GitHub Actions context.
-// The import.meta.main guard doesn't work in CJS bundles (esbuild empties it).
-// Instead, check for GITHUB_ACTIONS env var which is always set in Actions.
-// When imported as a module (e.g., harness importing callLLM), this won't fire
-// because GITHUB_ACTIONS won't be set in local dev.
 if (process.env.GITHUB_ACTIONS) {
-  run().catch(err => {
-    console.log(`::error::${err.message}`);
+  run().catch((err) => {
+    console.log(`::error::${err?.message ?? err}`);
+    if (err?.stack) console.log(err.stack);
     process.exit(1);
   });
 }

@@ -27,5 +27,5 @@ outputs:
     description: 'One-line summary of results'
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/action/index.cjs'

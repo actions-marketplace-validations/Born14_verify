@@ -20,13 +20,11 @@ Verify catches it before it merges.
 
 **Measured precision:** 19 true positives, 0 false positives across 761 production migrations from [cal.com](https://github.com/calcom/cal.com), [formbricks](https://github.com/formbricks/formbricks), and [supabase](https://github.com/supabase/supabase). See [MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) for full methodology and reproducibility steps.
 
-**DM-28: Deploy-window race (warning-only, uncalibrated)**
+**DM-28 (deploy-window race) — research-only, does not fire on your PRs today.**
 
-A migration adds a NOT NULL constraint (via SET NOT NULL or ADD COLUMN NOT NULL DEFAULT). The migration itself executes cleanly. But application code running the previous revision doesn't provide a value for the new column — writes fail until the app is redeployed. A later migration drops the NOT NULL constraint to recover.
+A related failure mode exists where a migration adds a NOT NULL constraint that executes cleanly but breaks writes from application code running a pre-migration revision. We have a detector for this pattern, but its current form is **retrospective** — it scans a repo's full migration history for SET NOT NULL followed by a later DROP NOT NULL revert on the same column. That form cannot fire at PR time, because the revert that confirms the pattern hasn't happened yet when you're writing the originating migration.
 
-Verify detects this pattern by scanning the migration sequence for SET NOT NULL followed by DROP NOT NULL on the same column within a window of subsequent migrations.
-
-This detector is **warning-only** — it reports but does not block merges. It has not yet been calibrated against a production corpus. See [shapes.json](calibration/shapes.json) for its current tier.
+Verify's Action does **not** check for DM-28 on your PRs right now. The retrospective detector and its first calibration attempt (15 findings, 4 TP / 10 FP / 1 ambiguous, held-to-bar) are published in the [calibration registry](calibration/) as research artifacts. A prospective per-file detector is planned; it will be registered as a PR-time warning when it ships.
 
 ## Install (60 seconds)
 
@@ -60,7 +58,7 @@ That's it. When a PR contains `.sql` migration files, Verify parses them, replay
 - Code style or formatting
 - Anything that requires an LLM to evaluate
 
-Verify checks two migration patterns: NOT NULL without DEFAULT (DM-18, blocks merge) and deploy-window race (DM-28, warning-only). It does not check application code, security, or style.
+Verify checks one migration pattern at PR time today: NOT NULL without DEFAULT (DM-18, blocks merge). A deploy-window race detector (DM-28) exists in the calibration registry as a research artifact; it does not run against your PRs in its current form. Verify does not check application code, security, or style.
 
 ## Suppressing a finding
 
@@ -77,7 +75,7 @@ The `-- verify: ack` comment tells Verify you've reviewed the finding. It will s
 
 - **Database support:** PostgreSQL only.
 - **Migration formats:** Prisma-generated SQL and hand-written `.sql` files.
-- **One calibrated rule, one warning-only rule.** DM-18 is measured against 761 production migrations with published precision. DM-28 (deploy-window race) is shipped as a warning-only detector without calibration data yet. Additional detectors (FK-dependent drops, narrowing type changes) are in development.
+- **One calibrated rule runs on your PRs today.** DM-18 is measured against 761 production migrations with published precision and blocks unsafe NOT NULL migrations before merge. DM-28 (deploy-window race) exists as a retrospective research detector but does not run at PR time in its current form. Additional detectors (FK-dependent drops, narrowing type changes, prospective deploy-window) are in development.
 - **No runtime knowledge:** Verify parses SQL statically. It doesn't know your table has zero rows. It flags the structural risk regardless.
 - **Deterministic:** Every finding is reproducible. Same migration in, same result out. No probabilities.
 
@@ -117,6 +115,7 @@ See [METHODOLOGY.md](METHODOLOGY.md) for the full calibration discipline.
 
 ## What's coming
 
+- DM-28 prospective: a per-file deploy-window warning that fires at PR time (replaces the current retrospective-only DM-28)
 - More migration detectors (FK-dependent drops, narrowing type changes)
 - Django migration support
 - More framework parsers (Rails, Alembic)

@@ -20,6 +20,14 @@ Verify catches it before it merges.
 
 **Measured precision:** 19 true positives, 0 false positives across 761 production migrations from [cal.com](https://github.com/calcom/cal.com), [formbricks](https://github.com/formbricks/formbricks), and [supabase](https://github.com/supabase/supabase). See [MEASURED-CLAIMS.md](scripts/mvp-migration/MEASURED-CLAIMS.md) for full methodology and reproducibility steps.
 
+**DM-28: Deploy-window race (warning-only, uncalibrated)**
+
+A migration adds a NOT NULL constraint (via SET NOT NULL or ADD COLUMN NOT NULL DEFAULT). The migration itself executes cleanly. But application code running the previous revision doesn't provide a value for the new column — writes fail until the app is redeployed. A later migration drops the NOT NULL constraint to recover.
+
+Verify detects this pattern by scanning the migration sequence for SET NOT NULL followed by DROP NOT NULL on the same column within a window of subsequent migrations.
+
+This detector is **warning-only** — it reports but does not block merges. It has not yet been calibrated against a production corpus. See [shapes.json](calibration/shapes.json) for its current tier.
+
 ## Install (60 seconds)
 
 Add this to `.github/workflows/verify.yml`:
@@ -52,7 +60,7 @@ That's it. When a PR contains `.sql` migration files, Verify parses them, replay
 - Code style or formatting
 - Anything that requires an LLM to evaluate
 
-Verify checks one migration pattern right now: NOT NULL without DEFAULT. More detectors are in development. It does not check application code, security, or style.
+Verify checks two migration patterns: NOT NULL without DEFAULT (DM-18, blocks merge) and deploy-window race (DM-28, warning-only). It does not check application code, security, or style.
 
 ## Suppressing a finding
 
@@ -69,7 +77,7 @@ The `-- verify: ack` comment tells Verify you've reviewed the finding. It will s
 
 - **Database support:** PostgreSQL only.
 - **Migration formats:** Prisma-generated SQL and hand-written `.sql` files.
-- **One calibrated rule today.** DM-18 is measured against 761 production migrations with published precision. Additional detectors (FK-dependent drops, narrowing type changes, deploy-window safety) are in development.
+- **One calibrated rule, one warning-only rule.** DM-18 is measured against 761 production migrations with published precision. DM-28 (deploy-window race) is shipped as a warning-only detector without calibration data yet. Additional detectors (FK-dependent drops, narrowing type changes) are in development.
 - **No runtime knowledge:** Verify parses SQL statically. It doesn't know your table has zero rows. It flags the structural risk regardless.
 - **Deterministic:** Every finding is reproducible. Same migration in, same result out. No probabilities.
 
@@ -109,7 +117,7 @@ See [METHODOLOGY.md](METHODOLOGY.md) for the full calibration discipline.
 
 ## What's coming
 
-- More migration detectors (FK-dependent drops, narrowing type changes, deploy-window safety)
+- More migration detectors (FK-dependent drops, narrowing type changes)
 - Django migration support
 - More framework parsers (Rails, Alembic)
 

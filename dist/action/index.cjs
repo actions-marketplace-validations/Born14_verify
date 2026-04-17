@@ -4361,6 +4361,103 @@ init_spec_from_ast();
 init_schema_loader();
 init_grounding_gate();
 init_safety_gate();
+
+// scripts/mvp-migration/deploy-window-gate.ts
+function extractSetNotNullEvents(mig, idx) {
+  const out = [];
+  const lines = mig.sql.split("\n");
+  let currentTable = null;
+  const alterTableRe = /alter\s+table\s+(?:if\s+exists\s+)?(?:["']?\w+["']?\.)?["']?(\w+)["']?/i;
+  const createTableRe = /create\s+table\s+(?:if\s+not\s+exists\s+)?(?:["']?\w+["']?\.)?["']?(\w+)["']?/i;
+  for (const line of lines) {
+    const atMatch = line.match(alterTableRe);
+    if (atMatch) currentTable = atMatch[1];
+    const ctMatch = line.match(createTableRe);
+    if (ctMatch) currentTable = ctMatch[1];
+    if (!currentTable) continue;
+    const setNotNullMatch = line.match(/alter\s+column\s+["']?(\w+)["']?\s+set\s+not\s+null/i);
+    if (setNotNullMatch) {
+      out.push({
+        migration_idx: idx,
+        table: currentTable,
+        column: setNotNullMatch[1],
+        pattern: "set_not_null",
+        raw_line: line.trim()
+      });
+      continue;
+    }
+    const addColMatch = line.match(
+      /add\s+column(?:\s+if\s+not\s+exists)?\s+["']?(\w+)["']?\s+([^,;]+)/i
+    );
+    if (addColMatch) {
+      const col = addColMatch[1];
+      const rest = addColMatch[2];
+      const hasNotNull = /\bnot\s+null\b/i.test(rest);
+      const hasDefault = /\bdefault\b/i.test(rest);
+      if (hasNotNull && hasDefault) {
+        out.push({
+          migration_idx: idx,
+          table: currentTable,
+          column: col,
+          pattern: "add_column_not_null_default",
+          raw_line: line.trim()
+        });
+      }
+    }
+  }
+  return out;
+}
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function hasDropNotNullRevert(sql, table, column) {
+  const pat = new RegExp(
+    `alter\\s+(?:table\\s+)?["']?${escapeRegex(table.toLowerCase())}["']?.*alter\\s+(?:column\\s+)?["']?${escapeRegex(column.toLowerCase())}["']?\\s+drop\\s+not\\s+null`,
+    "is"
+  );
+  return pat.test(sql);
+}
+var DEFAULT_LOOKAHEAD = 30;
+function runDeployWindowGate(sequence, lookahead = DEFAULT_LOOKAHEAD) {
+  const findings = [];
+  let totalEvents = 0;
+  for (let i = 0; i < sequence.migrations.length; i++) {
+    const events = extractSetNotNullEvents(sequence.migrations[i], i);
+    totalEvents += events.length;
+    for (const ev of events) {
+      const endIdx = Math.min(i + 1 + lookahead, sequence.migrations.length);
+      for (let j = i + 1; j < endIdx; j++) {
+        const later = sequence.migrations[j];
+        if (hasDropNotNullRevert(later.sql, ev.table, ev.column)) {
+          findings.push({
+            shapeId: "DM-28",
+            severity: "warning",
+            message: `${ev.pattern === "set_not_null" ? "SET NOT NULL" : "ADD COLUMN NOT NULL DEFAULT"} on ${ev.table}.${ev.column} was later reverted at migration ${j} (gap ${j - i} migrations). Deploy-window race signature: the migration executed cleanly but a subsequent migration dropped NOT NULL on the same column and the column and backfilled data were kept.`,
+            table: ev.table,
+            column: ev.column,
+            originating_migration: sequence.migrations[i].relPath,
+            originating_migration_idx: i,
+            originating_pattern: ev.pattern,
+            revert_migration: later.relPath,
+            revert_migration_idx: j,
+            gap_migrations: j - i
+          });
+          break;
+        }
+      }
+    }
+  }
+  return {
+    findings,
+    stats: {
+      total_migrations: sequence.migrations.length,
+      set_not_null_events: totalEvents,
+      confirmed_reverts: findings.length
+    }
+  };
+}
+
+// src/action-v2/index.ts
 var import_libpg_query3 = __toESM(require_wasm(), 1);
 
 // src/action-v2/comment.ts
@@ -4384,21 +4481,28 @@ function formatComment(findings, filesScanned) {
   }
   const errors = findings.filter((f) => f.severity === "error");
   const warnings = findings.filter((f) => f.severity === "warning");
+  const hasDm28InFindings = findings.some((f) => f.shapeId === "DM-28");
+  const precisionLine = hasDm28InFindings ? `DM-18 precision: **19 TP / 0 FP** on 761 production migrations. DM-28: warning-only, uncalibrated. [Methodology](${METHODOLOGY_URL})` : `DM-18 precision: **19 TP / 0 FP** on 761 production migrations. [Methodology](${METHODOLOGY_URL})`;
   const header = [
     errors.length > 0 ? "### \u274C Verify: Migration Safety" : "### \u26A0\uFE0F Verify: Migration Safety",
     "",
     errors.length > 0 ? `**${errors.length} blocking finding${errors.length === 1 ? "" : "s"}** in ${filesScanned.length} migration file${filesScanned.length === 1 ? "" : "s"}.` : `${warnings.length} warning${warnings.length === 1 ? "" : "s"} in ${filesScanned.length} migration file${filesScanned.length === 1 ? "" : "s"}. No blocking findings.`,
     "",
-    `DM-18 precision: **19 TP / 0 FP** on 761 production migrations. [Methodology](${METHODOLOGY_URL})`,
+    precisionLine,
     "",
     "| Shape | Sev | File | Line | Finding |",
     "|-------|-----|------|------|---------|"
   ];
   const rows = findings.map(findingRow);
-  const fix = [
-    "",
-    "**To fix NOT NULL findings:** add a `DEFAULT` clause, or split into three steps (ADD nullable \u2192 backfill \u2192 SET NOT NULL)."
-  ];
+  const hasDm18 = findings.some((f) => f.shapeId === "DM-18");
+  const hasDm28 = findings.some((f) => f.shapeId === "DM-28");
+  const fix = [""];
+  if (hasDm18) {
+    fix.push("**To fix DM-18 (NOT NULL on non-empty table):** add a `DEFAULT` clause, or split into three steps (ADD nullable \u2192 backfill \u2192 SET NOT NULL).");
+  }
+  if (hasDm28) {
+    fix.push("**DM-28 (deploy-window race):** a SET NOT NULL was later reverted, suggesting application code wasn\u2019t updated before the constraint was enforced. Coordinate deploys: update application code to always provide the column value *before* adding the NOT NULL constraint.");
+  }
   if (errors.length > 0) {
     fix.push(
       "",
@@ -4419,7 +4523,7 @@ function formatComment(findings, filesScanned) {
 
 // src/action-v2/index.ts
 var BLOCKING_SHAPES = /* @__PURE__ */ new Set(["DM-18"]);
-var WARNING_SHAPES = /* @__PURE__ */ new Set(["DM-15", "DM-16", "DM-17"]);
+var WARNING_SHAPES = /* @__PURE__ */ new Set(["DM-15", "DM-16", "DM-17", "DM-28"]);
 async function runMigrationGates(groups) {
   await (0, import_libpg_query3.loadModule)();
   const findings = [];
@@ -4470,6 +4574,47 @@ async function runMigrationGates(groups) {
     }
   }
   return { findings, filesChecked };
+}
+function runDm28Gate(groups) {
+  const findings = [];
+  for (const group of groups) {
+    const sequence = {
+      name: group.root,
+      migrations: [
+        ...group.priorMigrationsSql.map((sql, i) => ({
+          relPath: `${group.root}/prior-${i}`,
+          absPath: "",
+          sortKey: String(i).padStart(6, "0"),
+          sql
+        })),
+        ...group.newFiles.map((f, i) => ({
+          relPath: f.path,
+          absPath: "",
+          sortKey: String(group.priorMigrationsSql.length + i).padStart(6, "0"),
+          sql: f.sql
+        }))
+      ]
+    };
+    const result = runDeployWindowGate(sequence);
+    for (const dm28 of result.findings) {
+      const priorCount = group.priorMigrationsSql.length;
+      if (dm28.originating_migration_idx < priorCount && dm28.revert_migration_idx < priorCount) {
+        continue;
+      }
+      findings.push({
+        shapeId: "DM-28",
+        severity: "warning",
+        message: dm28.message,
+        operation: {
+          op: dm28.originating_pattern === "set_not_null" ? "alter_column_set_not_null" : "add_column",
+          table: dm28.table,
+          column: dm28.column
+        },
+        file: dm28.originating_migration_idx >= priorCount ? group.newFiles[dm28.originating_migration_idx - priorCount].path : dm28.revert_migration
+      });
+    }
+  }
+  return findings;
 }
 function isAcked(f) {
   return f.message.includes("[ACKED]");
@@ -4579,6 +4724,12 @@ async function run() {
     const result = await runMigrationGates(groups);
     allFindings = result.findings;
     filesChecked = result.filesChecked;
+    console.log(`${allFindings.length} per-file finding(s)`);
+    const dm28Findings = runDm28Gate(groups);
+    if (dm28Findings.length > 0) {
+      allFindings.push(...dm28Findings);
+      console.log(`${dm28Findings.length} DM-28 deploy-window finding(s)`);
+    }
     console.log(`${allFindings.length} total finding(s)`);
   } catch (err) {
     console.log(`::error::Migration verifier failed: ${err.message}`);

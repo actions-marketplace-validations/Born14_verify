@@ -4361,19 +4361,148 @@ init_spec_from_ast();
 init_schema_loader();
 init_grounding_gate();
 init_safety_gate();
+
+// scripts/mvp-migration/deploy-window-gate.ts
+function extractSetNotNullEvents(mig, idx) {
+  const out = [];
+  const lines = mig.sql.split("\n");
+  let currentTable = null;
+  const alterTableRe = /alter\s+table\s+(?:if\s+exists\s+)?(?:["']?\w+["']?\.)?["']?(\w+)["']?/i;
+  const createTableRe = /create\s+table\s+(?:if\s+not\s+exists\s+)?(?:["']?\w+["']?\.)?["']?(\w+)["']?/i;
+  for (const line of lines) {
+    const atMatch = line.match(alterTableRe);
+    if (atMatch) currentTable = atMatch[1];
+    const ctMatch = line.match(createTableRe);
+    if (ctMatch) currentTable = ctMatch[1];
+    if (!currentTable) continue;
+    const setNotNullMatch = line.match(/alter\s+column\s+["']?(\w+)["']?\s+set\s+not\s+null/i);
+    if (setNotNullMatch) {
+      out.push({
+        migration_idx: idx,
+        table: currentTable,
+        column: setNotNullMatch[1],
+        pattern: "set_not_null",
+        raw_line: line.trim()
+      });
+      continue;
+    }
+    const addColMatch = line.match(
+      /add\s+column(?:\s+if\s+not\s+exists)?\s+["']?(\w+)["']?\s+([^,;]+)/i
+    );
+    if (addColMatch) {
+      const col = addColMatch[1];
+      const rest = addColMatch[2];
+      const hasNotNull = /\bnot\s+null\b/i.test(rest);
+      const hasDefault = /\bdefault\b/i.test(rest);
+      if (hasNotNull && hasDefault) {
+        out.push({
+          migration_idx: idx,
+          table: currentTable,
+          column: col,
+          pattern: "add_column_not_null_default",
+          raw_line: line.trim()
+        });
+      }
+    }
+  }
+  return out;
+}
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function hasDropNotNullRevert(sql, table, column) {
+  const pat = new RegExp(
+    `alter\\s+(?:table\\s+)?["']?${escapeRegex(table.toLowerCase())}["']?.*alter\\s+(?:column\\s+)?["']?${escapeRegex(column.toLowerCase())}["']?\\s+drop\\s+not\\s+null`,
+    "is"
+  );
+  return pat.test(sql);
+}
+var DEFAULT_LOOKAHEAD = 30;
+function runDeployWindowGate(sequence, lookahead = DEFAULT_LOOKAHEAD) {
+  const findings = [];
+  let totalEvents = 0;
+  for (let i = 0; i < sequence.migrations.length; i++) {
+    const events = extractSetNotNullEvents(sequence.migrations[i], i);
+    totalEvents += events.length;
+    for (const ev of events) {
+      const endIdx = Math.min(i + 1 + lookahead, sequence.migrations.length);
+      for (let j = i + 1; j < endIdx; j++) {
+        const later = sequence.migrations[j];
+        if (hasDropNotNullRevert(later.sql, ev.table, ev.column)) {
+          findings.push({
+            shapeId: "DM-28",
+            severity: "warning",
+            message: `${ev.pattern === "set_not_null" ? "SET NOT NULL" : "ADD COLUMN NOT NULL DEFAULT"} on ${ev.table}.${ev.column} was later reverted at migration ${j} (gap ${j - i} migrations). Deploy-window race signature: the migration executed cleanly but a subsequent migration dropped NOT NULL on the same column and the column and backfilled data were kept.`,
+            table: ev.table,
+            column: ev.column,
+            originating_migration: sequence.migrations[i].relPath,
+            originating_migration_idx: i,
+            originating_pattern: ev.pattern,
+            revert_migration: later.relPath,
+            revert_migration_idx: j,
+            gap_migrations: j - i
+          });
+          break;
+        }
+      }
+    }
+  }
+  return {
+    findings,
+    stats: {
+      total_migrations: sequence.migrations.length,
+      set_not_null_events: totalEvents,
+      confirmed_reverts: findings.length
+    }
+  };
+}
+
+// src/action-v2/index.ts
 var import_libpg_query3 = __toESM(require_wasm(), 1);
 
 // src/action-v2/comment.ts
 var METHODOLOGY_URL = "https://github.com/Born14/verify/blob/main/scripts/mvp-migration/MEASURED-CLAIMS.md";
+var DM28_RUBRIC_URL = "https://github.com/Born14/verify-engine/blob/main/calibration/dm28-classification-rubric.md";
 function findingRow(f) {
   const line = f.location?.line ?? "";
   const sevIcon = f.severity === "error" ? "\u274C" : "\u26A0\uFE0F";
   const msg = f.message.length > 120 ? f.message.slice(0, 117) + "..." : f.message;
   return `| \`${f.shapeId}\` | ${sevIcon} | \`${f.file}\` | ${line} | ${msg} |`;
 }
+function renderHistoricalSection(infos) {
+  if (infos.length === 0) return [];
+  const dm28 = infos.filter((f) => f.shapeId === "DM-28");
+  if (dm28.length === 0) return [];
+  const lines = [
+    "",
+    "---",
+    "",
+    `### \u2139\uFE0F Historical context \u2014 deploy-window patterns in this repo`,
+    "",
+    `Verify found **${dm28.length} past deploy-window revert pattern${dm28.length === 1 ? "" : "s"}** in this repo's migration history. These are not findings against the current PR \u2014 they are signals that this codebase has had deploy-coordination issues before.`,
+    "",
+    "| Shape | Table.Column | Pattern |",
+    "|-------|--------------|---------|"
+  ];
+  for (const f of dm28) {
+    const op = f.operation;
+    const tableCol = op?.table && op?.column ? `\`${op.table}.${op.column}\`` : "\u2014";
+    const truncMsg = f.message.length > 100 ? f.message.slice(0, 97) + "..." : f.message;
+    lines.push(`| \`${f.shapeId}\` | ${tableCol} | ${truncMsg} |`);
+  }
+  lines.push(
+    "",
+    `DM-28 (deploy-window race) is a **retrospective detector**: it identifies past incidents where a SET NOT NULL was added and later reverted, suggesting application code couldn't write to the column during the deploy window. The current detector is uncalibrated (28.6% precision on first attempt, held-to-bar \u2014 see [classification rubric](${DM28_RUBRIC_URL})). A prospective per-file detector that fires on risky patterns *as they are introduced* is in development.`,
+    "",
+    "This section is informational. It does not fail the check."
+  );
+  return lines;
+}
 function formatComment(findings, filesScanned) {
   if (filesScanned.length === 0) return null;
-  if (findings.length === 0) {
+  const actionable = findings.filter((f) => f.severity === "error" || f.severity === "warning");
+  const infos = findings.filter((f) => f.severity === "info");
+  if (actionable.length === 0 && infos.length === 0) {
     return [
       "### \u2705 Verify: Migration Safety",
       "",
@@ -4382,8 +4511,18 @@ function formatComment(findings, filesScanned) {
       `DM-18 precision: **19 TP / 0 FP** on 761 production migrations. [Methodology](${METHODOLOGY_URL})`
     ].join("\n");
   }
-  const errors = findings.filter((f) => f.severity === "error");
-  const warnings = findings.filter((f) => f.severity === "warning");
+  if (actionable.length === 0 && infos.length > 0) {
+    const header2 = [
+      "### \u2705 Verify: Migration Safety",
+      "",
+      `Checked ${filesScanned.length} migration file${filesScanned.length === 1 ? "" : "s"}. No blocking or warning findings on this PR.`,
+      "",
+      `DM-18 precision: **19 TP / 0 FP** on 761 production migrations. [Methodology](${METHODOLOGY_URL})`
+    ];
+    return [...header2, ...renderHistoricalSection(infos)].join("\n");
+  }
+  const errors = actionable.filter((f) => f.severity === "error");
+  const warnings = actionable.filter((f) => f.severity === "warning");
   const header = [
     errors.length > 0 ? "### \u274C Verify: Migration Safety" : "### \u26A0\uFE0F Verify: Migration Safety",
     "",
@@ -4394,8 +4533,8 @@ function formatComment(findings, filesScanned) {
     "| Shape | Sev | File | Line | Finding |",
     "|-------|-----|------|------|---------|"
   ];
-  const rows = findings.map(findingRow);
-  const hasDm18 = findings.some((f) => f.shapeId === "DM-18");
+  const rows = actionable.map(findingRow);
+  const hasDm18 = actionable.some((f) => f.shapeId === "DM-18");
   const fix = [""];
   if (hasDm18) {
     fix.push("**To fix DM-18 (NOT NULL on non-empty table):** add a `DEFAULT` clause, or split into three steps (ADD nullable \u2192 backfill \u2192 SET NOT NULL).");
@@ -4415,7 +4554,7 @@ function formatComment(findings, filesScanned) {
       "</details>"
     );
   }
-  return [...header, ...rows, ...fix].join("\n");
+  return [...header, ...rows, ...fix, ...renderHistoricalSection(infos)].join("\n");
 }
 
 // src/action-v2/index.ts
@@ -4471,6 +4610,45 @@ async function runMigrationGates(groups) {
     }
   }
   return { findings, filesChecked };
+}
+function runDm28HistoricalScan(groups) {
+  const findings = [];
+  for (const group of groups) {
+    const sequence = {
+      name: group.root,
+      migrations: [
+        ...group.priorMigrationsSql.map((sql, i) => ({
+          relPath: `${group.root}/prior-${i}`,
+          absPath: "",
+          sortKey: String(i).padStart(6, "0"),
+          sql
+        })),
+        ...group.newFiles.map((f, i) => ({
+          relPath: f.path,
+          absPath: "",
+          sortKey: String(group.priorMigrationsSql.length + i).padStart(6, "0"),
+          sql: f.sql
+        }))
+      ]
+    };
+    const result = runDeployWindowGate(sequence);
+    const priorCount = group.priorMigrationsSql.length;
+    for (const dm28 of result.findings) {
+      const file = dm28.originating_migration_idx >= priorCount ? group.newFiles[dm28.originating_migration_idx - priorCount].path : `${group.root}/<prior-history>`;
+      findings.push({
+        shapeId: "DM-28",
+        severity: "info",
+        message: dm28.message,
+        operation: {
+          op: dm28.originating_pattern === "set_not_null" ? "alter_column_set_not_null" : "add_column",
+          table: dm28.table,
+          column: dm28.column
+        },
+        file
+      });
+    }
+  }
+  return findings;
 }
 function isAcked(f) {
   return f.message.includes("[ACKED]");
@@ -4580,7 +4758,12 @@ async function run() {
     const result = await runMigrationGates(groups);
     allFindings = result.findings;
     filesChecked = result.filesChecked;
-    console.log(`${allFindings.length} total finding(s)`);
+    console.log(`${allFindings.length} per-file finding(s)`);
+    const dm28Historical = runDm28HistoricalScan(groups);
+    if (dm28Historical.length > 0) {
+      allFindings.push(...dm28Historical);
+      console.log(`${dm28Historical.length} DM-28 historical pattern(s)`);
+    }
   } catch (err) {
     console.log(`::error::Migration verifier failed: ${err.message}`);
     if (err.stack) console.log(err.stack);

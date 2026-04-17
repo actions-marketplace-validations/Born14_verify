@@ -183,7 +183,7 @@
       "vertical": "migration",
       "category": "safety",
       "title": "NOT NULL without safe preconditions",
-      "description": "ADD COLUMN x NOT NULL without DEFAULT, or ALTER COLUMN x SET NOT NULL where x is currently nullable and has no default. Will fail on any non-empty table at runtime.",
+      "description": "ADD COLUMN x NOT NULL without DEFAULT, or ALTER COLUMN x SET NOT NULL where x is currently nullable and has no default. Will fail on any non-empty table at runtime. Scope note: DM-18 fires on the *structural* missing-value case only. It does NOT fire on ADD COLUMN NOT NULL WITH DEFAULT — since Postgres 11, non-volatile DEFAULTs are stored in table metadata without rewriting rows, so the migration is fast and structurally safe. Volatile DEFAULTs (now(), gen_random_uuid(), subqueries) still force a table rewrite, but that's a separate shape concern (table-rewrite cost) not covered by DM-18. Reference: https://www.postgresql.org/docs/current/sql-altertable.html notes section.",
       "implementation": {
         "gate_file": "scripts/mvp-migration/safety-gate.ts",
         "function": "checkNotNullSafety"

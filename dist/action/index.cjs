@@ -4322,6 +4322,32 @@ async function getFileContent(token, owner, repo, path, ref) {
   }
   return null;
 }
+async function preflightCommentPermission(token, owner, repo) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.v3+json" }
+    });
+    if (!res.ok) {
+      return { ok: true };
+    }
+    const data = await res.json();
+    const p = data?.permissions;
+    if (!p) return { ok: true };
+    if (p.admin || p.push || p.triage) return { ok: true };
+    return {
+      ok: false,
+      message: `The configured GITHUB_TOKEN does not have permission to post PR comments. Add this to your workflow YAML:
+
+permissions:
+  pull-requests: write
+  contents: read
+
+(See https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs)`
+    };
+  } catch {
+    return { ok: true };
+  }
+}
 async function postPRComment(token, owner, repo, prNumber, body) {
   const marker = "<!-- verify-action -->";
   const fullBody = `${marker}
@@ -4333,7 +4359,7 @@ ${body}`;
     const comments = await commentsRes.json();
     const existing = comments.find((c) => c.body?.includes(marker));
     if (existing) {
-      await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/comments/${existing.id}`, {
+      const patchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/comments/${existing.id}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -4342,10 +4368,13 @@ ${body}`;
         },
         body: JSON.stringify({ body: fullBody })
       });
+      if (!patchRes.ok) {
+        throw await commentPostError(patchRes, "update");
+      }
       return;
     }
   }
-  await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/comments`, {
+  const postRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/comments`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -4354,6 +4383,30 @@ ${body}`;
     },
     body: JSON.stringify({ body: fullBody })
   });
+  if (!postRes.ok) {
+    throw await commentPostError(postRes, "post");
+  }
+}
+async function commentPostError(res, verb) {
+  let bodyText = "";
+  try {
+    bodyText = await res.text();
+  } catch {
+  }
+  if (res.status === 403) {
+    return new Error(
+      `Could not ${verb} PR comment: 403 Forbidden. The most common cause is missing workflow permissions. Add this to your workflow YAML:
+
+permissions:
+  pull-requests: write
+  contents: read
+
+Raw response: ${bodyText.slice(0, 200)}`
+    );
+  }
+  return new Error(
+    `Could not ${verb} PR comment: ${res.status} ${res.statusText}. Response: ${bodyText.slice(0, 200)}`
+  );
 }
 
 // src/action-v2/index.ts
@@ -4684,6 +4737,13 @@ async function run() {
     process.exit(1);
   }
   console.log(`Verify: PR #${prNumber} in ${owner}/${repo}`);
+  if (commentEnabled) {
+    const preflight = await preflightCommentPermission(token, owner, repo);
+    if (!preflight.ok) {
+      console.log(`::error::${preflight.message}`);
+      process.exit(1);
+    }
+  }
   let migrationPaths = [];
   try {
     const prFiles = await getPRFiles(token, owner, repo, prNumber);

@@ -12,7 +12,7 @@ On a reviewed replay set of 761 real migrations across 3 repos, DM-18 produced 1
 - **Migration style:** Prisma-generated SQL migrations (cal.com, formbricks) and hand-written Supabase migrations.
 - **Schema replay:** For each migration N, schema was built by replaying migrations 0..N-1 using libpg-query (v17.7.3, WASM) + a custom schema loader with progressive per-op updates.
 - **Gates:** Grounding gate (DM-01..05) + safety gate (DM-15..19) run against each migration.
-- **Calibration:** All 19 findings were manually reviewed and labeled TP/FP/ambiguous by the author. Calibration file: `reports/calibration-postfix-2026-04-12.jsonl`.
+- **Calibration:** All 19 findings were manually reviewed and labeled TP/FP/ambiguous by the author. Calibration file: [`reports/calibration-postfix-2026-04-12.jsonl`](reports/calibration-postfix-2026-04-12.jsonl) (published; every finding is independently verifiable by reading its SQL and label).
 
 ### What DM-18 catches
 

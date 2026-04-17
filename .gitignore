@@ -49,7 +49,9 @@ scripts/mvp-migration/repo-adapter.ts
 scripts/mvp-migration/test-*.ts
 scripts/mvp-migration/corpus/
 scripts/mvp-migration/fixtures/
-scripts/mvp-migration/reports/
+scripts/mvp-migration/reports/*
+# Published calibration evidence — un-ignore files MEASURED-CLAIMS.md references.
+!scripts/mvp-migration/reports/calibration-postfix-2026-04-12.jsonl
 scripts/mvp-migration/corpus/_repos/
 
 # Substrate data
